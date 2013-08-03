@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Atombomb</title>
+
+    <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
+</head>
+<body>
+    <div id="dashboard">
+        <div class="row header">
+            <div class="small-2 columns">
+                <h5 data-bind="text:name"></h5>
+            </div>
+            <div class="small-10 columns">
+                <button class="small">Add Widget</button>
+            </div>
+        </div>
+        <div class="row widgets js-sortable" data-bind="foreach:widgets, afterRender:processWidgets">
+            <div class="large-6 widget columns">
+                <div class="widget-wrapper">
+                    <div class="handle">
+                        <div class="row collapse">
+                            <div class="small-6 columns" data-bind="html:name">
+                                
+                            </div>
+                            <div class="small-6 columns"></div>
+                        </div>
+                    </div>
+                    <div data-bind="attr :{id: 'widget'+ ($index()+1)}" class="widget-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="content/js/global.js"></script>
+    <script type="text/javascript" src="content/foundation/js/vendor/jquery.js"></script>
+    <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+    <script type="text/javascript" src="content/js/sortable.js"></script>
+    <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
+    <script type="text/javascript" src="content/js/dashboard.js"></script>
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script type="text/javascript" src="content/js/d3.line.js"></script>
+    <script type="text/javascript">
+        (function($, root) {
+            var dashboard = new atombomb.web.Dashboard();
+            ko.applyBindings(dashboard, document.getElementById('dashboard'));
+            root.atombomb.namespace('web').extend({
+                dashboardInstance : dashboard
+            });
+        })(jQuery, this);
+    </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+
+$widget-width: 50%;
+.row.header{
+	background-color:#34495E;
+	padding-top:.5em;
+}
+.row.header h5{ 
+	
+}
+.row.header button{ 
+	margin-bottom:0;
+}
+.handle {
+    width: 100%;
+    border-bottom:1px dashed #CCC;
+	padding:.5em;
+	background-color: #eee;
+	font-weight:bold;
+	font-size:1em;
+}
+
+
+.ui-sortable-placeholder {
+    background-color: #E5E0E0;
+    visibility: visible !important;
+    height: 400px;
+    width: $widget-width;
+}
+
+
+.ui-sortable-placeholder * {
+    visibility: hidden;
+}
+/*widget css*/
+.widget-wrapper {
+    border: 1px solid #CCC;
+    height: 100%;
+}
+        
+.row .widget.columns {
+    padding: 0.9375em;
+    height: 400px;
+    float: left !important;
+}
+.widget-content{
+	height:337px;
+}
+@media only screen and (max-width: 767px) {
+    .ui-sortable-placeholder {
+        width: 100%;
+    }   
+}

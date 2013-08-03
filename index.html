@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+
+<style>
+    body {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .line {
+        fill: none;
+        stroke-width: 1.5px;
+        stroke: url(#my-gradient);
+    }
+
+    .graph {
+        width: 25%;
+        height: 300px;
+        min-width: 400px;
+        float: left;
+        border: 1px solid steelblue;
+        box-sizing: border-box;
+    }
+
+    .graph.graph2 {
+        width: 75%;
+    }
+</style>
+<body>
+    <div id="graph" class="graph"></div>
+
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script>
+
+        var margin = { top: 20, right: 10, bottom: 20, left: 30 };
+        function processsvg(elemid) {
+            var elem = document.getElementById(elemid);
+
+            var width = elem.clientWidth,
+                height = elem.clientHeight;
+            var parseDate = d3.time.format("%d-%b-%y").parse;
+
+            var x = d3.time.scale()
+                .range([0, width - margin.left - margin.right]);
+
+            var y = d3.scale.linear().range([height - margin.top - margin.bottom, 0]);
+            var color = d3.scale.category10();
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+                .ticks(5);
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            var line = d3.svg.line()
+                .interpolate("basis")
+                .x(function (d) { return x(d.date); })
+                .y(function (d) { return y(d.close); });
+            var line2 = d3.svg.line()
+                .interpolate("basis")
+                .x(function (d) { return x(d.date); })
+                .y(function (d) { return y(d.close); });
+
+            var svg = d3.select('#' + elemid)
+            .append("svg")
+            .attr("viewBox", "0 0 " + width + " " + height)
+            .attr("preserveAspectRatio", "xMidYMid")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var mydata = [], mydata2 = [];
+            var today = new Date();
+            var maxy = 0;
+            //var maxx = new Date();
+            for (var i = 0; i < 500; i += 10) {
+                today = new Date(today.setHours(i));
+                var close1 = Math.floor(Math.random() * 10);;
+                mydata.push({
+                    date: today,
+                    close: close1
+                });
+                maxy = close1 > maxy ? close1 : maxy;
+                var close2 = Math.floor(Math.random() * 10);
+                mydata2.push({
+                    date: today,
+                    close: close2
+                });
+                maxy = close2 > maxy ? close2 : maxy;
+            }
+            x.domain(d3.extent(mydata, function (d) { return d.date; }));
+            y.domain([0, maxy]);
+            // x.domain([new Date(), mydata2[mydata2.length-1].date]);
+            // y.domain([0, maxy + 1]);
+            svg.append("linearGradient")
+              .attr("id", "my-gradient")
+              .attr("gradientUnits", "userSpaceOnUse")
+              .attr("x1", 0).attr("y1", y(2))
+              .attr("x2", 0).attr("y2", y(8))
+            .selectAll("stop")
+              .data([
+                { offset: "0%", color: "steelblue" },
+                { offset: "20%", color: "green" },
+                { offset: "60%", color: "green" },
+                { offset: "100%", color: "gray" }
+              ])
+            .enter().append("stop")
+              .attr("offset", function (d) { return d.offset; })
+              .attr("stop-color", function (d) { return d.color; });
+            
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + (height - margin.top - margin.bottom) + ")")
+                .call(xAxis);
+
+            svg.append("g")
+                .attr("class", "y axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Price ($)");
+
+            svg.append("path")
+                .datum(mydata)
+                .attr("class", "line")
+                //.attr("style", "stroke:#00FF00")
+                .attr("d", line);
+            svg.append("path")
+                .datum(mydata2)
+                .attr("class", "line")
+                //.attr("style", "stroke:#0000FF")
+                .attr("d", line2);
+        }
+
+        processsvg('graph');
+
+
+    </script>
+</body>
+
+</html>
