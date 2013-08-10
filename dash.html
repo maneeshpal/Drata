@@ -15,26 +15,31 @@
                 <h5 data-bind="text:name"></h5>
             </div>
             <div class="small-10 columns">
-                <button class="small">Add Widget</button>
+                <button class="small" data-bind="click:addWidget">Add Widget</button>
             </div>
         </div>
-        <div class="row widgets js-sortable" data-bind="foreach:widgets, afterRender:processWidgets">
-            <div class="large-6 widget columns">
-                <div class="widget-wrapper">
-                    <div class="handle">
-                        <div class="row collapse">
-                            <div class="small-6 columns" data-bind="html:name">
-                                
-                            </div>
-                            <div class="small-6 columns"></div>
+        <div class="row widgets js-sortable" data-bind="template:{
+        name:'widget-template',foreach:widgets, afterRender:loadWidget}">
+            
+        </div>
+    </div>
+    <script type="text/html" id="widget-template">
+        <div class="large-12 widget columns">
+            <div class="widget-wrapper">
+                <div class="handle">
+                    <div class="row collapse">
+                        <div class="small-6 columns" data-bind="html:name">
+                            
                         </div>
+                        <div class="small-6 columns"></div>
                     </div>
-                    <div data-bind="attr :{id: 'widget'+ ($index()+1)}" class="widget-content">
-                    </div>
+                </div>
+                <div data-bind="attr :{id: 'widget'+ ($index()+1)}" class="widget-content">
+                <svg></svg>
                 </div>
             </div>
         </div>
-    </div>
+    </script>
     <script type="text/javascript" src="content/js/global.js"></script>
     <script type="text/javascript" src="content/foundation/js/vendor/jquery.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>

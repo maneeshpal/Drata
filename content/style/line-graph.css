@@ -9,8 +9,24 @@
         display: none;
     }
 
-    .line {
+    .line-path {
         fill: none;
-        stroke-width: 1.5px;
+        stroke-width: 1px;
         stroke: url(#my-gradient);
+    }
+    .unselected-line-path {
+        opacity: .4;
+    }
+    .selected-line-path{
+        stroke-width:2px;
+    }
+    .tooltip{
+        visibility: hidden;
+        position:absolute;
+        border-radius:4px;
+        background: rgba(0,0,0,.7);
+        color#FFF;
+        padding:5px;
+        width:200px;
+        display:block;
     }

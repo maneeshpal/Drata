@@ -17,7 +17,7 @@
   background-color: #E5E0E0;
   visibility: visible !important;
   height: 400px;
-  width: 50%; }
+  width: 100%; }
 
 .ui-sortable-placeholder * {
   visibility: hidden; }
