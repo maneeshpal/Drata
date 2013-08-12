@@ -1,6 +1,6 @@
 ;(function(root){
 	var defaultOptions = {
-		margin:{ top: 10, right: 10, bottom: 25, left: 30 },
+		margin:{ top: 40, right: 10, bottom: 25, left: 30 },
         graphOptions:{
             resize:true,
             dateFormat : 'timestamp',
@@ -8,13 +8,13 @@
                 orient:'bottom',
                 type:'time',
                 ticks:5,
-                class:'x axis'
+                class:'axis x'
             },
             yAxis:{
                 orient:'left',
                 type:'linear',
                 ticks:5,
-                class:'y axis',
+                class:'axis y',
                 transform: 'rotate(-90)',
                 label:'this is my y'
             },
@@ -40,6 +40,13 @@
         $.extend(self,defaultOptions,options);
         self.data = graphData;
         self.elem = document.getElementById(elementId);
+        self.labelPos = {};
+        self.elemHeight = function(){
+            return self.elem.clientHeight;
+        };
+        self.elemWidth = function(){
+            return self.elem.clientWidth;
+        };
         self.parseDate = self.graphOptions.dateFormat =='timestamp'? function(timestamp){
                     return new Date(timestamp);
                 } : d3.time.format(self.graphOptions.dateFormat).parse;
@@ -55,11 +62,16 @@
                 .scale(self.x)
                 .orient(self.graphOptions.xAxis.orient)
                 .ticks(self.graphOptions.xAxis.ticks);
+                //.tickSize(-self.elemHeight(), 0, 0);
 
-        self.yAxis = d3.svg.axis()
-            .scale(self.y)
-            .ticks(self.graphOptions.yAxis.ticks)
-            .orient(self.graphOptions.yAxis.orient);
+
+        self.yAxis = function(){
+            return d3.svg.axis()
+                    .scale(self.y)
+                    .ticks(self.graphOptions.yAxis.ticks)
+                    .orient(self.graphOptions.yAxis.orient)
+                    .tickSize(-self.elemWidth(), 0, 0);
+        }
 
         self.line = d3.svg.line()
                         .x(function (d) { 
@@ -79,14 +91,12 @@
 
         self.renderGraph = function(){
             self.graphContainer.select('svg').remove();
-            self.width = self.elem.clientWidth,
-            self.height = self.elem.clientHeight;
-            self.x.range([0, self.width - self.margin.left - self.margin.right]);
+            self.x.range([0, self.elemWidth() - self.margin.left - self.margin.right]);
             
-            self.y.range([self.height - self.margin.top - self.margin.bottom, 0]);
+            self.y.range([self.elemHeight() - self.margin.top - self.margin.bottom, 0]);
             self.svg = self.graphContainer
                 .append("svg")
-                .attr("viewBox", "0 0 " + self.width + " " + self.height)
+                .attr("viewBox", "0 0 " + self.elemWidth() + " " + self.elemHeight())
                 .attr("preserveAspectRatio", self.graphOptions.preserveAspectRatio)
                 .append("g")
                 .attr("transform", "translate(" + self.margin.left + "," + self.margin.top + ")");
@@ -106,18 +116,19 @@
             //self.svg= svg;
             self.draw(self.data);
         };
-        self.getExtent = function(data){
+        self.getExtent = function(){
             var xExtent = [null,null], yExtent = [null,null];
-
-            for(var i = 0;i<data.length;i++){
+            
+            var labelLength = 2;
+            for(var i = 0;i<self.data.length;i++){
                 if(self.graphOptions.xAxis.type =='time'){
-                    for(var j = 0;j<data[i].values.length;j++){
-                        data[i].values[j].x = self.parseDate(data[i].values[j].x);
+                    for(var j = 0;j<self.data[i].values.length;j++){
+                        self.data[i].values[j].x = self.parseDate(self.data[i].values[j].x);
                     }
                 }
                 var xRange, yRange;
-                xRange = d3.extent(data[i].values, function (d) { return d.x; });
-                yRange = d3.extent(data[i].values, function (d) { return d.y; });
+                xRange = d3.extent(self.data[i].values, function (d) { return d.x; });
+                yRange = d3.extent(self.data[i].values, function (d) { return d.y; });
                 if(xExtent[0]==null || xRange[0]<xExtent[0])
                     xExtent[0] = xRange[0];
                 if(xExtent[1]==null || xRange[1]>xExtent[1])
@@ -126,7 +137,11 @@
                     yExtent[0] = yRange[0];
                 if(yExtent[1]==null || yRange[1]>yExtent[1])
                     yExtent[1] = yRange[1];
+                self.labelPos[self.data[i].name]= labelLength;
+                labelLength = labelLength + self.data[i].name.length;
             }
+            //yExtent[1] = yExtent[1] + Math.ceil((yExtent[1]-yExtent[0])/10);
+            //yExtent[0] = yExtent[0] - Math.ceil((yExtent[1]-yExtent[0])/10);
             return {x:xExtent,y:yExtent};
         };
         self.drawAxes = function(){
@@ -135,13 +150,13 @@
             self.svg.append("g")
                 .attr('id','gxaxis')
                 .attr("class", self.graphOptions.xAxis.class)
-                .attr("transform", "translate(0," + (self.height - self.margin.top - self.margin.bottom) + ")")
+                .attr("transform", "translate(0," + (self.elemHeight() - self.margin.top - self.margin.bottom) + ")")
                 .call(self.xAxis);
 
             self.svg.append("g")
                 .attr('id','gyaxis')
                 .attr("class", self.graphOptions.yAxis.class)
-                .call(self.yAxis)
+                .call(self.yAxis())
                 .append("text")
                 .attr("transform", self.graphOptions.yAxis.transform)
                 .attr("y", 6)
@@ -149,23 +164,97 @@
                 .style("text-anchor", "end")
                 .text(self.graphOptions.yAxis.label);
         };
+        self.drawLabels = function(){
+            self.graphContainer.selectAll('.labels-circle').remove();
+            self.svg.append("g")
+                .attr('class', 'labels-circle')
+                .selectAll('circle')
+                .data(self.data)
+                .enter()
+                .append('circle')
+                .attr('cx', function(d, i){
+                    return ((self.labelPos[d.name]*10) + 40*i)-15;
+                })
+                .attr('cy', -20)
+                .attr('r',6)
+                .attr('fill', function(d){
+                    return self.color(d.name);
+                })
+                .attr('stroke', function(d){
+                    return self.color(d.name);
+                })
+                .attr('stroke-width','2')
+                .on("mouseover",function(d){
+                    self.highlightPath('#'+d.name);
+                })
+                .on("mouseout",function(d){
+                    self.graphContainer.select('.lines-g').selectAll('path')
+                        .attr('class', 'line-path');
+                })
+                .on('click', function(d){
+                    d3.select(this).attr('fill', d.disabled?self.color(d.name):'#fff');
+                    self.highlightPath('#'+d.name);
+                    self.svg.select('#'+d.name)
+                    .transition().duration(1000,function(){
+                        self.graphContainer.select('.lines-g').selectAll('path')
+                        .attr('class', 'line-path');
+                    })
+                    .delay(200)
+                    .attr('d', function(){
+                        if(!d.disabled){
+                            d.disabled = true;
+                            var tempdata = atombomb.utils.clone(d.values);
+                            tempdata.forEach(function(v){
+                                v.y = self.extent.y[0];
+                            });
+                            return self.line(tempdata);
+                        }else{
+                            d.disabled = false;
+                            return self.line(d.values);
+                        }
+                    });
+                });
+            self.svg.append("g")
+                .attr('class', 'labels')
+                .selectAll('text')
+                .data(self.data)
+                .enter()
+                .append('text')
+                .attr('x', function(d, i){
+                    return (self.labelPos[d.name]*10) + 40*i;
+                })
+                .attr('y', -15)
+                .attr('fill', function(d){
+                    return self.color(d.name);
+                })
+                .text(function(d){
+                    return d.name;
+                })
+                .on("mouseover",function(d){
+                    self.highlightPath('#'+d.name);
+                })
+                .on("mouseout",function(d){
+                    self.graphContainer.select('.lines-g').selectAll('path')
+                        .attr('class', 'line-path');
+                });
+        };
         self.highlightPath = function(path){
             self.graphContainer.select('.lines-g').selectAll('path')
                 .attr('class', 'line-path unselected-line-path');
-            d3.select(path).attr('class','line-path selected-line-path');
+            self.graphContainer.select(path).attr('class','line-path selected-line-path');
         };
-        self.draw=function(data){
-            var extent = self.getExtent(data);
+        self.draw=function(){
+            var extent = self.getExtent();
             self.x.domain(extent.x);
             self.y.domain(extent.y);
             self.drawAxes();
-            var pathIndex=0;
+            self.drawLabels();
             self.graphContainer.selectAll('.lines-g').remove();
             self.graphContainer.selectAll('.circles-g').remove();
             self.svg.append("g")
                 .attr('class',"lines-g")
                 .selectAll("path")
-                .data(data)
+                .data(self.data)
                 .enter()
                 .append("path")
                 .attr('id', function(d){
@@ -176,18 +265,11 @@
                     return 'stroke:'+ self.color(d.name);})
                 
                 .attr("d", function(d){
-                    return self.line(d.values)
-                })
-                .on("mouseover",function(d){
-                    self.highlightPath(this);
-                })
-                .on("mouseout",function(d){
-                   self.graphContainer.select('.lines-g').selectAll('path')
-                        .attr('class', 'line-path'); 
+                    return self.line(d.values);
                 });
                 
             var circlegroup = self.svg.selectAll("circles-g")
-                .data(data)
+                .data(self.data)
                 .enter()
                 .append("g")
                 .attr("class", "circles-g");
@@ -222,7 +304,7 @@
                 .on("mouseover",function(d){
                     d3.select(this).attr('opacity',1);
                     self.tooltip.style("visibility", "visible");
-                    self.tooltip.style("top", (self.y(d.y)-35) + 'px');
+                    self.tooltip.style("top", (self.y(d.y)-self.margin.top) + 'px');
                     self.tooltip.style("left", (self.x(d.x)+50) + 'px');
                     self.tooltip.text("Time: " + d.x + "\nValue: " + d.y);
                     self.highlightPath('#'+d.pathId);
@@ -232,6 +314,8 @@
                     self.graphContainer.select('.lines-g').selectAll('path')
                         .attr('class', 'line-path');
                     d3.select(this).attr('opacity',0);
+                    self.tooltip.style("top", '0');
+                    self.tooltip.style("left", '0');
                     return self.tooltip.style("visibility","hidden");
                 });
 

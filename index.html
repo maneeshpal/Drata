@@ -30,16 +30,16 @@
             for(var i =0;i<3;i++){
                 var plotvalues = [];
                 var today = new Date();
-                for(var j=0;j<20;j++){
+                for(var j=0;j<15;j++){
                     var newToday = new Date(today.setHours(j));
                     plotvalues.push({
                         x:newToday.getTime(),
-                        y: Math.floor(Math.random()*10)                
+                        y: Math.floor(Math.random()*5)                
                     });
                 }
                 data.push({
                     values:plotvalues,
-                    name:'line'+i});
+                    name:'aaa'+i});
             };
             var graph = new atombomb.d3.LineGraph( 'graph', null, data);
             root.atombomb.namespace('web').extend({

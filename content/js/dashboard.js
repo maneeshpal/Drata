@@ -65,7 +65,8 @@ var Widget = function(model, index){
         if(self.bb==4){
             clearTimeout(self._t);
         }
-        self.graph.draw(self.data);
+        self.graph.data = self.data;
+        self.graph.draw();
     };
 	self.loadWidget = function(){
         
@@ -73,7 +74,7 @@ var Widget = function(model, index){
         //var date2 = new Date();
        // console.log(Math.abs(date2-date1)/1000);
 
-       self._t = setInterval(self.updateGraph.bind(self), 1000);
+       //self._t = setInterval(self.updateGraph.bind(self), 1000);
 	}
 }
 root.atombomb.namespace('web').extend({

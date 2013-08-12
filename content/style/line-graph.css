@@ -1,11 +1,11 @@
 .axis path,
     .axis line {
         fill: none;
-        stroke: #000;
+        stroke: #E5E5E5;
         shape-rendering: crispEdges;
     }
 
-    .x.axis path {
+    .axis.x path, .axis.x line {
         display: none;
     }
 
