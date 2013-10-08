@@ -27,14 +27,14 @@
         (function (root) {
             var data= [];
             var date1 = new Date();
-            for(var i =0;i<3;i++){
+            for(var i =1;i<4;i++){
                 var plotvalues = [];
                 var today = new Date();
                 for(var j=0;j<15;j++){
                     var newToday = new Date(today.setHours(j));
                     plotvalues.push({
                         x:newToday.getTime(),
-                        y: Math.floor(Math.random()*5)                
+                        y: Math.floor(Math.random()*5 * i)                
                     });
                 }
                 data.push({

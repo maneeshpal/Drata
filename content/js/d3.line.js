@@ -18,7 +18,7 @@
                 transform: 'rotate(-90)',
                 label:'this is my y'
             },
-            interpolate:'cardinal',
+            interpolate:'linear', /*monotone*/
             preserveAspectRatio: 'xMidYMid',
             linearGradient :{
                 id:'my-gradient',
@@ -74,22 +74,25 @@
         }
 
         self.line = d3.svg.line()
-                        .x(function (d) { 
-                            return self.x(d.x);
-                            })
-                        .y(function (d) { 
-                            return self.y(d.y); 
-                        });
+            .x(function (d) {
+                return self.x(d.x);})
+            .y(function (d) {
+                return self.y(d.y); 
+        });
         self.graphOptions.interpolate && self.line.interpolate(self.graphOptions.interpolate);
         self.graphContainer = d3.select( '#' + self.elem.id);
         self.color = d3.scale.category10()
                         .domain(self.data.map(function(d){
                             return d.name;
                     }));
-        self.tooltip = self.graphContainer.append('div')
-            .attr('class','tooltip');
-
-        self.renderGraph = function(){
+        self.toolTip = new atombomb.d3.ToolTip({
+            graphContainer:self.graphContainer,
+            scale :{
+                x: self.x,
+                y: self.y
+            }
+        });
+        self.drawContainer = function(){
             self.graphContainer.select('svg').remove();
             self.x.range([0, self.elemWidth() - self.margin.left - self.margin.right]);
             
@@ -113,22 +116,32 @@
                     .attr("offset", function (d) { return d.offset; })
                     .attr("stop-color", function (d) { return d.color; });
             }
-            //self.svg= svg;
-            self.draw(self.data);
         };
-        self.getExtent = function(){
+        self.processData = function(){
             var xExtent = [null,null], yExtent = [null,null];
             
             var labelLength = 2;
-            for(var i = 0;i<self.data.length;i++){
+            atombomb.utils.forEach(self.data, function(item){
+
                 if(self.graphOptions.xAxis.type =='time'){
-                    for(var j = 0;j<self.data[i].values.length;j++){
-                        self.data[i].values[j].x = self.parseDate(self.data[i].values[j].x);
-                    }
-                }
+                    atombomb.utils.forEach(item.values,function(datapoint){
+                        datapoint.x = self.parseDate(datapoint.x);
+                    });
+                };
                 var xRange, yRange;
-                xRange = d3.extent(self.data[i].values, function (d) { return d.x; });
-                yRange = d3.extent(self.data[i].values, function (d) { return d.y; });
+                
+                xRange = d3.extent(item.values, function (d) { 
+                    return d.x; 
+                });
+                if(!item.disabled) {
+                    yRange = d3.extent(item.values, function (d) { 
+                        return d.y; 
+                    });
+                }
+                else if(self.extent){
+                    yRange = [self.extent.y[0], self.extent.y[0]];
+                }
+                
                 if(xExtent[0]==null || xRange[0]<xExtent[0])
                     xExtent[0] = xRange[0];
                 if(xExtent[1]==null || xRange[1]>xExtent[1])
@@ -137,12 +150,12 @@
                     yExtent[0] = yRange[0];
                 if(yExtent[1]==null || yRange[1]>yExtent[1])
                     yExtent[1] = yRange[1];
-                self.labelPos[self.data[i].name]= labelLength;
-                labelLength = labelLength + self.data[i].name.length;
-            }
-            //yExtent[1] = yExtent[1] + Math.ceil((yExtent[1]-yExtent[0])/10);
-            //yExtent[0] = yExtent[0] - Math.ceil((yExtent[1]-yExtent[0])/10);
-            return {x:xExtent,y:yExtent};
+                self.labelPos[item.name]= labelLength;
+                labelLength = labelLength + item.name.length;
+            });
+            self.x.domain(xExtent);
+            self.y.domain(yExtent);
+            self.extent = {x:xExtent,y:yExtent};
         };
         self.drawAxes = function(){
             self.graphContainer.select('#gxaxis').remove();
@@ -164,10 +177,10 @@
                 .style("text-anchor", "end")
                 .text(self.graphOptions.yAxis.label);
         };
-        self.drawLabels = function(){
-            self.graphContainer.selectAll('.labels-circle').remove();
+        self.drawLegendCircles = function(){
+            self.graphContainer.selectAll('.legend-circles').remove();
             self.svg.append("g")
-                .attr('class', 'labels-circle')
+                .attr('class', 'legend-circles')
                 .selectAll('circle')
                 .data(self.data)
                 .enter()
@@ -195,27 +208,30 @@
                     d3.select(this).attr('fill', d.disabled?self.color(d.name):'#fff');
                     self.highlightPath('#'+d.name);
                     self.svg.select('#'+d.name)
-                    .transition().duration(1000,function(){
-                        self.graphContainer.select('.lines-g').selectAll('path')
-                        .attr('class', 'line-path');
-                    })
-                    .delay(200)
                     .attr('d', function(){
                         if(!d.disabled){
                             d.disabled = true;
-                            var tempdata = atombomb.utils.clone(d.values);
-                            tempdata.forEach(function(v){
-                                v.y = self.extent.y[0];
-                            });
-                            return self.line(tempdata);
-                        }else{
+                            //var tempdata = atombomb.utils.clone(d.values);
+                            //tempdata.forEach(function(v){
+                            //    v.y = self.extent.y[0];
+                            //});
+                            //return self.line(tempdata);
+                        }
+                        else{
                             d.disabled = false;
-                            return self.line(d.values);
+                            //return self.line(d.values);
                         }
                     });
+                    self.processData();
+                    self.drawAxes();
+                    self.drawPaths();
+                    self.drawCircles();
                 });
+        };
+        self.drawLegendLabels = function(){
+            self.graphContainer.selectAll('.legend-labels').remove();
             self.svg.append("g")
-                .attr('class', 'labels')
+                .attr('class', 'legend-labels')
                 .selectAll('text')
                 .data(self.data)
                 .enter()
@@ -243,31 +259,8 @@
                 .attr('class', 'line-path unselected-line-path');
             self.graphContainer.select(path).attr('class','line-path selected-line-path');
         };
-        self.draw=function(){
-            var extent = self.getExtent();
-            self.x.domain(extent.x);
-            self.y.domain(extent.y);
-            self.drawAxes();
-            self.drawLabels();
-            self.graphContainer.selectAll('.lines-g').remove();
+        self.drawCircles = function(){
             self.graphContainer.selectAll('.circles-g').remove();
-            self.svg.append("g")
-                .attr('class',"lines-g")
-                .selectAll("path")
-                .data(self.data)
-                .enter()
-                .append("path")
-                .attr('id', function(d){
-                    return d.name;
-                })
-                .attr("class",'line-path')
-                .attr("style", function(d){
-                    return 'stroke:'+ self.color(d.name);})
-                
-                .attr("d", function(d){
-                    return self.line(d.values);
-                });
-                
             var circlegroup = self.svg.selectAll("circles-g")
                 .data(self.data)
                 .enter()
@@ -284,7 +277,7 @@
                         return d;
                     });
                 });
-            colorIndex = 0;                                   
+            colorIndex = 0;
             var mycircle = circles
                 .enter()
                 .append("circle")
@@ -292,7 +285,7 @@
                     return self.x(d.x);
                 })
                 .attr("cy", function(d) { 
-                    return self.y(d.y);
+                    return self.y(d.disabled? self.extent.y[0]:d.y);
                 })
                 .attr("r", 10)
                 .attr("stroke", function(d){
@@ -303,34 +296,125 @@
                 .attr("opacity", 0)
                 .on("mouseover",function(d){
                     d3.select(this).attr('opacity',1);
-                    self.tooltip.style("visibility", "visible");
-                    self.tooltip.style("top", (self.y(d.y)-self.margin.top) + 'px');
-                    self.tooltip.style("left", (self.x(d.x)+50) + 'px');
-                    self.tooltip.text("Time: " + d.x + "\nValue: " + d.y);
                     self.highlightPath('#'+d.pathId);
+                    self.toolTip.open(d, -self.margin.top, 50);
                     return ;
                 })
                 .on("mouseout",function(d){
                     self.graphContainer.select('.lines-g').selectAll('path')
                         .attr('class', 'line-path');
                     d3.select(this).attr('opacity',0);
-                    self.tooltip.style("top", '0');
-                    self.tooltip.style("left", '0');
-                    return self.tooltip.style("visibility","hidden");
+                    self.toolTip.close();
+                    return ;
                 });
-
-            self.extent = extent;
-            //self.svg.exit().remove();
         };
-        self.renderGraph();
-        if(self.graphOptions.resize){
-            $(window).on('resize', function(){
-                self._t && clearTimeout(self._t);
-                self._t = setTimeout(self.renderGraph.bind(self), 2000);    
+        self._getLine = function(d){
+            if(d.disabled){
+                var tempdata = atombomb.utils.clone(d.values);
+                tempdata.forEach(function(v){
+                    v.y = self.extent.y[0];
+                });
+                 return self.line(tempdata);
+            }
+            else{
+                return self.line(d.values);
+            }
+        };
+        self.drawPath = function(pathContainer){
+            var linePath;
+            if(self.graphContainer.select('.lines-g').selectAll('path')[0].length === 0){
+                pathContainer.append("path")
+                .attr('id', function(d){
+                    return d.name;
+                })
+                .attr("class",'line-path')
+                .attr("style", function(d){
+                    return 'stroke:'+ self.color(d.name);
+                })
+                .attr("d", self._getLine.bind(self));
+            }
+            else{
+                self.graphContainer.select('.lines-g').selectAll('path')
+                .transition().duration(1000)
+                .delay(200)
+                .attr('id', function(d){
+                    return d.name;
+                })
+                .attr("class",'line-path')
+                .attr("style", function(d){
+                    return 'stroke:'+ self.color(d.name);
+                })
+                .attr("d", self._getLine.bind(self));
+            }
+        };
+        self.drawPaths=function(){
+            //self.graphContainer.selectAll('.lines-g').remove();
+            self.svg.append("g")
+            .attr('class',"lines-g")
+            .selectAll("path")
+            .data(self.data)
+            .enter()
+            .call(self.drawPath);
+            
+        };
+        self.drawContent = function(){
+            self.drawAxes();
+            self.drawPaths();
+            self.drawCircles();
+            self.drawLegendLabels();
+            self.drawLegendCircles();
+        };
+        self.redrawResize = function(){
+            self.drawContainer();
+            self.drawContent();
+        };
+        self.redraw = function(){
+            self.processData();
+            self.drawContent();
+        };
+        self.drawStream = function(){
+            self.processData();
+            self.drawAxes();
+            self.drawPaths();
+            self.drawCircles();
+        };
+        self.init = function(){
+            self.processData();
+            self.drawContainer();
+            self.drawContent();
+            self.graphOptions.resize &&  $(window).on('resize', function(){
+                    self._t && clearTimeout(self._t);
+                    self._t = setTimeout(self.redrawResize.bind(self), 2000);    
             });
-        }
+        };
+        self.init();
 	};
+    var ToolTip = function(params){
+        var self = this;
+        $.extend(self, params);
+        self._tip = null;
+        self._create = function(){
+            self._tip = self.graphContainer.append('div')
+            .attr('class','tooltip');
+            self.close();
+        };
+        self.open = function(data,top,left){
+            self._tip.style("visibility", "visible");
+            self._tip.style("top", (self.scale.y(data.y)+top) + 'px');
+            self._tip.style("left", (self.scale.x(data.x) +left) + 'px');
+            self._tip.text("Time: " + data.x + "\nValue: " + data.y);
+        };
+        self.close = function(){
+            self._tip.style('top', 0);
+            self._tip.style('left', 0);
+            self._tip.style('visibility','hidden');
+        };
+        self._create();
+    };
 	root.atombomb.namespace('d3').extend({
 	    LineGraph: LineGraph
 	});
+    root.atombomb.namespace('d3').extend({
+        ToolTip: ToolTip
+    });
 })(this);

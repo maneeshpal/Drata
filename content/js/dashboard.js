@@ -40,7 +40,7 @@ var Widget = function(model, index){
         for(var j=0;j<10;j++){
             plotvalues.push({
                 x: today.setHours(today.getHours()+1),
-                y: Math.random()*100             
+                y: Math.random()  * 10        
             });
         }
         self.data.push({
@@ -56,17 +56,17 @@ var Widget = function(model, index){
             //for(var j=0;j<2;j++){
                 self.data[i].values.push({
                     x:today.setHours(today.getHours()+1),
-                    y: Math.random()*100           
+                    y: Math.random() * 10
                 });
             //}
         }
         //console.log(self.data);
         self.bb++;
-        if(self.bb==4){
-            clearTimeout(self._t);
+        if(self.bb==3){
+            //clearTimeout(self._t);
         }
         self.graph.data = self.data;
-        self.graph.draw();
+        self.graph.drawStream();
     };
 	self.loadWidget = function(){
         
@@ -74,7 +74,7 @@ var Widget = function(model, index){
         //var date2 = new Date();
        // console.log(Math.abs(date2-date1)/1000);
 
-       //self._t = setInterval(self.updateGraph.bind(self), 1000);
+       self._t = setInterval(self.updateGraph.bind(self), 1000);
 	}
 }
 root.atombomb.namespace('web').extend({
