@@ -27,23 +27,31 @@
         (function (root) {
             var data= [];
             var date1 = new Date();
-            for(var i =1;i<4;i++){
+            for(var i =1;i<=1;i++){
                 var plotvalues = [];
                 var today = new Date();
-                for(var j=0;j<15;j++){
-                    var newToday = new Date(today.setHours(j));
+                // for(var j=0;j<15;j++){
+                //     var newToday = new Date(today.setHours(j));
+                //     plotvalues.push({
+                //         x:newToday.getTime(),
+                //         y: Math.floor(Math.random()*5 * i)                
+                //     });
+                // }
+                var y = 0;
+                for(var j = 0; j < 1000000; j++){
+                    y += (Math.random() * 10 - 5);
                     plotvalues.push({
-                        x:newToday.getTime(),
-                        y: Math.floor(Math.random()*5 * i)                
+                      x: j,
+                      y: y
                     });
                 }
                 data.push({
                     values:plotvalues,
                     name:'aaa'+i});
             };
-            var graph = new atombomb.d3.LineGraph( 'graph', null, data);
+            var lineGraph = new atombomb.d3.LineGraph( 'graph', null, data);
             root.atombomb.namespace('web').extend({
-                lineGraph : graph
+                lineGraph : lineGraph
             });
     })(this);
     </script>

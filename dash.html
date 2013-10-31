@@ -15,27 +15,163 @@
                 <h5 data-bind="text:name"></h5>
             </div>
             <div class="small-10 columns">
-                <button class="small" data-bind="click:addWidget">Add Widget</button>
+                <button class="small" data-reveal-id="myModal">Add Widget</button>
             </div>
         </div>
         <div class="row widgets js-sortable" data-bind="template:{
         name:'widget-template',foreach:widgets, afterRender:loadWidget}">
-            
         </div>
     </div>
+
+
+    <div id="myModal" class="reveal-modal">
+        <a class="close-reveal-modal">&#215;</a>
+        <div id="graphBuilder">
+            <div class="row">
+                <div class="small-3 columns">
+                    <div class="row">
+                        <div class="small-4 columns push-4">
+                            <input type="text" placeholder="top" data-bind="value:graphOptions.margin.top" />
+                        </div>
+                    </div>
+                    <div class="row" style="position: relative">
+                        <div class="small-4 columns">
+                            <input type="text" placeholder="left" data-bind="value:graphOptions.margin.left" />
+                            <div style="position: absolute; top: 8px; left: 70px;">Margin</div>
+                        </div>
+
+
+                        <div class="small-4 columns">
+                            <input type="text" placeholder="left" data-bind="value:graphOptions.margin.right" />
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="small-4 columns push-4">
+                            <input type="text" placeholder="bottom" data-bind="value:graphOptions.margin.bottom" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <select data-bind="selected:graphOptions.preserveAspectRatio, value:graphOptions.preserveAspectRatio, optionsCaption: '-Aspect Ratio-'">
+                                <option value="xMidYMid">xMidYMid</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <select data-bind="selected:graphOptions.interpolate,value:graphOptions.interpolate, optionsCaption: '-Interpolate-'">
+                                <option value="linear">Linear</option>
+                                <option value="monotone">Monotone</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="small-9 columns">
+                    <div class="row">
+                        <div class="small-6 columns">
+                            <fieldset>
+                                <legend>x Axis</legend>
+
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <select data-bind="selected:graphOptions.xAxis.orient,value:graphOptions.xAxis.orient, optionsCaption: '-Orient-'">
+                                            <option value="bottom">bottom</option>
+                                            <option value="top">top</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <select data-bind="selected:graphOptions.xAxis.type, value:graphOptions.xAxis.type, optionsCaption: '-Data type-'">
+                                            <option value="time">time</option>
+                                            <option value="linear">linear</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.xAxis.ticks" placeholder="ticks" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.xAxis.class" placeholder="class" />
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                        </div>
+                        <div class="small-6 columns">
+                            <fieldset>
+                                <legend>y Axis</legend>
+
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <select data-bind="selected:graphOptions.yAxis.orient,value:graphOptions.yAxis.orient, optionsCaption: '-Orient-'">
+                                            <option value="left">left</option>
+                                            <option value="right">right</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <select data-bind="selected:graphOptions.yAxis.type, value:graphOptions.yAxis.type, optionsCaption: '-Data type-'">
+                                            <option value="time">time</option>
+                                            <option value="linear">linear</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.yAxis.ticks" placeholder="ticks" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.yAxis.class" placeholder="class" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.yAxis.transform" placeholder="transform" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-12 columns">
+                                        <input type="text" data-bind="value:graphOptions.yAxis.label" placeholder="label" />
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="small-12 columns">
+                    <button data-bind="click:buildWidget,text:addUpdateBtnText"></button>
+                    &nbsp;
+                            <button class="button secondary" data-bind="click:widgetCancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="text/html" id="widget-template">
         <div class="large-6 widget columns">
             <div class="widget-wrapper">
                 <div class="handle">
                     <div class="row collapse">
                         <div class="small-6 columns" data-bind="html:name">
-                            
                         </div>
-                        <div class="small-6 columns"></div>
+                        <div class="small-6 columns">
+                            <a data-bind="click:editWidget">Edit</a>
+                        </div>
                     </div>
                 </div>
                 <div data-bind="attr :{id: 'widget'+ ($index()+1)}" class="widget-content">
-                <svg></svg>
+                    <svg></svg>
                 </div>
             </div>
         </div>
@@ -47,14 +183,22 @@
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
     <script src="http://d3js.org/d3.v3.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.reveal.js"></script>
     <script type="text/javascript" src="content/js/d3.line.js"></script>
     <script type="text/javascript">
-        (function($, root) {
+        (function ($, root) {
             var dashboard = new atombomb.web.Dashboard();
             ko.applyBindings(dashboard, document.getElementById('dashboard'));
             root.atombomb.namespace('web').extend({
-                dashboardInstance : dashboard
+                dashboard: dashboard
             });
+            var graphBuilder = new atombomb.web.GraphBuilder();
+            ko.applyBindings(graphBuilder, document.getElementById('graphBuilder'));
+            root.atombomb.namespace('web').extend({
+                graphBuilder: graphBuilder
+            });
+            $(document).foundation();
         })(jQuery, this);
     </script>
 </body>

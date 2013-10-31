@@ -1,43 +1,42 @@
-;(function(root){
-	var defaultOptions = {
-		margin:{ top: 40, right: 10, bottom: 25, left: 30 },
-        graphOptions:{
-            resize:true,
-            dateFormat : 'timestamp',
-            xAxis:{
-                orient:'bottom',
-                type:'time',
-                ticks:5,
-                class:'axis x'
-            },
-            yAxis:{
-                orient:'left',
-                type:'linear',
-                ticks:5,
-                class:'axis y',
-                transform: 'rotate(-90)',
-                label:'this is my y'
-            },
-            interpolate:'linear', /*monotone*/
-            preserveAspectRatio: 'xMidYMid',
-            linearGradient :{
-                id:'my-gradient',
-                offsetColors:[
-                    { offset: "0%", color: "steelblue" },
-                    { offset: "50%", color: "green" },
-                    { offset: "100%", color: "red" }
-                ],
-                clippings:{
-                    y1: 2,
-                    y2: 8
-                }
+;(function(root) {
+    var defaultLineOptions = {
+        margin: { top: 40, right: 10, bottom: 25, left: 30 },
+        resize: true,
+        dateFormat: 'timestamp',
+        xAxis: {
+            orient: 'bottom',
+            type: 'linear',
+            ticks: 5,
+            class: 'axis x'
+        },
+        yAxis: {
+            orient: 'left',
+            type: 'linear',
+            ticks: 5,
+            class: 'axis y',
+            transform: 'rotate(-90)',
+            label: 'this is my y'
+        },
+        interpolate: 'linear', /*monotone*/
+        preserveAspectRatio: 'xMidYMid',
+        linearGradient: {
+            id: 'my-gradient',
+            offsetColors: [
+                { offset: "0%", color: "steelblue" },
+                { offset: "50%", color: "green" },
+                { offset: "100%", color: "red" }
+            ],
+            clippings: {
+                y1: 2,
+                y2: 8
             }
         }
-	};
+    };
+    
 	var LineGraph = function(elementId, options,graphData){
 		var self = this;
-
-        $.extend(self,defaultOptions,options);
+        self.graphOptions = {};
+		$.extend(self.graphOptions, defaultLineOptions, options);
         self.data = graphData;
         self.elem = document.getElementById(elementId);
         self.labelPos = {};
@@ -71,7 +70,7 @@
                     .ticks(self.graphOptions.yAxis.ticks)
                     .orient(self.graphOptions.yAxis.orient)
                     .tickSize(-self.elemWidth(), 0, 0);
-        }
+        };
 
         self.line = d3.svg.line()
             .x(function (d) {
@@ -83,7 +82,7 @@
         self.graphContainer = d3.select( '#' + self.elem.id);
         self.color = d3.scale.category10()
                         .domain(self.data.map(function(d){
-                            return d.name;
+                            return d.name; 
                     }));
         self.toolTip = new atombomb.d3.ToolTip({
             graphContainer:self.graphContainer,
@@ -92,17 +91,18 @@
                 y: self.y
             }
         });
+        
         self.drawContainer = function(){
             self.graphContainer.select('svg').remove();
-            self.x.range([0, self.elemWidth() - self.margin.left - self.margin.right]);
+            self.x.range([0, self.elemWidth() - self.graphOptions.margin.left - self.graphOptions.margin.right]);
             
-            self.y.range([self.elemHeight() - self.margin.top - self.margin.bottom, 0]);
+            self.y.range([self.elemHeight() - self.graphOptions.margin.top - self.graphOptions.margin.bottom, 0]);
             self.svg = self.graphContainer
                 .append("svg")
                 .attr("viewBox", "0 0 " + self.elemWidth() + " " + self.elemHeight())
                 .attr("preserveAspectRatio", self.graphOptions.preserveAspectRatio)
                 .append("g")
-                .attr("transform", "translate(" + self.margin.left + "," + self.margin.top + ")");
+                .attr("transform", "translate(" + self.graphOptions.margin.left + "," + self.graphOptions.margin.top + ")");
 
             if(0 && self.graphOptions.linearGradient){
                 self.svg.append("linearGradient")
@@ -116,13 +116,17 @@
                     .attr("offset", function (d) { return d.offset; })
                     .attr("stop-color", function (d) { return d.color; });
             }
+            var dd = new Date();
+            var aa = new Date(dd);
+            dd.setHours(dd.getHours()+1);
+
+            self.xdiff = self.x(aa) - self.x(dd);
         };
         self.processData = function(){
             var xExtent = [null,null], yExtent = [null,null];
             
             var labelLength = 2;
             atombomb.utils.forEach(self.data, function(item){
-
                 if(self.graphOptions.xAxis.type =='time'){
                     atombomb.utils.forEach(item.values,function(datapoint){
                         datapoint.x = self.parseDate(datapoint.x);
@@ -158,24 +162,35 @@
             self.extent = {x:xExtent,y:yExtent};
         };
         self.drawAxes = function(){
-            self.graphContainer.select('#gxaxis').remove();
-            self.graphContainer.select('#gyaxis').remove();
-            self.svg.append("g")
-                .attr('id','gxaxis')
-                .attr("class", self.graphOptions.xAxis.class)
-                .attr("transform", "translate(0," + (self.elemHeight() - self.margin.top - self.margin.bottom) + ")")
-                .call(self.xAxis);
+            root.logmsg && console.log('drawing axes');
+            var xaxis = self.svg.select('#gxaxis');
+            var yaxis = self.svg.select('#gyaxis');
+            if(!self.elementExists(xaxis)){
+                xaxis = self.svg.append("g").attr('id','gxaxis')
+                        .attr("class", self.graphOptions.xAxis.class)
+                        .attr("transform", "translate(0," + (self.elemHeight() - self.graphOptions.margin.top - self.graphOptions.margin.bottom) + ")");
+                        
+            }
+            xaxis.transition().duration(1000).call(self.xAxis);
+            root.logmsg && console.log('x axis drawn');
 
-            self.svg.append("g")
+            if(!self.elementExists(yaxis)){
+                yaxis = self.svg.append("g")
                 .attr('id','gyaxis')
-                .attr("class", self.graphOptions.yAxis.class)
-                .call(self.yAxis())
+                .attr("class", self.graphOptions.yAxis.class);
+                yaxis
                 .append("text")
                 .attr("transform", self.graphOptions.yAxis.transform)
                 .attr("y", 6)
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text(self.graphOptions.yAxis.label);
+            }
+            
+            yaxis.transition().duration(1000)
+            .call(self.yAxis());
+                
+            root.logmsg && console.log('y axis drawn');
         };
         self.drawLegendCircles = function(){
             self.graphContainer.selectAll('.legend-circles').remove();
@@ -208,23 +223,14 @@
                     d3.select(this).attr('fill', d.disabled?self.color(d.name):'#fff');
                     self.highlightPath('#'+d.name);
                     self.svg.select('#'+d.name)
+                    .transition().duration(1000)
+                    .delay(200)
                     .attr('d', function(){
-                        if(!d.disabled){
-                            d.disabled = true;
-                            //var tempdata = atombomb.utils.clone(d.values);
-                            //tempdata.forEach(function(v){
-                            //    v.y = self.extent.y[0];
-                            //});
-                            //return self.line(tempdata);
-                        }
-                        else{
-                            d.disabled = false;
-                            //return self.line(d.values);
-                        }
+                        d.disabled = !d.disabled;
                     });
                     self.processData();
                     self.drawAxes();
-                    self.drawPaths();
+                    self.drawPaths(true);
                     self.drawCircles();
                 });
         };
@@ -297,7 +303,7 @@
                 .on("mouseover",function(d){
                     d3.select(this).attr('opacity',1);
                     self.highlightPath('#'+d.pathId);
-                    self.toolTip.open(d, -self.margin.top, 50);
+                    self.toolTip.open(d, -self.graphOptions.margin.top, 50);
                     return ;
                 })
                 .on("mouseout",function(d){
@@ -320,49 +326,79 @@
                 return self.line(d.values);
             }
         };
-        self.drawPath = function(pathContainer){
-            var linePath;
-            if(self.graphContainer.select('.lines-g').selectAll('path')[0].length === 0){
+        self.elementExists = function(el){
+            return !!el[0][0];
+        };
+        self.drawPath = function(pathContainer, tr, item){
+            var path = pathContainer.select('#' + item.name);
+            if(!self.elementExists(path)){
                 pathContainer.append("path")
-                .attr('id', function(d){
-                    return d.name;
-                })
-                .attr("class",'line-path')
-                .attr("style", function(d){
-                    return 'stroke:'+ self.color(d.name);
-                })
-                .attr("d", self._getLine.bind(self));
+                    .datum(item)
+                    .attr('id', function(d){
+                        return d.name;
+                    })
+                    .attr("class",'line-path')
+                    .attr("style", function(d){
+                        return 'stroke:'+ self.color(d.name);
+                    })
+                    .attr('transform',null)
+                    .attr("d", self._getLine.bind(self))
+                    .attr('transform', 'translate(' + self.xdiff + ')');
             }
             else{
-                self.graphContainer.select('.lines-g').selectAll('path')
-                .transition().duration(1000)
-                .delay(200)
-                .attr('id', function(d){
-                    return d.name;
-                })
-                .attr("class",'line-path')
-                .attr("style", function(d){
-                    return 'stroke:'+ self.color(d.name);
-                })
-                .attr("d", self._getLine.bind(self));
+                if(!tr){
+                    path.attr('transform',null)
+                    .attr("d", self._getLine.bind(self))
+                    .transition().duration(1000)
+                    .attr('transform', 'translate(' + self.xdiff + ')');
+                }
+                else{
+                    path.transition().duration(1000)
+                    .attr("d", self._getLine.bind(self));
+                }
+                    
             }
+            root.logmsg && console.log('path drawn : ' + item.name);
+                
         };
-        self.drawPaths=function(){
-            //self.graphContainer.selectAll('.lines-g').remove();
-            self.svg.append("g")
-            .attr('class',"lines-g")
-            .selectAll("path")
-            .data(self.data)
-            .enter()
-            .call(self.drawPath);
+        self.drawPaths=function(tr){
+            root.logmsg && console.log('drawing paths');
+            var pathContainer = self.svg.select('.lines-g');
+            if(!self.elementExists(pathContainer)){
+                pathContainer = self.svg
+                // .append('defs')
+                 // .append('clippath')
+                 // .attr('id', 'clip1')
+                 // .append('rect')
+                // .attr('x', self.graphOptions.margin.left)
+                // .attr('y', self.graphOptions.margin.top)
+                 // .attr('width', 906)
+                 // .attr('height', 438)
+                .append("g")
+                .attr('class',"lines-g")
+                .attr('transform', 'translate(' + (-self.xdiff) + ')');
+            }
+            atombomb.utils.forEach(self.data, self.drawPath.bind(self, pathContainer, tr));
             
+            // .selectAll("path")
+            // .data(self.data)
+            // .enter()
+            // .call(self.drawPath);
         };
         self.drawContent = function(){
             self.drawAxes();
+            var aa = new Date();
             self.drawPaths();
-            self.drawCircles();
+            console.log('draw path: '+ (new Date() - aa));
+            aa = new Date();
+            //self.drawCircles();
+            console.log('draw circle: '+ (new Date() - aa));
+            aa = new Date();
             self.drawLegendLabels();
+            console.log('draw legend labels: '+ (new Date() - aa));
+            aa = new Date();
             self.drawLegendCircles();
+            console.log('draw legend circles: '+ (new Date() - aa));
         };
         self.redrawResize = function(){
             self.drawContainer();
@@ -373,13 +409,22 @@
             self.drawContent();
         };
         self.drawStream = function(){
+            var pd = new Date();
             self.processData();
+            console.log('process data:' + (new Date() - pd));
+            pd = new Date();
             self.drawAxes();
+            console.log('draw axes:' + (new Date() - pd));
             self.drawPaths();
             self.drawCircles();
         };
+	    self.removeGraph = function() {
+	        self.svg.remove();
+	    };
         self.init = function(){
+            var pd = new Date();
             self.processData();
+            console.log('process data:' + (new Date() - pd));
             self.drawContainer();
             self.drawContent();
             self.graphOptions.resize &&  $(window).on('resize', function(){
@@ -387,7 +432,10 @@
                     self._t = setTimeout(self.redrawResize.bind(self), 2000);    
             });
         };
+        var st = new Date();
+        console.log(new Date());
         self.init();
+        console.log('time it took :' + (new Date() - st));
 	};
     var ToolTip = function(params){
         var self = this;
@@ -411,6 +459,7 @@
         };
         self._create();
     };
+    root.logmsg= false;
 	root.atombomb.namespace('d3').extend({
 	    LineGraph: LineGraph
 	});

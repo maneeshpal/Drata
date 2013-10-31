@@ -15,10 +15,10 @@
         stroke: url(#my-gradient);
     }
     .unselected-line-path {
-        opacity: .4;
+        
     }
     .selected-line-path{
-        stroke-width:2px;
+        stroke-width:3px;
     }
     .tooltip{
         visibility: hidden;
