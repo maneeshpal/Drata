@@ -4,7 +4,7 @@
  */
 
 ; (function(root) {
-    var atombomb = root.atombomb = {};
+    var atombomb = root.atombomb = root.drata = {};
     /**
      * Returns a nested namespace. Takes three argument forms:
      *    var module = atombomb.namespace('path.to.module');
@@ -25,7 +25,7 @@
 
         if (!namespaceParts) throw new Error('Either pass in a single string with dot-separated namespaces, an array of namespace strings, or a separate string param for each namespace');
 
-        if (namespaceParts[0].toLowerCase() === 'atombomb') {
+        if (namespaceParts[0].toLowerCase() === 'atombomb' || namespaceParts[0].toLowerCase() === 'drata') {
             namespaceParts = namespaceParts.slice(1);
         }
 

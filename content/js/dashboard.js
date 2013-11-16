@@ -1,193 +1,409 @@
 ;(function(root, $) {
-
-    var defaultgraphOptions = {
-        margin: { top: 40, right: 10, bottom: 25, left: 30 },
-        resize: true,
-        dateFormat: 'timestamp',
-        xAxis: {
-            orient: 'bottom',
-            type: 'linear',
-            ticks: 5,
-            class: 'axis x'
-        },
-        yAxis: {
-                orient: 'left',
-                type: 'linear',
-                ticks: 5,
-                class: 'axis y',
-                transform: 'rotate(-90)',
-                label: 'this is my y'
-        },
-        interpolate: 'linear', /*monotone*/
-        preserveAspectRatio: 'xMidYMid',
-        linearGradient: {
-            id: 'my-gradient',
-            offsetColors: [
-                { offset: "0%", color: "steelblue" },
-                { offset: "50%", color: "green" },
-                { offset: "100%", color: "red" }
-            ],
-            clippings: {
-                y1: 2,
-                y2: 8
-            }
-        }
-    };
     var defaultWidgetModel = {
         name: 'widget 1',
-        graphOptions: defaultgraphOptions
+        selectedActions : [{
+            type : 'selection',
+            val : 'nypAmount',
+            identifier : 'value'
+        },{
+            type : 'action',
+            val : 'add'
+        },{
+            type : 'selection',
+            val : 'pubAmount',
+            identifier : 'value'
+        },{
+            type : 'action',
+            val : 'over' 
+        },{
+            type : 'selection',
+            val : 'timestamp',
+            identifier : 'value'
+        }],
+        selectedDataKey: 'step2'
+        //graphOptions: defaultgraphOptions
     };
-    var widgetsModel = {
+    var dashboardModel = {
         name: 'maneesh',
         widgets: [defaultWidgetModel]
     };
 var Dashboard = function(){
 	var self = this;
-	self.name = widgetsModel.name;
+	self.name = dashboardModel.name;
 	self.index= 1;
 	self.widgets = ko.observableArray();
 
 	self.widgets(ko.utils.arrayMap(
-        widgetsModel.widgets,
-        function(widget) {
-          return new atombomb.web.Widget(widget, self.index++);
+        dashboardModel.widgets,
+        function(model) {
+          return new atombomb.web.Widget(model, self.index++);
         }
 	));
 	self.loadWidget = function(elem,widget){
-        widget && widget.loadWidget();
+        widget && widget.loadWidgetInit();
     };
-    self.addWidget = function(model){
-        var widget = new atombomb.web.Widget(model, self.index++);
+    self.addWidget = function(widgetModel){
+        var widget = new atombomb.web.Widget(widgetModel, self.index++);
         self.widgets.push(widget);
     };
 };
-var Widget = function(model, index){
+var Widget = function(widgetModel, index){
     var self = this;
-    self.model = model;
-    self.name = model.widgetName || 'New Widget';
+    self.name = widgetModel.name || widgetModel.selectedDataKey;
 	self.index = index;
-    self.data= [];
-    self.getRandomData = function(){
-        var data = [];
-        for(var i =0;i<3;i++){
-            var plotvalues = [];
-            var today = new Date();
-            var y = 0;
-            for(var j = 0; j < 100; j++){
-                y += (Math.random() * 10 - 5);
-                plotvalues.push({
-                  x: j,
-                  y: y
-                });
-                // plotvalues.push({
-                //     x: today.setHours(today.getHours()+1),
-                //     y: Math.random()  * 10        
-                // });
-            }
-            data.push({
-                values:plotvalues,
-                name:'line'+i
-            });
-        };
-        return data;
-    };
     self.bb = 0;
-    self.updateGraph = function(){
-        for(var i =0;i<self.data.length;i++){
-            self.data[i].values.shift();
-            var today = self.data[i].values[self.data[i].values.length-1].x;
-            //for(var j=0;j<2;j++){
-                self.data[i].values.push({
-                    x:today.setHours(today.getHours()+1),
-                    y: Math.random() * 10
-                });
-            //}
-        }
-        //console.log(self.data);
-        //self.bb++;
-        //if(self.bb==3){
-           // clearTimeout(self._t);
-        //}
-        self.graph.data = self.data;
-        self.graph.drawStream();
+    self.widgetModel = widgetModel;
+    self.loadWidgetInit = function(){ //runs after render
+        if(!self.widgetModel.data) self.widgetModel.data = atombomb.web.dataProcessor.getFormattedData(self.widgetModel.selectedDataKey, self.widgetModel.selectedActions);
+        self.graph = new atombomb.d3.LineGraph( 'widget'+ self.index, undefined, self.widgetModel.data);
     };
-    self.loadWidget = function (model) {
-        if (model)
-            self.model = model;
-	    self.data = self.getRandomData();
-	    if (self.graph) {
-	        self.graph.removeGraph();
-	    }
-        self.graph = new atombomb.d3.LineGraph( 'widget'+ self.index, self.model.graphOptions, self.data);
-        //self._t = setInterval(self.updateGraph.bind(self), 2000);
+    self.updateWidget = function (model) {
+        self.widgetModel = model;
+	    self.graph = new atombomb.d3.LineGraph( 'widget'+ self.index, undefined, self.widgetModel.data);
 	};
     self.editWidget = function () {
-        atombomb.web.graphBuilder.attach(self.model, self.loadWidget.bind(self));
-        $('#myModal').foundation('reveal', 'open');
+        atombomb.web.sAGenerator.attach(self.widgetModel, self.updateWidget.bind(self));
+        //$('#myModal').foundation('reveal', 'open');
     };
 };
-var GraphBuilder = function(){
+var SAGenerator = function(){
     var self = this;
     self.widgetName = ko.observable();
     self.addUpdateBtnText = ko.observable('Add Widget');
-    
-
-    self.buildWidget = function () {
-        var widgetModel = ko.toJS(self);
-        widgetModel.graphOptions.top = +widgetModel.graphOptions.margin.top;
-        widgetModel.graphOptions.right = +widgetModel.graphOptions.margin.right;
-        widgetModel.graphOptions.bottom = +widgetModel.graphOptions.margin.bottom;
-        widgetModel.graphOptions.left = +widgetModel.graphOptions.margin.left;
-        widgetModel.graphOptions.xAxis.ticks = +widgetModel.graphOptions.xAxis.ticks;
-        widgetModel.graphOptions.yAxis.ticks = +widgetModel.graphOptions.yAxis.ticks;
-        $('#myModal').foundation('reveal', 'close');
+    self.selections = ko.observableArray([]);
+    self.actions = ko.observableArray(['add','subtract', 'and', 'groupby', 'over']);
+    self.dataKeys = ko.observableArray();
+    self.selectedDataKey =ko.observable(undefined);
+    self.selectedActions = ko.observableArray();
+    self.jsonFormattedData = ko.observable();
+    self.jsonData = ko.observable();
+   
+    self.notifyWidget = function () {
+        //var widgetModel = ko.toJS(self);
+        //$('#myModal').foundation('reveal', 'close');
+        var formattedData = atombomb.web.dataProcessor.formatGroups(self.selectedDataKey(), self.selectedActions(), self.data);
+        self.jsonFormattedData(JSON.stringify(formattedData, null, '\t'));
+        self.jsonData(JSON.stringify(self.data, null, '\t'));
+        //self.notifyWidget(formattedData);
+        var widgetModel = {
+            selectedActions : self.selectedActions(),
+            selectedDataKey : self.selectedDataKey(),
+            data : formattedData
+        };
         self.onWidgetUpdate && self.onWidgetUpdate(widgetModel);
         !self.onWidgetUpdate && atombomb.web.dashboard.addWidget(widgetModel);
         self.onWidgetUpdate = undefined;
         self.onWidgetCancel = undefined;
+        self.addUpdateBtnText('Add');
     };
     self.attach = function (model, onWidgetUpdate, onWidgetCancel) {
-        self.setModel(model);
+        self.selectedDataKey(model.selectedDataKey);
+        
+        self.selectedActions(ko.utils.arrayMap(
+            model.selectedActions,
+            function(selectedAction) {
+              return new SelectedAction(selectedAction);
+            }
+        ));
+        //self.selectedActions(model.selectedActions);
+        self.jsonData(JSON.stringify(ko.toJS(self.selectedActions()), null, '\t'));
         self.addUpdateBtnText('Update');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
     };
-    self.setModel = function (model) {
-        self.graphOptions = {
-            margin: {
-                top: ko.observable(model.graphOptions.margin.top),
-                right: ko.observable(model.graphOptions.margin.right),
-                bottom: ko.observable(model.graphOptions.margin.bottom),
-                left: ko.observable(model.graphOptions.margin.left)
-            },
-            resize: ko.observable(model.graphOptions.resize),
-            dateFormat: ko.observable(model.graphOptions.dateFormat),
-            xAxis: {
-                orient: ko.observable(model.graphOptions.xAxis.orient),
-                type: ko.observable(model.graphOptions.xAxis.type),
-                ticks: ko.observable(model.graphOptions.xAxis.ticks),
-                class: ko.observable(model.graphOptions.xAxis.class)
-            },
-            yAxis: {
-                orient: ko.observable(model.graphOptions.xAxis.orient),
-                type: ko.observable(model.graphOptions.yAxis.type),
-                ticks: ko.observable(model.graphOptions.yAxis.ticks),
-                class: ko.observable(model.graphOptions.yAxis.class),
-                transform: ko.observable(model.graphOptions.yAxis.transform),
-                label: ko.observable(model.graphOptions.yAxis.label)
-            },
-            interpolate: ko.observable(model.graphOptions.interpolate), /*monotone*/
-            preserveAspectRatio: ko.observable(model.graphOptions.preserveAspectRatio)
+    self.bindProperties = function (data) {
+        //model.selectedActions && self.selectedActions(model.selectedActions);
+        
+        var selectionsArr = [];
+        for (var i = data.length - 1; i >= 0; i--) {
+            var dataValue = data[i].val;
+            for (var property in dataValue) {
+                (dataValue.hasOwnProperty(property) && selectionsArr.indexOf(property) === -1) && selectionsArr.push(property);
+            }
         };
+        self.selections(selectionsArr);
     };
+    
     self.widgetCancel = function() {
-        $('#myModal').foundation('reveal', 'close');
+        self.onWidgetUpdate = undefined;
+        self.onWidgetCancel = undefined;
+        self.addUpdateBtnText('Add');
+        //$('#myModal').foundation('reveal', 'close');
     };
-    self.setModel(defaultWidgetModel);
+    self.selectedDataKey.subscribe(function(selectedKey){
+        self.selectedActions([]);
+        var data = atombomb.web.dataProcessor.getData(selectedKey);
+        self.bindProperties(data);
+        self.data = data;
+        self.addNextSelectedAction();
+    });
+    self.addNextSelectedAction = function(){
+        var lastClause = ko.toJS(self.selectedActions()[self.selectedActions().length - 1]);
+        
+        var nextSelAction = {
+            type : lastClause && lastClause.type === 'selection'? 'action' : 'selection',
+            val : undefined,
+            identifier : 'value'
+        };
+
+        self.selectedActions.push(new SelectedAction(nextSelAction));
+    };
+    self.removePreviousClause = function(){
+        if(self.selectedActions().length > 0)
+            self.selectedActions.pop();
+    };
+
+    self.dataKeys(atombomb.web.dataProcessor.getDataKeys());
+};
+
+var SelectedAction = function(selectedAction){
+    var self = this;
+    self.type = ko.observable(selectedAction.type);
+    self.val = ko.observable(selectedAction.val);
+    self.identifier = ko.observable(selectedAction.identifier);
+    self.extentValue = ko.observable(selectedAction.extentValue);
+
+    self.identifierVisible = ko.computed(function(){
+        return self.type() === 'selection';
+    });
+    
+    self.extentValueVisible = ko.computed(function(){
+        return self.type() === 'selection' && self.val() === 'timestamp'
+            && self.identifier() === 'extent';
+    });
+    
+};
+
+var dataProcessor = {
+    getDataKeys : function(){
+        return ['step2', 'homepage'];
+    },
+    getData : function(dataKey){
+        var data = [];
+        if(dataKey === 'step2'){
+            for(var i= 1; i<= 5; i++){
+                data.push({
+                    key : 'step2',
+                    val : {
+                        userSelection : (Math.random() > .5)? 'pub': 'nyp',
+                        nypAmount : Math.random() * 100,
+                        pubAmount : Math.random() * 100,
+                        timestamp : new Date().setHours(i)
+                    }
+                })
+            };
+        }
+        else if(dataKey === 'homepage'){
+            // for(var i= 0; i<= 50; i++){
+            //     var n = Math.random() * 10;
+            //     var sc = 'clt';
+            //     if(n < 4) sc = 'ltl';
+            //     if(n >= 8) sc = 'hhg';
+            //     data.push({
+            //         key : 'homepage',
+            //         val : {
+            //             selectedCategory : sc,
+            //             usersite : (Math.random() > .7)? 'canada': 'usa',
+            //             loadtime: Math.random() * 100,
+            //             errorCount : Math.random() * 10,
+            //             submitTime : Math.random() * 100,
+            //             timestamp : Math.random() * 1000
+            //         }
+            //     })
+            // };
+            data.push({
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 30,
+                    errorCount : 2
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 40,
+                    errorCount : 4
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 70,
+                    errorCount : 3
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 80,
+                    errorCount : 2
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 20,
+                    errorCount : 6
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 25,
+                    errorCount : 4
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 27,
+                    errorCount : 3
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 60,
+                    errorCount : 5
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 65,
+                    errorCount : 2
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 90,
+                    errorCount : 0
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 97
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'bbb',
+                    timestamp : 91,
+                    errorCount : 7
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 41,
+                    errorCount : 2
+                }
+            },{
+                key : 'homepage',
+                val : {
+                    selectedCategory : 'aaa',
+                    timestamp : 45,
+                    errorCount : 1
+                }
+            });
+        };
+        return data;
+    },
+    calc : function(action, previousValue, currentValue){
+        if(!action){
+            return currentValue;
+        }
+        var result;
+        switch (action){
+            case 'add':
+                result = previousValue + currentValue;
+                break;
+            case 'subtract':
+                result = previousValue - currentValue;
+                break;
+            default :
+                result = previousValue;
+        }
+        return result;
+    },
+    getFormattedData: function(selectedDataKey, selectedActions, data){
+        var dataStore = [];
+        data = data || this.getData(selectedDataKey);
+        atombomb.utils.forEach(data, function(item){
+            var xvalue = undefined;
+            var yvalue = undefined;
+            for(var j = 0; j < selectedActions.length; j+=2 ){
+                var selectedProp = selectedActions[j];
+                var over = false;
+
+                if(j > 0 && selectedActions[j-1].type === 'action' && selectedActions[j-1].val ==='over'){
+                    over = true;
+                }
+
+                var action = (j === 0 || over)? undefined:selectedActions[j-1];
+                if(selectedProp.type=== 'selection'){
+                    if(item.val.hasOwnProperty(selectedProp.val)){
+                        if(over){
+                            xvalue = this.calc((action && action.val || undefined),xvalue, item.val[selectedProp.val]);    
+                        }
+                        else{
+                            yvalue = this.calc((action && action.val || undefined),yvalue, item.val[selectedProp.val]);    
+                        }
+                    }
+                }
+            }
+            dataStore.push({x:xvalue, y:yvalue});
+        }.bind(this));
+        return [{name: selectedDataKey, values : dataStore}];
+    },
+    formatGroups : function(selectedDataKey, selectedActions, data){
+        var returnData = [];
+        var returnDatum = [];
+        var interval = 10;
+        var proptoGroup = selectedActions[2].val();
+        var intervalProp = selectedActions[4].val();
+        var propToSelect = selectedActions[0].val();
+        var groupeddata = _.groupBy(data, function(item){
+            return item.val[proptoGroup];
+        });
+
+        _.each(groupeddata, function(groupedItem, groupKey){
+            returnDatum = [];
+            if(proptoGroup!== propToSelect){
+                var intervalGroup = _.groupBy(groupedItem, function(item){
+                    return Math.floor(+item.val.timestamp/interval) * interval;
+                });
+                _.each(intervalGroup,function(item, key){
+                    val = _.reduce(item, function(memo, num){ 
+                        numval =(num.val[propToSelect])? num.val[propToSelect] : 0;
+                        return memo + numval; 
+                    }, 0);
+                    returnDatum.push({x: key, y: val});
+                });
+            }
+            else{
+                var intervalCounts = _.countBy(groupedItem,function(item){
+                    return Math.floor(+item.val.timestamp/interval) * interval;
+                });
+
+                _.each(intervalCounts, function(count, key){
+                    returnDatum.push({x : key, y: count});
+                });
+            }
+            
+
+            returnData.push({name: groupKey, values : returnDatum});
+        });
+        return returnData;
+    }
 };
 root.atombomb.namespace('web').extend({
     Widget: Widget,
     Dashboard: Dashboard,
-    GraphBuilder: GraphBuilder
+    SAGenerator: SAGenerator,
+    dataProcessor : dataProcessor
 });
 })(this, jQuery);

@@ -1,15 +1,6 @@
 
-$widget-width: 50%;
-.row.header{
-	background-color:#34495E;
-	padding-top:.5em;
-}
-.row.header h5{ 
-	
-}
-.row.header button{ 
-	margin-bottom:0;
-}
+$widget-width: 100%;
+
 .handle {
     width: 100%;
     border-bottom:1px dashed #CCC;
@@ -35,12 +26,6 @@ $widget-width: 50%;
 .widget-wrapper {
     border: 1px solid #CCC;
     height: 100%;
-}
-        
-.row .widget.columns {
-    padding: 0.9375em;
-    height: 400px;
-    float: left !important;
 }
 .widget-content{
 	height:337px;

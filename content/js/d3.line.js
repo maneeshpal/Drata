@@ -266,7 +266,49 @@
             self.graphContainer.select(path).attr('class','line-path selected-line-path');
         };
         self.drawCircles = function(){
-            self.graphContainer.selectAll('.circles-g').remove();
+            // self.graphContainer.selectAll('.circles-g').remove();
+            // self.svg.selectAll('g')
+            // .data(self.data)
+            // .enter()
+            // .append('g')
+            // .attr("class", "circles-g")
+            // .selectAll('circle')
+            // .data(function(d){
+            //     var pathId = d.name;
+            //         return d.values.map(function(d){
+            //             d.pathId = pathId; 
+            //             d.color = self.color(pathId);
+            //             return d;
+            //         });
+            // })
+            // .enter()
+            // .append('circle')
+            // .attr('cx', function(d){return self.x(d.x);})
+            // .attr('cy', function(d){return self.y(d.disabled? self.extent.y[0]:d.y);})
+            // .attr('r', 10)
+            // .attr('fill',function(d){return d.c})
+            // .attr('opacity', .5)
+            // .attr("stroke", function(d){
+            //     return d.color;
+            // })
+            // .attr('stroke-width','4')
+            // .attr('fill','white')
+            // .attr("opacity", 0)
+            // .on("mouseover",function(d){
+            //     d3.select(this).attr('opacity',1);
+            //     self.highlightPath('#'+d.pathId);
+            //     self.toolTip.open(d, -self.graphOptions.margin.top, 50);
+            //     return ;
+            // })
+            // .on("mouseout",function(d){
+            //     self.graphContainer.select('.lines-g').selectAll('path')
+            //         .attr('class', 'line-path');
+            //     d3.select(this).attr('opacity',0);
+            //     self.toolTip.close();
+            //     return ;
+            // });
+
+
             var circlegroup = self.svg.selectAll("circles-g")
                 .data(self.data)
                 .enter()
@@ -391,7 +433,7 @@
             self.drawPaths();
             console.log('draw path: '+ (new Date() - aa));
             aa = new Date();
-            //self.drawCircles();
+            self.drawCircles();
             console.log('draw circle: '+ (new Date() - aa));
             aa = new Date();
             self.drawLegendLabels();
