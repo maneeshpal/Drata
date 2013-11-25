@@ -71,22 +71,22 @@ var SAGenerator = function(){
     self.widgetName = ko.observable();
     self.addUpdateBtnText = ko.observable('Add Widget');
     self.selections = ko.observableArray([]);
-    self.actions = ko.observableArray(['add','subtract', 'and', 'groupby', 'over']);
+    self.actions = ['add','subtract', 'and', 'groupby', 'over'];
     self.dataKeys = ko.observableArray();
     self.selectedDataKey =ko.observable(undefined);
     self.selectedActions = ko.observableArray();
     self.jsonFormattedData = ko.observable();
     self.jsonData = ko.observable();
-   
+    
     self.notifyWidget = function () {
         //var widgetModel = ko.toJS(self);
         //$('#myModal').foundation('reveal', 'close');
-        var formattedData = atombomb.web.dataProcessor.formatGroups(self.selectedDataKey(), self.selectedActions(), self.data);
+        var formattedData = atombomb.web.dataProcessor.formatExtent(self.selectedDataKey(), ko.toJS(self.selectedActions()), self.data);
         self.jsonFormattedData(JSON.stringify(formattedData, null, '\t'));
         self.jsonData(JSON.stringify(self.data, null, '\t'));
         //self.notifyWidget(formattedData);
         var widgetModel = {
-            selectedActions : self.selectedActions(),
+            selectedActions : ko.toJS(self.selectedActions()),
             selectedDataKey : self.selectedDataKey(),
             data : formattedData
         };
@@ -102,7 +102,8 @@ var SAGenerator = function(){
         self.selectedActions(ko.utils.arrayMap(
             model.selectedActions,
             function(selectedAction) {
-              return new SelectedAction(selectedAction);
+                selectedAction.availableActions = self.actions;
+                return new SelectedAction(selectedAction);
             }
         ));
         //self.selectedActions(model.selectedActions);
@@ -137,16 +138,60 @@ var SAGenerator = function(){
         self.data = data;
         self.addNextSelectedAction();
     });
-    self.addNextSelectedAction = function(){
-        var lastClause = ko.toJS(self.selectedActions()[self.selectedActions().length - 1]);
+    self.addNextSelectedAction = function(lastClause){
+        var selectedActionsObj = ko.toJS(self.selectedActions);
+        if(lastClause){
+            var index = self.selectedActions.indexOf(lastClause);
+            if(index > -1){
+                self.selectedActions.splice(index + 1, self.selectedActions().length);
+            }
+        }
+
+        lastClause = ko.toJS(lastClause);
         
+        var overExists = selectedActionsObj.some(function(sa){
+            return sa.type === 'action' && sa.val === 'over';
+        });
+
+        if(overExists && lastClause.type === 'selection' && lastClause.val === 'timestamp')
+            return;
+        
+        var arithmeticActionsExist = selectedActionsObj.some(function(sa){
+            return sa.type === 'action' && (sa.val === 'add' || sa.val === 'subtract' || sa.val === 'and');
+        });
+
+        var groupByExists = selectedActionsObj.some(function(sa){
+            return sa.type === 'action' && sa.val === 'groupby';
+        });
+
+        //filter the available actions
+        var availableActions = [];
+        if(groupByExists){
+            availableActions.push('over');
+        }
+        else if(arithmeticActionsExist){
+            availableActions = self.actions.filter(function(item){
+                return item !== 'groupby';
+            });
+        }
+        else{
+            availableActions = self.actions;
+        }
+
         var nextSelAction = {
             type : lastClause && lastClause.type === 'selection'? 'action' : 'selection',
             val : undefined,
-            identifier : 'value'
+            identifier : 'value',
+            useValue : true,
+            eligibleForExtentValue : overExists,
+            availableActions : availableActions
         };
 
         self.selectedActions.push(new SelectedAction(nextSelAction));
+    };
+    self.addNewSelectedAction = function(){
+        var lastClause = self.selectedActions()[self.selectedActions().length - 1];
+        self.addNextSelectedAction(lastClause);
     };
     self.removePreviousClause = function(){
         if(self.selectedActions().length > 0)
@@ -162,16 +207,21 @@ var SelectedAction = function(selectedAction){
     self.val = ko.observable(selectedAction.val);
     self.identifier = ko.observable(selectedAction.identifier);
     self.extentValue = ko.observable(selectedAction.extentValue);
-
+    self.useValue = ko.observable(selectedAction.useValue);
+    self.availableActions = selectedAction.availableActions;
     self.identifierVisible = ko.computed(function(){
         return self.type() === 'selection';
     });
     
-    self.extentValueVisible = ko.computed(function(){
-        return self.type() === 'selection' && self.val() === 'timestamp'
-            && self.identifier() === 'extent';
+    self.val.subscribe(function(newValue){
+        if(newValue){
+            atombomb.web.sAGenerator.addNextSelectedAction(self);
+        }
     });
-    
+
+    self.extentValueVisible = ko.computed(function(){
+        return self.type() === 'selection' && self.identifier() === 'extent' && selectedAction.eligibleForExtentValue;
+    });
 };
 
 var dataProcessor = {
@@ -216,7 +266,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'aaa',
                     timestamp : 30,
-                    errorCount : 2
+                    errorCount : 2,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -230,7 +281,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'aaa',
                     timestamp : 70,
-                    errorCount : 3
+                    errorCount : 3,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -244,14 +296,16 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'bbb',
                     timestamp : 20,
-                    errorCount : 6
+                    errorCount : 6,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
                 val : {
                     selectedCategory : 'bbb',
                     timestamp : 25,
-                    errorCount : 4
+                    errorCount : 4,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -265,7 +319,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'bbb',
                     timestamp : 60,
-                    errorCount : 5
+                    errorCount : 5,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -279,7 +334,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'bbb',
                     timestamp : 90,
-                    errorCount : 0
+                    errorCount : 0,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -292,7 +348,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'bbb',
                     timestamp : 91,
-                    errorCount : 7
+                    errorCount : 7,
+                    gotostep2 : true
                 }
             },{
                 key : 'homepage',
@@ -306,7 +363,8 @@ var dataProcessor = {
                 val : {
                     selectedCategory : 'aaa',
                     timestamp : 45,
-                    errorCount : 1
+                    errorCount : 1,
+                    gotostep2 : true
                 }
             });
         };
@@ -325,60 +383,119 @@ var dataProcessor = {
                 result = previousValue - currentValue;
                 break;
             default :
-                result = previousValue;
+                result = currentValue;
         }
         return result;
     },
-    getFormattedData: function(selectedDataKey, selectedActions, data){
-        var dataStore = [];
-        data = data || this.getData(selectedDataKey);
-        atombomb.utils.forEach(data, function(item){
-            var xvalue = undefined;
-            var yvalue = undefined;
-            for(var j = 0; j < selectedActions.length; j+=2 ){
-                var selectedProp = selectedActions[j];
-                var over = false;
+    performActions : function(item, selectedActions){
+        var xvalue = undefined, yvalue = [];
+        var numGraphs = 0;
+        for(var j = 0; j < selectedActions.length; j+=2 ){
+            var selectedProp = selectedActions[j];
+            var over = false;
+             
+            if(j > 0 && selectedActions[j-1].type === 'action' && selectedActions[j-1].val ==='over'){
+                over = true;
+            }
+            else if(j > 0 && selectedActions[j-1].type === 'action' && selectedActions[j-1].val ==='and'){
+                numGraphs ++ ;
+            }
 
-                if(j > 0 && selectedActions[j-1].type === 'action' && selectedActions[j-1].val ==='over'){
-                    over = true;
-                }
-
-                var action = (j === 0 || over)? undefined:selectedActions[j-1];
-                if(selectedProp.type=== 'selection'){
-                    if(item.val.hasOwnProperty(selectedProp.val)){
-                        if(over){
-                            xvalue = this.calc((action && action.val || undefined),xvalue, item.val[selectedProp.val]);    
-                        }
-                        else{
-                            yvalue = this.calc((action && action.val || undefined),yvalue, item.val[selectedProp.val]);    
-                        }
+            var action = (j === 0 || over)? undefined:selectedActions[j-1];
+            if(selectedProp.type=== 'selection'){
+                if(item.val.hasOwnProperty(selectedProp.val)){
+                   // var xyvalue = this.calc((action && action.val || undefined),xvalue, item.val[selectedProp.val]); 
+                    if(over){
+                        xvalue =  item.val[selectedProp.val];
+                    }
+                    else{
+                        yvalue[numGraphs] = this.calc((action && action.val || undefined),yvalue[numGraphs], item.val[selectedProp.val]);    
                     }
                 }
             }
-            dataStore.push({x:xvalue, y:yvalue});
+        }
+        return {xvalue : xvalue, yvalue : yvalue};
+    },
+    getFormattedData: function(selectedDataKey, selectedActions, data){
+        if(selectedActions.some(function(sa){return sa.type === 'action' && sa.val === 'groupby';})) return this.formatGroups(selectedDataKey, selectedActions, data);
+        var dataStore = [];
+        data = data || this.getData(selectedDataKey);
+        var xyValues = {};
+        atombomb.utils.forEach(data, function(item){
+            xyValues = this.performActions(item, selectedActions);
+            _.each(xyValues.yvalue, function(y, index){
+                if(dataStore[index] === undefined) dataStore[index] = [];
+                dataStore[index].push({x:xyValues.xvalue, y:y});
+            });
+            
         }.bind(this));
-        return [{name: selectedDataKey, values : dataStore}];
+        var returnArr = [];
+        _.each(dataStore, function(item, index){
+            returnArr.push({name: selectedDataKey + index , values : item});
+        });
+        return returnArr;
+    },
+    formatExtent : function(selectedDataKey, selectedActions, data){
+        var time_selection = _.find(selectedActions, function(item){
+            return item.val === 'timestamp' && item.type === 'selection';
+        });
+        
+        // var over_action = _.find(selectedActions, function(item){
+        //     return item.val === 'over' && item.type === 'action';
+        // });
+        var selections = selectedActions.filter(function(f){
+            return f.type === 'selection' && f.val !== 'timestamp';
+        }).map(function(m){
+            return m.val;
+        });
+        
+        var interval = +time_selection.extentValue;
+        
+        var intervalGroup = _.groupBy(data, function(item){
+            return Math.floor(+item.val.timestamp/interval) * interval;
+        });
+        var datum = {};
+        _.each(intervalGroup, function(intervalGroupItem, key){
+            var selectionCounts = {};
+            _.each(selections, function(selection){
+                //if(!selectionCounts[selection]) selectionCounts[selection] = 0;
+                var selectionCount = _.reduce(intervalGroupItem, function(memo, num){ 
+                    var numval = num.val[selection]? 1 : 0;
+                    return memo + numval; 
+                }, 0);
+
+                if(!datum[selection]) datum[selection] = [];
+                datum[selection].push({x: key, y : selectionCount});
+            });
+        });
+        
+        var returnData = [];
+        _.each(datum, function(dataItem, key){
+            returnData.push({name: key, values : dataItem});
+        });
+        return returnData;
     },
     formatGroups : function(selectedDataKey, selectedActions, data){
         var returnData = [];
         var returnDatum = [];
-        var interval = 10;
-        var proptoGroup = selectedActions[2].val();
-        var intervalProp = selectedActions[4].val();
-        var propToSelect = selectedActions[0].val();
+        var interval = +selectedActions[4].extentValue;
+        var proptoGroup = selectedActions[2].val;
+        var intervalProp = selectedActions[4].val;
+        var propToSelect = selectedActions[0].val;
+        var useValue = selectedActions[0].useValue;
         var groupeddata = _.groupBy(data, function(item){
             return item.val[proptoGroup];
         });
-
+        var val = 0;
         _.each(groupeddata, function(groupedItem, groupKey){
             returnDatum = [];
-            if(proptoGroup!== propToSelect){
+            if(proptoGroup !== propToSelect){
                 var intervalGroup = _.groupBy(groupedItem, function(item){
-                    return Math.floor(+item.val.timestamp/interval) * interval;
+                    return Math.floor(+item.val[intervalProp]/interval) * interval;
                 });
                 _.each(intervalGroup,function(item, key){
                     val = _.reduce(item, function(memo, num){ 
-                        numval =(num.val[propToSelect])? num.val[propToSelect] : 0;
+                        numval = (num.val[propToSelect])? (useValue ? num.val[propToSelect] : 1) : 0;
                         return memo + numval; 
                     }, 0);
                     returnDatum.push({x: key, y: val});
@@ -386,15 +503,13 @@ var dataProcessor = {
             }
             else{
                 var intervalCounts = _.countBy(groupedItem,function(item){
-                    return Math.floor(+item.val.timestamp/interval) * interval;
+                    return Math.floor(+item.val[intervalProp]/interval) * interval;
                 });
 
                 _.each(intervalCounts, function(count, key){
                     returnDatum.push({x : key, y: count});
                 });
             }
-            
-
             returnData.push({name: groupKey, values : returnDatum});
         });
         return returnData;

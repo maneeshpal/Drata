@@ -36,22 +36,22 @@
             <li>
             <div class="row">
                 <div class=" columns" data-bind="css:{ 'small-6': $data.type() === 'selection', 'small-12': $data.type() === 'action'} ">
-                    <select data-bind="options:($data.type() === 'selection')? $parent.selections : $parent.actions, optionsCaption: 'Choose', value: $data.val"></select>
+                    <select data-bind="options:($data.type() === 'selection')? $parent.selections : availableActions, optionsCaption: 'Choose', value: $data.val"></select>
                 </div>
                 <!-- ko if: $data.type() === 'selection' -->
                 <div class="small-6 columns">
-                     <!-- ko if:  $data.val() !== 'timestamp' -->
-                        <input type="checkbox" data-bind="checked: $data.identifier() === 'value'"></input>
+                    <!-- ko if:  $data.val() !== 'timestamp' -->
+                    <input type="checkbox" data-bind="checked: $data.useValue"></input>
                     <!-- /ko -->
-                     <!-- ko if:  $data.val() === 'timestamp' -->
-                         <select data-bind="optionsCaption: 'choose', value : $data.identifier">
-                            <option value="extent">extent</option>
-                            <option value="value">value</option>
-                         </select>
-                         <!-- ko if: $data.extentValueVisible() -->
-                         <input type="text" data-bind="val: $data.extentValue"/>    
-                         <!-- /ko -->       
-                     <!-- /ko -->
+                    <!-- ko if:  $data.val() === 'timestamp' -->
+                    <select data-bind="optionsCaption: 'choose', value : $data.identifier">
+                    <option value="extent">extent</option>
+                    <option value="value">value</option>
+                    </select>
+                    <!-- ko if: $data.extentValueVisible() -->
+                    <input type="text" data-bind="value: $data.extentValue"/>    
+                    <!-- /ko -->       
+                    <!-- /ko -->
                 </div>
                 <!-- /ko -->
             </div>

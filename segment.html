@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+
+    <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+</head>
+<body>
+<ul class="small-block-grid-12">
+    <!-- ko foreach: selections -->
+    <li>
+        <!-- ko foreach: conditions -->
+        <div class="row">
+            <div class="small-12 columns">
+                <select data-bind="options:($data.type() === 'selection')? $parent.selections : availableActions, optionsCaption: 'Choose', value: $data.val"></select>
+            </div>
+        </div>
+        <!-- /ko -->
+    </li>
+    <!-- /ko -->
+</ul>
+    
+
+    <script type="text/javascript" src="content/js/global.js"></script>
+    <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
+    <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/js/segment.js"></script>
+    <script type="text/javascript">
+        (function (root) {
+            window.segment = new Segmentor();
+        })(this);
+    </script>
+</body>
+</html>
