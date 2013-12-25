@@ -42,11 +42,11 @@
                 <div class="small-6 columns">
                     <!-- ko if:  $data.val() !== 'timestamp' -->
                     <input type="checkbox" data-bind="checked: $data.useValue"></input>
-                    <!-- /ko -->
+                    <!-- /knockout-2 -->
                     <!-- ko if:  $data.val() === 'timestamp' -->
                     <select data-bind="optionsCaption: 'choose', value : $data.identifier">
-                    <option value="extent">extent</option>
-                    <option value="value">value</option>
+                        <option value="extent">extent</option>
+                        <option value="value">value</option>
                     </select>
                     <!-- ko if: $data.extentValueVisible() -->
                     <input type="text" data-bind="value: $data.extentValue"/>    

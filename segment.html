@@ -8,21 +8,80 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
 </head>
 <body>
-<ul class="small-block-grid-12">
-    <!-- ko foreach: selections -->
-    <li>
-        <!-- ko foreach: conditions -->
+    <div id="segment">
         <div class="row">
             <div class="small-12 columns">
-                <select data-bind="options:($data.type() === 'selection')? $parent.selections : availableActions, optionsCaption: 'Choose', value: $data.val"></select>
+                <button data-bind="click: processConditioner" class="button warning">Process</button>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="small-12 columns" data-bind="template: {name: 'group-template', data: group}">
+                
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="small-4 columns">
+                <textarea style="height:300px" data-bind="text:jsonFormattedGroups"></textarea>        
+            </div>
+            <div class="small-4 columns">
+                <textarea style="height:300px" data-bind="text:jsonFormattedInput"></textarea>        
+            </div>
+            <div class="small-4 columns">
+                <textarea style="height:300px" data-bind="text:jsonFormattedOutput"></textarea>        
             </div>
         </div>
-        <!-- /ko -->
-    </li>
-    <!-- /ko -->
-</ul>
+    </div>
+    <script type="text/html" id="group-template">
+    <div class="row">
+        <div class="columns large-12">
+            <fieldset>
+                <legend>group <button class="button tiny" data-bind="click: addGroup">Add Group</button> &nbsp;<button class="button tiny" data-bind="click: addCondition">Add Condition</button> &nbsp; <button class="button tiny secondary" data-bind="click: $parent.removeGroup">Remove Group</button></legend>
+                <!-- ko if:  $data.conditions().length > 0 -->
+                <fieldset>
+                    <legend>Conditions</legend>
+                    <ul class="small-block-grid-1" data-bind="template: {name: 'condition-template', foreach:conditions}">
+                        
+                    </ul>
+                </fieldset>
+                <!-- /ko -->
+                <ul class="small-block-grid-1">
+                    <li data-bind="template:{ name: 'group-template',foreach:groups}"></li>
+                </ul>
+             </fieldset>
+        </div>
+    </div>
+    <!-- ko if: $parent.groups && $parent.groups().length > 0 && $parent.groups().indexOf($data) < $parent.groups().length-1 -->
+    <div class="row">
+        <div class="columns large-2">
+            <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
+        </div>
+    </div>
+    <!--/ko -->
+    </script>
+    <script type="text/html" id="condition-template">
+        <li>
+            <div class="row">
+                <div class="large-3 columns">
+                    <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                </div>
+                <div class="large-3 columns">
+                    <select data-bind="options:$root.operations, optionsCaption:'Operation', value: operation"></select>
+                </div>
+                <div class="large-2 columns">
+                    <input type="text" data-bind="value:value"></input>
+                </div>
+                <div class="large-2 columns">
+                    <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
+                </div>
+                <div class="large-2 columns">
+                    <button data-bind="click:$parent.removeCondition" class="button tiny">Remove</button>
+                </div>
+            </div>
+        </li>
+    </script>
     
-
     <script type="text/javascript" src="content/js/global.js"></script>
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
@@ -30,6 +89,7 @@
     <script type="text/javascript">
         (function (root) {
             window.segment = new Segmentor();
+            ko.applyBindings(window.segment, document.getElementById('segment'));
         })(this);
     </script>
 </body>
