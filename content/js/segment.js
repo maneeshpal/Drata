@@ -2,15 +2,23 @@
 
 var Segmentor = function(){
     var self = this;
-    self.group = ko.observable(new Group({}));
+    self.group = ko.observable(new Group({groupType: 'conditions'}));
+    self.selectionGroups = ko.observableArray([new Group({groupType: 'selections'})]);
     self.properties = ko.observableArray(['a', 'b', 'c']);
-    self.operations = ko.observableArray(['>', '<', '=', 'exists']);
+    self.conditionalOperations = ko.observableArray(['>', '<', '=', 'exists']);
+    self.arithmeticOperations = ko.observableArray(['+', '-', '*','/']);
     self.logics = ko.observableArray(['and', 'or']);
     self.jsonFormattedInput = ko.observable();
     self.jsonFormattedOutput = ko.observable();
     self.jsonFormattedGroups = ko.observable();
-    self.processConditioner = function(){
-
+    
+    self.addSelectionGroup = function(){
+        self.selectionGroups.push(new Group({groupType: 'selections'}));
+    };
+    self.removeGroup = function(group){
+       self.selectionGroups.remove(group);
+    };
+    self.processConditionsSection = function(){
         var data = [{
             a : 10,
             b : 20,
@@ -26,6 +34,23 @@ var Segmentor = function(){
             return result.value;
         });
         self.jsonFormattedOutput(JSON.stringify(filteredData, null, '\t'));
+    };
+    self.processSelectionsSection = function(){
+        var data = [{
+            a : 10,
+            b : 20,
+            c : 30
+        }];
+        self.jsonFormattedInput(JSON.stringify(data, null, '\t'));
+        var result = [];
+        var jsSelectionGroup = ko.toJS(self.selectionGroups);
+        _.each(data, function(obj){
+            _.each(jsSelectionGroup, function(group){
+                result.push(Conditioner.processGroup(obj, group));
+            });
+        });
+        
+        self.jsonFormattedOutput(JSON.stringify(result, null, '\t'));
     }
 };
 
@@ -35,16 +60,20 @@ var Condition = function(options){
     self.operation = ko.observable(options.operation);
     self.value = ko.observable(options.value);
     self.logic = ko.observable(options.logic || 'and');
+    self.conditionType = options.conditionType;
 };
 
 var Group = function(options){
     var self = this;
+    self.groupType = options.groupType;
     self.conditions = ko.observableArray(options.conditions || []);
-    self.logic = ko.observable('and');
+    self.logic = ko.observable((self.groupType === 'conditions')?'and':'+');
     self.groups = ko.observableArray([]);
-
+    self.conditionTemplate = {name: (self.groupType === 'conditions')?'condition-template': 'operation-template', foreach: self.conditions};
+    self.groupTemplate = {name: 'group-template', foreach: self.groups};
+    self.selectionName = ko.observable();
     self.addGroup = function(){
-        self.groups.push(new Group({parent:self}));
+        self.groups.push(new Group({groupType: self.groupType}));
     };
     
     self.removeGroup = function(group){
@@ -52,13 +81,17 @@ var Group = function(options){
     };
 
     self.addCondition = function(){
-        self.conditions.push(new Condition({}));
+        self.conditions.push(new Condition({
+            logic : (self.groupType === 'conditions')? 'and' : '+',
+            conditionType : self.groupType
+        }));
     };
     
     self.removeCondition = function(condition){
         self.conditions.remove(condition);
     };
-
+    self.groupTypeName = (self.groupType === 'conditions')? 'Condition Group' : 'Select';
+    self.conditionTypeName = (self.groupType === 'conditions')? 'Add Condition' : 'Add selection';
 };
 
 var Conditioner = {
@@ -107,11 +140,11 @@ var Conditioner = {
         for (var i = 0; i <= boolValues.length-2; i++) {
             var boolValue = boolValues[i];
             var nextValue = boolValues[i+1];
-            result = this.calc(result, boolValue.logic, nextValue.value);
+            result = this.calc(result, nextValue.logic, nextValue.value);
         };
         var returnValue = {
             value : result,
-            logic : boolValues[boolValues.length-1].logic
+            logic : boolValues[0].logic
         };
         return returnValue;
     },
@@ -120,7 +153,7 @@ var Conditioner = {
         var self = this;
         _.each(conditions, function(condition){
             boolValues.push({
-                value : self.calc(obj[condition.prop], condition.operation, condition.value),
+                value : (condition.conditionType === 'selections') ? obj[condition.prop]: self.calc(obj[condition.prop], condition.operation, condition.value),
                 logic : condition.logic
             });
         });
@@ -148,15 +181,14 @@ var Conditioner = {
         return returnValue;
     },
     processGroup : function(obj, group){
-        var boolValues = [];
+        var boolValues = [{
+            value : (group.groupType === 'conditions') ? true : 0,
+            logic : group.logic
+        }];
         group.conditions.length > 0 && boolValues.push(this.processConditions(obj, group.conditions));
         group.groups.length > 0 && boolValues.push(this.processGroups(obj, group.groups));
-        if (boolValues.length === 0){
-            return {value : true};
-        }
         
         var returnValue = this.applyOperations(boolValues);
-        
         console.log('group:');
         console.log(returnValue);
         return returnValue;

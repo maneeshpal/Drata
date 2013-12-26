@@ -10,17 +10,33 @@
 <body>
     <div id="segment">
         <div class="row">
-            <div class="small-12 columns">
-                <button data-bind="click: processConditioner" class="button warning">Process</button>
+            <div class="small-3 columns">
+                <button data-bind="click: processConditionsSection" class="button">Process Conditions</button>
+            </div>
+            <div class="small-3 columns">
+                <button data-bind="click: processSelectionsSection" class="button">Process Selections</button>
             </div>
             
         </div>
         <div class="row">
-            <div class="small-12 columns" data-bind="template: {name: 'group-template', data: group}">
-                
+            <div class="small-12 columns">
+            <button class="button tiny" data-bind="click: addSelectionGroup">Add Selection Group</button>    
             </div>
             
         </div>
+        <div class="row">
+            <div class="small-12 columns">
+        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: selectionGroups}">
+            
+        </ul>
+    </div></div>
+    <div class="row">
+            <div class="small-12 columns">
+        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', data: group}">
+            
+        </ul>
+        </div></div>
+
         <div class="row">
             <div class="small-4 columns">
                 <textarea style="height:300px" data-bind="text:jsonFormattedGroups"></textarea>        
@@ -33,48 +49,76 @@
             </div>
         </div>
     </div>
-    <script type="text/html" id="group-template">
-    <div class="row">
-        <div class="columns large-12">
+    <script type="text/html" id="group-template">    
+        <li>
             <fieldset>
-                <legend>group <button class="button tiny" data-bind="click: addGroup">Add Group</button> &nbsp;<button class="button tiny" data-bind="click: addCondition">Add Condition</button> &nbsp; <button class="button tiny secondary" data-bind="click: $parent.removeGroup">Remove Group</button></legend>
+                <legend>
+                <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
+                    <select style="width:auto" data-bind="options:(groupType === 'conditions')? $root.logics :$root.arithmeticOperations, optionsCaption:'logic', value: logic"></select> &nbsp;
+                <!-- /ko -->
+                
+                <span data-bind="text: groupTypeName"></span>
+                
+                <button class="button tiny" data-bind="click: addGroup">Add Group</button>&nbsp;
+                                    
+                <button class="button tiny" data-bind="click: addCondition, text: conditionTypeName"></button>&nbsp;
+                
+                <!-- ko if: $parent.groups ||  groupType === 'selections'-->
+                <button class="button tiny secondary" data-bind="click: $parent.removeGroup">Remove Group</button>
+                <!-- /ko -->
+                
+                <!-- ko if: !$parent.groups && groupType === 'selections'-->
+                &nbsp;<input style="width:100px;display:inline" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+                <!-- /ko -->
+                </legend>
                 <!-- ko if:  $data.conditions().length > 0 -->
                 <fieldset>
                     <legend>Conditions</legend>
-                    <ul class="small-block-grid-1" data-bind="template: {name: 'condition-template', foreach:conditions}">
-                        
+                    <ul class="small-block-grid-1" data-bind="template: conditionTemplate">
                     </ul>
                 </fieldset>
                 <!-- /ko -->
-                <ul class="small-block-grid-1">
-                    <li data-bind="template:{ name: 'group-template',foreach:groups}"></li>
-                </ul>
+                <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: groups}"></ul>
              </fieldset>
-        </div>
-    </div>
-    <!-- ko if: $parent.groups && $parent.groups().length > 0 && $parent.groups().indexOf($data) < $parent.groups().length-1 -->
-    <div class="row">
-        <div class="columns large-2">
-            <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
-        </div>
-    </div>
-    <!--/ko -->
+        </li>
     </script>
     <script type="text/html" id="condition-template">
         <li>
             <div class="row">
+                <div class="large-1 columns">
+                    <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                    <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
+                    <!-- /ko --> &nbsp;
+                </div>
+                <div class="large-8 columns">
+                    <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                </div>
+                <div class="large-1 columns">
+                    <select data-bind="options:$root.conditionalOperations, optionsCaption:'Operation', value: operation"></select>
+                </div>
+                <div class="large-1 columns">
+                    <input type="text" data-bind="value:value"></input>
+                </div>
+                
+                <div class="large-1 columns">
+                    <button data-bind="click:$parent.removeCondition" class="button tiny">Remove</button>
+                </div>
+            </div>
+        </li>
+    </script>
+    
+    <script type="text/html" id="operation-template">
+        <li>
+            <div class="row">
+                <div class="large-2 columns">
+                    <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                    <select data-bind="options:$root.arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                    <!-- /ko --> &nbsp;
+                </div>
                 <div class="large-3 columns">
                     <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
                 </div>
-                <div class="large-3 columns">
-                    <select data-bind="options:$root.operations, optionsCaption:'Operation', value: operation"></select>
-                </div>
-                <div class="large-2 columns">
-                    <input type="text" data-bind="value:value"></input>
-                </div>
-                <div class="large-2 columns">
-                    <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
-                </div>
+                
                 <div class="large-2 columns">
                     <button data-bind="click:$parent.removeCondition" class="button tiny">Remove</button>
                 </div>
