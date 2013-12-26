@@ -2,12 +2,12 @@
 
 var Segmentor = function(){
     var self = this;
-    self.group = ko.observable(new Group({groupType: 'conditions'}));
+    self.group = new Group({groupType: 'conditions'});
     self.selectionGroups = ko.observableArray([new Group({groupType: 'selections'})]);
-    self.properties = ko.observableArray(['a', 'b', 'c']);
-    self.conditionalOperations = ko.observableArray(['>', '<', '=', 'exists']);
-    self.arithmeticOperations = ko.observableArray(['+', '-', '*','/']);
-    self.logics = ko.observableArray(['and', 'or']);
+    self.properties = ['a', 'b', 'c'];
+    self.conditionalOperations = ['>', '<', '=', 'exists'];
+    self.arithmeticOperations = ['+', '-', '*','/'];
+    self.logics = ['and', 'or'];
     self.jsonFormattedInput = ko.observable();
     self.jsonFormattedOutput = ko.observable();
     self.jsonFormattedGroups = ko.observable();
@@ -48,8 +48,7 @@ var Segmentor = function(){
             _.each(jsSelectionGroup, function(group){
                 result.push(Conditioner.processGroup(obj, group));
             });
-        });
-        
+        });        
         self.jsonFormattedOutput(JSON.stringify(result, null, '\t'));
     }
 };
@@ -61,6 +60,9 @@ var Condition = function(options){
     self.value = ko.observable(options.value);
     self.logic = ko.observable(options.logic || 'and');
     self.conditionType = options.conditionType;
+    self.selectionGroup = new Group({groupType: 'selections'});
+    self.isComplex = ko.observable(false);
+
 };
 
 var Group = function(options){
@@ -69,8 +71,7 @@ var Group = function(options){
     self.conditions = ko.observableArray(options.conditions || []);
     self.logic = ko.observable((self.groupType === 'conditions')?'and':'+');
     self.groups = ko.observableArray([]);
-    self.conditionTemplate = {name: (self.groupType === 'conditions')?'condition-template': 'operation-template', foreach: self.conditions};
-    self.groupTemplate = {name: 'group-template', foreach: self.groups};
+    self.conditionTemplate = (self.groupType === 'conditions')?'condition-template': 'operation-template';
     self.selectionName = ko.observable();
     self.addGroup = function(){
         self.groups.push(new Group({groupType: self.groupType}));
@@ -152,8 +153,19 @@ var Conditioner = {
         var boolValues = [];
         var self = this;
         _.each(conditions, function(condition){
+            var complexValue = {}, complexType;
+            if(condition.conditionType === 'selections'){
+                complexValue = obj[condition.prop];
+            }
+            else if(condition.isComplex){
+                complexType = self.processGroup(obj, condition.selectionGroup);
+                complexValue = self.calc(complexType.value, condition.operation, condition.value);
+            }
+            else{
+                complexValue = self.calc(obj[condition.prop], condition.operation, condition.value);
+            }
             boolValues.push({
-                value : (condition.conditionType === 'selections') ? obj[condition.prop]: self.calc(obj[condition.prop], condition.operation, condition.value),
+                value : complexValue,
                 logic : condition.logic
             });
         });
