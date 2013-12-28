@@ -6,49 +6,124 @@
 
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
 </head>
 <body>
     <div id="segment">
         <div class="row">
             <div class="small-3 columns">
-                <button data-bind="click: processConditionsSection" class="button">Process Conditions</button>
+                <button data-bind="click: processConditionsSection" class="button small">Process Conditions</button>
             </div>
             <div class="small-3 columns">
-                <button data-bind="click: processSelectionsSection" class="button">Process Selections</button>
+                <button data-bind="click: processSelectionsSection" class="button small">Process Selections</button>
             </div>
-            
+            <div class="small-3 columns">
+                <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="small-12 columns" data-bind="template: {name: 'selection-template', data: selection}">
+                
+            </div>
         </div>
         <div class="row">
             <div class="small-12 columns">
-            <button class="button tiny" data-bind="click: addSelectionGroup">Add Selection Group</button>    
+                <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', data: group}"></ul>
             </div>
-            
         </div>
         <div class="row">
-            <div class="small-12 columns">
-        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: selectionGroups}">
-            
-        </ul>
-    </div></div>
-    <div class="row">
-            <div class="small-12 columns">
-        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', data: group}">
-            
-        </ul>
-        </div></div>
+            <div class="small-12 columns" data-bind="template: {name : 'datagroup-template', data : dataGroup}">
 
+            </div>
+        </div>
         <div class="row">
             <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="text:jsonFormattedGroups"></textarea>        
+                <textarea style="height:300px" data-bind="text:rawData"></textarea>        
             </div>
             <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="text:jsonFormattedInput"></textarea>        
+                <textarea style="height:300px" data-bind="value:filteredData"></textarea>        
             </div>
             <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="text:jsonFormattedOutput"></textarea>        
+                <textarea style="height:300px" data-bind="text:outputData"></textarea>        
             </div>
         </div>
     </div>
+    <script type="text/html" id="selection-template">
+        <div class="row">
+            <div class="small-3 columns">
+                <button class="button tiny" data-bind="click: addSimpleSelection">Add simple selection</button>  
+            </div>
+            <div class="small-3 columns">
+
+            <button class="button tiny" data-bind="click: addComplexSelection">Add complex selection</button>    
+            </div>
+        </div>
+        <ul class="small-block-grid-3" data-bind="foreach: props">
+            <li>
+            <div class="row">
+                <div class="small-10 columns">
+                     <select data-bind="options: $root.properties, value:prop"></select>
+                </div>
+                <div class="small-2 columns">
+                    <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
+                </div>
+            </div>
+               
+                
+            </li>
+        </ul>
+        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: complexGroups}"></ul>
+    </script>
+    
+    <script type="text/html" id="datagroup-template">
+        <fieldset>
+            <legend>Grouping</legend>
+            <form>
+                <div class="row">
+                    <div class="small-8">
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:$root.properties, visible:hasGrouping, value:groupByProp"></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">TimeSeries</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <input type="checkbox" data-bind="checked:timeseries"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <!-- ko if: !timeseries() -->
+                                <label class="right inline">x Axis</label>
+                                <!-- /ko -->
+                                <!-- ko if: timeseries -->
+                                <select data-bind="options:$root.groupingOptions, value:groupBy"></select>
+                                <!-- /ko -->
+                            </div>
+                            <div class="small-8 columns">
+                                <div class="row">
+                                    <div class="small-6 columns">
+                                        <select data-bind="options:$root.properties, value:xAxisProp"></select>
+                                    </div>
+                                    <!-- ko if: timeseries -->
+                                    <div class="small-6 columns">
+                                        <input type="text" data-bind="value:interval" placeholder="Interval"/>
+                                    </div>
+                                    <!-- /ko -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </fieldset>
+    </script>
     <script type="text/html" id="group-template">    
         <li>
             <fieldset>
@@ -59,9 +134,9 @@
                 
                 <span data-bind="text: groupTypeName"></span>
                 
-                <button class="button tiny" data-bind="click: addGroup">Add Group</button>&nbsp;
+                <a class="button tiny" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</a>&nbsp;
                                     
-                <button class="button tiny" data-bind="click: addCondition, text: conditionTypeName"></button>&nbsp;
+                <a class="button tiny" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></a>&nbsp;
                 
                 <!-- ko if: $parent.groups ||  groupType === 'selections'-->
                 <button class="button tiny secondary" data-bind="click: $parent.removeGroup">Remove Group</button>
