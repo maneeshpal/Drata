@@ -2513,6 +2513,18 @@ fieldset {
     margin: 0;
     margin-left: -0.1875rem; }
 
+fieldset.segment {
+  border: solid 1px #dddddd;
+  padding: 1.25rem;
+  margin: 1.125rem 0;
+  margin: 0.25rem 0 1.125rem 0; }
+  fieldset.segment legend {
+    font-weight: bold;
+    background: white;
+    padding: 0 0.1875rem;
+    margin: 0;
+    margin-left: -0.1875rem; }
+
 /* Error Handling */
 [data-abide] .error small.error, [data-abide] span.error, [data-abide] small.error {
   display: block;

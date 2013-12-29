@@ -15,7 +15,9 @@
   vertical-align: baseline;
   background-image: none;
   background-position: 0 0;
-  background-repeat: repeat; }
+  background-repeat: repeat;
+  position: relative;
+  top: 1px; }
 
 [class*="foundicon-"]:before {
   font-family: "GeneralFoundicons";

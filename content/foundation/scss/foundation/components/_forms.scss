@@ -440,7 +440,10 @@ $select-bg-color: #fafafa !default;
     fieldset {
       @include fieldset;
     }
-
+	fieldset.segment {
+      @include fieldset;
+	  margin : rem-calc(4 0 18 0);
+    }
     /* Error Handling */
 
     [data-abide] {

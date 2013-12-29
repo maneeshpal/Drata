@@ -10,7 +10,7 @@
 </head>
 <body>
     <div id="segment">
-        <div class="row">
+        <!-- <div class="row">
             <div class="small-3 columns">
                 <button data-bind="click: processConditionsSection" class="button small">Process Conditions</button>
             </div>
@@ -18,46 +18,47 @@
                 <button data-bind="click: processSelectionsSection" class="button small">Process Selections</button>
             </div>
             <div class="small-3 columns">
-                <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="small-12 columns" data-bind="template: {name: 'selection-template', data: selection}">
                 
             </div>
-        </div>
+        </div> -->
         <div class="row">
-            <div class="small-12 columns">
-                <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', data: group}"></ul>
+            <div class="small-12 large-6 columns">
+                <!-- ko template: {name: 'selection-template', data: selection} -->
+                <!-- /ko -->
+                <!-- ko template: {name: 'group-template', data: group} -->
+                <!-- /ko -->
+                <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
+                <!-- /ko -->
+            </div>
+            <div class="small-12 large-6 columns">
+            <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
+                <div class="row">
+                    <div class="small-4 columns">
+                        <textarea style="height:300px" data-bind="text:rawData"></textarea>        
+                    </div>
+                    <div class="small-4 columns">
+                        <textarea style="height:300px" data-bind="value:filteredData"></textarea>        
+                    </div>
+                    <div class="small-4 columns">
+                        <textarea style="height:300px" data-bind="text:outputData"></textarea>        
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="small-12 columns" data-bind="template: {name : 'datagroup-template', data : dataGroup}">
+        
+        
+        
 
-            </div>
-        </div>
-        <div class="row">
-            <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="text:rawData"></textarea>        
-            </div>
-            <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="value:filteredData"></textarea>        
-            </div>
-            <div class="small-4 columns">
-                <textarea style="height:300px" data-bind="text:outputData"></textarea>        
-            </div>
-        </div>
+        
     </div>
     <script type="text/html" id="selection-template">
-        <div class="row">
-            <div class="small-3 columns">
-                <button class="button tiny" data-bind="click: addSimpleSelection">Add simple selection</button>  
-            </div>
-            <div class="small-3 columns">
-
-            <button class="button tiny" data-bind="click: addComplexSelection">Add complex selection</button>    
-            </div>
-        </div>
+    <div class="row">
+    <div class="large-12 columns">
+    <fieldset class="segment">
+        <legend>Selections 
+        <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
+        <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>&nbsp;</legend>
+        
         <ul class="small-block-grid-3" data-bind="foreach: props">
             <li>
             <div class="row">
@@ -72,11 +73,19 @@
                 
             </li>
         </ul>
-        <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: complexGroups}"></ul>
+
+        <!-- ko template: {name: 'group-template', foreach: complexGroups} -->
+        <!-- /ko -->
+        </fieldset>
+    </div>
+    </div>
+    
     </script>
     
     <script type="text/html" id="datagroup-template">
-        <fieldset>
+    <div class="row">
+            <div class="small-12 columns">
+        <fieldset class="segment">
             <legend>Grouping</legend>
             <form>
                 <div class="row">
@@ -123,89 +132,102 @@
                 </div>
             </form>
         </fieldset>
+        </div>
+        </div>
     </script>
     <script type="text/html" id="group-template">    
-        <li>
-            <fieldset>
+        <div class="row">
+        <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
+        <div class="small-2 columns">
+            <select data-bind="options:(groupType === 'conditions')?$root.logics : $root.arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+        </div>
+         <!-- /ko -->
+        <div data-bind="css: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0) ? 'small-10 columns' : 'small-12 columns'">
+            <fieldset class="segment">
                 <legend>
-                <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
-                    <select style="width:auto" data-bind="options:(groupType === 'conditions')? $root.logics :$root.arithmeticOperations, optionsCaption:'logic', value: logic"></select> &nbsp;
-                <!-- /ko -->
-                
                 <span data-bind="text: groupTypeName"></span>
                 
-                <a class="button tiny" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</a>&nbsp;
+                <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</span>&nbsp;
                                     
-                <a class="button tiny" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></a>&nbsp;
+                <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></span>&nbsp;
                 
-                <!-- ko if: $parent.groups ||  groupType === 'selections'-->
-                <button class="button tiny secondary" data-bind="click: $parent.removeGroup">Remove Group</button>
-                <!-- /ko -->
                 <!-- ko if: !$parent.groups && groupType === 'selections'-->
-                &nbsp;<input style="width:100px;display:inline" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+                &nbsp;<input style="width:120px;display:inline" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+                <!-- /ko -->
+                <!-- ko if: $parent.groups ||  groupType === 'selections'-->
+                <i class="general foundicon-remove" style="color:red" data-bind="click: $parent.removeGroup"></i>
                 <!-- /ko -->
                 </legend>
                 <!-- ko if:  $data.conditions().length > 0 -->
-                <fieldset>
-                    <legend>Conditions</legend>
-                    <ul class="small-block-grid-1" data-bind="template: {name: conditionTemplate, foreach: conditions}">
-                    </ul>
-                </fieldset>
+               
+                <!-- ko template: {name: conditionTemplate, foreach: conditions} -->
                 <!-- /ko -->
-                <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: groups}"></ul>
+               
+                <!-- /ko -->
+                <!-- ko template: {name: 'group-template', foreach: groups} -->
+                <!-- /ko -->
              </fieldset>
-        </li>
+             </div>
+        </div>
+        
     </script>
     <script type="text/html" id="condition-template">
-        <li>
-            <div class="row">
-                <div class="large-1 columns">
-                    <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
-                    <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
-                    <!-- /ko --> &nbsp;
-                </div>
-                <div class="large-2 columns">
-                    <input type="checkbox" data-bind="checked:isComplex"/> Complex Type
-                </div>
-                <div class="large-6 columns">
-                    <!-- ko if: !isComplex() -->
-                    <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+        <div class="row">
+            <div class="small-2 columns">
+                <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
+                <!-- /ko -->
+                <!-- ko if: !($parent.conditions && $parent.conditions.indexOf($data) > 0) -->
+                <h6>Conditions</h6>
+                <!-- /ko -->
+            </div>
+            <div class="small-10 columns">
+                <!-- ko if: !isComplex() -->
+                <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                <!-- /ko -->
+                <!-- ko if: isComplex() -->
+                    <!-- ko template: {name: 'group-template', foreach: selectionGroup} -->
                     <!-- /ko -->
-                    <!-- ko if: isComplex() -->
-                    <ul class="small-block-grid-1" data-bind="template: {name: 'group-template', foreach: selectionGroup}">
-                    </ul>
-                    <!-- /ko -->
-                </div>
-                <div class="large-1 columns">
-                    <select data-bind="options:$root.conditionalOperations, optionsCaption:'Operation', value: operation"></select>
-                </div>
-                <div class="large-1 columns">
-                    <input type="text" data-bind="value:value"></input>
-                </div>
-                <div class="large-1 columns">
-                    <button data-bind="click:$parent.removeCondition" class="button tiny">Remove</button>
+                <!-- /ko -->
+                <div class="row">
+                    <div class="small-3 columns">
+                        <input type="checkbox" data-bind="checked:isComplex"/> Complex
+                    </div>
+                    <div class="small-3 columns">
+                        <select data-bind="options:$root.conditionalOperations, optionsCaption:'Operation', value: operation"></select>
+                    </div>
+                    <div class="small-4 columns">
+                        <input type="text" data-bind="value:value" placeholder="custom value"></input>
+                    </div>
+                    <div class="small-2 columns">
+                        <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
+                    </div>
                 </div>
             </div>
-        </li>
+        </div>
+        
     </script>
     
     <script type="text/html" id="operation-template">
-        <li>
             <div class="row">
-                <div class="large-4 columns">
+                <div class="small-2 columns">
                     <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
                     <select data-bind="options:$root.arithmeticOperations, optionsCaption:'logic', value: logic"></select>
-                    <!-- /ko --> &nbsp;
+                    <!-- /ko -->
                 </div>
-                <div class="large-5 columns">
-                    <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                <div class="small-10 columns">
+                    <div class="row">
+                        <div class="small-9 columns">
+                            <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                        </div>
+                        
+                        <div class="small-3 columns">
+                            <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="large-3 columns">
-                    <button data-bind="click:$parent.removeCondition" class="button tiny">Remove</button>
-                </div>
             </div>
-        </li>
     </script>
     
     <script type="text/javascript" src="content/js/global.js"></script>

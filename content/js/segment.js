@@ -130,7 +130,7 @@ var Condition = function(options){
     var self = this;
     _.extend(self, new SelectOperation(options));
     self.logic(options.logic || 'and');
-    self.operation = ko.observable(options.operation);
+    self.operation = ko.observable(options.operation || '=');
     self.selectionGroup = new Group({groupType: 'selections'});
     self.isComplex = ko.observable(false);
     self.value = ko.observable(options.value);
