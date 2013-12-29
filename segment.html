@@ -45,6 +45,8 @@
                 <textarea style="height:300px" data-bind="value:filteredData"></textarea>
                 <h6>Output</h6>
                 <textarea style="height:300px" data-bind="text:outputData"></textarea>
+                <h6>group</h6>
+                <textarea style="height:300px" data-bind="text:groupData"></textarea>
             </div>
         </div>
         
@@ -238,7 +240,93 @@
     <script type="text/javascript" src="content/js/segment.js"></script>
     <script type="text/javascript">
         (function (root) {
-            window.segment = new Segmentor();
+            var model = {
+                selection: {
+                    complexGroups: [
+                        {
+                            conditions: [
+                                {
+                                    prop: "a",
+                                    logic: "+"
+                                },
+                                {
+                                    prop: "b",
+                                    logic: "+"
+                                }
+                            ],
+                            logic: "+",
+                            groups: [
+                                {
+                                    conditions: [
+                                        {
+                                            prop: "a",
+                                            logic: "+"
+                                        }
+                                    ],
+                                    logic: "*",
+                                    groups: []
+                                }
+                            ],
+                            selectionName: "a+b"
+                        }
+                    ],
+                    props: [
+                        {
+                            prop: "a"
+                        }
+                    ]
+                },
+                dataGroup: {
+                    xAxisProp: "timestamp",
+                    groupByProp: "c",
+                    groupBy: "sumBy",
+                    timeseries: true,
+                    hasGrouping: true,
+                    interval: "5"
+                },
+                group: {
+                    conditions: [
+                        {
+                            prop: "b",
+                            logic: "and",
+                            conditionType: "conditions",
+                            operation: ">",
+                            selectionGroup: {
+                                groupType: "selections",
+                                conditions: [],
+                                logic: "+",
+                                groups: []
+                            },
+                            isComplex: false,
+                            value: "5"
+                        },
+                        {
+                            logic: "and",
+                            operation: ">",
+                            selectionGroup: {
+                                conditions: [
+                                    {
+                                        prop: "a",
+                                        logic: "+"
+                                        
+                                    },
+                                    {
+                                        prop: "b",
+                                        logic: "+"
+                                    }
+                                ],
+                                logic: "+",
+                                groups: []
+                            },
+                            isComplex: true,
+                            value: "20"
+                        }
+                    ],
+                    logic: "and",
+                    groups: []
+                }
+            };
+            window.segment = new Segmentor(model);
             ko.applyBindings(window.segment, document.getElementById('segment'));
         })(this);
     </script>
