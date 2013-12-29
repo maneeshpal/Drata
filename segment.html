@@ -7,6 +7,13 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
+    <style>
+    .simple-selection-remove {
+        text-align: right;
+        padding-top: 5px;
+        color:red;
+    }
+    </style>
 </head>
 <body>
     <div id="segment">
@@ -22,7 +29,7 @@
             </div>
         </div> -->
         <div class="row">
-            <div class="small-12 large-6 columns">
+            <div class="large-8 columns">
                 <!-- ko template: {name: 'selection-template', data: selection} -->
                 <!-- /ko -->
                 <!-- ko template: {name: 'group-template', data: group} -->
@@ -30,19 +37,14 @@
                 <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
                 <!-- /ko -->
             </div>
-            <div class="small-12 large-6 columns">
-            <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
-                <div class="row">
-                    <div class="small-4 columns">
-                        <textarea style="height:300px" data-bind="text:rawData"></textarea>        
-                    </div>
-                    <div class="small-4 columns">
-                        <textarea style="height:300px" data-bind="value:filteredData"></textarea>        
-                    </div>
-                    <div class="small-4 columns">
-                        <textarea style="height:300px" data-bind="text:outputData"></textarea>        
-                    </div>
-                </div>
+            <div class="large-4 columns">
+                <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
+                <h6>Input</h6>
+                <textarea style="height:300px" data-bind="text:rawData"></textarea>  
+                <h6>Filtered data</h6>
+                <textarea style="height:300px" data-bind="value:filteredData"></textarea>
+                <h6>Output</h6>
+                <textarea style="height:300px" data-bind="text:outputData"></textarea>
             </div>
         </div>
         
@@ -61,11 +63,11 @@
         
         <ul class="small-block-grid-3" data-bind="foreach: props">
             <li>
-            <div class="row">
+            <div class="row collapse">
                 <div class="small-10 columns">
                      <select data-bind="options: $root.properties, value:prop"></select>
                 </div>
-                <div class="small-2 columns">
+                <div class="small-2 columns simple-selection-remove">
                     <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
                 </div>
             </div>
