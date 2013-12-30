@@ -17,6 +17,7 @@
 </head>
 <body>
     <div id="segment">
+    
         <!-- <div class="row">
             <div class="small-3 columns">
                 <button data-bind="click: processConditionsSection" class="button small">Process Conditions</button>
@@ -28,6 +29,7 @@
                 
             </div>
         </div> -->
+        
         <div class="row">
             <div class="large-8 columns">
                 <!-- ko template: {name: 'selection-template', data: selection} -->
@@ -37,7 +39,7 @@
                 <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
                 <!-- /ko -->
             </div>
-            <div class="large-4 columns">
+            <!-- <div class="large-4 columns">
                 <button data-bind="click: processDataGroups" class="button small">Process Groups</button>
                 <h6>Input</h6>
                 <textarea style="height:300px" data-bind="text:rawData"></textarea>  
@@ -47,43 +49,34 @@
                 <textarea style="height:300px" data-bind="text:outputData"></textarea>
                 <h6>group</h6>
                 <textarea style="height:300px" data-bind="text:groupData"></textarea>
-            </div>
+            </div> -->
         </div>
-        
-        
-        
-
-        
     </div>
     <script type="text/html" id="selection-template">
-    <div class="row">
-    <div class="large-12 columns">
-    <fieldset class="segment">
-        <legend>Selections 
-        <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
-        <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>&nbsp;</legend>
-        
-        <ul class="small-block-grid-3" data-bind="foreach: props">
-            <li>
-            <div class="row collapse">
-                <div class="small-10 columns">
-                     <select data-bind="options: $root.properties, value:prop"></select>
-                </div>
-                <div class="small-2 columns simple-selection-remove">
-                    <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
-                </div>
+        <div class="row">
+            <div class="large-12 columns">
+                <fieldset class="segment">
+                    <legend>Selections 
+                    <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
+                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>&nbsp;</legend>
+                    
+                    <ul class="small-block-grid-3" data-bind="foreach: props">
+                        <li>
+                            <div class="row collapse">
+                                <div class="small-10 columns">
+                                     <select data-bind="options: $parents[1].properties, value:prop"></select>
+                                </div>
+                                <div class="small-2 columns simple-selection-remove">
+                                    <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- ko template: {name: 'group-template', foreach: complexGroups} -->
+                    <!-- /ko -->
+                </fieldset>
             </div>
-               
-                
-            </li>
-        </ul>
-
-        <!-- ko template: {name: 'group-template', foreach: complexGroups} -->
-        <!-- /ko -->
-        </fieldset>
-    </div>
-    </div>
-    
+        </div>
     </script>
     
     <script type="text/html" id="datagroup-template">
@@ -99,7 +92,7 @@
                                 <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
                             </div>
                             <div class="small-8 columns">
-                                <select data-bind="options:$root.properties, visible:hasGrouping, value:groupByProp"></select>
+                                <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
                             </div>
                         </div>
                         <div class="row">
@@ -116,13 +109,13 @@
                                 <label class="right inline">x Axis</label>
                                 <!-- /ko -->
                                 <!-- ko if: timeseries -->
-                                <select data-bind="options:$root.groupingOptions, value:groupBy"></select>
+                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
                                 <!-- /ko -->
                             </div>
                             <div class="small-8 columns">
                                 <div class="row">
                                     <div class="small-6 columns">
-                                        <select data-bind="options:$root.properties, value:xAxisProp"></select>
+                                        <select data-bind="options:$parent.properties, value:xAxisProp"></select>
                                     </div>
                                     <!-- ko if: timeseries -->
                                     <div class="small-6 columns">
@@ -139,11 +132,12 @@
         </div>
         </div>
     </script>
-    <script type="text/html" id="group-template">    
+    <script type="text/html" id="group-template">
+    
         <div class="row">
         <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
         <div class="small-2 columns">
-            <select data-bind="options:(groupType === 'conditions')?$root.logics : $root.arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+            <select data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
         </div>
          <!-- /ko -->
         <div data-bind="css: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0) ? 'small-10 columns' : 'small-12 columns'">
@@ -179,7 +173,7 @@
         <div class="row">
             <div class="small-2 columns">
                 <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
-                <select data-bind="options:$root.logics, optionsCaption:'logic', value: logic"></select>
+                <select data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
                 <!-- /ko -->
                 <!-- ko if: !($parent.conditions && $parent.conditions.indexOf($data) > 0) -->
                 <h6>Conditions</h6>
@@ -187,7 +181,7 @@
             </div>
             <div class="small-10 columns">
                 <!-- ko if: !isComplex() -->
-                <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
+                <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
                 <!-- /ko -->
                 <!-- ko if: isComplex() -->
                     <!-- ko template: {name: 'group-template', foreach: selectionGroup} -->
@@ -198,7 +192,7 @@
                         <input type="checkbox" data-bind="checked:isComplex"/> Complex
                     </div>
                     <div class="small-3 columns">
-                        <select data-bind="options:$root.conditionalOperations, optionsCaption:'Operation', value: operation"></select>
+                        <select data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
                     </div>
                     <div class="small-4 columns">
                         <input type="text" data-bind="value:value" placeholder="custom value"></input>
@@ -213,25 +207,24 @@
     </script>
     
     <script type="text/html" id="operation-template">
-            <div class="row">
-                <div class="small-2 columns">
-                    <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
-                    <select data-bind="options:$root.arithmeticOperations, optionsCaption:'logic', value: logic"></select>
-                    <!-- /ko -->
-                </div>
-                <div class="small-10 columns">
-                    <div class="row">
-                        <div class="small-9 columns">
-                            <select data-bind="options:$root.properties, optionsCaption:'choose Property', value: prop"></select>
-                        </div>
-                        
-                        <div class="small-3 columns">
-                            <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
-                        </div>
+        <div class="row">
+            <div class="small-2 columns">
+                <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                <select data-bind="options:$parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                <!-- /ko -->
+            </div>
+            <div class="small-10 columns">
+                <div class="row">
+                    <div class="small-9 columns">
+                        <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                    </div>
+                    
+                    <div class="small-3 columns">
+                        <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
                     </div>
                 </div>
-                
             </div>
+        </div>
     </script>
     
     <script type="text/javascript" src="content/js/global.js"></script>
@@ -241,6 +234,7 @@
     <script type="text/javascript">
         (function (root) {
             var model = {
+                properties: ['a', 'b', 'c', 'timestamp'],
                 selection: {
                     complexGroups: [
                         {

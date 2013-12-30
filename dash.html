@@ -8,11 +8,18 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
     <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
+    <style>
+    .simple-selection-remove {
+        text-align: right;
+        padding-top: 5px;
+        color:red;
+    }
+    </style>
 </head>
 <body>
 <div class="row">
     <div id="dashboard" class="small-4 columns">
-        
             <!-- <div class="row">
                      <div class="small-8 columns">
                          <h1 data-bind="text:name"></h1>
@@ -25,42 +32,25 @@
                   </div> -->
             <ul class="small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
             </ul>
-        
     </div>
     <div id="graphBuilder" class="small-8 columns">
-    <fieldset>
-        <legend>Slice Data</legend>
-        <ul class="large-block-grid-2 small-block-grid-1">
-            <li><select data-bind="options:dataKeys, optionsCaption:'choose Data Key', value: selectedDataKey"></select></li>
-            <!-- ko foreach: selectedActions -->
-            <li>
-            <div class="row">
-                <div class=" columns" data-bind="css:{ 'small-6': $data.type() === 'selection', 'small-12': $data.type() === 'action'} ">
-                    <select data-bind="options:($data.type() === 'selection')? $parent.selections : availableActions, optionsCaption: 'Choose', value: $data.val"></select>
-                </div>
-                <!-- ko if: $data.type() === 'selection' -->
-                <div class="small-6 columns">
-                    <!-- ko if:  $data.val() !== 'timestamp' -->
-                    <input type="checkbox" data-bind="checked: $data.useValue"></input>
-                    <!-- /knockout-2 -->
-                    <!-- ko if:  $data.val() === 'timestamp' -->
-                    <select data-bind="optionsCaption: 'choose', value : $data.identifier">
-                        <option value="extent">extent</option>
-                        <option value="value">value</option>
-                    </select>
-                    <!-- ko if: $data.extentValueVisible() -->
-                    <input type="text" data-bind="value: $data.extentValue"/>    
-                    <!-- /ko -->       
-                    <!-- /ko -->
-                </div>
-                <!-- /ko -->
+        <div class="row">
+            <div class="large-12 columns">
+                <fieldset>
+                    <legend>Data Key</legend>
+                    <div class="row">
+                        <div class="small-4 columns">
+                            <label class="right inline">Select Data Key</label>
+                        </div>
+                        <div class="small-8 columns">
+                            <select data-bind="options:dataKeys, value:selectedDataKey"></select>
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-            
-             </li>
-            <!-- /ko -->
-            <li data-bind="visible: selectedActions().length > 0"><button class="button success tiny" data-bind="click:addNextSelectedAction">Add</button> &nbsp;<button class="button secondary tiny" data-bind="click:removePreviousClause">Rem</button></li>
-        </ul>
-    </fieldset>
+        </div>
+         <!-- ko template: {name: 'segment-template', data: segment} -->
+         <!-- /ko -->
             
         <div class="row">
             <div class="small-12 columns">
@@ -68,14 +58,7 @@
                 &nbsp;<button class="button secondary" data-bind="click:widgetCancel">Cancel</button>
             </div>
         </div>
-        <div class="row">
-            <div class="small-6 columns">
-                <textarea style="height:300px" data-bind="text:jsonData"></textarea>    
-            </div>
-            <div class="small-6 columns">
-                <textarea style="height:300px" data-bind="text:jsonFormattedData"></textarea>
-            </div>
-        </div>
+        
     </div>
 </div>
    
@@ -104,6 +87,197 @@
             </div>
         </li>
     </script>
+
+    <script type="text/html" id="segment-template">
+        
+        <div class="row">
+            <div class="large-12 columns">
+                <!-- ko template: {name: 'selection-template', data: selection} -->
+                <!-- /ko -->
+                <!-- ko template: {name: 'group-template', data: group} -->
+                <!-- /ko -->
+                <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
+                <!-- /ko -->
+            </div>
+        </div>
+        
+    </script>
+    <script type="text/html" id="selection-template">
+        <div class="row">
+            <div class="large-12 columns">
+                <fieldset class="segment">
+                    <legend>Selections 
+                    <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
+                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>&nbsp;</legend>
+                    
+                    <ul class="small-block-grid-3" data-bind="foreach: props">
+                        <li>
+                            <div class="row collapse">
+                                <div class="small-10 columns">
+                                     <select data-bind="options: $parents[1].properties, value:prop"></select>
+                                </div>
+                                <div class="small-2 columns simple-selection-remove">
+                                    <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- ko template: {name: 'group-template', foreach: complexGroups} -->
+                    <!-- /ko -->
+                </fieldset>
+            </div>
+        </div>
+    </script>
+    
+    <script type="text/html" id="datagroup-template">
+    <div class="row">
+            <div class="small-12 columns">
+        <fieldset class="segment">
+            <legend>Grouping</legend>
+            <form>
+                <div class="row">
+                    <div class="small-8">
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">TimeSeries</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <input type="checkbox" data-bind="checked:timeseries"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <!-- ko if: !timeseries() -->
+                                <label class="right inline">x Axis</label>
+                                <!-- /ko -->
+                                <!-- ko if: timeseries -->
+                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
+                                <!-- /ko -->
+                            </div>
+                            <div class="small-8 columns">
+                                <div class="row">
+                                    <div class="small-6 columns">
+                                        <select data-bind="options:$parent.properties, value:xAxisProp"></select>
+                                    </div>
+                                    <!-- ko if: timeseries -->
+                                    <div class="small-6 columns">
+                                        <input type="text" data-bind="value:interval" placeholder="Interval"/>
+                                    </div>
+                                    <!-- /ko -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </fieldset>
+        </div>
+        </div>
+    </script>
+    <script type="text/html" id="group-template">
+    
+        <div class="row">
+        <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
+        <div class="small-2 columns">
+            <select data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+        </div>
+         <!-- /ko -->
+        <div data-bind="css: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0) ? 'small-10 columns' : 'small-12 columns'">
+            <fieldset class="segment">
+                <legend>
+                <span data-bind="text: groupTypeName"></span>
+                
+                <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</span>&nbsp;
+                                    
+                <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></span>&nbsp;
+                
+                <!-- ko if: !$parent.groups && groupType === 'selections'-->
+                &nbsp;<input style="width:120px;display:inline" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+                <!-- /ko -->
+                <!-- ko if: $parent.groups ||  groupType === 'selections'-->
+                <i class="general foundicon-remove" style="color:red" data-bind="click: $parent.removeGroup"></i>
+                <!-- /ko -->
+                </legend>
+                <!-- ko if:  $data.conditions().length > 0 -->
+               
+                <!-- ko template: {name: conditionTemplate, foreach: conditions} -->
+                <!-- /ko -->
+               
+                <!-- /ko -->
+                <!-- ko template: {name: 'group-template', foreach: groups} -->
+                <!-- /ko -->
+             </fieldset>
+             </div>
+        </div>
+        
+    </script>
+    <script type="text/html" id="condition-template">
+        <div class="row">
+            <div class="small-2 columns">
+                <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                <select data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
+                <!-- /ko -->
+                <!-- ko if: !($parent.conditions && $parent.conditions.indexOf($data) > 0) -->
+                <h6>Conditions</h6>
+                <!-- /ko -->
+            </div>
+            <div class="small-10 columns">
+                <!-- ko if: !isComplex() -->
+                <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                <!-- /ko -->
+                <!-- ko if: isComplex() -->
+                    <!-- ko template: {name: 'group-template', foreach: selectionGroup} -->
+                    <!-- /ko -->
+                <!-- /ko -->
+                <div class="row">
+                    <div class="small-3 columns">
+                        <input type="checkbox" data-bind="checked:isComplex"/> Complex
+                    </div>
+                    <div class="small-3 columns">
+                        <select data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
+                    </div>
+                    <div class="small-4 columns">
+                        <input type="text" data-bind="value:value" placeholder="custom value"></input>
+                    </div>
+                    <div class="small-2 columns">
+                        <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </script>
+    
+    <script type="text/html" id="operation-template">
+        <div class="row">
+            <div class="small-2 columns">
+                <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
+                <select data-bind="options:$parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                <!-- /ko -->
+            </div>
+            <div class="small-10 columns">
+                <div class="row">
+                    <div class="small-9 columns">
+                        <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                    </div>
+                    
+                    <div class="small-3 columns">
+                        <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+
     <script type="text/javascript" src="content/js/global.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
@@ -111,24 +285,19 @@
     <script type="text/javascript" src="content/js/sortable.js"></script>
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/js/segment.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
-    <script type="text/javascript" src="content/js/test.js"></script>
-    
-<!--    <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>-->
-<!--    <script type="text/javascript" src="content/foundation/js/foundation/foundation.reveal.js"></script>-->
+
     <script type="text/javascript" src="content/js/d3.line.js"></script>
     <script type="text/javascript">
         (function (root) {
-            var dashboard = new atombomb.web.Dashboard();
+            window.dashboard = new Dashboard();
             ko.applyBindings(dashboard, document.getElementById('dashboard'));
-            root.atombomb.namespace('web').extend({
-                dashboard: dashboard
-            });
-            var sAGenerator = new atombomb.web.SAGenerator();
-            ko.applyBindings(sAGenerator, document.getElementById('graphBuilder'));
-            root.atombomb.namespace('web').extend({
-                sAGenerator: sAGenerator
-            });
+            
+            window.widgetProcessor = new WidgetProcessor();
+            ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
+            
+
            // $(document).foundation();
         })(this);
     </script>
