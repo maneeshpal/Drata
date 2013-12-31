@@ -20,18 +20,21 @@
 <body>
 <div class="row">
     <div id="dashboard" class="small-4 columns">
-            <!-- <div class="row">
-                     <div class="small-8 columns">
-                         <h1 data-bind="text:name"></h1>
-                     </div>
-                     <div class="small-4 columns">
-                         <button class="button small" data-reveal-id="myModal">Add Widget</button>
-                     </div>
-                 </div> -->
-            <!--  <div class="row widgets js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
-                  </div> -->
-            <ul class="small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
-            </ul>
+        <ul class="small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
+        </ul>
+        <div class="row">
+            <div class="large-12 columns" style="height:700px">
+                <h6>Output</h6>
+                <textarea style="height:300px" data-bind="text:outputData"></textarea>
+                <h6>Input</h6>
+                <textarea style="height:300px" data-bind="text:inputData"></textarea>  
+                <!-- <h6>Filtered data</h6>
+                <textarea style="height:300px" data-bind="value:filteredData"></textarea> -->
+                
+                <!-- <h6>group</h6>
+                <textarea style="height:300px" data-bind="text:groupData"></textarea> -->
+            </div>
+        </div>
     </div>
     <div id="graphBuilder" class="small-8 columns">
         <div class="row">

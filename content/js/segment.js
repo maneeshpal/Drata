@@ -274,6 +274,16 @@ var DataRetriever = {
                 b : 44,
                 c : 'ccc',
                 timestamp : 50
+            },{
+                a : 34,
+                b : 92,
+                c : 'ccc',
+                timestamp : 52
+            },{
+                a : 55,
+                b : 3,
+                c : 'ccc',
+                timestamp : 54
             }];
         }
         else{
@@ -418,14 +428,13 @@ var Conditioner = {
     processSimpleSelection : function(obj, prop){
         return obj[prop];
     },
-    processDataGroups : function(data, dataGroup, selectionGroup){
+    processDataGroups : function(data, dataGroup, selectionGroup, groupCounter){
         var returnGroups = [];
         var groupedData = _.groupBy(data, function(item){return item[dataGroup.groupByProp]});
-        
         _.each(groupedData, function(dataItem, groupName){
             var ret = this.divideByInterval(dataItem, dataGroup, selectionGroup);
             returnGroups.push({
-                name : groupName,
+                name : groupCounter ? groupName + '-' + groupCounter : groupName,
                 values : ret
             });
         }.bind(this));
@@ -479,10 +488,15 @@ var Conditioner = {
     },
     getGraphData: function(segmentModel, inputData){
         var result = [];
+        var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
+        var multipleGroups = segmentModel.dataGroup.hasGrouping && (segmentModel.selection.complexGroups.length + segmentModel.selection.props.length) > 1;
         _.each(segmentModel.selection.complexGroups, function(selectionGroup){
             if(segmentModel.dataGroup.hasGrouping){
-                result.push(Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, selectionGroup));
+                multipleGroups && groupCounter ++;
+                var groupValues = Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, selectionGroup, groupCounter);
+                _.each(groupValues, function(val){result.push(val);});
+                
             }
             else{
                 result.push({
@@ -494,7 +508,9 @@ var Conditioner = {
         
         _.each(segmentModel.selection.props, function(prop){
             if(segmentModel.dataGroup.hasGrouping){
-                result.push(Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, prop.prop));
+                multipleGroups && groupCounter ++;
+                var groupValues = Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, prop.prop, groupCounter);
+                _.each(groupValues, function(val){result.push(val);});
             }
             else{
                 result.push({

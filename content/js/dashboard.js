@@ -51,6 +51,10 @@ var Dashboard = function(){
 	var self = this;
 	self.name = dashboardModel.name;
 	self.index= 1;
+    self.inputData = ko.observable();
+    self.filteredData = ko.observable();
+    self.outputData = ko.observable();
+    self.groupData = ko.observable();
 	self.widgets = ko.observableArray();
 
 	self.widgets(ko.utils.arrayMap(
@@ -79,6 +83,8 @@ var Widget = function(widgetModel, index){
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
         var graphData = Conditioner.getGraphData(self.widgetModel.segmentModel, inputData);
+        dashboard.outputData(JSON.stringify(graphData, null, '\t'));
+        dashboard.inputData(JSON.stringify(inputData, null, '\t'));
         self.graph = new atombomb.d3.LineGraph( 'widget'+ self.index, undefined, graphData);
     };
 
@@ -86,6 +92,8 @@ var Widget = function(widgetModel, index){
         self.widgetModel = widgetModel;
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey); //get input data
         var graphData = Conditioner.getGraphData(self.widgetModel.segmentModel, inputData); //process data for graph
+        dashboard.outputData(JSON.stringify(graphData, null, '\t'));
+        dashboard.inputData(JSON.stringify(inputData, null, '\t'));
 	    self.graph = new atombomb.d3.LineGraph( 'widget'+ self.index, undefined, graphData);
 	};
 
@@ -131,14 +139,14 @@ var WidgetProcessor = function(){
         self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
         self.segment.prefill(clonemodel.segmentModel);
-        self.addUpdateBtnText('Update');
+        self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
     };
     self.widgetCancel = function() {
         self.onWidgetUpdate = undefined;
         self.onWidgetCancel = undefined;
-        self.addUpdateBtnText('Add');
+        self.addUpdateBtnText('Add Widget');
         //$('#myModal').foundation('reveal', 'close');
     };
 };
