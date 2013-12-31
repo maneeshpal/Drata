@@ -90,7 +90,7 @@ var Widget = function(widgetModel, index){
 	};
 
     self.editWidget = function () {
-        widgetProcessor.attach(widgetModel, self.updateWidget.bind(self));
+        widgetProcessor.attach(self.widgetModel, self.updateWidget.bind(self));
         //$('#myModal').foundation('reveal', 'open');
     };
 };
@@ -115,14 +115,10 @@ var WidgetProcessor = function(){
     self.notifyWidget = function () {
         //var widgetModel = ko.toJS(self);
         //$('#myModal').foundation('reveal', 'close');
-        //self.notifyWidget(formattedData);
-        var segmentModel = self.segment.getModel();
         var widgetModel = {
             selectedDataKey: self.selectedDataKey(),
-            segmentModel: segmentModel
+            segmentModel: self.segment.getModel()
         };
-        //var data = DataRetriever.getData(self.widgetModel.selectedDataKey);
-        //var graphData = Conditioner.getGraphData(segmentModel, data);
         self.onWidgetUpdate && self.onWidgetUpdate(widgetModel);
         !self.onWidgetUpdate && dashboard.addWidget(widgetModel);
         self.onWidgetUpdate = undefined;
@@ -130,10 +126,11 @@ var WidgetProcessor = function(){
         self.addUpdateBtnText('Add');
     };
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
+        var clonemodel = atombomb.utils.clone(model);
         self.processSegment = false;
-        self.selectedDataKey(model.selectedDataKey);
+        self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
-        self.segment.prefill(model.segmentModel);
+        self.segment.prefill(clonemodel.segmentModel);
         self.addUpdateBtnText('Update');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;

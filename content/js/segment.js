@@ -77,13 +77,12 @@ var Segmentor = function(model){
     // };
     self.prefill = function(model){
         model && self.properties(model.properties);
-        //intiate objects
-        
-        if(model){
-            model.group && self.group.prefill(model.group);
-            model.selection && self.selection.prefill(model.selection);
-            model.dataGroup && self.dataGroup.prefill(model.dataGroup);
-        }
+
+        //This will reset all the properties down the line.
+        model = model || {};
+        self.group.prefill(model.group || {});
+        self.selection.prefill(model.selection || {});
+        self.dataGroup.prefill(model.dataGroup || {});
     };
     self.getModel = function(){
         var jsSelection = ko.toJS(self.selection);
@@ -98,7 +97,7 @@ var Segmentor = function(model){
         };
         return model;
     }
-    self.prefill(model);
+    model && self.prefill(model);
 };
 
 var SelectOperation = function(level, conditionType, model){
