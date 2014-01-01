@@ -443,6 +443,18 @@ $select-bg-color: #fafafa !default;
 	fieldset.segment {
       @include fieldset;
 	  margin : rem-calc(4 0 18 0);
+	  padding-left:0;
+	  legend {
+		margin:0;
+		padding: 0 1rem;
+		.input-elem {
+			width:120px;
+			display:inline;
+			padding: .5rem;
+			margin-bottom: 0;
+			height: 1.7rem;
+		}
+	  }
     }
     /* Error Handling */
 

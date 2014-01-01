@@ -1,25 +1,13 @@
 
 var defaultSegmentModel = {
-    properties: ['a', 'b', 'c', 'timestamp'],
-    selection: {},
-    dataGroup : {},
-    group:{}
+    properties: ['a', 'b', 'c', 'timestamp']
 };
 
 var Segmentor = function(model){
+    //model = model || defaultSegmentModel;
     var self = this;
-    //self.rawData = ko.observable();
     self.properties = ko.observable();
     self.level = 0;
-    // self.data = ko.computed(function(){
-    //     var d = [];
-    //     try{
-    //         d = ko.utils.parseJson(self.rawData());
-    //     }
-    //     catch(e) {}
-    //     return d;
-    // });
-
     self.conditionalOperations = ['>', '<', '>=','<=', '=', 'exists','like'];
     self.arithmeticOperations = ['+', '-', '*','/'];
     self.groupingOptions = ['countBy', 'sumBy'];
@@ -31,50 +19,6 @@ var Segmentor = function(model){
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
     
-    // self.processConditionsSection = function(){
-    //     var jsGroup = ko.toJS(self.group);
-    //     var filteredData = Conditioner.filterData(self.data(), jsGroup);
-    //     self.filteredData(JSON.stringify(filteredData, null, '\t'));
-    // };
-
-    // self.processSelectionsSection = function(){
-    //     var result = [];
-    //     var jsComplexGroup = ko.toJS(self.selection.complexGroups);
-    //     var jsSimpleGroup = ko.toJS(self.selection.props);
-        
-    //     jsSimpleGroup.length > 0 && _.each(self.data(), function(obj){
-    //         _.each(jsSimpleGroup, function(prop){
-    //             var returnValue = Conditioner.processSimpleSelection(obj, prop.prop);
-    //             result.push({
-    //                 value: returnValue,
-    //                 name: prop.prop
-    //             });
-    //         });
-    //     });
-
-    //     jsComplexGroup.length > 0 && _.each(self.data(), function(obj){
-    //         _.each(jsComplexGroup, function(group){
-    //             var returnValue = Conditioner.processGroup(obj, group);
-    //             result.push({
-    //                 value: returnValue.value,
-    //                 name: group.selectionName
-    //             });
-    //         });
-    //     });
-
-    //     self.outputData(JSON.stringify(result, null, '\t'));
-    // };
-    // self.processDataGroups = function(){
-    //     var model = self.getModel();
-    //     //temp
-    //     var filteredData = Conditioner.filterData(self.data(), model.group);
-    //     self.filteredData(JSON.stringify(filteredData, null, '\t'));
-    //     self.groupData(JSON.stringify(model, null, '\t'));
-    //     //end temp
-    //     var result = Conditioner.getGraphData(model, self.data());
-        
-    //     self.outputData(JSON.stringify(result, null, '\t'));
-    // };
     self.prefill = function(model){
         model && self.properties(model.properties);
 

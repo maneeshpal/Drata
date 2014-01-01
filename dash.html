@@ -10,11 +10,44 @@
     <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
     <style>
-    .simple-selection-remove {
-        text-align: right;
-        padding-top: 5px;
-        color:red;
-    }
+        
+        .logic-text {
+            position: relative;
+            top: .4rem;
+            left:1rem;
+            display: inline;
+        }
+        .logic-selection{
+            display:none;
+            max-width:80px;
+        }
+        .logic-wrapper{
+            border-bottom: 1px solid #ddd;
+        }
+        .logic-toggler:hover .logic-wrapper{
+            border:none;
+        }
+        .logic-toggler:hover .logic-text{
+            display: none;
+        }
+        .logic-toggler:hover .logic-selection{
+            display: block;
+        }
+        .remove-group {
+            color: #ff0000;
+            vertical-align: middle;
+        }
+        .remove-element{
+            color: #ff0000;
+            position: relative;
+            top: .5rem;
+            left: .5rem;
+        }
+        .vertical-bg{
+            background-image: url('content/images/border_1x1.png');
+            background-repeat: repeat-x;
+            background-position: 0 20px;
+        }
     </style>
 </head>
 <body>
@@ -46,7 +79,7 @@
                             <label class="right inline">Select Data Key</label>
                         </div>
                         <div class="small-8 columns">
-                            <select data-bind="options:dataKeys, value:selectedDataKey"></select>
+                            <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
                         </div>
                     </div>
                 </fieldset>
@@ -108,10 +141,11 @@
     <script type="text/html" id="selection-template">
         <div class="row">
             <div class="large-12 columns">
-                <fieldset class="segment">
+                <fieldset>
                     <legend>Selections 
                     <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
-                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>&nbsp;</legend>
+                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>
+                    </legend>
                     
                     <ul class="small-block-grid-3" data-bind="foreach: props">
                         <li>
@@ -119,8 +153,8 @@
                                 <div class="small-10 columns">
                                      <select data-bind="options: $parents[1].properties, value:prop"></select>
                                 </div>
-                                <div class="small-2 columns simple-selection-remove">
-                                    <i class="general foundicon-remove" data-bind="click:$parent.removeSimpleSelection"></i>
+                                <div class="small-2 columns">
+                                    <i class="general foundicon-remove remove-element" data-bind="click:$parent.removeSimpleSelection"></i>
                                 </div>
                             </div>
                         </li>
@@ -133,80 +167,77 @@
     </script>
     
     <script type="text/html" id="datagroup-template">
-    <div class="row">
+        <div class="row">
             <div class="small-12 columns">
-        <fieldset class="segment">
-            <legend>Grouping</legend>
-            <form>
-                <div class="row">
-                    <div class="small-8">
+                <fieldset>
+                    <legend>Grouping</legend>
+                    <form>
                         <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">TimeSeries</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <input type="checkbox" data-bind="checked:timeseries"/>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <!-- ko if: !timeseries() -->
-                                <label class="right inline">x Axis</label>
-                                <!-- /ko -->
-                                <!-- ko if: timeseries -->
-                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
-                                <!-- /ko -->
-                            </div>
-                            <div class="small-8 columns">
+                            <div class="small-8">
                                 <div class="row">
-                                    <div class="small-6 columns">
+                                    <div class="small-4 columns">
+                                        <label class="right inline">x Axis</label>
+                                    </div>
+                                    <div class="small-8 columns">
                                         <select data-bind="options:$parent.properties, value:xAxisProp"></select>
                                     </div>
-                                    <!-- ko if: timeseries -->
-                                    <div class="small-6 columns">
-                                        <input type="text" data-bind="value:interval" placeholder="Interval"/>
+                                </div>
+                                <div class="row">
+                                    <div class="small-4 columns">
+                                        <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
                                     </div>
-                                    <!-- /ko -->
+                                    <div class="small-8 columns">
+                                        <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-4 columns">
+                                        <label class="right inline"><input type="checkbox" data-bind="checked:timeseries"/> TimeSeries</label>
+                                    </div>
+                                    <div class="small-8 columns">
+                                        <!-- ko if: timeseries -->
+                                        <div class="row">
+                                            <div class="small-6 columns">
+                                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
+                                            </div>
+                                            <div class="small-6 columns">
+                                                <input type="text" data-bind="value:interval" placeholder="Interval"/>
+                                            </div>
+                                        </div>
+                                        <!-- /ko -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </form>
-        </fieldset>
-        </div>
+                    </form>
+                </fieldset>
+            </div>
         </div>
     </script>
     <script type="text/html" id="group-template">
     
-        <div class="row">
-        <!-- ko if: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)-->
-        <div class="small-2 columns">
-            <select data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+        <div class="row collapse">
+        <!-- ko if: $parent.groups-->
+        <div class="small-2 columns logic-toggler">
+            <div class="logic-wrapper" data-bind="visible: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0)">
+                <span data-bind="text: logic" class="logic-text label secondary" />
+            <select class="logic-selection" data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+            </div>
         </div>
          <!-- /ko -->
-        <div data-bind="css: ($parent.groups && $parent.groups().indexOf($data) > 0) || ($parent.conditions && $parent.conditions().length > 0) ? 'small-10 columns' : 'small-12 columns'">
+        <div data-bind="css: ($parent.groups) ? 'small-10 columns' : 'small-12 columns'">
             <fieldset class="segment">
-                <legend>
+                <legend class="vertical-bg">
                 <span data-bind="text: groupTypeName"></span>
                 
                 <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</span>&nbsp;
                                     
                 <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></span>&nbsp;
-                
-                <!-- ko if: !$parent.groups && groupType === 'selections'-->
-                &nbsp;<input style="width:120px;display:inline" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+                <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
+                &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
                 <!-- /ko -->
                 <!-- ko if: $parent.groups ||  groupType === 'selections'-->
-                <i class="general foundicon-remove" style="color:red" data-bind="click: $parent.removeGroup"></i>
+                <i class="general foundicon-remove remove-group" data-bind="click: $parent.removeGroup"></i>
                 <!-- /ko -->
                 </legend>
                 <!-- ko if:  $data.conditions().length > 0 -->
@@ -223,13 +254,13 @@
         
     </script>
     <script type="text/html" id="condition-template">
-        <div class="row">
-            <div class="small-2 columns">
+        <div class="row collapse">
+            <div class="small-2 columns logic-toggler">
                 <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
-                <select data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
-                <!-- /ko -->
-                <!-- ko if: !($parent.conditions && $parent.conditions.indexOf($data) > 0) -->
-                <h6>Conditions</h6>
+                <div class="logic-wrapper">
+                    <span data-bind="text: logic" class="logic-text label secondary" />
+                    <select class="logic-selection" data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
+                </div>
                 <!-- /ko -->
             </div>
             <div class="small-10 columns">
@@ -260,20 +291,22 @@
     </script>
     
     <script type="text/html" id="operation-template">
-        <div class="row">
-            <div class="small-2 columns">
+        <div class="row collapse">
+            <div class="small-2 columns logic-toggler">
                 <!-- ko if: $parent.conditions && $parent.conditions.indexOf($data) > 0 -->
-                <select data-bind="options:$parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                <div class="logic-wrapper">
+                    <span data-bind="text: logic" class="logic-text label secondary" />
+                    <select class="logic-selection" data-bind="options:$parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                </div>
                 <!-- /ko -->
             </div>
             <div class="small-10 columns">
-                <div class="row">
-                    <div class="small-9 columns">
+                <div class="row collapse">
+                    <div class="small-10 columns">
                         <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
                     </div>
-                    
-                    <div class="small-3 columns">
-                        <i style="color:#ff0000" class="general foundicon-remove" data-bind="click:$parent.removeCondition"></i>
+                    <div class="small-2 columns">
+                        <i class="general foundicon-remove remove-element" data-bind="click:$parent.removeCondition"></i>
                     </div>
                 </div>
             </div>
