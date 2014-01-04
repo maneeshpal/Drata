@@ -12,7 +12,7 @@
         .logic-text {
             position: relative;
             top: .4rem;
-            left:1rem;
+            left:1.5rem;
             display: inline;
         }
         .logic-selection{
@@ -21,6 +21,14 @@
         }
         .logic-wrapper{
             border-bottom: 1px solid #ddd;
+        }
+        .row .columns.logic-toggler{
+            position:absolute;
+            width:80px;
+            z-index: 999;
+        }
+        .row .columns.operation-group{
+            padding-left:80px;
         }
         .logic-toggler:hover .logic-wrapper{
             border:none;
@@ -175,16 +183,15 @@
     <script type="text/html" id="group-template">
         
         <div class="row collapse" style="position:relative">
-            <i style="position:absolute;right: 5px;top: 20px; color: #d5d5d5; z-index:999" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
         <!-- ko if: $parent.groups-->
-        <div class="small-2 columns logic-toggler">
+        <div class="columns logic-toggler">
             <div class="logic-wrapper" data-bind="visible: !amIFirst()">
                 <span data-bind="text: logic" class="logic-text label secondary"></span>
             <select class="logic-selection" data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
             </div>
         </div>
          <!-- /ko -->
-        <div data-bind="css: ($parent.groups) ? 'small-10 columns' : 'small-12 columns'">
+        <div data-bind="css: ($parent.groups) ? 'operation-group columns' : 'small-12 columns'">
             <!-- ko if: !editMode() -->
             <div class="condition-view">
                 <span class="keystroke" data-bind="text:expression,click: expand"></span>
@@ -197,7 +204,7 @@
                 <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</span>&nbsp;
                 <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></span>
                 <i class="general foundicon-remove remove-group" data-bind="click: $parent.removeGroup, visible : $parent.groups ||  groupType === 'selections'"></i>
-                
+                <i style="color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
                 <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
                 &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
                 <!-- /ko -->
@@ -214,13 +221,13 @@
     <script type="text/html" id="condition-template">
         <div class="row collapse" style="position:relative">
             <i style="position:absolute;right: -17px;top: 8px; color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible:editMode"></i>
-            <div class="small-2 columns logic-toggler">
+            <div class="columns logic-toggler">
                 <div class="logic-wrapper" data-bind="visible: !amIFirst()">
                     <span data-bind="text: logic" class="logic-text label secondary"></span>
                     <select class="logic-selection" data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
                 </div>
             </div>
-            <div class="small-10 columns">
+            <div class="operation-group columns">
                 <!-- ko if: !editMode() -->
                 <div class="condition-view">
                 <span class="keystroke" data-bind="text:expression,click: expand"></span>
@@ -229,14 +236,14 @@
 
                 <!-- ko if: editMode() -->
                 <div class="row collapse" data-bind="visible : !isComplex()">
-                    <div class="small-6 columns">
-                        <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                    <div class="small-5 columns">
+                        <select data-bind="options:$parents[level].properties, optionsCaption:'property', value: prop"></select>
                     </div>
-                    <div class="small-3 columns">
-                        <select style="margin-left:-1px" data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
+                    <div class="small-2 columns">
+                        <select style="margin-left:-1px" data-bind="options:$parents[level].conditionalOperations, value: operation"></select>
                     </div>
-                    <div class="small-3 columns">
-                        <input type="text" style="margin-left:-2px" data-bind="value:value" placeholder="custom value"></input>
+                    <div class="small-5 columns">
+                        <input type="text" style="margin-left:-2px" data-bind="value:value" placeholder="value"></input>
                     </div>
                 </div>
                 <!-- ko if: isComplex() -->
@@ -248,6 +255,7 @@
                         <input type="checkbox" data-bind="checked:isComplex"/> Complex
                     </div>
                     <!-- ko if: isComplex() -->
+                    
                     <div class="small-3 columns">
                         <select data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
                     </div>
@@ -268,7 +276,7 @@
     
     <script type="text/html" id="operation-template">
         <div class="row collapse">
-            <div class="small-2 columns logic-toggler">
+            <div class="columns logic-toggler">
                 <!-- ko if: $parent.groups && $parent.groups.indexOf($data) > 0 -->
                 <div class="logic-wrapper">
                     <span data-bind="text: logic" class="logic-text label secondary"></span>
@@ -276,7 +284,7 @@
                 </div>
                 <!-- /ko -->
             </div>
-            <div class="small-10 columns">
+            <div class="operation-group columns">
                 <div class="row collapse">
                     <div class="small-10 columns">
                         <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
