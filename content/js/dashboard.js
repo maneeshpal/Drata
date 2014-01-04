@@ -16,15 +16,16 @@
             },
             group: {
                 groupType: "conditions",
-                conditions: [
+                groups: [
                     {
                         prop: "a",
                         logic: "and",
                         conditionType: "conditions",
+                        renderType: "condition",
                         operation: ">",
                         selectionGroup: {
                             groupType: "selections",
-                            conditions: [],
+                            renderType: "group",
                             logic: "+",
                             groups: []
                         },
@@ -32,8 +33,7 @@
                         value: "4"
                     }
                 ],
-                logic: "and",
-                groups: []
+                logic: "and"
             },
             properties: [
                 "a",

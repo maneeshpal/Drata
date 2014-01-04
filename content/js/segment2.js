@@ -29,17 +29,12 @@ var Segmentor = function(model){
         self.dataGroup.prefill(model.dataGroup || {});
     };
     self.getModel = function(){
-        var jsSelection = ko.toJS(self.selection);
-        var jsGroup = ko.toJS(self.group);
-        var dataGroup = ko.toJS(self.dataGroup);
-        
-        var model = {
-            selection: jsSelection,
-            dataGroup: dataGroup,
-            group: jsGroup,
+        return {
+            selection: self.selection.getModel(),
+            dataGroup: ko.toJS(self.dataGroup),
+            group: self.group.getModel(),
             properties: self.properties()
         };
-        return model;
     }
     model && self.prefill(model);
 };
@@ -61,9 +56,6 @@ var SelectOperation = function(level, conditionType, model, parent){
         }
         return expression;
     });
-    // self.expression = ko.computed(function(){
-    //     return self.getExpression();
-    // });
     self.expand = function(){
         self.editMode(true);
     };
@@ -106,10 +98,22 @@ var Condition = function(level, conditionType, model, parent){
     self.amIFirst = ko.computed(function(){
         return self.parent && self.parent.groups && self.parent.groups.indexOf(self) === 0;
     });
-    // self.expression = ko.computed(function(){
-    //     return self.getExpression();
-    // });
+    self.getModel = function(){
+        var selectionGroupModel = self.selectionGroup.getModel();
+        var returnModel = ko.toJS(self);
+        delete returnModel.parent;
+        delete returnModel.template;
+        delete returnModel.expression;
+        delete returnModel.amIFirst;
+        delete returnModel.level;
+        delete returnModel.expand;
+        delete returnModel.collapse;
+        delete returnModel.getModel;
+        delete returnModel.editMode;
 
+        returnModel.selectionGroup = selectionGroupModel;
+        return returnModel;
+    };
 };
 
 var Group = function(level, groupType, model, parent){
@@ -174,6 +178,18 @@ var Group = function(level, groupType, model, parent){
             }
         )); 
     };
+    self.getModel = function(){
+        var returnGroups = [];
+        _.each(self.groups(), function(group){
+            returnGroups.push(group.getModel());
+        });
+        return {
+            groupType: self.groupType,
+            groups: returnGroups,
+            logic: self.logic(),
+            renderType: self.renderType
+        }
+    };
     self.expression = ko.computed(function(){
         if(self.groups().length === 0) return '';
         var expression = '';
@@ -190,9 +206,6 @@ var Group = function(level, groupType, model, parent){
         }
         return notComplete? '' : expression;
     });
-    // self.expression = ko.computed(function(){
-    //     return self.getExpression();
-    // });
     self.expand = function(){
         self.editMode(true);
     };
@@ -234,7 +247,19 @@ var Selection = function(level, model){
         ));
         self.props(model.props || []);
     };
+
     model && self.prefill(model);
+
+    self.getModel = function(){
+        var returnGroups = [];
+        _.each(self.complexGroups(), function(group){
+            returnGroups.push(group.getModel());
+        });
+        return {
+            complexGroups: returnGroups,
+            props: self.props()
+        }
+    };
 };
 
 var DataGroup = function(model){
