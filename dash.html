@@ -2,135 +2,268 @@
 <meta charset="utf-8">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Atombomb</title>
+    <title>Drata</title>
 
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
     <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
+    <link rel="stylesheet" type="text/css" href="content/nvd3/nv.d3.css" />
     <style>
-        
         .logic-text {
             position: relative;
             top: .4rem;
-            left:1.5rem;
+            left: 1.5rem;
             display: inline;
         }
-        .logic-selection{
-            display:none;
-            max-width:80px;
+
+        .logic-selection {
+            display: none;
+            max-width: 55px;
+            margin-left: 0.8rem;
         }
-        .logic-wrapper{
+
+        .logic-wrapper {
             border-bottom: 1px solid #ddd;
         }
-        .row .columns.logic-toggler{
-            position:absolute;
-            width:80px;
+
+        .row .columns.logic-toggler {
+            position: absolute;
+            width: 80px;
             z-index: 999;
         }
-        .row .columns.operation-group{
-            padding-left:80px;
+
+        .row .columns.operation-group {
+            padding-left: 80px;
         }
-        .logic-toggler:hover .logic-wrapper{
-            border:none;
+
+        .logic-toggler:hover .logic-wrapper {
+            border: none;
         }
-        .logic-toggler:hover .logic-text{
+
+        .logic-toggler:hover .logic-text {
             display: none;
         }
-        .logic-toggler:hover .logic-selection{
+
+        .logic-toggler:hover .logic-selection {
             display: block;
         }
+
         .remove-group {
             color: #ff0000;
             vertical-align: middle;
         }
-        .remove-condition{
+
+        .remove-condition {
             color: #ff0000;
             position: relative;
             top: .4rem;
             left: .5rem;
         }
-        .vertical-bg{
+
+        .vertical-bg {
             background-image: url('content/images/border_1x1.png');
             background-repeat: repeat-x;
             background-position: 0 20px;
         }
-        .condition-view{
-            position:relative;
-            top:.5rem;
+
+        .condition-view {
+            position: relative;
+            top: .5rem;
             margin-bottom: 1.5rem;
+        }
+
+        #previewgraph {
+            height: 300px;
+        }
+
+        #graphBuilder.showme {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #graphBuilder {
+            position: absolute;
+            /*right: -103%;
+            left: 103%;*/
+            visibility: hidden;
+            transition: visibility .1s, opacity .5s linear;
+            height: auto;
+            /*transition: all 1s;*/
+            background-color: rgba(0, 0, 0, 0.4);
+            top: 2.8rem;
+            padding: 1.3rem 0;
+            width: 100%;
+            opacity: 0;
+        }
+
+        #graphBuilder:before, #graphBuilder:after {
+            content: " ";
+        }
+
+        .segment-processor-inner {
+            width: 70%;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+
+
+        svg.pie {
+            width:auto;
+            height:auto;
+            display:inline;
+        }
+        @media only screen and (max-width: 64.063em) {
+            .segment-processor-inner {
+                width: 95%;
+            }
         }
     </style>
 </head>
-<body>
-<div class="row">
-    <div id="dashboard" class="small-4 columns">
-        <ul class="small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
+<body style="overflow: hidden">
+    <nav class="top-bar dashboard" id="topbar" data-topbar>
+        <ul class="title-area">
+            <li class="name">
+                <h1><a href="#">Drata</a></h1>
+            </li>
+            <!-- <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li> -->
         </ul>
-        <div class="row">
-            <div class="large-12 columns" style="height:700px">
-                <h6>Output</h6>
-                <textarea style="height:300px" data-bind="text:outputData"></textarea>
-                <h6>Input</h6>
-                <textarea style="height:300px" data-bind="text:inputData"></textarea>  
-                <!-- <h6>Filtered data</h6>
-                <textarea style="height:300px" data-bind="value:filteredData"></textarea> -->
-                
-                <!-- <h6>group</h6>
-                <textarea style="height:300px" data-bind="text:groupData"></textarea> -->
-            </div>
+
+        <section class="top-bar-section">
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class="divider"></li>
+                <li class="has-form">
+                    <a data-bind="click:addWidget" class="button success"><i class="general foundicon-plus"></i>&nbsp;Add Widget</a>
+                </li>
+            </ul>
+
+            <!-- Left Nav Section -->
+            <ul class="left">
+            </ul>
+        </section>
+    </nav>
+    <div class="row">
+        <div id="dashboard" class="small-12 columns">
+            <ul class="large-block-grid-3 small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
+            </ul>
         </div>
     </div>
-    <div id="graphBuilder" class="small-8 columns">
-        <div class="row">
-            <div class="large-12 columns">
-                <fieldset>
-                    <legend>Data Key</legend>
+    <div id="graphBuilder">
+        <div class="segment-processor-inner">
+            <nav class="top-bar" id="topbar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a href="#">Widget Processor</a></h1>
+                    </li>
+                    <!-- <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li> -->
+                </ul>
+
+                <section class="top-bar-section">
+                    <!-- Right Nav Section -->
+                    <ul class="right">
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:preview" class="button">
+                                <i class="general foundicon-graph"></i>&nbsp;Preview</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:notifyWidget" class="button success">
+                                <i class="general foundicon-plus"></i>
+                                <!-- ko text:addUpdateBtnText -->
+                                <!-- /ko -->
+                            </a>
+                        </li>
+
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:widgetCancel" class="button alert"><i class="general foundicon-remove"></i></a>
+                        </li>
+                    </ul>
+
+                    <!-- Left Nav Section -->
+                    <ul class="left">
+                    </ul>
+                </section>
+            </nav>
+            <div class="row">
+                <div class="small-12 medium-4 large-6 columns">
+                    <fieldset data-bind="visible:previewGraph">
+                        <legend>Preview</legend>
+                        <div id="previewgraph">
+                            <svg></svg></div>
+                    </fieldset>
                     <div class="row">
-                        <div class="small-4 columns">
-                            <label class="right inline">Select Data Key</label>
-                        </div>
-                        <div class="small-8 columns">
-                            <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-        </div>
-         <!-- ko template: {name: 'segment-template', data: segment} -->
-         <!-- /ko -->
-            
-        <div class="row">
-            <div class="small-12 columns">
-                <button data-bind="click:notifyWidget,text:addUpdateBtnText"></button>
-                &nbsp;<button class="button secondary" data-bind="click:widgetCancel">Cancel</button>
-            </div>
-        </div>
-        
-    </div>
-</div>
-   
+                        <div class="large-12 columns" style="height: 700px">
+                            <h6>Output</h6>
+                            <textarea style="height: 300px" data-bind="text:outputData"></textarea>
+                            <h6>Input</h6>
+                            <textarea style="height: 300px" data-bind="text:inputData"></textarea>
+                            <!-- <h6>Filtered data</h6>
+                        <textarea style="height:300px" data-bind="value:filteredData"></textarea> -->
 
-   <!--  <div id="myModal" class="reveal-modal">
-        <a class="close-reveal-modal">&#215;</a> -->
-        
-   <!--  </div> -->
-
-    <script type="text/html" id="widget-template">
-        
-        <li>
-            <div class="widget-wrapper">
-                <div class="handle">
-                    <div class="row collapse">
-                        <div class="small-6 columns" data-bind="html:name">
-                        </div>
-                        <div class="small-6 columns">
-                            <a data-bind="click:editWidget">Edit</a>
+                            <!-- <h6>group</h6>
+                        <textarea style="height:300px" data-bind="text:groupData"></textarea> -->
                         </div>
                     </div>
                 </div>
-                <div data-bind="attr :{id: 'widget'+ ($index()+1)}" class="widget-content">
+                <div class="small-12 medium-8 large-6 columns">
+                    <fieldset>
+                        <legend>Data Key</legend>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Select Data Key</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!-- ko template: {name: 'segment-template', data: segment} -->
+                    <!-- /ko -->
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="small-12 columns">
+                    <button class="button success" data-bind="click:preview">Preview</button>
+                    &nbsp;
+                    <button data-bind="click:notifyWidget,text:addUpdateBtnText"></button>
+                    &nbsp;
+                    <button class="button secondary" data-bind="click:widgetCancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="widget-template">
+        <li>
+            <div class="widget-wrapper">
+                <nav class="top-bar widget handle" id="topbar" data-topbar>
+                    <ul class="title-area">
+                        <li class="name">
+                            <h1><a data-bind="html:name"></a></h1>
+                        </li>
+                    </ul>
+                    <section class="top-bar-section">
+                        <ul class="right">
+                            <li class="divider"></li>
+                            <li class="has-form">
+                                <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
+                            </li>
+                            <li class="divider"></li>
+                            <li class="has-form">
+                                <i data-bind="click:editWidget" class="general foundicon-edit"></i>
+                            </li>
+                        </ul>
+                        <ul class="left">
+                        </ul>
+                    </section>
+                </nav>
+                <div data-bind="attr :{id: widgetContentId}" class="widget-content">
                     <svg></svg>
                 </div>
             </div>
@@ -138,7 +271,7 @@
     </script>
 
     <script type="text/html" id="segment-template">
-        
+
         <div class="row">
             <div class="large-12 columns">
                 <!-- ko template: {name: 'selection-template', data: selection} -->
@@ -149,22 +282,22 @@
                 <!-- /ko -->
             </div>
         </div>
-        
+
     </script>
     <script type="text/html" id="selection-template">
         <div class="row">
             <div class="large-12 columns">
                 <fieldset>
                     <legend>Selections 
-                    <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i> Simple</span>&nbsp;
-                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i> Complex</span>
+                    <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i>Simple</span>&nbsp;
+                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i>Complex</span>
                     </legend>
-                    
+
                     <ul class="small-block-grid-3" data-bind="foreach: props">
                         <li>
                             <div class="row collapse">
                                 <div class="small-10 columns">
-                                     <select data-bind="options: $parents[1].properties, value:prop"></select>
+                                    <select data-bind="options: $parents[1].properties, value:prop"></select>
                                 </div>
                                 <div class="small-2 columns">
                                     <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeSimpleSelection"></i>
@@ -178,7 +311,7 @@
             </div>
         </div>
     </script>
-    
+
     <script type="text/html" id="datagroup-template">
         <div class="row">
             <div class="small-12 columns">
@@ -197,7 +330,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="small-4 columns">
-                                        <label class="right inline"><input type="checkbox" data-bind="checked:hasGrouping"/> &nbsp;Group by</label>
+                                        <label class="right inline">
+                                            <input type="checkbox" data-bind="checked:hasGrouping" />
+                                            &nbsp;Group by</label>
                                     </div>
                                     <div class="small-8 columns">
                                         <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
@@ -205,7 +340,9 @@
                                 </div>
                                 <div class="row">
                                     <div class="small-4 columns">
-                                        <label class="right inline"><input type="checkbox" data-bind="checked:timeseries"/> TimeSeries</label>
+                                        <label class="right inline">
+                                            <input type="checkbox" data-bind="checked:timeseries" />
+                                            TimeSeries</label>
                                     </div>
                                     <div class="small-8 columns">
                                         <!-- ko if: timeseries -->
@@ -214,7 +351,7 @@
                                                 <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
                                             </div>
                                             <div class="small-6 columns">
-                                                <input type="text" data-bind="value:interval" placeholder="Interval"/>
+                                                <input type="text" data-bind="value:interval" placeholder="Interval" />
                                             </div>
                                         </div>
                                         <!-- /ko -->
@@ -228,46 +365,45 @@
         </div>
     </script>
     <script type="text/html" id="group-template">
-        
-        <div class="row collapse" style="position:relative">
-        <!-- ko if: $parent.groups-->
-        <div class="columns logic-toggler">
-            <div class="logic-wrapper" data-bind="visible: !amIFirst()">
-                <span data-bind="text: logic" class="logic-text label secondary"></span>
-            <select class="logic-selection" data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
-            </div>
-        </div>
-         <!-- /ko -->
-        <div data-bind="css: ($parent.groups) ? 'operation-group columns' : 'small-12 columns'">
-            <!-- ko if: !editMode() -->
-            <div class="condition-view">
-                <span class="keystroke" data-bind="text:expression,click: expand"></span>
+        <div class="row collapse" style="position: relative">
+            <!-- ko if: $parent.groups-->
+            <div class="columns logic-toggler">
+                <div class="logic-wrapper" data-bind="visible: !amIFirst()">
+                    <span data-bind="text: logic" class="logic-text label secondary"></span>
+                    <select class="logic-selection" data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
+                </div>
             </div>
             <!-- /ko -->
-            <!-- ko if: editMode() -->
-            <fieldset class="segment">
-                <legend>
-                <span data-bind="text: groupTypeName"></span>
-                <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i> Group</span>&nbsp;
-                <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i> <span data-bind="text:conditionTypeName"></span></span>
-                <i class="general foundicon-remove remove-group" data-bind="click: $parent.removeGroup, visible : $parent.groups ||  groupType === 'selections'"></i>
-                <i style="color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
-                <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
-                &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name"/>
+            <div data-bind="css: ($parent.groups) ? 'operation-group columns' : 'small-12 columns'">
+                <!-- ko if: !editMode() -->
+                <div class="condition-view">
+                    <span class="keystroke" data-bind="text:expression,click: expand"></span>
+                </div>
                 <!-- /ko -->
-                
-                </legend>
-                <!-- ko template: {name: getTemplate, foreach: groups} -->
+                <!-- ko if: editMode() -->
+                <fieldset class="segment">
+                    <legend>
+                        <span data-bind="text: groupTypeName"></span>
+                        <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i>Group</span>&nbsp;
+                <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i><span data-bind="text:conditionTypeName"></span></span>
+                        <i class="general foundicon-remove remove-group" data-bind="click: $parent.removeGroup, visible : $parent.groups ||  groupType === 'selections'"></i>
+                        <i style="color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
+                        <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
+                        &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name" />
+                        <!-- /ko -->
+
+                    </legend>
+                    <!-- ko template: {name: getTemplate, foreach: groups} -->
+                    <!-- /ko -->
+                </fieldset>
                 <!-- /ko -->
-             </fieldset>
-             <!-- /ko -->
-             </div>
+            </div>
         </div>
-        
+
     </script>
     <script type="text/html" id="condition-template">
-        <div class="row collapse" style="position:relative">
-            <i style="position:absolute;right: -17px;top: 8px; color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible:editMode"></i>
+        <div class="row collapse" style="position: relative">
+            <i style="position: absolute; right: -17px; top: 8px; color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible:editMode"></i>
             <div class="columns logic-toggler">
                 <div class="logic-wrapper" data-bind="visible: !amIFirst()">
                     <span data-bind="text: logic" class="logic-text label secondary"></span>
@@ -277,7 +413,7 @@
             <div class="operation-group columns">
                 <!-- ko if: !editMode() -->
                 <div class="condition-view">
-                <span class="keystroke" data-bind="text:expression,click: expand"></span>
+                    <span class="keystroke" data-bind="text:expression,click: expand"></span>
                 </div>
                 <!-- /ko -->
 
@@ -287,10 +423,10 @@
                         <select data-bind="options:$parents[level].properties, optionsCaption:'property', value: prop"></select>
                     </div>
                     <div class="small-2 columns">
-                        <select style="margin-left:-1px" data-bind="options:$parents[level].conditionalOperations, value: operation"></select>
+                        <select style="margin-left: -1px" data-bind="options:$parents[level].conditionalOperations, value: operation"></select>
                     </div>
                     <div class="small-5 columns">
-                        <input type="text" style="margin-left:-2px" data-bind="value:value" placeholder="value"></input>
+                        <input type="text" style="margin-left: -2px" data-bind="value:value" placeholder="value"></input>
                     </div>
                 </div>
                 <!-- ko if: isComplex() -->
@@ -299,28 +435,29 @@
                 <!-- /ko -->
                 <div class="row collapse">
                     <div class="small-5 columns">
-                        <input type="checkbox" data-bind="checked:isComplex"/> Complex
+                        <input type="checkbox" data-bind="checked:isComplex" />
+                        Complex
                     </div>
                     <!-- ko if: isComplex() -->
-                    
+
                     <div class="small-3 columns">
                         <select data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
                     </div>
                     <div class="small-3 columns">
-                        <input type="text" data-bind="value:value" placeholder="custom value" style="margin-left:-1px"></input>
+                        <input type="text" data-bind="value:value" placeholder="custom value" style="margin-left: -1px"></input>
                     </div>
                     <div class="small-1 columns">
-                        <i style="color:#ff0000" class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
+                        <i style="color: #ff0000" class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
                     </div>
                     <!-- /ko -->
-                    
+
                 </div>
                 <!-- /ko -->
             </div>
         </div>
-        
+
     </script>
-    
+
     <script type="text/html" id="operation-template">
         <div class="row collapse">
             <div class="columns logic-toggler">
@@ -349,6 +486,20 @@
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
+
+    <script src="content/nvd3/core.js"></script>
+    <script src="content/nvd3/utils.js"></script>
+    <script src="content/nvd3/models/legend.js"></script>
+    <script src="content/nvd3/models/line.js"></script>
+    <script src="content/nvd3/tooltip.js"></script>
+    <script src="content/nvd3/interactiveLayer.js"></script>
+    <script src="content/nvd3/models/axis.js"></script>
+    <script src="content/nvd3/models/scatter.js"></script>
+    <script src="content/nvd3/models/lineChart.js"></script>
+    
+    <script src="content/nvd3/models/pie.js"></script>
+    <script src="content/nvd3/models/pieChart.js"></script>
+
     <script type="text/javascript" src="content/js/sortable.js"></script>
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
@@ -360,12 +511,14 @@
         (function (root) {
             window.dashboard = new Dashboard();
             ko.applyBindings(dashboard, document.getElementById('dashboard'));
-            
+            window.topBar = new TopBar();
+            ko.applyBindings(topBar, document.getElementById('topbar'));
+
             window.widgetProcessor = new WidgetProcessor();
             ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
-            
 
-           // $(document).foundation();
+
+            // $(document).foundation();
         })(this);
     </script>
 </body>

@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
+    <link href="content/nvd3/nv.d3.css" rel="stylesheet" type="text/css"/>
     <style>
         
         .logic-text {
@@ -17,7 +18,8 @@
         }
         .logic-selection{
             display:none;
-            max-width:80px;
+            max-width: 55px;
+            margin-left: 0.8rem;
         }
         .logic-wrapper{
             border-bottom: 1px solid #ddd;
@@ -59,19 +61,27 @@
             top:.5rem;
             margin-bottom: 1.5rem;
         }
+        .graph {
+            height:500px;
+        }
+
     </style>
 </head>
 <body>
     <div>
         <div class="row" id="segmentProcessor">
             <div class="large-6 columns">
-                <!-- ko template: {name: 'segment-template', data: segment} -->
-                <!-- /ko -->
-            </div>
-            <div class="large-6 columns">
+                <div class="row">
+                    <div class="small-12 columns">
+                        <div id="graph" class="graph">
+                            <svg></svg>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="small-6 columns">
                         <button data-bind="click: processDataGroups" class="button small">Groups</button>
+                        <button data-bind="click: toggleSegmentDisplay" class="button small">toggle</button>
                     </div>
                     <div class="small-6 columns">
                         <button data-bind="click: processConditionsSection" class="button small">Conditions</button>
@@ -87,6 +97,10 @@
                         <textarea style="height:300px" data-bind="text:outputData"></textarea>
                     </div>
                 </div>
+            </div>
+            <div class="large-6 columns">
+                <!-- ko template: {name: 'segment-template', data: segment} -->
+                <!-- /ko -->
             </div>
         </div>
     </div>
@@ -262,11 +276,11 @@
                     <div class="small-3 columns">
                         <input type="text" data-bind="value:value" placeholder="custom value" style="margin-left:-1px"></input>
                     </div>
+                    
+                    <!-- /ko -->
                     <div class="small-1 columns">
                         <i style="color:#ff0000" class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
                     </div>
-                    <!-- /ko -->
-                    
                 </div>
                 <!-- /ko -->
             </div>
@@ -296,7 +310,22 @@
             </div>
         </div>
     </script>
+    <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     
+    <script src="content/js/lib/d3.v3.js"></script>
+    <script src="content/nvd3/core.js"></script>
+    <script src="content/nvd3/utils.js"></script>
+    <script src="content/nvd3/models/legend.js"></script>
+    <script src="content/nvd3/models/line.js"></script>
+    <script src="content/nvd3/tooltip.js"></script>
+    <script src="content/nvd3/interactiveLayer.js"></script>
+    <script src="content/nvd3/models/axis.js"></script>
+    <script src="content/nvd3/models/scatter.js"></script>
+    <script src="content/nvd3/models/lineChart.js"></script>
+    
+    <script src="content/nvd3/models/pie.js"></script>
+    <script src="content/nvd3/models/pieChart.js"></script>
+
     <script type="text/javascript" src="content/js/global.js"></script>
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>

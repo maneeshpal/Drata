@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
+        <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+
+        <style type="text/css">
+            .graph{
+                width:100%;
+                height:500px;
+            }
+            .donuttext{
+                font:normal 12px sans-serif;
+            }
+        </style>
+    </head>
+<body>
+    <div id="donutd3" class="graph">
+    </div>
+   
+    <div id="graph" class="graph">
+        <svg></svg>
+    </div>
+     
+    <script src="content/js/lib/d3.v3.js"></script>
+    <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
+     <script>
+        (function (root) {
+            window.data= [];
+            var date1 = new Date();
+            for(var i =10;i<=13;i++){
+                var plotvalues = [];
+                var today = new Date();
+                var y = 0;
+                for(var j = 1; j < 6; j++){
+                    plotvalues.push({
+                      x: i * 20,
+                      y: j * 50
+                    });
+                }
+                data.push(plotvalues);
+            };
+// d3.select('#graph svg').selectAll('g').data(data).enter().append('g')
+// .selectAll('circle')
+// .data(function(d) {return d;}).enter().append('circle')
+// .attr('cx', function (d) { return d.x; })
+// .attr('cy', function (d) { return d.y; })
+// .attr('r', function (d) { return 10; })
+// .attr('fill', function (d) { return '#ff0000'; })
+// .attr('opacity', .5);
+
+    })(this);
+    
+
+    // var data = [
+    //   [11975,  5871, 8916, 2868],
+    //   [ 1951, 10048, 2060, 6171],
+    //   [ 8010, 16145, 8090, 8045],
+    //   [ 1013,   990,  940, 6907]
+    // ];
+    var data = [
+    [
+        {
+            key: "aaa",
+            value: 22
+        },
+        {
+            key: "bbb",
+            value: 18
+        },
+        {
+            key: "ccc",
+            value: 36
+        }
+    ],
+    [
+        {
+            key: "aaa",
+            value: 44
+        },
+        {
+            key: "bbb",
+            value: 29
+        },
+        {
+            key: "ccc",
+            value: 136
+        }
+    ]
+]
+
+    var m = 10,
+        r = 60,
+        z = d3.scale.category20();
+
+    var svg = d3.select("#donutd3").selectAll("svg")
+        .data(data)
+      .enter().append("svg:svg")
+        .attr("width", (r + m) * 2)
+        .attr("height", (r + m) * 2)
+      .append("svg:g")
+        .attr("class", "arc")
+        .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+    var arc = d3.svg.arc()
+        .outerRadius(r)
+        .innerRadius(r / 2);
+
+    var pie = d3.layout.pie()
+        .sort(null)
+        .value(function(d) { 
+            return d.value; 
+        });
+    
+    var g = svg.selectAll(".arc")
+        .data(pie)
+        .enter().append("g")
+        .attr("class", "arc");
+
+    g.append("path")
+        .attr("d", arc)
+        .style("fill", function(d, i) { return z(i); });
+
+    g.append("text")
+        .attr("class", "donuttext")
+        .attr("transform", function(d) {
+            return "translate(" + arc.centroid(d) + ")";
+        })
+        .attr("dy", ".35em")
+        .style("text-anchor", "middle")
+        .text(function(d) { 
+            return d.data.key; 
+        });
+
+    </script>
+
+</body>
+
+</html>

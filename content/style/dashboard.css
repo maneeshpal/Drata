@@ -1,11 +1,3 @@
-.handle {
-  width: 100%;
-  border-bottom: 1px dashed #CCC;
-  padding: .5em;
-  background-color: #eee;
-  font-weight: bold;
-  font-size: 1em; }
-
 .ui-sortable-placeholder {
   background-color: #E5E0E0;
   visibility: visible !important;
@@ -21,7 +13,8 @@
   height: 100%; }
 
 .widget-content {
-  height: 337px; }
+  height: 337px;
+  position: relative; }
 
 @media only screen and (max-width: 767px) {
   .ui-sortable-placeholder {

@@ -3911,6 +3911,21 @@ meta.foundation-mq-topbar {
       .top-bar.expanded .toggle-topbar a span {
         -webkit-box-shadow: 0 10px 0 1px #888888, 0 16px 0 1px #888888, 0 22px 0 1px #888888;
         box-shadow: 0 10px 0 1px #888888, 0 16px 0 1px #888888, 0 22px 0 1px #888888; }
+  .top-bar.widget {
+    color: #333333;
+    background-color: #f2f2f2;
+    border-bottom: 1px dashed #CCC; }
+    .top-bar.widget .name h1 a {
+      color: #333333; }
+    .top-bar.widget i {
+      top: 10px; }
+    .top-bar.widget .top-bar-section .divider {
+      border-right: 1px solid #ccc; }
+    .top-bar.widget .top-bar-section .has-form {
+      background-color: #f2f2f2;
+      border-bottom: 1px dashed #CCC; }
+  .top-bar.dashboard {
+    margin-bottom: 1.2rem; }
 
 .top-bar-section {
   left: 0;

@@ -19,11 +19,9 @@ var Segmentor = function(model){
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
     
-    self.prefill = function(model){
-        model && self.properties(model.properties);
-
-        //This will reset all the properties down the line.
+    self.initialize = function(model){
         model = model || {};
+        self.properties(model.properties);
         self.group.prefill(model.group || {});
         self.selection.prefill(model.selection || {});
         self.dataGroup.prefill(model.dataGroup || {});
@@ -36,7 +34,7 @@ var Segmentor = function(model){
             properties: self.properties()
         };
     }
-    model && self.prefill(model);
+    model && self.initialize(model);
 };
 
 var SelectOperation = function(level, conditionType, model, parent){
@@ -61,6 +59,21 @@ var SelectOperation = function(level, conditionType, model, parent){
     };
     self.collapse = function(){
         self.editMode(false);
+    };
+    self.getModel = function(){
+        //var selectionGroupModel = self.selectionGroup.getModel();
+        var returnModel = ko.toJS(self);
+        delete returnModel.parent;
+        delete returnModel.template;
+        delete returnModel.expression;
+        delete returnModel.amIFirst;
+        delete returnModel.level;
+        delete returnModel.expand;
+        delete returnModel.collapse;
+        delete returnModel.getModel;
+        delete returnModel.editMode;
+        //returnModel.selectionGroup = selectionGroupModel;
+        return returnModel;
     };
 };
 
@@ -158,11 +171,11 @@ var Group = function(level, groupType, model, parent){
     self.getTemplate = function(item){
         return item.template;
     };
-    self.prefill = function(model){
-        self.selectionName(model.selectionName);
-        self.logic(model.logic);
+    self.prefill = function(m){
+        self.selectionName(m.selectionName);
+        self.logic(m.logic);
         self.groups(ko.utils.arrayMap(
-            model.groups,
+            m.groups,
             function(groupModel) {
                 if(groupModel.renderType === 'condition'){
                     if(self.groupType === 'conditions'){
@@ -187,7 +200,8 @@ var Group = function(level, groupType, model, parent){
             groupType: self.groupType,
             groups: returnGroups,
             logic: self.logic(),
-            renderType: self.renderType
+            renderType: self.renderType,
+            selectionName: self.selectionName()
         }
     };
     self.expression = ko.computed(function(){
@@ -486,13 +500,12 @@ var Conditioner = {
     processSimpleSelection : function(obj, prop){
         return obj[prop];
     },
-    processDataGroups : function(data, dataGroup, selectionGroup, groupCounter){
+    processDataGroups : function(groupedData, dataGroup, selectionGroup, groupCounter){
         var returnGroups = [];
-        var groupedData = _.groupBy(data, function(item){return item[dataGroup.groupByProp]});
         _.each(groupedData, function(dataItem, groupName){
             var ret = this.divideByInterval(dataItem, dataGroup, selectionGroup);
             returnGroups.push({
-                name : groupCounter ? groupName + '-' + groupCounter : groupName,
+                key : groupCounter ? groupName + '-' + groupCounter : groupName,
                 values : ret
             });
         }.bind(this));
@@ -549,15 +562,20 @@ var Conditioner = {
         var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
         var multipleGroups = segmentModel.dataGroup.hasGrouping && (segmentModel.selection.complexGroups.length + segmentModel.selection.props.length) > 1;
+        var groupedData;
+        
+        if(segmentModel.dataGroup.hasGrouping){
+            groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
+        }
         _.each(segmentModel.selection.complexGroups, function(selectionGroup){
             if(segmentModel.dataGroup.hasGrouping){
                 multipleGroups && groupCounter ++;
-                var groupValues = Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, selectionGroup, groupCounter);
+                var groupValues = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, selectionGroup, groupCounter);
                 _.each(groupValues, function(val){result.push(val);});
             }
             else{
                 result.push({
-                    name : selectionGroup.selectionName,
+                    key : selectionGroup.selectionName,
                     values : Conditioner.divideByInterval(filteredData, segmentModel.dataGroup, selectionGroup)
                 });
             }
@@ -566,16 +584,56 @@ var Conditioner = {
         _.each(segmentModel.selection.props, function(prop){
             if(segmentModel.dataGroup.hasGrouping){
                 multipleGroups && groupCounter ++;
-                var groupValues = Conditioner.processDataGroups(filteredData, segmentModel.dataGroup, prop.prop, groupCounter);
+                var groupValues = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, prop.prop, groupCounter);
                 _.each(groupValues, function(val){result.push(val);});
             }
             else{
                 result.push({
-                    name : prop.prop,
+                    key : prop.prop,
                     values : Conditioner.divideByInterval(filteredData, segmentModel.dataGroup , prop.prop)
                 });
             }
         });
         return result;
+    },
+    getPieData: function(segmentModel, inputData){
+        var response = [];
+        var groupCounter = 0;
+        var filteredData = Conditioner.filterData(inputData, segmentModel.group);
+        var groupedData;
+        if(segmentModel.dataGroup.hasGrouping){
+            groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
+        }
+
+        _.each(segmentModel.selection.props, function(prop){
+            var result = [];
+            if(segmentModel.dataGroup.hasGrouping){
+                _.each(groupedData, function(groupedDataItem, groupName){
+                    result.push({
+                        key: groupName,
+                        value: _.reduce(groupedDataItem, function(memo, num){ 
+                            var numval;
+                            if(segmentModel.dataGroup.groupBy === 'countBy'){
+                                numval = num[prop.prop]? 1 : 0;
+                            }
+                            else{ // sumby
+                                numval = +num[prop.prop] || 0;
+                            }
+                            return memo + numval; 
+                        }, 0)
+                    });
+                });
+            }
+            else{
+                result.push({
+                    key: prop.prop,
+                    value: _.reduce(filteredData, function(memo, num){
+                        return memo + (num[prop.prop]? 1 : 0);
+                    })
+                });
+            }
+            response.push(result);
+        });
+        return response;
     }
 }

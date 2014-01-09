@@ -1,32 +1,38 @@
-.axis path,
-    .axis line {
-        fill: none;
-        stroke: #E5E5E5;
-        shape-rendering: crispEdges;
-    }
 
-    .axis.x path, .axis.x line {
-        display: none;
-    }
+svg text {
+    font: normal 12px Arial;
+}
+.axis path,.axis line {
+    fill: none;
+    stroke: #E5E5E5;
+    shape-rendering: crispEdges;
+}
 
-    .line-path {
-        fill: none;
-        stroke-width: 1px;
-        stroke: url(#my-gradient);
-    }
-    .unselected-line-path {
-        
-    }
-    .selected-line-path{
-        stroke-width:3px;
-    }
-    .tooltip{
-        visibility: hidden;
-        position:absolute;
-        border-radius:4px;
-        background: rgba(0,0,0,.7);
-        color#FFF;
-        padding:5px;
-        width:200px;
-        display:block;
-    }
+.axis.x path, .axis.x line {
+    display: none;
+}
+
+.line-path {
+    fill: none;
+    stroke-width: 1px;
+    stroke: url(#my-gradient);
+}
+.unselected-line-path {
+    
+}
+.selected-line-path{
+    stroke-width:3px;
+}
+.tooltip{
+    visibility: hidden;
+    color:#FFF;
+    display:block;
+    position: absolute;
+    border-radius: .3rem;
+    padding: .3rem;
+    font-size: .8rem;
+    top: 0;
+    right: 0;
+    max-width: 172px;
+    text-align: center;
+}

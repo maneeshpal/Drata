@@ -1,5 +1,6 @@
 ;(function(root) {
     var defaultLineOptions = {
+        drawPathCircles : false,
         margin: { top: 40, right: 10, bottom: 25, left: 30 },
         resize: true,
         dateFormat: 'timestamp',
@@ -33,7 +34,7 @@
         }
     };
     
-	var LineGraph = function(elementId, options,graphData){
+	var LineGraph = function(elementId, options, graphData){
 		var self = this;
         self.graphOptions = {};
 		$.extend(self.graphOptions, defaultLineOptions, options);
@@ -82,14 +83,15 @@
         self.graphContainer = d3.select( '#' + self.elem.id);
         self.color = d3.scale.category10()
                         .domain(self.data.map(function(d){
-                            return d.name; 
+                            return d.key; 
                     }));
         self.toolTip = new atombomb.d3.ToolTip({
             graphContainer:self.graphContainer,
             scale :{
                 x: self.x,
                 y: self.y
-            }
+            },
+            position : 'fixed'
         });
         
         self.drawContainer = function(){
@@ -154,8 +156,8 @@
                     yExtent[0] = yRange[0];
                 if(yExtent[1]==null || yRange[1]>yExtent[1])
                     yExtent[1] = yRange[1];
-                self.labelPos[item.name]= labelLength;
-                labelLength = labelLength + item.name.length;
+                self.labelPos[item.key]= labelLength;
+                labelLength = labelLength + item.key.length;
             });
             self.x.domain(xExtent);
             self.y.domain(yExtent);
@@ -201,28 +203,28 @@
                 .enter()
                 .append('circle')
                 .attr('cx', function(d, i){
-                    return ((self.labelPos[d.name]*10) + 40*i)-15;
+                    return ((self.labelPos[d.key]*10) + 40*i)-15;
                 })
                 .attr('cy', -20)
                 .attr('r',6)
                 .attr('fill', function(d){
-                    return self.color(d.name);
+                    return self.color(d.key);
                 })
                 .attr('stroke', function(d){
-                    return self.color(d.name);
+                    return self.color(d.key);
                 })
                 .attr('stroke-width','2')
                 .on("mouseover",function(d){
-                    self.highlightPath('#'+d.name);
+                    self.highlightPath('#'+d.key);
                 })
                 .on("mouseout",function(d){
                     self.graphContainer.select('.lines-g').selectAll('path')
                         .attr('class', 'line-path');
                 })
                 .on('click', function(d){
-                    d3.select(this).attr('fill', d.disabled?self.color(d.name):'#fff');
-                    self.highlightPath('#'+d.name);
-                    self.svg.select('#'+d.name)
+                    d3.select(this).attr('fill', d.disabled?self.color(d.key):'#fff');
+                    self.highlightPath('#'+d.key);
+                    self.svg.select('#'+d.key)
                     .transition().duration(1000)
                     .delay(200)
                     .attr('d', function(){
@@ -243,17 +245,17 @@
                 .enter()
                 .append('text')
                 .attr('x', function(d, i){
-                    return (self.labelPos[d.name]*10) + 40*i;
+                    return (self.labelPos[d.key]*10) + 40*i;
                 })
                 .attr('y', -15)
                 .attr('fill', function(d){
-                    return self.color(d.name);
+                    return self.color(d.key);
                 })
                 .text(function(d){
-                    return d.name;
+                    return d.key;
                 })
                 .on("mouseover",function(d){
-                    self.highlightPath('#'+d.name);
+                    self.highlightPath('#'+d.key);
                 })
                 .on("mouseout",function(d){
                     self.graphContainer.select('.lines-g').selectAll('path')
@@ -266,59 +268,21 @@
             self.graphContainer.select(path).attr('class','line-path selected-line-path');
         };
         self.drawCircles = function(){
-            // self.graphContainer.selectAll('.circles-g').remove();
-            // self.svg.selectAll('g')
-            // .data(self.data)
-            // .enter()
-            // .append('g')
-            // .attr("class", "circles-g")
-            // .selectAll('circle')
-            // .data(function(d){
-            //     var pathId = d.name;
-            //         return d.values.map(function(d){
-            //             d.pathId = pathId; 
-            //             d.color = self.color(pathId);
-            //             return d;
-            //         });
-            // })
-            // .enter()
-            // .append('circle')
-            // .attr('cx', function(d){return self.x(d.x);})
-            // .attr('cy', function(d){return self.y(d.disabled? self.extent.y[0]:d.y);})
-            // .attr('r', 10)
-            // .attr('fill',function(d){return d.c})
-            // .attr('opacity', .5)
-            // .attr("stroke", function(d){
-            //     return d.color;
-            // })
-            // .attr('stroke-width','4')
-            // .attr('fill','white')
-            // .attr("opacity", 0)
-            // .on("mouseover",function(d){
-            //     d3.select(this).attr('opacity',1);
-            //     self.highlightPath('#'+d.pathId);
-            //     self.toolTip.open(d, -self.graphOptions.margin.top, 50);
-            //     return ;
-            // })
-            // .on("mouseout",function(d){
-            //     self.graphContainer.select('.lines-g').selectAll('path')
-            //         .attr('class', 'line-path');
-            //     d3.select(this).attr('opacity',0);
-            //     self.toolTip.close();
-            //     return ;
-            // });
-
-
-            var circlegroup = self.svg.selectAll("circles-g")
+            if(!self.drawPathCircles)
+                return;
+            self.graphContainer.selectAll(".circles-g").remove();
+            var circlegroup = self.svg.selectAll(".circles-g")
                 .data(self.data)
                 .enter()
                 .append("g")
-                .attr("class", "circles-g");
+                .attr("class", function(d){
+                    return 'circles-g path-' + d.key;
+                });
 
             var circles = circlegroup
                 .selectAll("circle")
                 .data(function(d) {
-                    var pathId = d.name;
+                    var pathId = d.key;
                     return d.values.map(function(d){
                         d.pathId = pathId; 
                         d.color = self.color(pathId);
@@ -343,12 +307,14 @@
                 .attr('fill','white')
                 .attr("opacity", 0)
                 .on("mouseover",function(d){
+                    //if(!d.disabled) return; 
                     d3.select(this).attr('opacity',1);
                     self.highlightPath('#'+d.pathId);
-                    self.toolTip.open(d, -self.graphOptions.margin.top, 50);
+                    self.toolTip.open(d, self.graphOptions.margin.top, 50);
                     return ;
                 })
                 .on("mouseout",function(d){
+                    //if(!d.disabled) return; 
                     self.graphContainer.select('.lines-g').selectAll('path')
                         .attr('class', 'line-path');
                     d3.select(this).attr('opacity',0);
@@ -372,16 +338,16 @@
             return !!el[0][0];
         };
         self.drawPath = function(pathContainer, tr, item){
-            var path = pathContainer.select('#' + item.name);
+            var path = pathContainer.select('#' + item.key);
             if(!self.elementExists(path)){
                 pathContainer.append("path")
                     .datum(item)
                     .attr('id', function(d){
-                        return d.name;
+                        return d.key;
                     })
                     .attr("class",'line-path')
                     .attr("style", function(d){
-                        return 'stroke:'+ self.color(d.name);
+                        return 'stroke:'+ self.color(d.key);
                     })
                     .attr('transform',null)
                     .attr("d", self._getLine.bind(self))
@@ -400,7 +366,7 @@
                 }
                     
             }
-            root.logmsg && console.log('path drawn : ' + item.name);
+            root.logmsg && console.log('path drawn : ' + item.key);
                 
         };
         self.drawPaths=function(tr){
@@ -408,24 +374,11 @@
             var pathContainer = self.svg.select('.lines-g');
             if(!self.elementExists(pathContainer)){
                 pathContainer = self.svg
-                // .append('defs')
-                 // .append('clippath')
-                 // .attr('id', 'clip1')
-                 // .append('rect')
-                // .attr('x', self.graphOptions.margin.left)
-                // .attr('y', self.graphOptions.margin.top)
-                 // .attr('width', 906)
-                 // .attr('height', 438)
                 .append("g")
                 .attr('class',"lines-g")
                 .attr('transform', 'translate(' + (-self.xdiff) + ')');
             }
             atombomb.utils.forEach(self.data, self.drawPath.bind(self, pathContainer, tr));
-            
-            // .selectAll("path")
-            // .data(self.data)
-            // .enter()
-            // .call(self.drawPath);
         };
         self.drawContent = function(){
             self.drawAxes();
@@ -489,14 +442,19 @@
             self.close();
         };
         self.open = function(data,top,left){
+            if(self.position === 'relative'){
+                self._tip.style("top", (self.scale.y(data.y)+top) + 'px');
+                self._tip.style("left", (self.scale.x(data.x) +left) + 'px');
+            }
+            self._tip.style('background-color', data.color);
             self._tip.style("visibility", "visible");
-            self._tip.style("top", (self.scale.y(data.y)+top) + 'px');
-            self._tip.style("left", (self.scale.x(data.x) +left) + 'px');
             self._tip.text("Time: " + data.x + "\nValue: " + data.y);
         };
         self.close = function(){
-            self._tip.style('top', 0);
-            self._tip.style('left', 0);
+            if(self.position === 'relative'){
+                self._tip.style('top', 0);
+                self._tip.style('left', 0);
+            }
             self._tip.style('visibility','hidden');
         };
         self._create();
