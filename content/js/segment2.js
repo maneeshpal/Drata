@@ -18,23 +18,30 @@ var Segmentor = function(model){
     self.selection = new Selection(self.level);
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
-    
+    self.segmentType = ko.observable();
+    self.editMode = ko.observable(false);
     self.initialize = function(model){
+        self.editMode(true);
         model = model || {};
         self.properties(model.properties);
+        self.segmentType(model.segmentType);
         self.group.prefill(model.group || {});
         self.selection.prefill(model.selection || {});
         self.dataGroup.prefill(model.dataGroup || {});
     };
     self.getModel = function(){
         return {
+            segmentType: self.segmentType(),
             selection: self.selection.getModel(),
             dataGroup: ko.toJS(self.dataGroup),
             group: self.group.getModel(),
             properties: self.properties()
         };
-    }
-    model && self.initialize(model);
+    };
+    self.setSegmentType = function(segmentType){
+        self.segmentType(segmentType);
+    };
+    //model && self.initialize(model);
 };
 
 var SelectOperation = function(level, conditionType, model, parent){
@@ -276,8 +283,22 @@ var Selection = function(level, model){
     };
 };
 
+var BasicDataGroup = function(model){
+    var self = this;
+    self.template = 'basic-datagroup-template';
+    self.groupBy = ko.observable();
+    self.groupByProp = ko.observable();
+
+    self.prefill = function(model){
+        self.groupByProp(model.groupByProp);
+        self.groupBy(model.groupBy);
+    };
+    model && self.prefill(model);
+};
+
 var DataGroup = function(model){
     var self = this;
+    self.template = 'datagroup-template';
     self.xAxisProp = ko.observable();
     self.groupByProp = ko.observable();
     self.groupBy = ko.observable();
@@ -558,6 +579,18 @@ var Conditioner = {
         return filteredData;
     },
     getGraphData: function(segmentModel, inputData){
+        var returnData;
+        switch (segmentModel.segmentType){
+            case 'line':
+                returnData = this.getLineCharData(segmentModel, inputData);
+                break;
+            case 'pie':
+                returnData = this.getPieData(segmentModel, inputData);
+                break;
+        }
+        return returnData;
+    },
+    getLineCharData: function(segmentModel, inputData){
         var result = [];
         var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);

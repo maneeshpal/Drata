@@ -114,6 +114,13 @@
             height:auto;
             display:inline;
         }
+
+        ul.segment-type{
+            text-align: center;
+        }
+        .segment-type i {
+            font-size: 2rem;
+        }
         @media only screen and (max-width: 64.063em) {
             .segment-processor-inner {
                 width: 95%;
@@ -122,7 +129,7 @@
     </style>
 </head>
 <body style="overflow: hidden">
-    <nav class="top-bar dashboard" id="topbar" data-topbar>
+    <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:2rem">
         <ul class="title-area">
             <li class="name">
                 <h1><a href="#">Drata</a></h1>
@@ -242,7 +249,7 @@
     <script type="text/html" id="widget-template">
         <li>
             <div class="widget-wrapper">
-                <nav class="top-bar widget handle" id="topbar" data-topbar>
+                <nav class="top-bar secondary widget handle" id="topbar" data-topbar>
                     <ul class="title-area">
                         <li class="name">
                             <h1><a data-bind="html:name"></a></h1>
@@ -251,11 +258,11 @@
                     <section class="top-bar-section">
                         <ul class="right">
                             <li class="divider"></li>
-                            <li class="has-form">
+                            <li class="has-form action-icon">
                                 <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
                             </li>
                             <li class="divider"></li>
-                            <li class="has-form">
+                            <li class="has-form action-icon">
                                 <i data-bind="click:editWidget" class="general foundicon-edit"></i>
                             </li>
                         </ul>
@@ -271,7 +278,27 @@
     </script>
 
     <script type="text/html" id="segment-template">
-
+    <ul class="small-block-grid-3 segment-type">
+        <li>
+            <div class="button tiny" data-bind="css: {'primary': segmentType() === 'line','secondary': segmentType() !== 'line'},click:setSegmentType.bind(this, 'line')">
+                <i class="general foundicon-plus"></i>
+                <p>LineChart</p>
+            </div>
+        </li>
+        <li>
+            <div class="button tiny" data-bind="css: {'primary': segmentType() === 'pie','secondary': segmentType() !== 'pie'},click:setSegmentType.bind(this, 'pie')">
+                <i class="general foundicon-plus"></i>
+                <p>PieChart</p>
+            </div>
+        </li>
+        <li>
+            <div class="button secondary tiny">
+                <i class="general foundicon-plus"></i>
+                <p>PieChart</p>
+            </div>
+        </li>
+        
+    </ul>
         <div class="row">
             <div class="large-12 columns">
                 <!-- ko template: {name: 'selection-template', data: selection} -->
@@ -311,13 +338,35 @@
             </div>
         </div>
     </script>
-
+     <script type="text/html" id="basic-datagroup-template">
+        <div class="row">
+            <div class="small-12 columns">
+                <fieldset>
+                    <legend>Grouping Data</legend>
+                    <form>
+                        
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </script>
     <script type="text/html" id="datagroup-template">
         <div class="row">
             <div class="small-12 columns">
                 <fieldset>
                     <legend>Grouping</legend>
                     <form>
+                        <!-- ko if:$parent.segmentType() !== 'line' -->
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:$parent.properties, value:groupByProp"></select>
+                            </div>
+                        </div>
+                        <!-- /ko -->
+                        <!-- ko if:$parent.segmentType() === 'line' -->
                         <div class="row">
                             <div class="small-8">
                                 <div class="row">
@@ -359,6 +408,7 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- /ko -->
                     </form>
                 </fieldset>
             </div>
@@ -507,6 +557,7 @@
     <script type="text/javascript" src="content/js/dashboard.js"></script>
 
     <script type="text/javascript" src="content/js/d3.line.js"></script>
+    <script type="text/javascript" src="content/js/pie.js"></script>
     <script type="text/javascript">
         (function (root) {
             window.dashboard = new Dashboard();

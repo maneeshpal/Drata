@@ -3,6 +3,7 @@
         selectedDataKey: 'key1',
         widgetType: 'line',
         segmentModel: {
+            segmentType: 'line',
             selection: {
                 complexGroups: [],
                 props: [
@@ -49,6 +50,7 @@
         selectedDataKey: "key1",
         widgetType: 'line',
         segmentModel: {
+            segmentType: 'line',
             selection: {
                 complexGroups: [
                     {
@@ -115,6 +117,7 @@
         selectedDataKey: "key1",
         widgetType: 'pie',
         segmentModel: {
+            segmentType: 'pie',
             selection: {
                 complexGroups: [],
                 props: [
@@ -126,7 +129,7 @@
             dataGroup: {
                 xAxisProp: "timestamp",
                 groupByProp: "c",
-                groupBy: "sumby",
+                groupBy: "sumBy",
                 hasGrouping: true
             },
             group: {
@@ -162,6 +165,7 @@
         selectedDataKey: "key2",
         widgetType: 'line',
         segmentModel: {
+            segmentType: 'line',
             selection: {
                 complexGroups: [],
                 props: [
@@ -271,10 +275,7 @@ var LineWidget = function(widgetModel, index){
             });
             var formatter = d3.format(",.1f");
             chart.margin({right: 40});
-            chart.xAxis // chart sub-models (ie. xAxis, yAxis, etc) when accessed directly, return themselves, not the parent chart, so need to chain separately
-                .tickFormat(
-                    formatter
-                  );
+            chart.xAxis.tickFormat(formatter);
             chart.transitionDuration(1000);
             chart.yAxis
                 .axisLabel('maneesh')
@@ -314,59 +315,12 @@ var PieWidget = function(widgetModel, index){
     };
 
     self.getChartData = function(inputData){
-        var graphData = Conditioner.getPieData(self.widgetModel.segmentModel, inputData);
+        var graphData = Conditioner.getGraphData(self.widgetModel.segmentModel, inputData);
         return graphData;
     };
 
     self.drawChart = function(chartData){
-        var wrapperHeight = $('#'+ self.widgetContentId).height();
-        var wrapperWidth = $('#'+ self.widgetContentId).width();
-        var numPies = chartData.length;
-        var r = (wrapperWidth/numPies)/2 - 10;
-        if(r > (wrapperHeight/2)-20)
-            r = (wrapperHeight/2)-20;
-        var m = 10,
-        z = d3.scale.category20();
-        d3.select('#'+ self.widgetContentId)
-            .selectAll("svg").remove();
-        var svg = d3.select('#'+ self.widgetContentId)
-            .selectAll("svg")
-            .data(chartData)
-            .enter().append("svg:svg").attr('class', 'pie')
-            .attr("width", (r + m) * 2)
-            .attr("height", (r + m) * 2)
-            .append("svg:g")
-            .attr("class", "arc")
-            .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
-        var arc = d3.svg.arc()
-            .outerRadius(r)
-            .innerRadius(r / 2);
-
-        var pie = d3.layout.pie()
-            .sort(null)
-            .value(function(d) { 
-                return d.value; 
-            });
-        
-        var g = svg.selectAll(".arc")
-            .data(pie)
-            .enter().append("g")
-            .attr("class", "arc");
-
-        g.append("path")
-            .attr("d", arc)
-            .style("fill", function(d, i) { return z(i); });
-
-        g.append("text")
-            .attr("class", "donuttext")
-            .attr("transform", function(d) {
-                return "translate(" + arc.centroid(d) + ")";
-            })
-            .attr("dy", ".35em")
-            .style("text-anchor", "middle")
-            .text(function(d) { 
-                return d.data.key;
-        });
+        self.chart = new drata.charts.PieChart(self.widgetContentId, chartData);
     };
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
@@ -421,10 +375,11 @@ var WidgetProcessor = function(){
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add');
         self.selectedDataKey(undefined);
+        self.previewGraph(false);
         $('#graphBuilder').removeClass('showme');
     };
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
-        var clonemodel = atombomb.utils.clone(model);
+        var clonemodel = drata.utils.clone(model);
         self.processSegment = false;
         self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
@@ -441,13 +396,20 @@ var WidgetProcessor = function(){
         self.previewGraph(false);
         self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
-        //$('#myModal').foundation('reveal', 'close');
     };
     self.handleGraphPreview = function(segmentModel){
         self.previewGraph(true);
         var inputData = DataRetriever.getData(self.selectedDataKey());
         var graphData = Conditioner.getGraphData(segmentModel, inputData);
-        self.graph = new atombomb.d3.LineGraph( 'previewgraph', undefined, graphData);
+        switch(segmentModel.segmentType){
+            case 'line':
+                self.graph = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+                break;
+            case 'pie':
+                self.graph = new drata.charts.PieChart( 'previewgraph', graphData);
+                break;
+        }
+        
         self.outputData(JSON.stringify(graphData, null, '\t'));
         self.inputData(JSON.stringify(inputData, null, '\t'));
     };
@@ -456,7 +418,7 @@ var WidgetProcessor = function(){
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
-            self.graph.removeGraph();
+            self.graph.removeChart();
         }
     });
 };

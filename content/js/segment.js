@@ -18,6 +18,7 @@ var Segmentor = function(model){
     self.selection = new Selection(self.level);
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
+    self.segmentType = ko.observable();
     
     self.prefill = function(model){
         model && self.properties(model.properties);
@@ -34,6 +35,7 @@ var Segmentor = function(model){
         var dataGroup = ko.toJS(self.dataGroup);
         
         var model = {
+            segmentType: self.segmentType(),
             selection: jsSelection,
             dataGroup: dataGroup,
             group: jsGroup,

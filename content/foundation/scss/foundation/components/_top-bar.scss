@@ -252,34 +252,6 @@ meta.foundation-mq-topbar {
           }
         }
       }
-	  &.widget {
-			color:	$topbar-bg;
-			background-color : #f2f2f2;
-			border-bottom:1px dashed #CCC;
-			.name {
-				h1 {
-					a {
-						color:	$topbar-bg;
-					}
-				}
-			}
-			i {
-				top:10px;
-			}
-			.top-bar-section {
-				.divider {
-					border-right : 1px solid #ccc;
-				}
-				.has-form{
-					background-color : #f2f2f2;
-					border-bottom:1px dashed #CCC;
-				}
-			} 
-	  }
-	  &.dashboard {
-			margin-bottom: 1.2rem;
-	  }
-
     }
 
     // Right and Left Navigation that stacked by default
@@ -305,7 +277,6 @@ meta.foundation-mq-topbar {
         height: 1px;
         width: 100%;
       }
-
       ul li {
         & > a {
           display: block;
@@ -360,7 +331,7 @@ meta.foundation-mq-topbar {
           background: $topbar-link-bg-active;
           color: $topbar-link-color-active;
           &:hover {
-                background: $topbar-link-bg-active-hover;
+				background: $topbar-link-bg-active-hover;
           }
         }
       }

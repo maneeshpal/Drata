@@ -48,10 +48,7 @@
                     values:plotvalues,
                     name:'aaa'+i});
             };
-            var lineGraph = new atombomb.d3.LineGraph( 'graph', null, data);
-            root.atombomb.namespace('web').extend({
-                lineGraph : lineGraph
-            });
+            var l = new drata.charts.LineChart('graph', null, data);
     })(this);
     </script>
 </body>

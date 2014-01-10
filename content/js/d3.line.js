@@ -34,7 +34,7 @@
         }
     };
     
-	var LineGraph = function(elementId, options, graphData){
+	var LineChart = function(elementId, options, graphData){
 		var self = this;
         self.graphOptions = {};
 		$.extend(self.graphOptions, defaultLineOptions, options);
@@ -85,7 +85,7 @@
                         .domain(self.data.map(function(d){
                             return d.key; 
                     }));
-        self.toolTip = new atombomb.d3.ToolTip({
+        self.toolTip = new ToolTip({
             graphContainer:self.graphContainer,
             scale :{
                 x: self.x,
@@ -128,9 +128,9 @@
             var xExtent = [null,null], yExtent = [null,null];
             
             var labelLength = 2;
-            atombomb.utils.forEach(self.data, function(item){
+            _.each(self.data, function(item){
                 if(self.graphOptions.xAxis.type =='time'){
-                    atombomb.utils.forEach(item.values,function(datapoint){
+                    _.each(item.values,function(datapoint){
                         datapoint.x = self.parseDate(datapoint.x);
                     });
                 };
@@ -324,7 +324,7 @@
         };
         self._getLine = function(d){
             if(d.disabled){
-                var tempdata = atombomb.utils.clone(d.values);
+                var tempdata = drata.utils.clone(d.values);
                 tempdata.forEach(function(v){
                     v.y = self.extent.y[0];
                 });
@@ -378,22 +378,22 @@
                 .attr('class',"lines-g")
                 .attr('transform', 'translate(' + (-self.xdiff) + ')');
             }
-            atombomb.utils.forEach(self.data, self.drawPath.bind(self, pathContainer, tr));
+            _.each(self.data, self.drawPath.bind(self, pathContainer, tr));
         };
         self.drawContent = function(){
             self.drawAxes();
             var aa = new Date();
             self.drawPaths();
-            console.log('draw path: '+ (new Date() - aa));
+            root.logmsg && console.log('draw path: '+ (new Date() - aa));
             aa = new Date();
             self.drawCircles();
-            console.log('draw circle: '+ (new Date() - aa));
+            root.logmsg && console.log('draw circle: '+ (new Date() - aa));
             aa = new Date();
             self.drawLegendLabels();
-            console.log('draw legend labels: '+ (new Date() - aa));
+            root.logmsg && console.log('draw legend labels: '+ (new Date() - aa));
             aa = new Date();
             self.drawLegendCircles();
-            console.log('draw legend circles: '+ (new Date() - aa));
+            root.logmsg && console.log('draw legend circles: '+ (new Date() - aa));
         };
         self.redrawResize = function(){
             self.drawContainer();
@@ -406,20 +406,20 @@
         self.drawStream = function(){
             var pd = new Date();
             self.processData();
-            console.log('process data:' + (new Date() - pd));
+            root.logmsg && console.log('process data:' + (new Date() - pd));
             pd = new Date();
             self.drawAxes();
-            console.log('draw axes:' + (new Date() - pd));
+            root.logmsg && console.log('draw axes:' + (new Date() - pd));
             self.drawPaths();
             self.drawCircles();
         };
-	    self.removeGraph = function() {
+	    self.removeChart = function() {
 	        self.svg.remove();
 	    };
         self.init = function(){
             var pd = new Date();
             self.processData();
-            console.log('process data:' + (new Date() - pd));
+            root.logmsg && console.log('process data:' + (new Date() - pd));
             self.drawContainer();
             self.drawContent();
             self.graphOptions.resize &&  $(window).on('resize', function(){
@@ -428,9 +428,9 @@
             });
         };
         var st = new Date();
-        console.log(new Date());
+        root.logmsg && console.log(new Date());
         self.init();
-        console.log('time it took :' + (new Date() - st));
+        root.logmsg && console.log('time it took :' + (new Date() - st));
 	};
     var ToolTip = function(params){
         var self = this;
@@ -459,11 +459,8 @@
         };
         self._create();
     };
-    root.logmsg= false;
-	root.atombomb.namespace('d3').extend({
-	    LineGraph: LineGraph
-	});
-    root.atombomb.namespace('d3').extend({
-        ToolTip: ToolTip
+    root.logmsg = false;
+    root.drata.ns('charts').extend({
+        LineChart : LineChart
     });
 })(this);
