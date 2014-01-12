@@ -2,7 +2,6 @@
 ;(function(root) {
     var PieChart = function(elementId, chartData){
         var self = this;
-        self.chartData = chartData;
 
         self.elem = document.getElementById(elementId); 
         
@@ -13,13 +12,22 @@
             return self.elem.clientWidth;
         };
         self.drawChart = function(){
-            var numPies = self.chartData.length;
+            var numPies = chartData.length;
             var w = self.elemWidth();
             var h = self.elemHeight();
             var sqrt = Math.sqrt(numPies);
             var maxgrid = Math.ceil(sqrt);
             var mingrid = Math.floor(sqrt);
             var x,y;
+            _.each(chartData, function(chartDatum, index){
+                var total = _.reduce(chartDatum, function(memo, num){
+                    return memo + (+num.value);
+                }, 0);
+                chartDatum = chartDatum.map(function(d){
+                  d.perc = ((d.value * 100) / total).toFixed(1);
+                });
+            });
+            
             if(mingrid === maxgrid){
                 //perfect grid
                 x = mingrid;
@@ -46,7 +54,7 @@
                 .selectAll("svg").remove();
             var svg = d3.select('#'+ self.elem.id)
                 .selectAll("svg")
-                .data(self.chartData)
+                .data(chartData)
                 .enter().append("svg:svg").attr('class', 'pie')
                 .attr("width", (r * 2) + m) 
                 .attr("height", (r * 2) + m)
@@ -80,7 +88,7 @@
                 .attr("dy", ".35em")
                 .style("text-anchor", "middle")
                 .text(function(d) { 
-                    return d.data.key;
+                    return d.data.key + ' ('+ d.data.perc +'%)';
             });
         };
         self.drawChart();
