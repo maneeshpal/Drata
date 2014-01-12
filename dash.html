@@ -78,12 +78,12 @@
             height: 300px;
         }
 
-        #graphBuilder.showme {
+        .mymodal-wrapper.showme {
             opacity: 1;
             visibility: visible;
         }
 
-        #graphBuilder {
+        .mymodal-wrapper {
             position: absolute;
             /*right: -103%;
             left: 103%;*/
@@ -98,17 +98,23 @@
             opacity: 0;
         }
 
-        #graphBuilder:before, #graphBuilder:after {
+        /*#graphBuilder:before, #graphBuilder:after {
             content: " ";
-        }
+        }*/
 
-        .segment-processor-inner {
+        .mymodal-inner {
             width: 70%;
             margin: 0 auto;
             background-color: #fff;
         }
-
-
+        .mymodal-wrapper.chart-type{
+            height:400px;
+            z-index: 9;
+            top: 0;
+        }
+        .mymodal-wrapper.chart-type .mymodal-inner{
+            top:33%;
+        }
         svg.pie {
             width:auto;
             height:auto;
@@ -117,9 +123,13 @@
 
         ul.segment-type{
             text-align: center;
+            padding-top:1.25rem;
         }
         .segment-type i {
             font-size: 2rem;
+        }
+        .segment-type p{
+            margin-bottom: 0;
         }
         @media only screen and (max-width: 64.063em) {
             .segment-processor-inner {
@@ -157,8 +167,8 @@
             </ul>
         </div>
     </div>
-    <div id="graphBuilder">
-        <div class="segment-processor-inner">
+    <div id="graphBuilder" class="mymodal-wrapper">
+        <div class="mymodal-inner">
             <nav class="top-bar" id="topbar" data-topbar>
                 <ul class="title-area">
                     <li class="name">
@@ -195,26 +205,30 @@
                     </ul>
                 </section>
             </nav>
+            <!-- <div style="position:relative">
+            <div class="mymodal-wrapper chart-type showme">
+                <div class="mymodal-inner">
+                    
+                </div>
+            </div>
+            </div> -->
             <div class="row">
                 <div class="small-12 medium-4 large-6 columns">
-                    <fieldset data-bind="visible:previewGraph">
+                    <fieldset data-bind="visible:preview">
                         <legend>Preview</legend>
                         <div id="previewgraph">
-                            <svg></svg></div>
+                            <svg></svg>
+                        </div>
                     </fieldset>
-                    <div class="row">
+                    <!-- <div class="row">
                         <div class="large-12 columns" style="height: 700px">
                             <h6>Output</h6>
                             <textarea style="height: 300px" data-bind="text:outputData"></textarea>
                             <h6>Input</h6>
                             <textarea style="height: 300px" data-bind="text:inputData"></textarea>
-                            <!-- <h6>Filtered data</h6>
-                        <textarea style="height:300px" data-bind="value:filteredData"></textarea> -->
-
-                            <!-- <h6>group</h6>
-                        <textarea style="height:300px" data-bind="text:groupData"></textarea> -->
+                            
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="small-12 medium-8 large-6 columns">
                     <fieldset>
@@ -278,33 +292,35 @@
     </script>
 
     <script type="text/html" id="segment-template">
-    <ul class="small-block-grid-3 segment-type">
-        <li>
-            <div class="button tiny" data-bind="css: {'primary': segmentType() === 'line','secondary': segmentType() !== 'line'},click:setSegmentType.bind(this, 'line')">
-                <i class="general foundicon-plus"></i>
-                <p>LineChart</p>
-            </div>
-        </li>
-        <li>
-            <div class="button tiny" data-bind="css: {'primary': segmentType() === 'pie','secondary': segmentType() !== 'pie'},click:setSegmentType.bind(this, 'pie')">
-                <i class="general foundicon-plus"></i>
-                <p>PieChart</p>
-            </div>
-        </li>
-        <li>
-            <div class="button secondary tiny">
-                <i class="general foundicon-plus"></i>
-                <p>PieChart</p>
-            </div>
-        </li>
-        
-    </ul>
+    
         <div class="row">
             <div class="large-12 columns">
                 <!-- ko template: {name: 'selection-template', data: selection} -->
                 <!-- /ko -->
                 <!-- ko template: {name: 'group-template', data: group} -->
                 <!-- /ko -->
+
+                <ul class="small-block-grid-3 segment-type" data-bind="visible: $root.newWidget">
+                    <li>
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'line','secondary': chartType() !== 'line'},click:setChartType.bind(this, 'line')">
+                            <i class="general foundicon-plus"></i>
+                            <p>LineChart</p>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'pie','secondary': chartType() !== 'pie'},click:setChartType.bind(this, 'pie')">
+                            <i class="general foundicon-plus"></i>
+                            <p>PieChart</p>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="label radius secondary">
+                            <i class="general foundicon-plus"></i>
+                            <p>PieChart</p>
+                        </span>
+                    </li>
+                </ul>
+
                 <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
                 <!-- /ko -->
             </div>
@@ -356,17 +372,22 @@
                 <fieldset>
                     <legend>Grouping</legend>
                     <form>
-                        <!-- ko if:$parent.segmentType() !== 'line' -->
+                        <!-- ko if:$parent.chartType() === 'pie' -->
                         <div class="row">
                             <div class="small-4 columns">
-                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
+                                <select data-bind="value:groupBy">
+                                <option value="sumBy">Sum By</option>
+                                <option value="countBy">Count By</option>
+                                <option value="count">Compare Counts</option>
+                                <option value="sum">Compare Sum</option>
+                                </select>
                             </div>
                             <div class="small-8 columns">
-                                <select data-bind="options:$parent.properties, value:groupByProp"></select>
+                                <select data-bind="options:$parent.properties, value:groupByProp, visible:hasGrouping"></select>
                             </div>
                         </div>
                         <!-- /ko -->
-                        <!-- ko if:$parent.segmentType() === 'line' -->
+                        <!-- ko if:$parent.chartType() === 'line' -->
                         <div class="row">
                             <div class="small-8">
                                 <div class="row">

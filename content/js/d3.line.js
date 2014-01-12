@@ -415,6 +415,7 @@
         };
 	    self.removeChart = function() {
 	        self.svg.remove();
+            self._t && clearTimeout(self._t);
 	    };
         self.init = function(){
             var pd = new Date();
@@ -422,11 +423,16 @@
             root.logmsg && console.log('process data:' + (new Date() - pd));
             self.drawContainer();
             self.drawContent();
-            self.graphOptions.resize &&  $(window).on('resize', function(){
-                    self._t && clearTimeout(self._t);
-                    self._t = setTimeout(self.redrawResize.bind(self), 2000);    
-            });
+            // self.graphOptions.resize &&  $(window).on('resize', function(){
+                
+            // });
         };
+
+        self.onResize = function(){
+            self._t && clearTimeout(self._t);
+            self._t = setTimeout(self.redrawResize.bind(self), 2000);
+        };
+
         var st = new Date();
         root.logmsg && console.log(new Date());
         self.init();

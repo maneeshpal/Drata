@@ -1,9 +1,8 @@
  var defaultWidgetModel = [{
         name: 'widget 1',
         selectedDataKey: 'key1',
-        widgetType: 'line',
         segmentModel: {
-            segmentType: 'line',
+            chartType: 'line',
             selection: {
                 complexGroups: [],
                 props: [
@@ -48,9 +47,8 @@
     {
         name: 'widget 2',
         selectedDataKey: "key1",
-        widgetType: 'line',
         segmentModel: {
-            segmentType: 'line',
+            chartType: 'line',
             selection: {
                 complexGroups: [
                     {
@@ -115,9 +113,8 @@
     },{
         name: 'widget pie',
         selectedDataKey: "key1",
-        widgetType: 'pie',
         segmentModel: {
-            segmentType: 'pie',
+            chartType: 'pie',
             selection: {
                 complexGroups: [],
                 props: [
@@ -163,9 +160,8 @@
     },{
         name: "widget-3",
         selectedDataKey: "key2",
-        widgetType: 'line',
         segmentModel: {
-            segmentType: 'line',
+            chartType: 'line',
             selection: {
                 complexGroups: [],
                 props: [
@@ -207,10 +203,10 @@ var Dashboard = function(){
 	self.widgets(ko.utils.arrayMap(
         dashboardModel.widgets,
         function(model) {
-            if(model.widgetType === 'line'){
+            if(model.segmentModel.chartType === 'line'){
                 return new LineWidget(model, self.index++);    
             } 
-            else if(model.widgetType === 'pie'){
+            else if(model.segmentModel.chartType === 'pie'){
                 return new PieWidget(model, self.index++);    
             }
         }
@@ -222,9 +218,9 @@ var Dashboard = function(){
 
     self.addWidget = function(widgetModel){
         var widget;
-        if(widgetModel.widgetType === 'line'){
+        if(widgetModel.segmentModel.chartType === 'line'){
             widget = new LineWidget(widgetModel, self.index++);    
-        }else if(widgetModel.widgetType === 'pie'){
+        }else if(widgetModel.segmentModel.chartType === 'pie'){
             widget = new PieWidget(widgetModel, self.index++);    
         }
         self.widgets.push(widget);
@@ -294,14 +290,16 @@ var LineWidget = function(widgetModel, index){
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
         var chartData = self.getChartData(inputData);
-        self.graph = self.drawChart(chartData);
+        self.chart && self.chart.removeChart();
+        self.chart = self.drawChart(chartData);
     };
 
     self.updateWidget = function (widgetModel) {
         self.widgetModel = widgetModel;
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
         var chartData = self.getChartData(inputData);
-        self.graph = self.drawChart(chartData);
+        self.chart && self.chart.removeChart();
+        self.chart = self.drawChart(chartData);
     };
 };
 
@@ -321,19 +319,23 @@ var PieWidget = function(widgetModel, index){
 
     self.drawChart = function(chartData){
         self.chart = new drata.charts.PieChart(self.widgetContentId, chartData);
+        $(window).on('resize', self.chart.onResize.bind(self));
     };
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
         var chartData = self.getChartData(inputData);
-        self.graph = self.drawChart(chartData);
+        self.chart && self.chart.removeChart();
+        self.drawChart(chartData);
     };
 
     self.updateWidget = function (widgetModel) {
         self.widgetModel = widgetModel;
         var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
         var chartData = self.getChartData(inputData);
-        self.graph = self.drawChart(chartData);
+        self.chart && self.chart.removeChart();
+        self.drawChart(chartData);
     };
+    
 };
 
 var WidgetProcessor = function(){
@@ -344,12 +346,13 @@ var WidgetProcessor = function(){
     self.previewGraph = ko.observable(false);
     self.dataKeys = ko.observableArray(DataRetriever.getDataKeys());
     self.selectedDataKey = ko.observable();
-    self.inputData = ko.observable();
-    self.outputData = ko.observable();
-
+    //self.inputData = ko.observable();
+    //self.outputData = ko.observable();
+    self.newWidget = ko.observable(true);
+    
     self.selectedDataKey.subscribe(function(newValue){
-        self.outputData(undefined);
-        self.inputData(undefined);
+        //self.outputData(undefined);
+        //self.inputData(undefined);
         if(!newValue){
             self.segment.initialize();
         }
@@ -369,6 +372,7 @@ var WidgetProcessor = function(){
             selectedDataKey: self.selectedDataKey(),
             segmentModel: self.segment.getModel()
         };
+        
         self.onWidgetUpdate && self.onWidgetUpdate(widgetModel);
         !self.onWidgetUpdate && dashboard.addWidget(widgetModel);
         self.onWidgetUpdate = undefined;
@@ -377,6 +381,7 @@ var WidgetProcessor = function(){
         self.selectedDataKey(undefined);
         self.previewGraph(false);
         $('#graphBuilder').removeClass('showme');
+        self.newWidget(true);
     };
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
         var clonemodel = drata.utils.clone(model);
@@ -384,6 +389,8 @@ var WidgetProcessor = function(){
         self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
         self.segment.initialize(clonemodel.segmentModel);
+        self.newWidget(false);
+        self.previewGraph(true);
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
@@ -396,30 +403,36 @@ var WidgetProcessor = function(){
         self.previewGraph(false);
         self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
+        self.newWidget(true);
     };
     self.handleGraphPreview = function(segmentModel){
+        self.chart && self.chart.removeChart();
+        self.chart = undefined;
         self.previewGraph(true);
         var inputData = DataRetriever.getData(self.selectedDataKey());
         var graphData = Conditioner.getGraphData(segmentModel, inputData);
-        switch(segmentModel.segmentType){
+        switch(segmentModel.chartType){
             case 'line':
-                self.graph = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+                self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
                 break;
             case 'pie':
-                self.graph = new drata.charts.PieChart( 'previewgraph', graphData);
+                self.chart = new drata.charts.PieChart( 'previewgraph', graphData);
                 break;
         }
         
-        self.outputData(JSON.stringify(graphData, null, '\t'));
-        self.inputData(JSON.stringify(inputData, null, '\t'));
+        console.log(JSON.stringify(graphData, null, '\t'));
+        console.log(JSON.stringify(inputData, null, '\t'));
     };
     self.preview = function(){
         self.handleGraphPreview(self.segment.getModel());
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
-            self.graph.removeChart();
+            self.chart.removeChart();
         }
+    });
+    $(window).on('resize', function(){
+        self.chart && self.chart.onResize();   
     });
 };
 

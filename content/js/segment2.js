@@ -18,28 +18,32 @@ var Segmentor = function(model){
     self.selection = new Selection(self.level);
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
-    self.segmentType = ko.observable();
-    self.editMode = ko.observable(false);
+    self.chartType = ko.observable();
+
+    self.chartType.subscribe(function(){
+        self.dataGroup.setProps({});
+    });
+
     self.initialize = function(model){
-        self.editMode(true);
         model = model || {};
         self.properties(model.properties);
-        self.segmentType(model.segmentType);
+        self.chartType(model.chartType);
         self.group.prefill(model.group || {});
         self.selection.prefill(model.selection || {});
-        self.dataGroup.prefill(model.dataGroup || {});
+        self.dataGroup.setProps(model.dataGroup || {});
     };
     self.getModel = function(){
         return {
-            segmentType: self.segmentType(),
+            chartType: self.chartType(),
             selection: self.selection.getModel(),
             dataGroup: ko.toJS(self.dataGroup),
             group: self.group.getModel(),
             properties: self.properties()
         };
     };
-    self.setSegmentType = function(segmentType){
-        self.segmentType(segmentType);
+
+    self.setChartType = function(type){
+        self.chartType(type);
     };
     //model && self.initialize(model);
 };
@@ -305,8 +309,12 @@ var DataGroup = function(model){
     self.timeseries = ko.observable();
     self.hasGrouping = ko.observable();
     self.interval = ko.observable();
+    
+    self.groupBy.subscribe(function(newValue){
+        self.hasGrouping((newValue === 'sumBy' || newValue === 'countBy'));
+    });
 
-    self.prefill = function(model){
+    self.setProps = function(model){
         self.xAxisProp(model.xAxisProp);
         self.groupByProp(model.groupByProp);
         self.groupBy(model.groupBy);
@@ -314,7 +322,7 @@ var DataGroup = function(model){
         self.hasGrouping(model.hasGrouping);
         self.interval(model.interval);
     };
-    model && self.prefill(model);
+    model && self.setProps(model);
 };
 
 var DataRetriever = {
@@ -580,7 +588,7 @@ var Conditioner = {
     },
     getGraphData: function(segmentModel, inputData){
         var returnData;
-        switch (segmentModel.segmentType){
+        switch (segmentModel.chartType){
             case 'line':
                 returnData = this.getLineCharData(segmentModel, inputData);
                 break;
@@ -662,7 +670,7 @@ var Conditioner = {
                     key: prop.prop,
                     value: _.reduce(filteredData, function(memo, num){
                         return memo + (num[prop.prop]? 1 : 0);
-                    })
+                    },0)
                 });
             }
             response.push(result);
