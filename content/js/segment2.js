@@ -673,7 +673,10 @@ var Conditioner = {
                     },0)
                 });
             }
-            response.push(result);
+            response.push({
+                key : prop.prop,
+                values: result
+            });
         });
         return response;
     }

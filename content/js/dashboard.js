@@ -120,6 +120,9 @@
                 props: [
                     {
                         prop: "a"
+                    },
+                    {
+                        prop: "b"
                     }
                 ]
             },
@@ -203,12 +206,7 @@ var Dashboard = function(){
 	self.widgets(ko.utils.arrayMap(
         dashboardModel.widgets,
         function(model) {
-            if(model.segmentModel.chartType === 'line'){
-                return new LineWidget(model, self.index++);    
-            } 
-            else if(model.segmentModel.chartType === 'pie'){
-                return new PieWidget(model, self.index++);    
-            }
+            return new Widget(model, self.index++); 
         }
 	));
 
@@ -217,13 +215,7 @@ var Dashboard = function(){
     };
 
     self.addWidget = function(widgetModel){
-        var widget;
-        if(widgetModel.segmentModel.chartType === 'line'){
-            widget = new LineWidget(widgetModel, self.index++);    
-        }else if(widgetModel.segmentModel.chartType === 'pie'){
-            widget = new PieWidget(widgetModel, self.index++);    
-        }
-        self.widgets.push(widget);
+        self.widgets.push(new Widget(widgetModel, self.index++));
     };
     self.deleteWidget = function(widget){
         self.widgets.remove(widget);
@@ -233,35 +225,51 @@ var Dashboard = function(){
 var Widget = function(widgetModel, index){
     var self = this;
     self.name = widgetModel.name || widgetModel.selectedDataKey;
-    self.widgetModel = widgetModel;
-    self.widgetContentId = 'widgetContent'+index;
+    self.chartType = ko.observable(widgetModel.segmentModel.chartType);
+    //self.content = (widgetModel.segmentModel.chartType === 'line')? new LineContent(index) : new PieContent(index);
+    var content;
+    self.contentTemplate = ko.computed(function(){
+        switch(self.chartType()){
+            case 'line':
+                content = new LineContent(index);
+                break;
+            case 'pie':
+                content = new PieContent(index);
+                break;
+            //self.content = content;
+        }
 
-    // self.editWidget = function () {
-    //     $('#graphBuilder').addClass('showme');
-    //     widgetProcessor.attach(self.widgetModel, self.updateWidget.bind(self));
-    // };
-    // self.getChartData = function(inputData){
-    //     throw 'You have to override this method';
-    // };
-    // self.drawChart = function(graphData){
-    //    throw 'You have to override this method';  
-    // }
-};
+        return {
+            name: content.template, 
+            data: content
+        }
 
-var LineWidget = function(widgetModel, index){
-    var self = this;
-    _.extend(self, new Widget(widgetModel, index));
-
-    self.getChartData = function(inputData){
-        var graphData = Conditioner.getGraphData(self.widgetModel.segmentModel, inputData);
-        return graphData;
-    };
+    });
 
     self.editWidget = function () {
         $('#graphBuilder').addClass('showme');
-        widgetProcessor.attach(self.widgetModel, self.updateWidget.bind(self));
+        widgetProcessor.attach(widgetModel, self.updateWidget.bind(self));
     };
 
+    self.loadWidgetInit = function(){ //runs after render
+        var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
+        var chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        content.drawChart(chartData);
+    };
+
+    self.updateWidget = function (newModel) {
+        widgetModel = newModel;
+        var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
+        var chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        self.chartType(widgetModel.segmentModel.chartType);
+        content.drawChart(chartData);
+    };
+};
+
+var LineContent = function(index){
+    var self = this;
+    self.widgetContentId = 'widgetContent'+index;
+    self.template = 'line-content-template';
     self.drawChart = function(graphData){
         var chart;
         nv.addGraph(function() {
@@ -270,13 +278,13 @@ var LineWidget = function(widgetModel, index){
                   return d.x;
             });
             var formatter = d3.format(",.1f");
-            chart.margin({right: 40});
+            chart.margin({right: 20});
             chart.xAxis.tickFormat(formatter);
             chart.transitionDuration(1000);
             chart.yAxis
                 .axisLabel('maneesh')
                 .tickFormat(d3.format(',.2f'));
-            d3.select('#'+ self.widgetContentId +' svg')
+            d3.select('#'+self.widgetContentId +' svg')
                 .datum(graphData)
               //.transition().duration(1000)
                 .call(chart);
@@ -287,55 +295,43 @@ var LineWidget = function(widgetModel, index){
         });
         return chart;
     };
-    self.loadWidgetInit = function(){ //runs after render
-        var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
-        var chartData = self.getChartData(inputData);
-        self.chart && self.chart.removeChart();
-        self.chart = self.drawChart(chartData);
-    };
-
-    self.updateWidget = function (widgetModel) {
-        self.widgetModel = widgetModel;
-        var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
-        var chartData = self.getChartData(inputData);
-        self.chart && self.chart.removeChart();
-        self.chart = self.drawChart(chartData);
-    };
 };
 
-var PieWidget = function(widgetModel, index){
+
+var PieContent = function(index){
     var self = this;
-    _.extend(self, new Widget(widgetModel, index));
+    self.widgetContentId = 'widgetContent'+index;
+    self.contentType = 'pie';
+    self.template = 'pie-content-template';
+    var _t = undefined;
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
+    var chartData = [];
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        self.chart && self.chart.change(newdata);
+    });
 
-    self.editWidget = function () {
-        $('#graphBuilder').addClass('showme');
-        widgetProcessor.attach(self.widgetModel, self.updateWidget.bind(self));
-    };
+    self.drawChart = function(_data){
+        chartData = _data;
+        _t && clearTimeout(_t);
+        self.pieKeys(chartData.map(function(dataItem){
+            return dataItem.key;
+        }));
+        self.selectedPieKey(self.pieKeys()[0]);
+        self.chart = drata.charts.PieChart();
 
-    self.getChartData = function(inputData){
-        var graphData = Conditioner.getGraphData(self.widgetModel.segmentModel, inputData);
-        return graphData;
-    };
+        d3.select('#'+self.widgetContentId)
+            .datum(chartData[0])
+            .call(self.chart);
 
-    self.drawChart = function(chartData){
-        self.chart = new drata.charts.PieChart(self.widgetContentId, chartData);
-        $(window).on('resize', self.chart.onResize.bind(self));
+        $(window).on('resize', function(){
+            _t && clearTimeout(_t);
+            _t = setTimeout(self.chart.update.bind(self.chart), 2000);
+        });
     };
-    self.loadWidgetInit = function(){ //runs after render
-        var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
-        var chartData = self.getChartData(inputData);
-        self.chart && self.chart.removeChart();
-        self.drawChart(chartData);
-    };
-
-    self.updateWidget = function (widgetModel) {
-        self.widgetModel = widgetModel;
-        var inputData = DataRetriever.getData(self.widgetModel.selectedDataKey);
-        var chartData = self.getChartData(inputData);
-        self.chart && self.chart.removeChart();
-        self.drawChart(chartData);
-    };
-    
 };
 
 var WidgetProcessor = function(){
@@ -346,6 +342,7 @@ var WidgetProcessor = function(){
     self.previewGraph = ko.observable(false);
     self.dataKeys = ko.observableArray(DataRetriever.getDataKeys());
     self.selectedDataKey = ko.observable();
+
     //self.inputData = ko.observable();
     //self.outputData = ko.observable();
     self.newWidget = ko.observable(true);
@@ -366,8 +363,6 @@ var WidgetProcessor = function(){
 
     self.segment = new Segmentor();
     self.notifyWidget = function () {
-        //var widgetModel = ko.toJS(self);
-        //$('#myModal').foundation('reveal', 'close');
         var widgetModel = {
             selectedDataKey: self.selectedDataKey(),
             segmentModel: self.segment.getModel()
@@ -389,7 +384,7 @@ var WidgetProcessor = function(){
         self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
         self.segment.initialize(clonemodel.segmentModel);
-        self.newWidget(false);
+        //self.newWidget(false);
         self.previewGraph(true);
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
@@ -406,8 +401,8 @@ var WidgetProcessor = function(){
         self.newWidget(true);
     };
     self.handleGraphPreview = function(segmentModel){
-        self.chart && self.chart.removeChart();
-        self.chart = undefined;
+        // self.chart && self.chart.removeChart();
+        // self.chart = undefined;
         self.previewGraph(true);
         var inputData = DataRetriever.getData(self.selectedDataKey());
         var graphData = Conditioner.getGraphData(segmentModel, inputData);
@@ -416,7 +411,7 @@ var WidgetProcessor = function(){
                 self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
                 break;
             case 'pie':
-                self.chart = new drata.charts.PieChart( 'previewgraph', graphData);
+                self.chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
                 break;
         }
         

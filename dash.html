@@ -284,13 +284,26 @@
                         </ul>
                     </section>
                 </nav>
-                <div data-bind="attr :{id: widgetContentId}" class="widget-content">
-                    <svg></svg>
-                </div>
+                <!-- ko template: contentTemplate() -->
+                <!-- /ko -->
             </div>
         </li>
     </script>
-
+    <script type="text/html" id="line-content-template">
+        <div data-bind="attr :{id: widgetContentId}" class="widget-content">
+            <svg></svg>
+        </div>
+    </script>
+    <script type="text/html" id="pie-content-template">
+        <div class="row">
+            <div class="small-12 columns" style="position:relative">
+                <div data-bind="attr :{id: widgetContentId}" class="widget-content">
+                </div>
+                <select style="position:absolute; right: 0.9rem;top: -.09rem;width:auto" data-bind="options:pieKeys, value:selectedPieKey, visible:pieKeys().length > 1"></select>
+            </div>
+        </div>
+        
+    </script>
     <script type="text/html" id="segment-template">
     
         <div class="row">

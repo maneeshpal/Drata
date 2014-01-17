@@ -1,6 +1,6 @@
 
-;(function(root) {
-    var PieChart = function(elementId, chartData){
+ ;(function(root) {
+    var PreviewPieChart = function(elementId, chartData){
         var self = this;
 
         self.elem = document.getElementById(elementId); 
@@ -20,10 +20,10 @@
             var mingrid = Math.floor(sqrt);
             var x,y;
             _.each(chartData, function(chartDatum, index){
-                var total = _.reduce(chartDatum, function(memo, num){
+                var total = _.reduce(chartDatum.values, function(memo, num){
                     return memo + (+num.value);
                 }, 0);
-                chartDatum = chartDatum.map(function(d){
+                _.each(chartDatum.values, function(d){
                   d.perc = ((d.value * 100) / total).toFixed(1);
                 });
             });
@@ -47,23 +47,28 @@
 
             var z = d3.scale.category20();
             
-            var r = (xradius < yradius ? xradius : yradius) - 10;
-            var m = 10;
-
-            d3.select('#'+ self.elem.id)
-                .selectAll("svg").remove();
-            var svg = d3.select('#'+ self.elem.id)
-                .selectAll("svg")
-                .data(chartData)
-                .enter().append("svg:svg").attr('class', 'pie')
-                .attr("width", (r * 2) + m) 
-                .attr("height", (r * 2) + m)
-                .append("svg:g")
-                .attr("class", "arc")
-                .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+            var r = Math.min(xradius, yradius) - 20;
+            var m = 20;
             var arc = d3.svg.arc()
                 .outerRadius(r)
                 .innerRadius(r / 2);
+
+            d3.select('#'+ self.elem.id)
+                .selectAll("svg").remove();
+
+            var svg = d3.select('#'+ self.elem.id)
+                .selectAll("svg")
+                .data(chartData)
+                .enter()
+                .append("svg")
+                .datum(function(d){
+                    return d.values;
+                })
+                .attr('class', 'pie')
+                .attr("width", (r * 2) + m) 
+                .attr("height", (r * 2) + m)
+                .append("svg:g")
+                .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
 
             var pie = d3.layout.pie()
                 .sort(null)
@@ -76,9 +81,12 @@
                 .enter().append("g")
                 .attr("class", "arc");
 
-            g.append("path")
+            var path = g.append("path")
                 .attr("d", arc)
-                .style("fill", function(d, i) { return z(i); });
+                .each(function(d){
+                    this._current = d;
+                })
+                .attr("fill", function(d, i) { return z(i); });
 
             g.append("text")
                 .attr("class", "donuttext")
@@ -91,6 +99,28 @@
                     return d.data.key + ' ('+ d.data.perc +'%)';
             });
         };
+        
+        self.change = function(value){
+            var curData = _.find(chartData, function(d){
+                return d.key === value;
+            });
+            var arcTween = function(a) {
+                var i = d3.interpolate(this._current, a);
+                this._current = i(0);
+                return function(t) {
+                    return self.arc(i(t));
+                };
+            };
+
+            self.path
+                .data(curData.values)
+                .transition()
+                .duration(750).attrTween("d", arcTween);
+
+            self.svg.datum(curData.values)
+                .selectAll("path")
+                .data(self.pie);
+        };
         self.drawChart();
         
         self.removeChart = function(){
@@ -101,10 +131,125 @@
 
         self.onResize = function(){
             self._t && clearTimeout(self._t);
-            self._t = setTimeout(self.drawChart.bind(self), 2000);
+            self._t = setTimeout(self.chart.bind(self), 2000);
         };
+        window.chartData = chartData;
+    };
+
+    var PieChart = function(){
+        function chart(selection) {
+            selection.each(function(data) {
+                var container = d3.select(this);
+                var enterAntiClockwise = {
+                  startAngle: Math.PI * 2,
+                  endAngle: Math.PI * 2
+                };
+                var enterClockwise = {
+                  startAngle: 0,
+                  endAngle: 0
+                };
+                chart.update = function() { 
+                    container
+                    .transition()
+                    .duration(1000)
+                    .call(this);
+                };
+                //chart.container = this;
+                chart.change = function(newData){
+                    container = container.datum(newData);
+                    path = path.data(pie(newData.values));
+                    path.enter().append('path')
+                        .attr("fill", function (d, i) {
+                            return z(i);
+                        })
+                        .each(function (d) {
+                            this._current = {
+                                data: d.data,
+                                value: d.value,
+                                startAngle: enterAntiClockwise.startAngle,
+                                endAngle: enterAntiClockwise.endAngle
+                            };
+                      }); // store the initial values
+
+                    path.exit()
+                      .transition()
+                      .duration(750)
+                      .attrTween('d', arcTweenOut)
+                      .remove(); // now remove the exiting arcs
+                    path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs  
+                };
+                var w = $(container[0]).width()/2;
+                var h = $(container[0]).height()/2;
+                var z = d3.scale.category20();
+                var m = 20;
+                var r = Math.min(w, h) - m;
+
+                var pie = d3.layout.pie()
+                    .value(function(d) {
+                     return d.value;
+                 }).sort(null);
+
+                var arc = d3.svg.arc()
+                    .outerRadius(r)
+                    .innerRadius(r / 2);
+
+                container.selectAll("svg").remove();
+
+                var svg = container
+                    .append("svg")
+                    .attr("width", (r * 2) + m) 
+                    .attr("height", (r * 2) + m)
+                    .append("svg:g")
+                    .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+
+                var arcTween = function(a) {
+                    var i = d3.interpolate(this._current, a);
+                    this._current = i(0);
+                    return function(t) {
+                        return arc(i(t));
+                    };
+                };
+                // Interpolate exiting arcs start and end angles to Math.PI * 2
+                // so that they 'exit' at the end of the data
+                function arcTweenOut(a) {
+                  var i = d3.interpolate(this._current, {startAngle: Math.PI * 2, endAngle: Math.PI * 2, value: 0});
+                  this._current = i(0);
+                  return function (t) {
+                    return arc(i(t));
+                  };
+                }
+
+                var path = svg
+                    .selectAll("path")
+                    .data(pie(data.values))
+                    .enter().append("path")
+                    .attr("fill",
+                     function(d, i) { 
+                        return z(i); 
+                    })
+                    //.attr("d", arc(enterClockwise))
+                    .attr("d", arc)
+                    .each(function(d) { 
+                        // this._current = {
+                        //     data: d.data,
+                        //     value: d.value,
+                        //     startAngle: enterClockwise.startAngle,
+                        //     endAngle: enterClockwise.endAngle
+                        //   }
+                        this._current = d;
+                    });
+
+                // path.transition()  // update
+                //     .duration(750)
+                //     .attrTween("d", arcTween);
+            });
+            
+            return chart;
+        };
+        return chart;
     };
     root.drata.ns('charts').extend({
-        PieChart : PieChart
+        PieChart : PieChart,
+        PreviewPieChart: PreviewPieChart
     });
 })(this);
