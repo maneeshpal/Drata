@@ -138,13 +138,13 @@
         }
     </style>
 </head>
-<body style="overflow: hidden">
+<body>
     <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:2rem">
         <ul class="title-area">
             <li class="name">
                 <h1><a href="#">Drata</a></h1>
             </li>
-            <!-- <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li> -->
+            <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
         </ul>
 
         <section class="top-bar-section">
@@ -175,7 +175,7 @@
                     <li class="name">
                         <h1><a href="#">Widget Processor</a></h1>
                     </li>
-                    <!-- <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li> -->
+                    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
                 </ul>
 
                 <section class="top-bar-section">
@@ -206,13 +206,7 @@
                     </ul>
                 </section>
             </nav>
-            <!-- <div style="position:relative">
-            <div class="mymodal-wrapper chart-type showme">
-                <div class="mymodal-inner">
-                    
-                </div>
-            </div>
-            </div> -->
+            
             <div class="row">
                 <div class="small-12 medium-4 large-6 columns">
                     <fieldset data-bind="visible:preview">
@@ -221,15 +215,7 @@
                             <svg></svg>
                         </div>
                     </fieldset>
-                    <!-- <div class="row">
-                        <div class="large-12 columns" style="height: 700px">
-                            <h6>Output</h6>
-                            <textarea style="height: 300px" data-bind="text:outputData"></textarea>
-                            <h6>Input</h6>
-                            <textarea style="height: 300px" data-bind="text:inputData"></textarea>
-                            
-                        </div>
-                    </div> -->
+                    
                 </div>
                 <div class="small-12 medium-8 large-6 columns">
                     <fieldset>
@@ -269,6 +255,7 @@
                         <li class="name">
                             <h1><a data-bind="html:name"></a></h1>
                         </li>
+                        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
                     </ul>
                     <section class="top-bar-section">
                         <ul class="right">
@@ -292,6 +279,7 @@
                         </ul>
                         <ul class="left">
                         </ul>
+
                     </section>
                 </nav>
                 <!-- ko template: contentTemplate() -->
@@ -580,7 +568,6 @@
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
-
     <script src="content/nvd3/core.js"></script>
     <script src="content/nvd3/utils.js"></script>
     <script src="content/nvd3/models/legend.js"></script>
@@ -590,6 +577,8 @@
     <script src="content/nvd3/models/axis.js"></script>
     <script src="content/nvd3/models/scatter.js"></script>
     <script src="content/nvd3/models/lineChart.js"></script>
+     <script src="content/nvd3/models/stackedArea.js"></script>
+     <script src="content/nvd3/models/stackedAreaChart.js"></script>
     
     <script src="content/nvd3/models/pie.js"></script>
     <script src="content/nvd3/models/pieChart.js"></script>

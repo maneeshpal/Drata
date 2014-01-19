@@ -11,7 +11,7 @@ $topbar-secondary-bg-color: #F2F2F2 !default;
 $topbar-secondary-bg: $topbar-secondary-bg-color !default;
 
 // Height and margin
-$topbar-secondary-height: 45px !default;
+$topbar-secondary-height: 35px !default;
 $topbar-secondary-margin-bottom: 0 !default;
 
 // Control Input height for top bar
@@ -34,7 +34,7 @@ $topbar-secondary-link-color-active: #333 !default;
 $topbar-secondary-link-weight: normal !default;
 $topbar-secondary-link-font-size: rem-calc(13) !default;
 $topbar-secondary-link-hover-lightness: -10% !default; // Darken by 10%
-$topbar-secondary-link-bg-hover: #272727 !default;
+$topbar-secondary-link-bg-hover: #CCC !default;
 $topbar-secondary-link-bg-active: $primary-color !default;
 $topbar-secondary-link-bg-active-hover: scale-color($primary-color, $lightness: -14%) !default;
 $topbar-secondary-link-font-family: $body-font-family !default;
@@ -59,7 +59,7 @@ $topbar-secondary-menu-icon-color-toggled: #888 !default;
 // Transitions and breakpoint styles
 $topbar-secondary-transition-speed: 300ms !default;
 // Using rem-calc for the below breakpoint causes issues with top bar
-$topbar-secondary-breakpoint: #{lower-bound($medium-range)} !default; // Change to 9999px for always mobile layout
+$topbar-secondary-breakpoint: 9999px !default; // Change to 9999px for always mobile layout
 $topbar-secondary-media-query: $medium-up !default;
 
 // Divider Styles
@@ -334,7 +334,7 @@ meta.foundation-mq-topbar {
           }
         }
 		&.action-icon > i {
-			top:8px;
+			top:5px;
 		}
       }
 

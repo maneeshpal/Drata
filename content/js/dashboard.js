@@ -45,72 +45,6 @@
         }
     },
     {
-        name: 'widget 2',
-        selectedDataKey: "key1",
-        segmentModel: {
-            chartType: 'line',
-            selection: {
-                complexGroups: [
-                    {
-                        groupType: "selections",
-                        groups: [
-                            {
-                                prop: "b",
-                                logic: "+",
-                                conditionType: "selections",
-                                renderType: "condition"
-                            },
-                            {
-                                prop: "a",
-                                logic: "-",
-                                conditionType: "selections",
-                                renderType: "condition"
-                            }
-                        ],
-                        logic: "+",
-                        renderType: "group",
-                        selectionName: "b-a"
-                    }
-                ],
-                props: [
-                    {
-                        prop: "a"
-                    }
-                ]
-            },
-            dataGroup: {
-                xAxisProp: "timestamp",
-                groupByProp: "a"
-            },
-            group: {
-                groupType: "conditions",
-                groups: [
-                    {
-                        prop: "b",
-                        logic: "and",
-                        conditionType: "conditions",
-                        renderType: "condition",
-                        operation: ">",
-                        selectionGroup: {
-                            groupType: "selections",
-                            groups: [],
-                            logic: "+",
-                            renderType: "group"
-                        },
-                        isComplex: false,
-                        value: "12"
-                    }
-                ],
-                renderType: "group"
-            },
-            properties: [
-                "a",
-                "b",
-                "c",
-                "timestamp"
-            ]
-        }
-    },{
         name: 'widget pie',
         selectedDataKey: "key1",
         segmentModel: {
@@ -273,13 +207,16 @@ var LineContent = function(index){
     self.drawChart = function(graphData){
         var chart;
         nv.addGraph(function() {
-            chart = nv.models.lineChart().useInteractiveGuideline(true);
+            chart = nv.models.stackedAreaChart().useInteractiveGuideline(true);
             chart.x(function(d,i) { 
                   return d.x;
             });
-            var formatter = d3.format(",.1f");
+            chart.y(function(d,i) { 
+                  return d.y;
+            });
+
             chart.margin({right: 20});
-            chart.xAxis.tickFormat(formatter);
+            chart.xAxis.tickFormat(d3.format(",.1f"));
             chart.transitionDuration(1000);
             chart.yAxis
                 .axisLabel('maneesh')
