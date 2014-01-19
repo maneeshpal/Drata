@@ -307,11 +307,12 @@ var PieContent = function(index){
     self.pieKeys = ko.observableArray([]);
     self.selectedPieKey = ko.observable();
     var chartData = [];
+    var chart;
     self.selectedPieKey.subscribe(function(newValue){
         var newdata = _.find(chartData, function(item){
             return item.key === newValue;
         });
-        self.chart && self.chart.change(newdata);
+        chart && chart.change(newdata);
     });
 
     self.drawChart = function(_data){
@@ -321,16 +322,21 @@ var PieContent = function(index){
             return dataItem.key;
         }));
         self.selectedPieKey(self.pieKeys()[0]);
-        self.chart = drata.charts.PieChart();
+        chart = drata.charts.PieChart();
 
         d3.select('#'+self.widgetContentId)
             .datum(chartData[0])
-            .call(self.chart);
-
-        $(window).on('resize', function(){
+            .call(chart);
+        //var om = false;
+        //nv.utils.windowResize(chart.update);
+        window.onresize = function(event) {
+            // if(!om){
+            //     om = true;
+            //     return;
+            // }
             _t && clearTimeout(_t);
-            _t = setTimeout(self.chart.update.bind(self.chart), 2000);
-        });
+            _t = setTimeout(chart.update, 2000);
+        };
     };
 };
 

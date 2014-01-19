@@ -154,6 +154,7 @@
                 <li class="has-form">
                     <a data-bind="click:addWidget" class="button success"><i class="general foundicon-plus"></i>&nbsp;Add Widget</a>
                 </li>
+                
             </ul>
 
             <!-- Left Nav Section -->
@@ -271,6 +272,15 @@
                     </ul>
                     <section class="top-bar-section">
                         <ul class="right">
+                            <li class="divider"></li>
+                            <li class="has-dropdown">
+                                <a href="#">heolaps</a>
+                                <ul class="dropdown">
+                                    <li><a href="#">yes yes</a></li>
+                                    <li><a href="#">yes yes</a></li>
+                                    <li><a href="#">yes yes</a></li>
+                                </ul>
+                            </li>
                             <li class="divider"></li>
                             <li class="has-form action-icon">
                                 <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
@@ -587,13 +597,15 @@
     <script type="text/javascript" src="content/js/sortable.js"></script>
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>
     <script type="text/javascript" src="content/js/segment2.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
 
     <script type="text/javascript" src="content/js/d3.line.js"></script>
     <script type="text/javascript" src="content/js/pie.js"></script>
     <script type="text/javascript">
-        (function (root) {
+        (function (root, $) {
             window.dashboard = new Dashboard();
             ko.applyBindings(dashboard, document.getElementById('dashboard'));
             window.topBar = new TopBar();
@@ -601,10 +613,8 @@
 
             window.widgetProcessor = new WidgetProcessor();
             ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
-
-
-            // $(document).foundation();
-        })(this);
+            $(document).foundation();
+        })(this, jQuery);
     </script>
 </body>
 </html>

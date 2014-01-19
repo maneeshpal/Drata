@@ -8,8 +8,8 @@
 
         <style type="text/css">
             .graph{
-                width:100%;
-                height:500px;
+                width:450px;
+                height:300px;
             }
              
         </style>
@@ -23,9 +23,10 @@
     <script src="content/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
+    <script src="content/js/kickasspie.js"></script>
      <script>
         
-    var dataaa = [
+    var mydata = [
         {
             key: 'first',
             values : [
@@ -61,86 +62,7 @@
         }
     ];    
 
-    var PieChart = function(){
-        function chart(selection) {
-            selection.each(function(data) {
-                var container = d3.select(this);
-
-                chart.update = function() { 
-                    container
-                    .transition()
-                    .duration(1000)
-                    .call(chart);
-                };
-                //chart.container = this;
-                chart.change = function(newData){
-                    
-                    // container.datum(newData)
-                    // .transition()
-                    //     .duration(2000).attrTween("d", arcTween)
-                    //    .call(chart);
-                    path
-                        .data(newData.values)
-                        .transition()
-                        .duration(750).attrTween("d", arcTween);
-
-                    svg.datum(newData.values)
-                        .selectAll("path")
-                        .data(pie);
-                    //return chart;
-                };
-                var w = $(container[0]).width()/2;
-                var h = $(container[0]).height()/2;
-                var z = d3.scale.category20();
-                var r = Math.min(w, h) - 10;
-                var m = 10;
-
-                var pie = d3.layout.pie()
-                    .value(function(d) {
-                     return d.value;
-                 }).sort(null);
-
-                var arc = d3.svg.arc()
-                    .outerRadius(r)
-                    .innerRadius(r / 2);
-
-                //container.selectAll("svg").remove();
-
-                var svg = container.selectAll("svg").append("svg")
-                    .attr("width", (r * 2) + m) 
-                    .attr("height", (r * 2) + m)
-                    .append("svg:g")
-                    .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
-
-                var arcTween = function(a) {
-                    var i = d3.interpolate(this._current, a);
-                    this._current = i(0);
-                    return function(t) {
-                        return arc(i(t));
-                    };
-                };
-
-                var path = svg.datum(data.values)
-                    .selectAll("path")
-                    .data(pie)
-                    .enter().append("path")
-                    .attr("fill",
-                     function(d, i) { 
-                        return z(i); 
-                    })
-                    .attr("d", arc)
-                    .each(function(d) { this._current = d; });
-            });
-            
-            return chart;
-        };
-        return chart;
-    };
-
-        var ch = PieChart();
-        d3.select('#graph')
-            .datum(dataaa[0])
-            .call(ch);
+    
 
     </script>
 

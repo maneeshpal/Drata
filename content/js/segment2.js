@@ -376,6 +376,15 @@ var DataRetriever = {
                 b : 3,
                 c : 'ccc',
                 timestamp : 54
+            },{
+                b : 32,
+                c : 'ddd',
+                timestamp : 67
+            },
+            {
+                b : 39,
+                c : 'ddd',
+                timestamp : 77
             }];
         }
         else{
@@ -650,9 +659,7 @@ var Conditioner = {
             var result = [];
             if(segmentModel.dataGroup.hasGrouping){
                 _.each(groupedData, function(groupedDataItem, groupName){
-                    result.push({
-                        key: groupName,
-                        value: _.reduce(groupedDataItem, function(memo, num){ 
+                    var val = _.reduce(groupedDataItem, function(memo, num){ 
                             var numval;
                             if(segmentModel.dataGroup.groupBy === 'countBy'){
                                 numval = num[prop.prop]? 1 : 0;
@@ -661,16 +668,22 @@ var Conditioner = {
                                 numval = +num[prop.prop] || 0;
                             }
                             return memo + numval; 
-                        }, 0)
+                        }, 0);
+
+                    val > 0 && result.push({
+                        key: groupName,
+                        value: val
                     });
                 });
             }
             else{
-                result.push({
-                    key: prop.prop,
-                    value: _.reduce(filteredData, function(memo, num){
+                var val =  _.reduce(filteredData, function(memo, num){
                         return memo + (num[prop.prop]? 1 : 0);
-                    },0)
+                    },0);
+
+                val > 0 && result.push({
+                    key: prop.prop,
+                    value: val
                 });
             }
             response.push({

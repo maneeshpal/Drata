@@ -152,31 +152,13 @@
                     container
                     .transition()
                     .duration(1000)
-                    .call(this);
+                    .call(chart);
                 };
                 //chart.container = this;
                 chart.change = function(newData){
                     container = container.datum(newData);
-                    path = path.data(pie(newData.values));
-                    path.enter().append('path')
-                        .attr("fill", function (d, i) {
-                            return z(i);
-                        })
-                        .each(function (d) {
-                            this._current = {
-                                data: d.data,
-                                value: d.value,
-                                startAngle: enterAntiClockwise.startAngle,
-                                endAngle: enterAntiClockwise.endAngle
-                            };
-                      }); // store the initial values
-
-                    path.exit()
-                      .transition()
-                      .duration(750)
-                      .attrTween('d', arcTweenOut)
-                      .remove(); // now remove the exiting arcs
-                    path.transition().duration(750).attrTween("d", arcTween); // redraw the arcs  
+                    drawPie(newData);
+                    drawText(newData);
                 };
                 var w = $(container[0]).width()/2;
                 var h = $(container[0]).height()/2;
@@ -198,9 +180,8 @@
                 var svg = container
                     .append("svg")
                     .attr("width", (r * 2) + m) 
-                    .attr("height", (r * 2) + m)
-                    .append("svg:g")
-                    .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+                    .attr("height", (r * 2) + m);
+
 
                 var arcTween = function(a) {
                     var i = d3.interpolate(this._current, a);
@@ -212,36 +193,69 @@
                 // Interpolate exiting arcs start and end angles to Math.PI * 2
                 // so that they 'exit' at the end of the data
                 function arcTweenOut(a) {
-                  var i = d3.interpolate(this._current, {startAngle: Math.PI * 2, endAngle: Math.PI * 2, value: 0});
-                  this._current = i(0);
-                  return function (t) {
-                    return arc(i(t));
-                  };
-                }
-
-                var path = svg
-                    .selectAll("path")
-                    .data(pie(data.values))
-                    .enter().append("path")
-                    .attr("fill",
-                     function(d, i) { 
-                        return z(i); 
-                    })
-                    //.attr("d", arc(enterClockwise))
-                    .attr("d", arc)
-                    .each(function(d) { 
-                        // this._current = {
-                        //     data: d.data,
-                        //     value: d.value,
-                        //     startAngle: enterClockwise.startAngle,
-                        //     endAngle: enterClockwise.endAngle
-                        //   }
-                        this._current = d;
+                    var i = d3.interpolate(this._current, {
+                        startAngle: Math.PI * 2, 
+                        endAngle: Math.PI * 2, 
+                        value: 0
                     });
+                    this._current = i(0);
+                    return function (t) {
+                        return arc(i(t));
+                    };
+                };
 
-                // path.transition()  // update
-                //     .duration(750)
-                //     .attrTween("d", arcTween);
+                
+                var arcGroup = svg.append("svg:g")
+                    .attr('class', 'arcs-group')
+                    .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+                
+                function drawPie(_data){
+                    var paths = arcGroup.selectAll("path").data(pie(_data.values));
+                    paths.enter().append('path')
+                        .attr("fill", function (d, i) {
+                            return z(i);
+                        })
+                        .each(function (d) {
+                            this._current = {
+                                data: d.data,
+                                value: d.value,
+                                startAngle: enterAntiClockwise.startAngle,
+                                endAngle: enterAntiClockwise.endAngle
+                            };
+                      }); // store the initial values
+
+                    paths.exit()
+                      .transition()
+                      .duration(750)
+                      .attrTween('d', arcTweenOut)
+                      .remove(); // now remove the exiting arcs
+                    
+                    paths.transition().duration(750).attrTween("d", arcTween); // redraw the arcs
+                };
+
+                function drawText(_data){
+                    var texts = textGroup.selectAll("text")
+                        .data(pie(_data.values));
+                    texts.enter()
+                        .append("svg:text")
+                        .attr("class", "donuttext")
+                        .attr("dy", ".35em")
+                        .style("text-anchor", "middle")
+                        .text(function(d) { 
+                            return d.data.key;
+                        });
+                    texts.exit().remove();
+                    texts.transition().duration(750).attr("transform", function(d) {
+                            return "translate(" + arc.centroid(d) + ")";
+                        });
+                    
+                };
+                drawPie(data);
+                
+                var textGroup = svg.append("svg:g")
+                    .attr("class", 'text-group')
+                    .attr("transform", "translate(" + (r + m) + "," + (r + m) + ")");
+                drawText(data);
             });
             
             return chart;
