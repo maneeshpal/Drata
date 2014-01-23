@@ -3,6 +3,7 @@
         selectedDataKey: 'key1',
         segmentModel: {
             chartType: 'line',
+            chartSubType: 'stackedArea',
             selection: {
                 complexGroups: [],
                 props: [
@@ -49,6 +50,7 @@
         selectedDataKey: "key1",
         segmentModel: {
             chartType: 'pie',
+            chartSubType: 'donut',
             selection: {
                 complexGroups: [],
                 props: [
@@ -99,6 +101,7 @@
         selectedDataKey: "key2",
         segmentModel: {
             chartType: 'line',
+            chartSubType: 'line',
             selection: {
                 complexGroups: [],
                 props: [
@@ -132,19 +135,19 @@
         widgets: defaultWidgetModel
     };
 var Dashboard = function(){
-	var self = this;
-	self.name = dashboardModel.name;
-	self.index= 1;
-	self.widgets = ko.observableArray();
+    var self = this;
+    self.name = dashboardModel.name;
+    self.index= 1;
+    self.widgets = ko.observableArray();
 
-	self.widgets(ko.utils.arrayMap(
+    self.widgets(ko.utils.arrayMap(
         dashboardModel.widgets,
         function(model) {
             return new Widget(model, self.index++); 
         }
-	));
+    ));
 
-	self.loadWidget = function(elem,widget){
+    self.loadWidget = function(elem,widget){
         widget && widget.loadWidgetInit();
     };
 
@@ -159,7 +162,16 @@ var Dashboard = function(){
 var Widget = function(widgetModel, index){
     var self = this;
     self.name = widgetModel.name || widgetModel.selectedDataKey;
+    self.chartSubType = ko.observable(widgetModel.segmentModel.chartSubType);
     self.chartType = ko.observable(widgetModel.segmentModel.chartType);
+    self.chartSubTypes = ko.computed(function(){
+        if(self.chartType() === 'line'){
+            return ['line', 'stackedArea'];
+        }
+        else{
+            return ['pie', 'donut'];
+        }
+    });
     //self.content = (widgetModel.segmentModel.chartType === 'line')? new LineContent(index) : new PieContent(index);
     var content;
     self.contentTemplate = ko.computed(function(){
@@ -204,7 +216,7 @@ var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'line-content-template';
-    self.drawChart = function(graphData){
+    self.drawChart = function(chartData){
         var chart;
         nv.addGraph(function() {
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true);
@@ -222,7 +234,7 @@ var LineContent = function(index){
                 .axisLabel('maneesh')
                 .tickFormat(d3.format(',.2f'));
             d3.select('#'+self.widgetContentId +' svg')
-                .datum(graphData)
+                .datum(chartData)
               //.transition().duration(1000)
                 .call(chart);
 
@@ -264,16 +276,12 @@ var PieContent = function(index){
         d3.select('#'+self.widgetContentId)
             .datum(chartData[0])
             .call(chart);
-        //var om = false;
-        //nv.utils.windowResize(chart.update);
-        window.onresize = function(event) {
-            // if(!om){
-            //     om = true;
-            //     return;
-            // }
-            _t && clearTimeout(_t);
-            _t = setTimeout(chart.update, 2000);
-        };
+        //setTimeout(function(){
+            window.onresize = function(event) {
+                _t && clearTimeout(_t);
+                _t = setTimeout(chart.update, 2000);
+            };
+        //}, 2000);
     };
 };
 
@@ -286,7 +294,7 @@ var WidgetProcessor = function(){
     self.dataKeys = ko.observableArray(DataRetriever.getDataKeys());
     self.selectedDataKey = ko.observable();
 
-    //self.inputData = ko.observable();
+    //self.inputData = ko.observable(); 
     //self.outputData = ko.observable();
     self.newWidget = ko.observable(true);
     

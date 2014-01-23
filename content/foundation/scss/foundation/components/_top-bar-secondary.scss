@@ -59,8 +59,8 @@ $topbar-secondary-menu-icon-color-toggled: #888 !default;
 // Transitions and breakpoint styles
 $topbar-secondary-transition-speed: 300ms !default;
 // Using rem-calc for the below breakpoint causes issues with top bar
-$topbar-secondary-breakpoint: 9999px !default; // Change to 9999px for always mobile layout
-$topbar-secondary-media-query: $medium-up !default;
+$topbar-secondary-breakpoint: #{0px} !default; // Change to 9999px for always mobile layout
+$topbar-secondary-media-query: "#{$screen} and (min-width:#{0px})" !default;
 
 // Divider Styles
 $topbar-secondary-divider-border-bottom: solid 1px  scale-color(#ccc, $lightness: 13%) !default;
@@ -86,7 +86,9 @@ meta.foundation-mq-topbar {
       width: 100%;
       background: $topbar-secondary-bg;
 
-      .top-bar.secondary { margin-bottom: $topbar-secondary-margin-bottom; }
+      .top-bar.secondary { 
+	  margin-bottom: $topbar-secondary-margin-bottom;
+	   }
     }
 
     // Wrapped around .top-bar to make it stick to the top

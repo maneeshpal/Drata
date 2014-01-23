@@ -1,0 +1,27 @@
+.combobox-container{
+    width:50%;
+    margin:0 auto;
+    padding:20px;
+    border:1px solid #222;
+    height:400px;
+}
+
+ul.combolist {
+    border: 1px solid #999999;
+    border-top:none;
+    background: #f2f2f2;
+    box-shadow: 0 0 5px #999999;
+    max-height:200px;
+    overflow: auto;
+    font-size: 0.875rem;
+    position:absolute;
+    width:100%;
+    margin-top:-1rem;
+    z-index:9;
+} 
+ul.combolist li {
+    padding:.5rem;
+} 
+ul.combolist li:hover {
+    background:#e3e3e3;
+}

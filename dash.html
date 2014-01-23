@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
     <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
     <link rel="stylesheet" type="text/css" href="content/nvd3/nv.d3.css" />
     <style>
@@ -131,6 +132,7 @@
         .segment-type p{
             margin-bottom: 0;
         }
+
         @media only screen and (max-width: 64.063em) {
             .segment-processor-inner {
                 width: 95%;
@@ -139,7 +141,7 @@
     </style>
 </head>
 <body>
-    <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:2rem">
+    <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:1rem">
         <ul class="title-area">
             <li class="name">
                 <h1><a href="#">Drata</a></h1>
@@ -208,7 +210,7 @@
             </nav>
             
             <div class="row">
-                <div class="small-12 medium-4 large-6 columns">
+                <div class="medium-12 large-6 columns">
                     <fieldset data-bind="visible:preview">
                         <legend>Preview</legend>
                         <div id="previewgraph">
@@ -217,7 +219,7 @@
                     </fieldset>
                     
                 </div>
-                <div class="small-12 medium-8 large-6 columns">
+                <div class="medium-12 large-6 columns">
                     <fieldset>
                         <legend>Data Key</legend>
                         <div class="row">
@@ -261,11 +263,11 @@
                         <ul class="right">
                             <li class="divider"></li>
                             <li class="has-dropdown">
-                                <a href="#">heolaps</a>
+                                <a data-bind="text:chartSubType"></a>
                                 <ul class="dropdown">
-                                    <li><a href="#">yes yes</a></li>
-                                    <li><a href="#">yes yes</a></li>
-                                    <li><a href="#">yes yes</a></li>
+                                    <!-- ko foreach: chartSubTypes -->
+                                    <li><a></a></li>
+                                    <!-- /ko -->
                                 </ul>
                             </li>
                             <li class="divider"></li>
@@ -552,8 +554,8 @@
             </div>
             <div class="operation-group columns">
                 <div class="row collapse">
-                    <div class="small-10 columns">
-                        <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                    <div class="small-10 columns" data-bind="comboBox :{selectedValue: prop, options:$parents[level].properties,optionsCaption:'choose Property'}">
+                        // <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
                     </div>
                     <div class="small-2 columns">
                         <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
@@ -568,6 +570,7 @@
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
+
     <script src="content/nvd3/core.js"></script>
     <script src="content/nvd3/utils.js"></script>
     <script src="content/nvd3/models/legend.js"></script>
@@ -584,7 +587,11 @@
     <script src="content/nvd3/models/pieChart.js"></script>
 
     <script type="text/javascript" src="content/js/sortable.js"></script>
+
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
+    <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
+
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>

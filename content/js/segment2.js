@@ -1,8 +1,4 @@
 
-var defaultSegmentModel = {
-    properties: ['a', 'b', 'c', 'timestamp']
-};
-
 var Segmentor = function(model){
     //model = model || defaultSegmentModel;
     var self = this;
@@ -36,7 +32,7 @@ var Segmentor = function(model){
         return {
             chartType: self.chartType(),
             selection: self.selection.getModel(),
-            dataGroup: ko.toJS(self.dataGroup),
+            dataGroup: self.dataGroup.getModel(),
             group: self.group.getModel(),
             properties: self.properties()
         };
@@ -134,7 +130,6 @@ var Condition = function(level, conditionType, model, parent){
         delete returnModel.collapse;
         delete returnModel.getModel;
         delete returnModel.editMode;
-
         returnModel.selectionGroup = selectionGroupModel;
         return returnModel;
     };
@@ -322,6 +317,11 @@ var DataGroup = function(model){
         self.hasGrouping(model.hasGrouping);
         self.interval(model.interval);
     };
+    self.getModel = function(){
+        var dataGroupModel = ko.toJS(self);
+        delete dataGroupModel.setProps;
+        return dataGroupModel;
+    }
     model && self.setProps(model);
 };
 
@@ -458,6 +458,8 @@ var Conditioner = {
             case 'like':
             result = left.indexOf(right) > -1;
             break;
+            case '/':
+                result = (+left) / (+right);
         }
 
         return result;
@@ -475,9 +477,15 @@ var Conditioner = {
         };
     },
     processCondition : function(obj, condition){
-        var complexValue = {}, complexType;
+        var complexValue, complexType;
         if(condition.conditionType === 'selections'){
-            complexValue = obj[condition.prop];
+            //perform arithmetic operation on selections
+            if(this.properties.indexOf(condition.prop) === -1 && _.isNumber(+condition.prop)){
+                complexValue = +condition.prop;
+            }else{
+                complexValue = obj[condition.prop];    
+            }
+            
         }
         else if(condition.isComplex){
             complexType = this.processGroup(obj, condition.selectionGroup);
@@ -535,9 +543,6 @@ var Conditioner = {
         console.log(returnValue);
         return returnValue;
     },
-    processSimpleSelection : function(obj, prop){
-        return obj[prop];
-    },
     processDataGroups : function(groupedData, dataGroup, selectionGroup, groupCounter){
         var returnGroups = [];
         _.each(groupedData, function(dataItem, groupName){
@@ -549,9 +554,9 @@ var Conditioner = {
         }.bind(this));
         return returnGroups;
     },
-    divideByInterval : function(data, dataGroup, selectionGroup){
+    divideByInterval : function(data, dataGroup, selection){
         var ret = [];
-        var isComplex = typeof selectionGroup === 'object';
+        var isComplex = typeof selection === 'object';
         if(isComplex && dataGroup.groupBy === 'countBy')
             throw "countBy not allowed for complex selections.";
         if(dataGroup.timeseries){
@@ -561,28 +566,29 @@ var Conditioner = {
             _.each(intervalGroup, function(gi, time){
                 ret.push({
                     x: +time, 
-                    y: _.reduce(gi, function(memo, num){ 
-                            var numval;
-                            if(isComplex){ //complex selection. so we need to process it.
-                                var temp = Conditioner.processGroup(num,selectionGroup);
-                                numval = temp.value;
-                            }
-                            else if(dataGroup.groupBy === 'countBy'){
-                                numval = num[selectionGroup]? 1 : 0;
-                            }
-                            else{ // sumby
-                                numval = +num[selectionGroup] || 0;
-                            }
-                            return memo + numval; 
-                        }, 0)
+                    y:  Conditioner.reduceData(gi,dataGroup.groupBy, selection)
+                    // _.reduce(gi, function(memo, num){ 
+                    //         var numval;
+                    //         if(isComplex){ //complex selection. so we need to process it.
+                    //             var temp = Conditioner.processGroup(num,selection);
+                    //             numval = temp.value;
+                    //         }
+                    //         else if(dataGroup.groupBy === 'countBy'){
+                    //             numval = num[selection]? 1 : 0;
+                    //         }
+                    //         else{ // sumby
+                    //             numval = +num[selection] || 0;
+                    //         }
+                    //         return memo + numval; 
+                    //     }, 0)
                 });
             });
         }
         else{
             _.each(data, function(item){
-                ret.push({
+                (item.hasOwnProperty(selection) || isComplex) && ret.push({
                     x: item[dataGroup.xAxisProp],
-                    y: (isComplex)? Conditioner.processGroup(item,selectionGroup).value : item[selectionGroup]
+                    y: (isComplex)? Conditioner.processGroup(item,selection).value : item[selection]
                 });
             });
         }
@@ -596,6 +602,7 @@ var Conditioner = {
         return filteredData;
     },
     getGraphData: function(segmentModel, inputData){
+        this.properties = segmentModel.properties;
         var returnData;
         switch (segmentModel.chartType){
             case 'line':
@@ -646,6 +653,30 @@ var Conditioner = {
         });
         return result;
     },
+    reduceData : function(objArray, groupingType, selection){
+        var isComplex = typeof selection === 'object';
+
+        if(isComplex && groupingType === 'countBy')
+            throw "countBy not allowed for complex selections.";
+
+        return _.reduce(objArray, function(memo, num){ 
+                    var numval;
+                    if(isComplex){ //complex selection. so we need to process it.
+                        var temp = Conditioner.processGroup(num,selection);
+                        numval = temp.value;
+                    }
+                    else if(groupingType === 'countBy'){
+                        numval = num[selection]? 1 : 0;
+                    }
+                    else if(groupingType === 'sumBy'){ // sumby
+                        numval = +num[selection] || 0;
+                    }
+                    else{
+                        throw 'you should select groupby property for simple selections';
+                    }
+                    return memo + numval; 
+        }, 0);
+    },
     getPieData: function(segmentModel, inputData){
         var response = [];
         var groupCounter = 0;
@@ -659,28 +690,15 @@ var Conditioner = {
             var result = [];
             if(segmentModel.dataGroup.hasGrouping){
                 _.each(groupedData, function(groupedDataItem, groupName){
-                    var val = _.reduce(groupedDataItem, function(memo, num){ 
-                            var numval;
-                            if(segmentModel.dataGroup.groupBy === 'countBy'){
-                                numval = num[prop.prop]? 1 : 0;
-                            }
-                            else{ // sumby
-                                numval = +num[prop.prop] || 0;
-                            }
-                            return memo + numval; 
-                        }, 0);
-
+                    var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, prop.prop);
                     val > 0 && result.push({
                         key: groupName,
                         value: val
                     });
-                });
+                }.bind(this));
             }
             else{
-                var val =  _.reduce(filteredData, function(memo, num){
-                        return memo + (num[prop.prop]? 1 : 0);
-                    },0);
-
+                var val = this.reduceData(filteredData,'countBy', prop.prop);
                 val > 0 && result.push({
                     key: prop.prop,
                     value: val
@@ -688,6 +706,25 @@ var Conditioner = {
             }
             response.push({
                 key : prop.prop,
+                values: result
+            });
+        });
+        
+        _.each(segmentModel.selection.complexGroups, function(selectionGroup){
+            if(!segmentModel.dataGroup.hasGrouping)
+                throw 'you cant have complex selections without grouping';
+
+            var result = [];
+            _.each(groupedData, function(groupedDataItem, groupName){
+                var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, selectionGroup);
+                val > 0 && result.push({
+                    key: groupName,
+                    value: val
+                });
+            });
+
+            response.push({
+                key : selectionGroup.selectionName,
                 values: result
             });
         });
