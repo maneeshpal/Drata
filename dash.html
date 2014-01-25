@@ -140,7 +140,7 @@
         }
     </style>
 </head>
-<body>
+<body class="with-3d-shadow with-transitions">
     <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:1rem">
         <ul class="title-area">
             <li class="name">
@@ -211,7 +211,7 @@
             
             <div class="row">
                 <div class="medium-12 large-6 columns">
-                    <fieldset data-bind="visible:preview">
+                    <fieldset data-bind="visible:previewGraph">
                         <legend>Preview</legend>
                         <div id="previewgraph">
                             <svg></svg>
@@ -572,14 +572,15 @@
     <script src="content/js/lib/d3.v3.js"></script>
 
     <script src="content/nvd3/core.js"></script>
-    <script src="content/nvd3/utils.js"></script>
-    <script src="content/nvd3/models/legend.js"></script>
-    <script src="content/nvd3/models/line.js"></script>
     <script src="content/nvd3/tooltip.js"></script>
+    <script src="content/nvd3/utils.js"></script>
     <script src="content/nvd3/interactiveLayer.js"></script>
+    <script src="content/nvd3/models/legend.js"></script>
     <script src="content/nvd3/models/axis.js"></script>
     <script src="content/nvd3/models/scatter.js"></script>
+    <script src="content/nvd3/models/line.js"></script>
     <script src="content/nvd3/models/lineChart.js"></script>
+
      <script src="content/nvd3/models/stackedArea.js"></script>
      <script src="content/nvd3/models/stackedAreaChart.js"></script>
     

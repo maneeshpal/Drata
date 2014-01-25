@@ -21,21 +21,13 @@
     <script type="text/javascript" src="content/js/global.js"></script>
     <script src="http://d3js.org/d3.v3.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/js/d3.line.js"></script>
      <script>
         (function (root) {
             var data= [];
-            var date1 = new Date();
             for(var i =1;i<=1;i++){
                 var plotvalues = [];
-                var today = new Date();
-                // for(var j=0;j<15;j++){
-                //     var newToday = new Date(today.setHours(j));
-                //     plotvalues.push({
-                //         x:newToday.getTime(),
-                //         y: Math.floor(Math.random()*5 * i)                
-                //     });
-                // }
                 var y = 0;
                 for(var j = 0; j < 1000; j++){
                     y += (Math.random() * 10 - 5);
@@ -46,7 +38,7 @@
                 }
                 data.push({
                     values:plotvalues,
-                    name:'aaa'+i});
+                    key:'aaa'+i});
             };
             var l = new drata.charts.LineChart('graph', null, data);
     })(this);

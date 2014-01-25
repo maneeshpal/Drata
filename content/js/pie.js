@@ -131,7 +131,7 @@
 
         self.onResize = function(){
             self._t && clearTimeout(self._t);
-            self._t = setTimeout(self.chart.bind(self), 2000);
+            self._t = setTimeout(self.drawChart.bind(self), 2000);
         };
         window.chartData = chartData;
     };

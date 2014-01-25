@@ -15,8 +15,7 @@
   box-shadow: 0px 0px 5px .5px #ccc; }
 
 .widget-content {
-  height: 337px;
-  position: relative; }
+  height: 337px; }
 
 @media only screen and (max-width: 767px) {
   .ui-sortable-placeholder {

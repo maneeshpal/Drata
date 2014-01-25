@@ -106,18 +106,7 @@
                 .append("g")
                 .attr("transform", "translate(" + self.graphOptions.margin.left + "," + self.graphOptions.margin.top + ")");
 
-            if(0 && self.graphOptions.linearGradient){
-                self.svg.append("linearGradient")
-                    .attr("id", self.graphOptions.linearGradient.id)
-                    .attr("gradientUnits", "userSpaceOnUse")
-                    .attr("x1", 0).attr("y1", self.y(self.graphOptions.linearGradient.clippings.y1))
-                    .attr("x2", 0).attr("y2", self.y(self.graphOptions.linearGradient.clippings.y2))
-                    .selectAll("stop")
-                    .data(self.graphOptions.linearGradient.offsetColors)
-                    .enter().append("stop")
-                    .attr("offset", function (d) { return d.offset; })
-                    .attr("stop-color", function (d) { return d.color; });
-            }
+            
             var dd = new Date();
             var aa = new Date(dd);
             dd.setHours(dd.getHours()+1);

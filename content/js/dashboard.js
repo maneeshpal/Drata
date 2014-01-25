@@ -219,7 +219,7 @@ var LineContent = function(index){
     self.drawChart = function(chartData){
         var chart;
         nv.addGraph(function() {
-            chart = nv.models.stackedAreaChart().useInteractiveGuideline(true);
+            chart = nv.models.lineChart().useInteractiveGuideline(true);
             chart.x(function(d,i) { 
                   return d.x;
             });
@@ -227,7 +227,7 @@ var LineContent = function(index){
                   return d.y;
             });
 
-            chart.margin({right: 20});
+            chart.margin({right: 20, left:50});
             chart.xAxis.tickFormat(d3.format(",.1f"));
             chart.transitionDuration(1000);
             chart.yAxis
@@ -243,6 +243,12 @@ var LineContent = function(index){
             return chart;
         });
         return chart;
+        // var chart = new drata.charts.LineChart(self.widgetContentId, undefined, chartData);
+        // var _t;
+        // window.onresize = function(event) {
+        //     _t && clearTimeout(_t);
+        //     _t = setTimeout(chart.redrawResize, 2000);
+        // };
     };
 };
 
@@ -293,7 +299,6 @@ var WidgetProcessor = function(){
     self.previewGraph = ko.observable(false);
     self.dataKeys = ko.observableArray(DataRetriever.getDataKeys());
     self.selectedDataKey = ko.observable();
-
     //self.inputData = ko.observable(); 
     //self.outputData = ko.observable();
     self.newWidget = ko.observable(true);

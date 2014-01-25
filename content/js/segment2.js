@@ -387,7 +387,7 @@ var DataRetriever = {
                 timestamp : 77
             }];
         }
-        else{
+        else if(dataKey === 'key2'){
             return [{
                 d : 10,
                 e : 20,
@@ -414,6 +414,23 @@ var DataRetriever = {
                 f : 'ccc',
                 timestamp : 50
             }];
+        }
+        else{
+            var data= [];
+            for(var i =1;i<=1;i++){
+                var plotvalues = [];
+                var y = 0;
+                for(var j = 0; j < 1000; j++){
+                    y += (Math.random() * 10 - 5);
+                    plotvalues.push({
+                      x: j,
+                      y: y
+                    });
+                }
+                data.push({
+                    values:plotvalues,
+                    key:'aaa'+i});
+            };
         }
     }
 };
@@ -499,19 +516,6 @@ var Conditioner = {
             logic : condition.logic
         };
     },
-    // processConditions : function(obj, conditions){
-    //     var boolValues = [];
-    //     _.each(conditions, function(condition){
-    //         var response = this.processCondition(obj, condition);
-    //         boolValues.push(response);
-    //     }.bind(this));
-
-    //     var returnValue = this.applyOperations(boolValues);
-        
-    //     console.log('conditions:');
-    //     console.log(returnValue);
-    //     return returnValue;
-    // },
     processGroups : function(obj, groups){
         var boolValues = [];
         _.each(groups, function(group){
@@ -567,20 +571,6 @@ var Conditioner = {
                 ret.push({
                     x: +time, 
                     y:  Conditioner.reduceData(gi,dataGroup.groupBy, selection)
-                    // _.reduce(gi, function(memo, num){ 
-                    //         var numval;
-                    //         if(isComplex){ //complex selection. so we need to process it.
-                    //             var temp = Conditioner.processGroup(num,selection);
-                    //             numval = temp.value;
-                    //         }
-                    //         else if(dataGroup.groupBy === 'countBy'){
-                    //             numval = num[selection]? 1 : 0;
-                    //         }
-                    //         else{ // sumby
-                    //             numval = +num[selection] || 0;
-                    //         }
-                    //         return memo + numval; 
-                    //     }, 0)
                 });
             });
         }
@@ -681,40 +671,48 @@ var Conditioner = {
         var response = [];
         var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
-        var groupedData;
-        if(segmentModel.dataGroup.hasGrouping){
-            groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
-        }
+        var result = [];
 
-        _.each(segmentModel.selection.props, function(prop){
-            var result = [];
-            if(segmentModel.dataGroup.hasGrouping){
+        if(segmentModel.dataGroup.hasGrouping){
+            var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
+            _.each(segmentModel.selection.props, function(prop){
+                result = [];
                 _.each(groupedData, function(groupedDataItem, groupName){
                     var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, prop.prop);
                     val > 0 && result.push({
                         key: groupName,
                         value: val
                     });
-                }.bind(this));
-            }
-            else{
-                var val = this.reduceData(filteredData,'countBy', prop.prop);
+                });
+                
+                response.push({
+                    key : prop.prop,
+                    values: result
+                });
+            });
+        }
+        else{
+            var toplevelkey = 'xxxx';
+            result = [];
+            _.each(segmentModel.selection.props, function(prop){
+                var val = Conditioner.reduceData(filteredData, segmentModel.dataGroup.groupBy + 'By', prop.prop);
                 val > 0 && result.push({
                     key: prop.prop,
                     value: val
                 });
-            }
+            });
             response.push({
-                key : prop.prop,
+                key : toplevelkey,
                 values: result
             });
-        });
+        }
+        
         
         _.each(segmentModel.selection.complexGroups, function(selectionGroup){
             if(!segmentModel.dataGroup.hasGrouping)
                 throw 'you cant have complex selections without grouping';
 
-            var result = [];
+            result = [];
             _.each(groupedData, function(groupedDataItem, groupName){
                 var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, selectionGroup);
                 val > 0 && result.push({
