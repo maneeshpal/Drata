@@ -4,7 +4,7 @@ var Segmentor = function(model){
     var self = this;
     self.properties = ko.observable();
     self.level = 0;
-    self.conditionalOperations = ['>', '<', '>=','<=', '=', 'exists','like'];
+    self.conditionalOperations = ['>', '<', '>=','<=', '=', '!=','exists','like'];
     self.arithmeticOperations = ['+', '-', '*','/'];
     self.groupingOptions = ['countBy', 'sumBy'];
     self.logics = ['and', 'or'];
@@ -451,6 +451,9 @@ var Conditioner = {
             case '=':
                 result = (left === right) || (+left === +right);
             break;
+            case '!=':
+                result = (left !== right) || (+left !== +right);
+            break;
             case '>=':
                 result = +left >= +right;
             break;
@@ -596,6 +599,7 @@ var Conditioner = {
         var returnData;
         switch (segmentModel.chartType){
             case 'line':
+            case 'stackedArea':
                 returnData = this.getLineCharData(segmentModel, inputData);
                 break;
             case 'pie':

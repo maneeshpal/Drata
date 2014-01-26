@@ -1,139 +1,4 @@
- var defaultWidgetModel = [{
-        name: 'widget 1',
-        selectedDataKey: 'key1',
-        segmentModel: {
-            chartType: 'line',
-            chartSubType: 'stackedArea',
-            selection: {
-                complexGroups: [],
-                props: [
-                    {
-                        prop: "a"
-                    }
-                ]
-            },
-            dataGroup: {
-                xAxisProp: "timestamp",
-                groupByProp: "a"
-            },
-            group: {
-                groupType: "conditions",
-                groups: [
-                    {
-                        prop: "a",
-                        logic: "and",
-                        conditionType: "conditions",
-                        renderType: "condition",
-                        operation: ">",
-                        selectionGroup: {
-                            groupType: "selections",
-                            renderType: "group",
-                            logic: "+",
-                            groups: []
-                        },
-                        isComplex: false,
-                        value: "4"
-                    }
-                ],
-                logic: "and"
-            },
-            properties: [
-                "a",
-                "b",
-                "c",
-                "timestamp"
-            ]
-        }
-    },
-    {
-        name: 'widget pie',
-        selectedDataKey: "key1",
-        segmentModel: {
-            chartType: 'pie',
-            chartSubType: 'donut',
-            selection: {
-                complexGroups: [],
-                props: [
-                    {
-                        prop: "a"
-                    },
-                    {
-                        prop: "b"
-                    }
-                ]
-            },
-            dataGroup: {
-                xAxisProp: "timestamp",
-                groupByProp: "c",
-                groupBy: "sumBy",
-                hasGrouping: true
-            },
-            group: {
-                groupType: "conditions",
-                groups: [
-                    {
-                        prop: "b",
-                        logic: "and",
-                        conditionType: "conditions",
-                        renderType: "condition",
-                        operation: ">",
-                        selectionGroup: {
-                            groupType: "selections",
-                            groups: [],
-                            logic: "+",
-                            renderType: "group"
-                        },
-                        isComplex: false,
-                        value: "12"
-                    }
-                ],
-                renderType: "group"
-            },
-            properties: [
-                "a",
-                "b",
-                "c",
-                "timestamp"
-            ]
-        }
-    },{
-        name: "widget-3",
-        selectedDataKey: "key2",
-        segmentModel: {
-            chartType: 'line',
-            chartSubType: 'line',
-            selection: {
-                complexGroups: [],
-                props: [
-                    {
-                        prop: "d"
-                    },
-                    {
-                        prop: "e"
-                    }
-                ]
-            },
-            dataGroup: {
-                xAxisProp: "timestamp",
-                groupByProp: "d"
-            },
-            group: {
-                groupType: "conditions",
-                groups: [],
-                renderType: "group"
-            },
-            properties: [
-                "d",
-                "e",
-                "f",
-                "timestamp"
-            ]
-        }
-    }];
-    var dashboardModel = {
-        name: 'maneesh',
-        widgets: defaultWidgetModel
-    };
+
 var Dashboard = function(){
     var self = this;
     self.name = dashboardModel.name;
@@ -161,23 +26,18 @@ var Dashboard = function(){
 
 var Widget = function(widgetModel, index){
     var self = this;
+    var chartData;
     self.name = widgetModel.name || widgetModel.selectedDataKey;
-    self.chartSubType = ko.observable(widgetModel.segmentModel.chartSubType);
+
     self.chartType = ko.observable(widgetModel.segmentModel.chartType);
-    self.chartSubTypes = ko.computed(function(){
-        if(self.chartType() === 'line'){
-            return ['line', 'stackedArea'];
-        }
-        else{
-            return ['pie', 'donut'];
-        }
-    });
-    //self.content = (widgetModel.segmentModel.chartType === 'line')? new LineContent(index) : new PieContent(index);
     var content;
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
             case 'line':
                 content = new LineContent(index);
+                break;
+            case 'stackedArea':
+                content = new StackedAreaContent(index);
                 break;
             case 'pie':
                 content = new PieContent(index);
@@ -199,14 +59,14 @@ var Widget = function(widgetModel, index){
 
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        var chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
         content.drawChart(chartData);
     };
 
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        var chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
         self.chartType(widgetModel.segmentModel.chartType);
         content.drawChart(chartData);
     };
@@ -216,18 +76,22 @@ var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'line-content-template';
+    self.nvChart = nv.models.lineChart();
     self.drawChart = function(chartData){
         var chart;
+        d3.select('#'+self.widgetContentId +' svg').remove();
+        d3.select('#'+self.widgetContentId).append('svg'); 
         nv.addGraph(function() {
-            chart = nv.models.lineChart().useInteractiveGuideline(true);
+            var nvChart = self.nvChart;
+            chart = nvChart.useInteractiveGuideline(true);
             chart.x(function(d,i) { 
-                  return d.x;
+                  return d && d.x;
             });
             chart.y(function(d,i) { 
-                  return d.y;
+                  return d && d.y;
             });
 
-            chart.margin({right: 20, left:50});
+            chart.margin({right: 20});
             chart.xAxis.tickFormat(d3.format(",.1f"));
             chart.transitionDuration(1000);
             chart.yAxis
@@ -243,15 +107,46 @@ var LineContent = function(index){
             return chart;
         });
         return chart;
-        // var chart = new drata.charts.LineChart(self.widgetContentId, undefined, chartData);
-        // var _t;
-        // window.onresize = function(event) {
-        //     _t && clearTimeout(_t);
-        //     _t = setTimeout(chart.redrawResize, 2000);
-        // };
     };
 };
 
+var StackedAreaContent = function(index){
+    var self = this;
+    self.widgetContentId = 'widgetContent'+index;
+    self.template = 'line-content-template';
+    self.nvChart = nv.models.stackedAreaChart();
+    self.drawChart = function(chartData){
+        var chart;
+        d3.select('#'+self.widgetContentId +' svg').remove();
+        d3.select('#'+self.widgetContentId).append('svg'); 
+        nv.addGraph(function() {
+            var nvChart = self.nvChart;
+            chart = nvChart.useInteractiveGuideline(true);
+            chart.x(function(d,i) { 
+                  return d && d.x;
+            });
+            chart.y(function(d,i) { 
+                  return d && d.y;
+            });
+
+            chart.margin({right: 20});
+            chart.xAxis.tickFormat(d3.format(",.1f"));
+            chart.transitionDuration(1000);
+            chart.yAxis
+                .axisLabel('maneesh')
+                .tickFormat(d3.format(',.2f'));
+            d3.select('#'+self.widgetContentId +' svg')
+                .datum(chartData)
+              //.transition().duration(1000)
+                .call(chart);
+
+            nv.utils.windowResize(chart.update);
+
+            return chart;
+        });
+        return chart;
+    };
+};
 
 var PieContent = function(index){
     var self = this;
@@ -369,6 +264,9 @@ var WidgetProcessor = function(){
             case 'pie':
                 self.chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
                 break;
+            case 'stackedArea':
+                
+                break;
         }
         
         console.log(JSON.stringify(graphData, null, '\t'));
@@ -379,7 +277,7 @@ var WidgetProcessor = function(){
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
-            self.chart.removeChart();
+            self.chart && self.chart.removeChart();
         }
     });
     $(window).on('resize', function(){

@@ -262,15 +262,6 @@
                     <section class="top-bar-section">
                         <ul class="right">
                             <li class="divider"></li>
-                            <li class="has-dropdown">
-                                <a data-bind="text:chartSubType"></a>
-                                <ul class="dropdown">
-                                    <!-- ko foreach: chartSubTypes -->
-                                    <li><a></a></li>
-                                    <!-- /ko -->
-                                </ul>
-                            </li>
-                            <li class="divider"></li>
                             <li class="has-form action-icon">
                                 <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
                             </li>
@@ -327,9 +318,9 @@
                         </span>
                     </li>
                     <li>
-                        <span class="label radius secondary">
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'stackedArea','secondary': chartType() !== 'stackedArea'},click:setChartType.bind(this, 'stackedArea')">
                             <i class="general foundicon-plus"></i>
-                            <p>PieChart</p>
+                            <p>StackedAreaChart</p>
                         </span>
                     </li>
                 </ul>
@@ -367,18 +358,6 @@
             </div>
         </div>
     </script>
-     <script type="text/html" id="basic-datagroup-template">
-        <div class="row">
-            <div class="small-12 columns">
-                <fieldset>
-                    <legend>Grouping Data</legend>
-                    <form>
-                        
-                    </form>
-                </fieldset>
-            </div>
-        </div>
-    </script>
     <script type="text/html" id="datagroup-template">
         <div class="row">
             <div class="small-12 columns">
@@ -400,7 +379,7 @@
                             </div>
                         </div>
                         <!-- /ko -->
-                        <!-- ko if:$parent.chartType() === 'line' -->
+                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'stackedArea'  -->
                         <div class="row">
                             <div class="small-8">
                                 <div class="row">
@@ -597,6 +576,7 @@
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>
     <script type="text/javascript" src="content/js/segment2.js"></script>
+    <script type="text/javascript" src="content/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
 
     <script type="text/javascript" src="content/js/d3.line.js"></script>

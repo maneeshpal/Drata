@@ -7,68 +7,29 @@
         <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
 
         <style type="text/css">
-            .combobox-container{
+            .graph {
                 width:50%;
-                margin:0 auto;
-                padding:20px;
-                border:1px solid #222;
                 height:400px;
-            }
-            .combo-box input{
-                margin-bottom:0;
-            }
-            ul.combolist {
-                width:100%;
-                margin-top:-1rem;
-                z-index:9;
-                border: 1px solid #999999;
-                border-top:none;
-                background: #f2f2f2;
-                box-shadow: 0 0 5px #999999;
-                max-height:200px;
-                overflow: auto;
-                font-size: 0.875rem;
-            } 
-            ul.combolist li {
-                padding:.5rem;
-            } 
-            ul.combolist li:hover {
-                background:#e3e3e3;
+                margin:0 auto;
+                border:1px solid #ccc;
             }
         </style>
     </head>
 <body>
      
-     <div id="combo" class="combobox-container">
-     <div class="row">
-        <div class="large-6 columns">
-            <div class="combo-box" data-bind="comboBox :{selectedValue: selectedValue, options: ['a','ab', 'abc']}">
-            </div>
-        </div>
-        <div class="large-6 columns">
-            <div class="combo-box" data-bind="comboBox :{selectedValue: selectedValue2, options: ['a','ab', 'abc']}">
-            </div>
-        </div>
-     </div>
-         
-     </div>
-    
+     
+    <div class="graph" id="graph"></div>
     <script src="content/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
-    <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
-    <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
-    
+   <script type="text/javascript" src="content/js/global.js"></script>
+   
+   <script type="text/javascript" src="content/js/tempdata.js"></script>
+   
+   <script type="text/javascript" src="content/js/linechart.js"></script>
+   
     <script>
-        var abc = function(){
-            var self = this;
-            self.name = 'maneesh';
-            self.selectedValue = ko.observable();
-            self.selectedValue2 = ko.observable();
-        }
-        var x = new abc();
-        ko.applyBindings(x, document.getElementById('combo'));
+       
     </script>
 
 </body>
