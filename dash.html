@@ -7,10 +7,10 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
-    <link rel="stylesheet" type="text/css" href="content/style/line-graph.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="content/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
-    <link rel="stylesheet" type="text/css" href="content/nvd3/nv.d3.css" />
+
     <style>
         .logic-text {
             position: relative;
@@ -99,10 +99,6 @@
             opacity: 0;
         }
 
-        /*#graphBuilder:before, #graphBuilder:after {
-            content: " ";
-        }*/
-
         .mymodal-inner {
             width: 70%;
             margin: 0 auto;
@@ -115,11 +111,6 @@
         }
         .mymodal-wrapper.chart-type .mymodal-inner{
             top:33%;
-        }
-        svg.pie {
-            width:auto;
-            height:auto;
-            display:inline;
         }
 
         ul.segment-type{
@@ -140,7 +131,7 @@
         }
     </style>
 </head>
-<body class="with-3d-shadow with-transitions">
+<body>
     <nav class="top-bar dashboard" id="topbar" data-topbar style="margin-bottom:1rem">
         <ul class="title-area">
             <li class="name">
@@ -550,22 +541,7 @@
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
 
-    <script src="content/nvd3/core.js"></script>
-    <script src="content/nvd3/tooltip.js"></script>
-    <script src="content/nvd3/utils.js"></script>
-    <script src="content/nvd3/interactiveLayer.js"></script>
-    <script src="content/nvd3/models/legend.js"></script>
-    <script src="content/nvd3/models/axis.js"></script>
-    <script src="content/nvd3/models/scatter.js"></script>
-    <script src="content/nvd3/models/line.js"></script>
-    <script src="content/nvd3/models/lineChart.js"></script>
-
-     <script src="content/nvd3/models/stackedArea.js"></script>
-     <script src="content/nvd3/models/stackedAreaChart.js"></script>
     
-    <script src="content/nvd3/models/pie.js"></script>
-    <script src="content/nvd3/models/pieChart.js"></script>
-
     <script type="text/javascript" src="content/js/sortable.js"></script>
 
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
@@ -575,12 +551,19 @@
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>
+
+    <script type="text/javascript" src="content/js/models/axis.js"></script>
+    <script type="text/javascript" src="content/js/models/dots.js"></script>
+    <script type="text/javascript" src="content/js/models/labels.js"></script>
+    <script type="text/javascript" src="content/js/models/lines.js"></script>
+    <script type="text/javascript" src="content/js/models/tooltip.js"></script>
+    <script type="text/javascript" src="content/js/charts/linechart.js"></script>
+    <script type="text/javascript" src="content/js/charts/areachart.js"></script>
+
     <script type="text/javascript" src="content/js/segment2.js"></script>
     <script type="text/javascript" src="content/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
-
-    <script type="text/javascript" src="content/js/d3.line.js"></script>
-    <script type="text/javascript" src="content/js/pie.js"></script>
+    <script type="text/javascript" src="content/js/charts/pie.js"></script>
     <script type="text/javascript">
         (function (root, $) {
             window.dashboard = new Dashboard();

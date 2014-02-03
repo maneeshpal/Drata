@@ -2,7 +2,7 @@ var defaultWidgetModel = [{
         name: 'widget 1',
         selectedDataKey: 'key1',
         segmentModel: {
-            chartType: 'stackedArea',
+            chartType: 'area',
             selection: {
                 complexGroups: [],
                 props: [

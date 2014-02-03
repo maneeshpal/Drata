@@ -36,7 +36,7 @@ var Widget = function(widgetModel, index){
             case 'line':
                 content = new LineContent(index);
                 break;
-            case 'stackedArea':
+            case 'area':
                 content = new StackedAreaContent(index);
                 break;
             case 'pie':
@@ -76,36 +76,19 @@ var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'line-content-template';
-    self.nvChart = nv.models.lineChart();
     self.drawChart = function(chartData){
-        var chart;
-        d3.select('#'+self.widgetContentId +' svg').remove();
-        d3.select('#'+self.widgetContentId).append('svg'); 
-        nv.addGraph(function() {
-            var nvChart = self.nvChart;
-            chart = nvChart.useInteractiveGuideline(true);
-            chart.x(function(d,i) { 
-                  return d && d.x;
-            });
-            chart.y(function(d,i) { 
-                  return d && d.y;
-            });
-
-            chart.margin({right: 20});
-            chart.xAxis.tickFormat(d3.format(",.1f"));
-            chart.transitionDuration(1000);
-            chart.yAxis
-                .axisLabel('maneesh')
-                .tickFormat(d3.format(',.2f'));
-            d3.select('#'+self.widgetContentId +' svg')
-                .datum(chartData)
-              //.transition().duration(1000)
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
-        });
+        var chart = drata.charts.lineChart();
+        
+        d3.select('#'+self.widgetContentId +' svg')
+            .datum(chartData)
+            .call(chart);
+        
+        var _t;
+        window.onresize = function(event) {
+            _t && clearTimeout(_t);
+            _t = setTimeout(chart.resize, 2000);
+        };
+        
         return chart;
     };
 };
@@ -114,36 +97,20 @@ var StackedAreaContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'line-content-template';
-    self.nvChart = nv.models.stackedAreaChart();
+    
     self.drawChart = function(chartData){
-        var chart;
-        d3.select('#'+self.widgetContentId +' svg').remove();
-        d3.select('#'+self.widgetContentId).append('svg'); 
-        nv.addGraph(function() {
-            var nvChart = self.nvChart;
-            chart = nvChart.useInteractiveGuideline(true);
-            chart.x(function(d,i) { 
-                  return d && d.x;
-            });
-            chart.y(function(d,i) { 
-                  return d && d.y;
-            });
-
-            chart.margin({right: 20});
-            chart.xAxis.tickFormat(d3.format(",.1f"));
-            chart.transitionDuration(1000);
-            chart.yAxis
-                .axisLabel('maneesh')
-                .tickFormat(d3.format(',.2f'));
-            d3.select('#'+self.widgetContentId +' svg')
-                .datum(chartData)
-              //.transition().duration(1000)
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
-        });
+        var chart = drata.charts.areaChart();
+        
+        d3.select('#'+self.widgetContentId +' svg')
+            .datum(chartData)
+            .call(chart);
+        
+        var _t;
+        window.onresize = function(event) {
+            _t && clearTimeout(_t);
+            _t = setTimeout(chart.resize, 2000);
+        };
+        
         return chart;
     };
 };
@@ -259,13 +226,31 @@ var WidgetProcessor = function(){
         var graphData = Conditioner.getGraphData(segmentModel, inputData);
         switch(segmentModel.chartType){
             case 'line':
-                self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+                //self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+                var chart = drata.charts.lineChart();
+                d3.select('#previewgraph svg')
+                    .datum(graphData)
+                    .call(chart);
+                var _t;
+                window.onresize = function(event) {
+                    _t && clearTimeout(_t);
+                    _t = setTimeout(chart.resize, 2000);
+                };
+                break;
+            case 'area':
+                //self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+                var chart = drata.charts.areaChart();
+                d3.select('#previewgraph svg')
+                    .datum(graphData)
+                    .call(chart);
+                var _t;
+                window.onresize = function(event) {
+                    _t && clearTimeout(_t);
+                    _t = setTimeout(chart.resize, 2000);
+                };
                 break;
             case 'pie':
                 self.chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
-                break;
-            case 'stackedArea':
-                
                 break;
         }
         
@@ -277,12 +262,12 @@ var WidgetProcessor = function(){
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
-            self.chart && self.chart.removeChart();
+            d3.select('#previewgraph svg').remove();
         }
     });
-    $(window).on('resize', function(){
-        self.chart && self.chart.onResize();   
-    });
+    // $(window).on('resize', function(){
+    //     self.chart && self.chart.onResize();   
+    // });
 };
 
 var TopBar = function(){

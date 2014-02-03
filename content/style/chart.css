@@ -1,0 +1,44 @@
+    .axis path{
+      stroke:#ccc;
+      fill:none;
+      shape-rendering: crispEdges;
+
+    }
+    .axis line {
+      stroke:#ccc;
+      opacity: .5;
+      fill:none;
+      shape-rendering: crispEdges;
+    }
+    .axis text{
+        font: 10px arial;
+        fill: #ccc;
+    }
+    .label-group text{
+        font:12px arial;
+    }
+    .line-group .line{
+        fill:none;
+        stroke-width:2;
+    }
+    .label-group {
+        cursor:pointer;
+    }
+    .tooltip {
+        text-anchor:end;
+        font: 12px arial;
+    }
+    .area-group .line{
+        stroke-width:2;
+        opacity:.3;
+    }
+
+
+    /**PIE**/
+    svg.pie {
+            width:auto;
+            height:auto;
+            display:inline;
+        }
+
+    /****/

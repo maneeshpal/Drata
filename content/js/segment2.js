@@ -599,7 +599,7 @@ var Conditioner = {
         var returnData;
         switch (segmentModel.chartType){
             case 'line':
-            case 'stackedArea':
+            case 'area':
                 returnData = this.getLineCharData(segmentModel, inputData);
                 break;
             case 'pie':
