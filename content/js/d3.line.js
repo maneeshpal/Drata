@@ -62,7 +62,7 @@
                 .scale(self.x)
                 .orient(self.graphOptions.xAxis.orient)
                 .ticks(self.graphOptions.xAxis.ticks);
-                //.tickSize(-self.elemHeight(), 0, 0);
+                //.ticksize(-self.elemHeight(), 0, 0);
 
 
         self.yAxis = function(){
