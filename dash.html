@@ -7,128 +7,16 @@
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="content/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="content/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
 
     <style>
-        .logic-text {
-            position: relative;
-            top: .4rem;
-            left: 1.5rem;
-            display: inline;
-        }
-
-        .logic-selection {
-            display: none;
-            max-width: 55px;
-            margin-left: 0.8rem;
-        }
-
-        .logic-wrapper {
-            border-bottom: 1px solid #ddd;
-        }
-
-        .row .columns.logic-toggler {
-            position: absolute;
-            width: 80px;
-            z-index: 999;
-        }
-
-        .row .columns.operation-group {
-            padding-left: 80px;
-        }
-
-        .logic-toggler:hover .logic-wrapper {
-            border: none;
-        }
-
-        .logic-toggler:hover .logic-text {
-            display: none;
-        }
-
-        .logic-toggler:hover .logic-selection {
-            display: block;
-        }
-
-        .remove-group {
-            color: #ff0000;
-            vertical-align: middle;
-        }
-
-        .remove-condition {
-            color: #ff0000;
-            position: relative;
-            top: .4rem;
-            left: .5rem;
-        }
-
-        .vertical-bg {
-            background-image: url('content/images/border_1x1.png');
-            background-repeat: repeat-x;
-            background-position: 0 20px;
-        }
-
-        .condition-view {
-            position: relative;
-            top: .5rem;
-            margin-bottom: 1.5rem;
-        }
-
         #previewgraph {
             height: 300px;
         }
-
-        .mymodal-wrapper.showme {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .mymodal-wrapper {
-            position: absolute;
-            /*right: -103%;
-            left: 103%;*/
-            visibility: hidden;
-            transition: visibility .1s, opacity .5s linear;
-            height: auto;
-            /*transition: all 1s;*/
-            background-color: rgba(0, 0, 0, 0.4);
-            top: 2.8rem;
-            padding: 1.3rem 0;
-            width: 100%;
-            opacity: 0;
-        }
-
-        .mymodal-inner {
-            width: 70%;
-            margin: 0 auto;
-            background-color: #fff;
-        }
-        .mymodal-wrapper.chart-type{
-            height:400px;
-            z-index: 9;
-            top: 0;
-        }
-        .mymodal-wrapper.chart-type .mymodal-inner{
-            top:33%;
-        }
-
-        ul.segment-type{
-            text-align: center;
-            padding-top:1.25rem;
-        }
-        .segment-type i {
-            font-size: 2rem;
-        }
-        .segment-type p{
-            margin-bottom: 0;
-        }
-
-        @media only screen and (max-width: 64.063em) {
-            .segment-processor-inner {
-                width: 95%;
-            }
-        }
+        
     </style>
 </head>
 <body>
@@ -155,11 +43,7 @@
             </ul>
         </section>
     </nav>
-    <div class="row">
-        <div id="dashboard" class="small-12 columns">
-            <ul class="large-block-grid-3 small-block-grid-1 js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
-            </ul>
-        </div>
+    <div id="dashboard" class="row js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
     </div>
     <div id="graphBuilder" class="mymodal-wrapper">
         <div class="mymodal-inner">
@@ -241,49 +125,59 @@
     </div>
 
     <script type="text/html" id="widget-template">
-        <li>
-            <div class="widget-wrapper">
-                <nav class="top-bar secondary widget handle" id="topbar" data-topbar>
-                    <ul class="title-area">
-                        <li class="name">
-                            <h1><a data-bind="html:name"></a></h1>
+    <div class="widget-outer" data-bind="css: widgetClass">
+        <div class="widget-wrapper">
+            <nav class="top-bar secondary widget handle" id="topbar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a data-bind="html:name"></a></h1>
+                    </li>
+                    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+                </ul>
+                <section class="top-bar-section">
+                    <ul class="right">
+                        <li class="divider"></li>
+                        <li>
+                        <select data-bind="value:sizex">
+                            <option value="1">25%</option>
+                            <option value="2">50%</option>
+                            <option value="3">75%</option>
+                            <option value="4">100%</option>
+                            <option value="5">33.3%</option>
+                            <option value="6">66.6%</option>
+                        </select>
                         </li>
-                        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+                        <li class="divider"></li>
+                        <li class="has-form action-icon">
+                            <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="has-form action-icon">
+                            <i data-bind="click:editWidget" class="general foundicon-edit"></i>
+                        </li>
                     </ul>
-                    <section class="top-bar-section">
-                        <ul class="right">
-                            <li class="divider"></li>
-                            <li class="has-form action-icon">
-                                <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
-                            </li>
-                            <li class="divider"></li>
-                            <li class="has-form action-icon">
-                                <i data-bind="click:editWidget" class="general foundicon-edit"></i>
-                            </li>
-                        </ul>
-                        <ul class="left">
-                        </ul>
+                    <ul class="left">
+                    </ul>
 
-                    </section>
-                </nav>
-                <!-- ko template: contentTemplate() -->
-                <!-- /ko -->
-            </div>
-        </li>
+                </section>
+            </nav>
+            <!-- ko template: contentTemplate() -->
+            <!-- /ko -->
+        </div>
+        </div>
     </script>
-    <script type="text/html" id="line-content-template">
+    <script type="text/html" id="content-template">
         <div data-bind="attr :{id: widgetContentId}" class="widget-content">
             <svg></svg>
         </div>
     </script>
     <script type="text/html" id="pie-content-template">
-        <div class="row">
-            <div class="small-12 columns" style="position:relative">
-                <div data-bind="attr :{id: widgetContentId}" class="widget-content">
-                </div>
-                <select style="position:absolute; right: 0.9rem;top: -.09rem;width:auto" data-bind="options:pieKeys, value:selectedPieKey, visible:pieKeys().length > 1"></select>
-            </div>
+        <div style="position:relative">
+        <div data-bind="attr :{id: widgetContentId}" class="widget-content">
+            <svg></svg>
         </div>
+        <select style="position:absolute; right: 0;top: -.09rem;width:auto" data-bind="options:pieKeys, value:selectedPieKey, visible:pieKeys().length > 1"></select>
+            </div>
         
     </script>
     <script type="text/html" id="segment-template">
@@ -295,7 +189,7 @@
                 <!-- ko template: {name: 'group-template', data: group} -->
                 <!-- /ko -->
 
-                <ul class="small-block-grid-3 segment-type" data-bind="visible: $root.newWidget">
+                <ul class="small-block-grid-2 segment-type" data-bind="visible: $root.newWidget">
                     <li>
                         <span class="label radius" data-bind="css: {'primary': chartType() === 'line','secondary': chartType() !== 'line'},click:setChartType.bind(this, 'line')">
                             <i class="general foundicon-plus"></i>
@@ -309,9 +203,21 @@
                         </span>
                     </li>
                     <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'stackedArea','secondary': chartType() !== 'stackedArea'},click:setChartType.bind(this, 'stackedArea')">
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'area','secondary': chartType() !== 'area'},click:setChartType.bind(this, 'area')">
                             <i class="general foundicon-plus"></i>
-                            <p>StackedAreaChart</p>
+                            <p>AreaChart</p>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'bar','secondary': chartType() !== 'bar'},click:setChartType.bind(this, 'bar')">
+                            <i class="general foundicon-plus"></i>
+                            <p>Bar Chart</p>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="label radius" data-bind="css: {'primary': chartType() === 'scatter','secondary': chartType() !== 'scatter'},click:setChartType.bind(this, 'scatter')">
+                            <i class="general foundicon-plus"></i>
+                            <p>ScatterChart</p>
                         </span>
                     </li>
                 </ul>
@@ -355,14 +261,15 @@
                 <fieldset>
                     <legend>Grouping</legend>
                     <form>
-                        <!-- ko if:$parent.chartType() === 'pie' -->
+                        <!-- ko if:$parent.chartType() === 'pie' || $parent.chartType() === 'bar' -->
                         <div class="row">
                             <div class="small-4 columns">
-                                <select data-bind="value:groupBy">
-                                <option value="sumBy">Sum By</option>
-                                <option value="countBy">Count By</option>
-                                <option value="count">Compare Counts</option>
-                                <option value="sum">Compare Sum</option>
+                                <select data-bind="value:groupBy, optionsCaption : 'grouping'">
+                                    <option value="sumBy">Sum By</option>
+                                    <option value="countBy">Count By</option>
+                                    <option value="groupValuesBy">Group Selection By</option>
+                                    <option value="count">Compare Counts</option>
+                                    <option value="sum">Compare Sum</option>
                                 </select>
                             </div>
                             <div class="small-8 columns">
@@ -370,7 +277,7 @@
                             </div>
                         </div>
                         <!-- /ko -->
-                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'stackedArea'  -->
+                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
                         <div class="row">
                             <div class="small-8">
                                 <div class="row">
@@ -536,7 +443,7 @@
     </script>
 
 
-    <script type="text/javascript" src="content/js/global.js"></script>
+    <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
@@ -556,14 +463,21 @@
     <script type="text/javascript" src="content/js/models/dots.js"></script>
     <script type="text/javascript" src="content/js/models/labels.js"></script>
     <script type="text/javascript" src="content/js/models/lines.js"></script>
+    <script type="text/javascript" src="content/js/models/area.js"></script>
     <script type="text/javascript" src="content/js/models/tooltip.js"></script>
     <script type="text/javascript" src="content/js/charts/linechart.js"></script>
     <script type="text/javascript" src="content/js/charts/areachart.js"></script>
 
-    <script type="text/javascript" src="content/js/segment2.js"></script>
+    <script type="text/javascript" src="content/js/segment.js"></script>
     <script type="text/javascript" src="content/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
     <script type="text/javascript" src="content/js/charts/pie.js"></script>
+
+    <script type="text/javascript" src="content/js/charts/barchart.js"></script>
+    <script type="text/javascript" src="content/js/charts/scatterplot.js"></script>
+   
+    <script type="text/javascript" src="content/js/tempdata.js"></script>
+   
     <script type="text/javascript">
         (function (root, $) {
             window.dashboard = new Dashboard();

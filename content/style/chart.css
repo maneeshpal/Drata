@@ -1,3 +1,6 @@
+    text{
+        font: 10px arial;
+    }
     .axis path{
       stroke:#ccc;
       fill:none;
@@ -11,7 +14,6 @@
       shape-rendering: crispEdges;
     }
     .axis text{
-        font: 10px arial;
         fill: #ccc;
     }
     .label-group text{
@@ -24,13 +26,13 @@
     .label-group {
         cursor:pointer;
     }
-    .tooltip {
+    .tool-tip {
         text-anchor:end;
         font: 12px arial;
     }
     .area-group .line{
         stroke-width:2;
-        opacity:.3;
+        opacity:.6;
     }
 
 

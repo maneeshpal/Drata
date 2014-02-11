@@ -293,7 +293,7 @@ var DataGroup = function(model){
     self.interval = ko.observable();
     
     self.groupBy.subscribe(function(newValue){
-        self.hasGrouping((newValue === 'sumBy' || newValue === 'countBy'));
+        self.hasGrouping((newValue === 'sumBy' || newValue === 'countBy' || newValue === 'groupValuesBy'));
     });
 
     self.setProps = function(model){
@@ -403,7 +403,7 @@ var DataRetriever = {
             }];
         }
         else{
-            return tempData.randomProps(20);
+            return tempData.randomProps(100);
         }
     }
 };
@@ -649,9 +649,14 @@ var Conditioner = {
     reduceData : function(objArray, groupingType, selection){
         var isComplex = typeof selection === 'object';
 
-        if(isComplex && groupingType === 'countBy')
-            throw "countBy not allowed for complex selections.";
+        if(isComplex && (groupingType === 'countBy' || groupingType === 'groupValuesBy'))
+            throw "Not allowed for complex selections.";
 
+        if(groupingType === 'groupValuesBy'){
+            return _.countBy(objArray, function(val){
+                return val[selection];
+            });   
+        }
         return _.reduce(objArray, function(memo, num){ 
                     var numval;
                     if(isComplex){ //complex selection. so we need to process it.
@@ -675,60 +680,129 @@ var Conditioner = {
         var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
         var result = [];
+        var topLevelResponse = [];
 
         if(segmentModel.dataGroup.hasGrouping){
             var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
-            _.each(segmentModel.selection.props, function(prop){
-                result = [];
-                _.each(groupedData, function(groupedDataItem, groupName){
-                    var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, prop.prop);
-                    val > 0 && result.push({
-                        key: groupName,
-                        value: val
+            
+            if(segmentModel.dataGroup.groupBy !== 'groupValuesBy'){
+                response = [];
+                _.each(segmentModel.selection.props, function(prop){
+                    result = [];
+                    _.each(groupedData, function(groupedDataItem, groupName){
+                        var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, prop.prop);
+
+                        val >= 0 && result.push({
+                            key: groupName,
+                            value: val
+                        });
+                    });
+                    
+                    response.push({
+                        key : prop.prop,
+                        groupLevel: 'B',
+                        values: result
                     });
                 });
-                
-                response.push({
-                    key : prop.prop,
-                    values: result
+
+                _.each(segmentModel.selection.complexGroups, function(selectionGroup){
+                    result = [];
+                    _.each(groupedData, function(groupedDataItem, groupName){
+                        var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, selectionGroup);
+                        val > 0 && result.push({
+                            key: groupName,
+                            value: val
+                        });
+                    });
+
+                    response.push({
+                        key : selectionGroup.selectionName,
+                        groupLevel : 'B',
+                        values: result
+                    });
                 });
-            });
+
+                topLevelResponse.push({
+                    key : 'xxx',
+                    groupLevel: 'A',
+                    values: response
+                });
+            }
+            else{
+
+                topLevelResponse = [];
+                _.each(segmentModel.selection.props, function(prop){
+                    response = [];
+                    _.each(groupedData, function(groupedDataItem, groupName){
+                        var propCounts =  Conditioner.reduceData(groupedDataItem, segmentModel.dataGroup.groupBy, prop.prop);
+                        
+                        result = [];
+                        _.each(propCounts, function(value, name){
+                            result.push({
+                                key: name,
+                                value: value
+                            });
+                        });
+
+                        response.push({
+                            key : groupName,
+                            groupLevel: 'B',
+                            values: result
+                        });
+                    });
+
+                    topLevelResponse.push({
+                        key : prop.prop + '-Group',
+                        groupLevel : 'A',
+                        values: response
+                    });
+                });
+            }
         }
         else{
             var toplevelkey = 'xxxx';
             result = [];
             _.each(segmentModel.selection.props, function(prop){
                 var val = Conditioner.reduceData(filteredData, segmentModel.dataGroup.groupBy + 'By', prop.prop);
-                val > 0 && result.push({
+                result.push({
                     key: prop.prop,
                     value: val
                 });
             });
-            response.push({
-                key : toplevelkey,
-                values: result
-            });
-        }
-        
-        
-        _.each(segmentModel.selection.complexGroups, function(selectionGroup){
-            if(!segmentModel.dataGroup.hasGrouping)
-                throw 'you cant have complex selections without grouping';
 
-            result = [];
-            _.each(groupedData, function(groupedDataItem, groupName){
-                var val = Conditioner.reduceData(groupedDataItem,segmentModel.dataGroup.groupBy, selectionGroup);
-                val > 0 && result.push({
-                    key: groupName,
+            _.each(segmentModel.selection.complexGroups, function(selectionGroup){
+                var val = Conditioner.reduceData(filteredData,segmentModel.dataGroup.groupBy + 'By', selectionGroup);
+                result.push({
+                    key: selectionGroup.selectionName,
                     value: val
                 });
             });
 
             response.push({
-                key : selectionGroup.selectionName,
+                key : toplevelkey,
+                groupLevel : 'B',
                 values: result
             });
-        });
-        return response;
+
+            topLevelResponse.push({
+                key : toplevelkey,
+                groupLevel : 'A',
+                values: response
+            });
+        }
+        
+        
+        
+
+        return topLevelResponse;
+    },
+
+    getKeyValuePair : function(dataArr, groupBy, prop){
+        var val = Conditioner.reduceData(dataArr,groupBy, prop);
+        if(val === undefined || isNaN(val)) val = 0;
+        return {
+            key: groupName,
+            value: val
+        };
     }
 }

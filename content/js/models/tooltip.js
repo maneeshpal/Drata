@@ -11,9 +11,9 @@
                     .selectAll('text.tooltip')
                     .data([0])
                     .enter().append('text')
-                    .attr('class', 'tooltip');
+                    .attr('class', 'tool-tip');
 
-                var toolTip = container.select('text.tooltip');
+                var toolTip = container.select('text.tool-tip');
 
                 _dispatch.on("showToolTip", function(d, color){
                     toolTip.text('x:' + d.x + ', y:' + d.y)
@@ -23,7 +23,6 @@
                 _dispatch.on("hideToolTip", function(){
                     toolTip.text('');
                 });
-
             });
 
             return tt;

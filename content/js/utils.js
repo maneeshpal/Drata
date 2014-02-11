@@ -117,12 +117,29 @@
         }
     };
 
+    var textToPixel = function(text, style){
+        var txt = $('#lid');
+        if(txt.length === 0){
+            txt = $(document.createElement('span'));
+            txt.attr('id', 'lid');
+            $('body').append(txt);
+        }
+        style  = style || 'font-size: 12px; font-family: arial;';
+        txt.attr('style', style + ' display:none');
+        txt.html(text);
+        return txt.width();
+    };
+
+    drata.ns('js').extend({
+        logmsg : false
+    });
     drata.ns('utils').extend({
         format: format,
         extend: extend,
         getUrlParam: getUrlParam,
         clone:clone,
-        windowResize:windowResize
+        windowResize:windowResize,
+        textToPixel : textToPixel
     });
 })(this);
 

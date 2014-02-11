@@ -1,4 +1,4 @@
-
+"use strict";
 var Dashboard = function(){
     var self = this;
     self.name = dashboardModel.name;
@@ -28,9 +28,15 @@ var Widget = function(widgetModel, index){
     var self = this;
     var chartData;
     self.name = widgetModel.name || widgetModel.selectedDataKey;
-
-    self.chartType = ko.observable(widgetModel.segmentModel.chartType);
+    self.sizex = ko.observable(widgetModel.sizex || 1);
+    self.widgetClass= ko.computed(function(){
+        return 'widget-size-' + self.sizex();
+    });
     var content;
+    self.sizex.subscribe(function(){
+        content.resize();
+    });
+    self.chartType = ko.observable(widgetModel.segmentModel.chartType);
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
             case 'line':
@@ -42,13 +48,18 @@ var Widget = function(widgetModel, index){
             case 'pie':
                 content = new PieContent(index);
                 break;
-            //self.content = content;
+            case 'bar':
+                content = new BarContent(index);
+                break;
+            case 'scatter':
+                content = new ScatterContent(index);
+                break;
         }
 
         return {
             name: content.template, 
             data: content
-        }
+        };
 
     });
 
@@ -70,49 +81,170 @@ var Widget = function(widgetModel, index){
         self.chartType(widgetModel.segmentModel.chartType);
         content.drawChart(chartData);
     };
+    self.getModel = function (argument) {
+        return widgetModel;
+    }
 };
 
 var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'line-content-template';
-    self.drawChart = function(chartData){
-        var chart = drata.charts.lineChart();
+    self.template = 'pie-content-template';
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
+    var chart, chartData;
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        chart && chart.change(newdata.values);
+    });
+    var _t;
+    self.drawChart = function(_data){
+        chartData = _data;
+        _t && clearTimeout(_t);
+
+        self.pieKeys(chartData.map(function(dataItem){
+            return dataItem.key;
+        }));
+        self.selectedPieKey(self.pieKeys()[0]);
+
+        chart = drata.charts.lineChart();
         
         d3.select('#'+self.widgetContentId +' svg')
-            .datum(chartData)
+            .datum(chartData[0].values)
             .call(chart);
-        
-        var _t;
-        window.onresize = function(event) {
-            _t && clearTimeout(_t);
-            _t = setTimeout(chart.resize, 2000);
-        };
+        drata.utils.windowResize(self.resize.bind(self));
         
         return chart;
     };
+    self.resize = function(){
+        if(!chart) return;
+        _t && clearTimeout(_t);
+        _t = setTimeout(chart.resize, 2000);
+    }
+};
+
+var ScatterContent = function(index){
+    var self = this;
+    self.widgetContentId = 'widgetContent'+index;
+    self.template = 'pie-content-template';
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
+    var chart, chartData;
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        chart && chart.change(newdata.values);
+    });
+    var _t;
+    self.drawChart = function(_data){
+        chartData = _data;
+        _t && clearTimeout(_t);
+
+        self.pieKeys(chartData.map(function(dataItem){
+            return dataItem.key;
+        }));
+        self.selectedPieKey(self.pieKeys()[0]);
+
+        chart = drata.charts.scatterPlot();
+        
+        d3.select('#'+self.widgetContentId +' svg')
+            .datum(chartData[0].values)
+            .call(chart);
+        drata.utils.windowResize(self.resize.bind(self));
+        
+        return chart;
+    };
+    self.resize = function(){
+        if(!chart) return;
+        _t && clearTimeout(_t);
+        _t = setTimeout(chart.resize, 2000);
+    }
+};
+
+var BarContent = function(index){
+    var self = this;
+    self.widgetContentId = 'widgetContent'+index;
+    self.template = 'pie-content-template';
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
+    self.contentType = 'bar';
+    var chart,chartData, _t;
+
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        chart && chart.change(newdata.values);
+    });
+
+    self.drawChart = function(_data){
+        chartData = _data;
+        _t && clearTimeout(_t);
+        
+        self.pieKeys(chartData.map(
+            function(dataItem){
+                return dataItem.key;
+            }));
+
+        self.selectedPieKey(self.pieKeys()[0]);
+        chart = drata.charts.barChart();
+        d3.select('#'+self.widgetContentId +' svg')
+            .datum(chartData[0].values)
+            .call(chart);
+        
+        drata.utils.windowResize(self.resize.bind(self));
+        
+        //return chart;
+    };
+
+    self.resize = function(){
+        if(!chart) return;
+        _t && clearTimeout(_t);
+        _t = setTimeout(chart.resize, 2000);
+    }
 };
 
 var StackedAreaContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'line-content-template';
-    
-    self.drawChart = function(chartData){
-        var chart = drata.charts.areaChart();
+    self.template = 'pie-content-template';
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
+    var chart, chartData;
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        chart && chart.change(newdata.values);
+    });
+    var _t;
+    self.drawChart = function(_data){
+        chartData = _data;
+        _t && clearTimeout(_t);
+
+        self.pieKeys(chartData.map(function(dataItem){
+            return dataItem.key;
+        }));
+        self.selectedPieKey(self.pieKeys()[0]);
+
+        chart = drata.charts.areaChart();
         
         d3.select('#'+self.widgetContentId +' svg')
-            .datum(chartData)
+            .datum(chartData[0].values)
             .call(chart);
-        
-        var _t;
-        window.onresize = function(event) {
-            _t && clearTimeout(_t);
-            _t = setTimeout(chart.resize, 2000);
-        };
+        drata.utils.windowResize(self.resize.bind(self));
         
         return chart;
     };
+
+    self.resize = function(){
+        if(!chart) return;
+        _t && clearTimeout(_t);
+        _t = setTimeout(chart.resize, 2000);
+    }
 };
 
 var PieContent = function(index){
@@ -133,24 +265,25 @@ var PieContent = function(index){
     });
 
     self.drawChart = function(_data){
-        chartData = _data;
+        chartData = _data[0].values;
         _t && clearTimeout(_t);
         self.pieKeys(chartData.map(function(dataItem){
             return dataItem.key;
         }));
-        self.selectedPieKey(self.pieKeys()[0]);
-        chart = drata.charts.PieChart();
+        chart = drata.charts.pieChart();
 
-        d3.select('#'+self.widgetContentId)
+        d3.select('#'+self.widgetContentId + ' svg')
             .datum(chartData[0])
             .call(chart);
-        //setTimeout(function(){
-            window.onresize = function(event) {
-                _t && clearTimeout(_t);
-                _t = setTimeout(chart.update, 2000);
-            };
-        //}, 2000);
+        drata.utils.windowResize(self.resize.bind(self));
+        self.selectedPieKey(self.pieKeys()[0]);
     };
+
+    self.resize = function(){
+        if(!chart) return;
+        _t && clearTimeout(_t);
+        _t = setTimeout(chart.resize, 2000);
+    }
 };
 
 var WidgetProcessor = function(){
@@ -221,48 +354,54 @@ var WidgetProcessor = function(){
     self.handleGraphPreview = function(segmentModel){
         // self.chart && self.chart.removeChart();
         // self.chart = undefined;
-        self.previewGraph(true);
-        var inputData = DataRetriever.getData(self.selectedDataKey());
-        var graphData = Conditioner.getGraphData(segmentModel, inputData);
-        switch(segmentModel.chartType){
-            case 'line':
-                //self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
-                var chart = drata.charts.lineChart();
-                d3.select('#previewgraph svg')
-                    .datum(graphData)
-                    .call(chart);
-                var _t;
-                window.onresize = function(event) {
-                    _t && clearTimeout(_t);
-                    _t = setTimeout(chart.resize, 2000);
-                };
-                break;
-            case 'area':
-                //self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
-                var chart = drata.charts.areaChart();
-                d3.select('#previewgraph svg')
-                    .datum(graphData)
-                    .call(chart);
-                var _t;
-                window.onresize = function(event) {
-                    _t && clearTimeout(_t);
-                    _t = setTimeout(chart.resize, 2000);
-                };
-                break;
-            case 'pie':
-                self.chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
-                break;
-        }
+        //self.previewGraph(true);
+        //var inputData = DataRetriever.getData(self.selectedDataKey());
+        //var graphData = Conditioner.getGraphData(segmentModel, inputData);
+
+        d3.select('#previewgraph').selectAll('svg').remove();
+        d3.select('#previewgraph').append('svg');
+        var chart;
+        var _t;
+        // switch(segmentModel.chartType){
+        //     case 'line':
+        //         self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+        //         chart = drata.charts.lineChart();
+        //         d3.select('#previewgraph svg')
+        //             .datum(graphData)
+        //             .call(chart);
+        //         break;
+        //     case 'area':
+        //         self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
+        //         chart = drata.charts.areaChart();
+        //         d3.select('#previewgraph svg')
+        //             .datum(graphData)
+        //             .call(chart);
+        //         break;
+        //     case 'pie':
+        //         chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
+        //         break;
+        //     case 'bar':
+        //         chart = drata.charts.barChart();
+        //         d3.select('#previewgraph svg')
+        //             .datum(graphData)
+        //             .call(chart);
+        //         break;
+        // }
+        // drata.utils.windowResize(function() {
+        //     _t && clearTimeout(_t);
+        //     _t = setTimeout(chart.resize, 2000);
+        // });
         
-        console.log(JSON.stringify(graphData, null, '\t'));
-        console.log(JSON.stringify(inputData, null, '\t'));
+        // console.log(JSON.stringify(graphData, null, '\t'));
+        // console.log(JSON.stringify(inputData, null, '\t'));
     };
     self.preview = function(){
         self.handleGraphPreview(self.segment.getModel());
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
-            d3.select('#previewgraph svg').remove();
+            d3.select('#previewgraph').selectAll('svg').remove();
+            d3.select('#previewgraph').append('svg');
         }
     });
     // $(window).on('resize', function(){

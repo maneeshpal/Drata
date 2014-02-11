@@ -4184,6 +4184,10 @@ meta.foundation-mq-topbar {
   .top-bar.secondary ul {
     margin-bottom: 0;
     list-style: none; }
+  .top-bar.secondary select {
+    margin-bottom: 0;
+    border: none;
+    background-color: #f2f2f2; }
   .top-bar.secondary .row {
     max-width: none; }
   .top-bar.secondary form,

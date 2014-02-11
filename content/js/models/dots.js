@@ -2,8 +2,10 @@
  ;(function(root) {
     var Dots = function(){
 
-        var _xScale, _yScale, _color = d3.scale.category20(), _dispatch = d3.dispatch();
-        
+        var _xScale, _yScale, _colorfull = false, _color = d3.scale.category20(), _dispatch = d3.dispatch();
+        var _dotRadius = function(){
+            return 2;
+        };
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
@@ -20,6 +22,9 @@
                 var dot = dotLineGroup
                     .selectAll('circle.circle-each')
                     .data(function(d){
+                        d.values.map(function(item){
+                            item.key = d.key;
+                        })
                         return d.values;
                     });
 
@@ -28,28 +33,34 @@
                     .append('circle')
                     .attr('class', 'circle-each');
 
-                dot.attr('r',2)
-                    .attr('fill', 'none')
+                dot.attr('r', _dotRadius)
+                    .attr('fill', function(d){
+                        return _colorfull ? _color(d.key) : 'none';
+                    })
                     .attr('stroke', function(d){
-                        return '#fff';
+                        return _colorfull ? _color(d.key) : '#fff';
                     })
                     .attr('stroke-width', 2)
                     .on('mouseover', function(d){
-                        var color = _color(d3.select(this.parentNode).data()[0].key);
+                        var color = _color(d.key);
                         d3.select(this)
                             .attr('stroke', color)
                             .attr('stroke-width', 4)
                             .attr('r', 4)
                             .attr('fill', '#fff');
-                        _dispatch.showToolTip(d, color);
+                        _dispatch.showToolTip && _dispatch.showToolTip(d, color);
                     })
                     .on('mouseout', function(d){
-                        _dispatch.hideToolTip();
+                        _dispatch.hideToolTip && _dispatch.hideToolTip();
                         d3.select(this)
-                            .attr('stroke', '#fff')
-                            .attr('stroke-width', 2)
-                            .attr('r', 2)
-                            .attr('fill', 'none');
+                            .attr('r', _dotRadius)
+                            .attr('fill', function(d){
+                                return _colorfull ? _color(d.key) : 'none';
+                            })
+                            .attr('stroke', function(d){
+                                return _colorfull ? _color(d.key) : '#fff';
+                            })
+                            .attr('stroke-width', 2);
                         
                     })
                     .transition().duration(500)
@@ -57,7 +68,7 @@
                         return _xScale(d.x);
                     })
                     .attr('cy', function(d){
-                        return _yScale(d.y);
+                        return _yScale(d);
                     })
                     //.call(moveleft)
                     ;
@@ -71,7 +82,11 @@
             _color = value;
             return chart;
         };
-
+        chart.colorfull = function(value){
+            if (!arguments.length) return _colorfull;
+            _colorfull = value;
+            return chart;
+        };
         chart.xScale = function(value){
             if (!arguments.length) return _xScale;
             _xScale = value;
@@ -86,6 +101,11 @@
         chart.dispatch = function(value){
             if (!arguments.length) return _dispatch;
             _dispatch = value;
+            return chart;
+        };
+        chart.dotRadius = function(value){
+            if (!arguments.length) return _dotRadius;
+            _dotRadius = value;
             return chart;
         };
         return chart;

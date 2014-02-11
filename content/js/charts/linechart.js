@@ -18,7 +18,7 @@
     
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
-                return d3.min(d.values, function(v) { 
+                return d3.min(d.values, function(v) {
                     return v[prop]; 
                 }); 
             });
@@ -32,16 +32,26 @@
             });
         };
         function chart(selection) {
+            console.log('line chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
+                // var maxlength = 0;
+                // var textLength = 0;
+                // _.each(data,function(d) {
+                //     textLength = drata.utils.textToPixel(d.key);
+                //     maxlength = maxlength > textLength  ? maxlength : textLength;
+                // });
+                // m.l = Math.max(maxlength, 30);
+
                 z.domain(data.map(function(d){return d.key}));
+                
                 chart.resize = function() { 
                     container
                     .transition().duration(500)
                     .call(chart);
                 };
 
-                chart.redraw = function(_) { 
+                chart.change = function(_) { 
                     container
                     .datum(_)
                     .transition().duration(500)
@@ -139,7 +149,9 @@
                     .call(lines);
 
                 //dots
-                var dots = drata.models.dots().xScale(x).yScale(y).color(z).dispatch(dispatch);
+                var dots = drata.models.dots().xScale(x).yScale(function(d){
+                    return y(d.y);
+                }).color(z).dispatch(dispatch);
                 gWrapper
                     .select('g.dot-group')
                     .attr("transform", "translate(" + m.l +"," + m.t + ")")

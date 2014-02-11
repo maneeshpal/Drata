@@ -3,100 +3,46 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <!DOCTYPE html>
     <head>
-        
-        <style type="text/css">
+
+    <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/chart.css" />
+
+       <style type="text/css">
             .graph {
-                width:50%;
+                width:90%;
                 height:400px;
                 margin:0 auto;
                 border:1px solid #ccc;
             }
-            .axis path{
-              stroke:#ccc;
-              fill:none;
-              shape-rendering: crispEdges;
-
-            }
-            .axis line {
-              stroke:#f2f2f2;
-              fill:none;
-              shape-rendering: crispEdges;
-            }
-            .axis text{
-                font: 10px arial;
-                fill: #ccc;
-            }
-            .label-group text{
-                font:12px arial;
-            }
-            .line-group .line{
-                fill:none;
-                stroke-width:2;
-            }
-            .label-group {
-                cursor:pointer;
-            }
-            .tooltip {
-                text-anchor:end;
-                font: 12px arial;
-            }
-            .area-group .line{
-                stroke-width:2;
-                opacity:.3;
-            }
         </style>
     </head>
 <body>
-     
-     
-    <div class="graph" id="linechart">
-    <svg></svg>
-    </div>
-    <div>
-        <textarea id="jsondata" style="height:400px; border:none; width:100%"></textarea>
+    <div id="graph" class="graph">
+       <svg></svg>
     </div>
     <script src="content/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
-   <script type="text/javascript" src="content/js/global.js"></script>
-   
-   <script type="text/javascript" src="content/js/tempdata.js"></script>
 
-<script type="text/javascript" src="content/js/models/axis.js"></script>
-<script type="text/javascript" src="content/js/models/dots.js"></script>
-<script type="text/javascript" src="content/js/models/labels.js"></script>
-<script type="text/javascript" src="content/js/models/lines.js"></script>
-<script type="text/javascript" src="content/js/models/tooltip.js"></script>
-<script type="text/javascript" src="content/js/charts/linechart.js"></script>
-<script type="text/javascript" src="content/js/charts/areachart.js"></script>
-   
+    <script type="text/javascript" src="content/js/models/axis.js"></script>
+    <script type="text/javascript" src="content/js/models/dots.js"></script>
+    <script type="text/javascript" src="content/js/models/labels.js"></script>
+    <script type="text/javascript" src="content/js/models/lines.js"></script>
+    <script type="text/javascript" src="content/js/models/area.js"></script>
+    <script type="text/javascript" src="content/js/models/tooltip.js"></script>
+    <script type="text/javascript" src="content/js/tempdata.js"></script>
+
+    <script type="text/javascript" src="content/js/charts/linechart.js"></script>
+    <script type="text/javascript" src="content/js/charts/scatterplot.js"></script>
+
     <script>
         (function($){
-            var chart = drata.charts.lineChart();
-            window.chart = chart;
-            var newdata = tempData.randomData(3,1,10);
-            //var lastx = newdata[0].values[newdata[0].values.length - 1].x;
-            //console.log(newdata[0].values[newdata[0].values.length - 1]);
-            d3.select('#linechart svg')
-                    .datum(newdata)
-                  //.transition().duration(1000)
-                    .call(chart);
-            //$(window).resize(chart.update);
-            var _t;
-            window.onresize = function(event) {
-                _t && clearTimeout(_t);
-                _t = setTimeout(chart.resize, 2000);
-            };
-            // var xxx = 0;
-            // setInterval(function(){
-            //     if(xxx == 40) return;
-            //     xxx ++;
-            //     var newdata2 = tempData.randomData(1,lastx+1,lastx+1,1);
-            //     lastx = newdata2[0].values[newdata2[0].values.length - 1].x;
-            //     console.log(newdata2[0].values[0]);
-            //     chart.feed(newdata2);
-            // }, 1000);
-            //$('#jsondata').val(JSON.stringify(newdata, null, '\t'));
+            var chart = drata.charts.scatterPlot();
+            d3.select('#graph svg')
+            .datum(tempData.randomData(10, 1,20))
+            .call(chart);
         })(jQuery);
     </script>
 

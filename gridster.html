@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+    <head>
+       
+        <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
+    
+     <link rel="stylesheet" type="text/css" href="content/gridster/jquery.gridster.css" />
+    
+        <style type="text/css">
+
+        li{
+            background-color:#333;
+        }
+        </style>
+    </head>
+<body>
+    <div class="gridster">
+        <ul class="no-bullet">
+            <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">content </li>
+            <li data-row="2" data-col="2" data-sizex="1" data-sizey="1">content </li>
+            <li data-row="3" data-col="3" data-sizex="1" data-sizey="1">content </li>
+     
+            <li data-row="1" data-col="4" data-sizex="2" data-sizey="1">content </li>
+        </ul>
+    </div> 
+    
+    <script type="text/javascript" src="content/js/utils.js"></script>
+    <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
+    </script>
+ <script type="text/javascript" src="content/gridster/jquery.gridster.with-extras.min.js"></script>
+
+    <script>
+        (function($){
+            $(".gridster ul").gridster({
+                widget_margins: [10, 10],
+                widget_base_dimensions: [140, 140]
+            });
+        })(jQuery);
+    </script>
+
+</body>
+
+</html>

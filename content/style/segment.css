@@ -1,0 +1,73 @@
+.logic-text {
+    position: relative;
+    top: .4rem;
+    left: 1.5rem;
+    display: inline;
+}
+
+.logic-selection {
+    display: none;
+    max-width: 55px;
+    margin-left: 0.8rem;
+}
+
+.logic-wrapper {
+    border-bottom: 1px solid #ddd;
+}
+
+.row .columns.logic-toggler {
+    position: absolute;
+    width: 80px;
+    z-index: 999;
+}
+
+.row .columns.operation-group {
+    padding-left: 80px;
+}
+
+.logic-toggler:hover .logic-wrapper {
+    border: none;
+}
+
+.logic-toggler:hover .logic-text {
+    display: none;
+}
+
+.logic-toggler:hover .logic-selection {
+    display: block;
+}
+
+.remove-group {
+    color: #ff0000;
+    vertical-align: middle;
+}
+
+.remove-condition {
+    color: #ff0000;
+    position: relative;
+    top: .4rem;
+    left: .5rem;
+}
+
+.vertical-bg {
+    background-image: url('content/images/border_1x1.png');
+    background-repeat: repeat-x;
+    background-position: 0 20px;
+}
+
+.condition-view {
+    position: relative;
+    top: .5rem;
+    margin-bottom: 1.5rem;
+}
+
+ul.segment-type{
+    text-align: center;
+    padding-top:1.25rem;
+}
+.segment-type i {
+    font-size: 2rem;
+}
+.segment-type p{
+    margin-bottom: 0;
+}

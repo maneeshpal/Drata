@@ -2,9 +2,8 @@
  ;(function(root) {
     var Axis = function(){
 
-        var _orient, _w, _h, _m, _scale, _ticks, _tickSize = 0;
+        var _orient, _w, _h, _m, _scale, _ticks, _tickSize = 0, _tickFormat;
         var axis = d3.svg.axis();
-        //var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
         var _m = {l:30, r:10, t:30, b:30};
         
         function chart(selection) {
@@ -12,10 +11,12 @@
                 var container = d3.select(this);
                 axis
                     .scale(_scale)
-                    .orient(_orient)
-                    .ticks(_ticks);
+                    .orient(_orient);
+                _ticks > 0 && axis.ticks(_ticks);
                 _tickSize!==0 && axis.tickSize(_tickSize);
-                    
+                
+                _tickFormat && axis.tickFormat(_tickFormat);
+
                 container
                     .call(axis);
             });
@@ -62,7 +63,11 @@
             _ticks = value;
             return chart;
         };
-        
+        chart.tickFormat = function(value){
+            if (!arguments.length) return _tickFormat;
+            _tickFormat = value;
+            return chart;
+        };
         return chart;
     };
     root.drata.ns('models').extend({

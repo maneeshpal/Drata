@@ -132,6 +132,11 @@ meta.foundation-mq-topbar {
         list-style: none;
       }
 
+	  select {
+		margin-bottom: 0;
+		border: none;
+		background-color: $topbar-secondary-bg;
+	  }
       .row { max-width: none; }
 
       form,
