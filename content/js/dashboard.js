@@ -82,6 +82,7 @@ var Widget = function(widgetModel, index){
         content.drawChart(chartData);
     };
     self.getModel = function (argument) {
+        widgetModel.sizex = self.sizex();
         return widgetModel;
     }
 };

@@ -17,7 +17,7 @@
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-                xdiff = _xScale(data[0].values[1].x) - _xScale(data[0].values[0].x);
+                // xdiff = _xScale(data[0].values[1].x) - _xScale(data[0].values[0].x);
 
                 var moveleft = function(){
                     this.attr("transform","translate(" + xdiff + ")")

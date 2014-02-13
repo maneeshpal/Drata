@@ -114,10 +114,10 @@
                     <ul class="small-block-grid-3" data-bind="foreach: props">
                         <li>
                             <div class="row collapse">
-                                <div class="small-10 columns">
-                                    <select data-bind="options: $parents[1].properties, value:prop"></select>
+                                <div class="small-11 columns" data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: $parents[1].groupingOptions ,selectedValue: prop, options:$parents[1].properties,optionsCaption:'choose Property', allowCustom:false}">
                                 </div>
-                                <div class="small-2 columns">
+                               
+                                <div class="small-1 columns">
                                     <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeSimpleSelection"></i>
                                 </div>
                             </div>
@@ -135,21 +135,27 @@
                 <fieldset>
                     <legend>Grouping</legend>
                     <form>
-                        <!-- ko if:$parent.chartType() === 'pie' || $parent.chartType() === 'bar' -->
                         <div class="row">
                             <div class="small-4 columns">
-                                <select data-bind="value:groupBy, optionsCaption : 'grouping'">
-                                    <option value="sumBy">Sum By</option>
-                                    <option value="countBy">Count By</option>
-                                    <option value="groupValuesBy">Group Selection By</option>
-                                    <option value="count">Compare Counts</option>
-                                    <option value="sum">Compare Sum</option>
-                                </select>
+                                <label class="right inline">
+                                    <input type="checkbox" data-bind="checked:hasGrouping" />
+                                    &nbsp;Group by</label>
                             </div>
                             <div class="small-8 columns">
-                                <select data-bind="options:$parent.properties, value:groupByProp, visible:hasGrouping"></select>
+                                <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
                             </div>
                         </div>
+
+                        <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Divide by</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:$parent.properties, value:divideByProp"></select>
+                            </div>
+                        </div>
+
                         <!-- /ko -->
                         <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
                         <div class="row">
@@ -162,16 +168,7 @@
                                         <select data-bind="options:$parent.properties, value:xAxisProp"></select>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="small-4 columns">
-                                        <label class="right inline">
-                                            <input type="checkbox" data-bind="checked:hasGrouping" />
-                                            &nbsp;Group by</label>
-                                    </div>
-                                    <div class="small-8 columns">
-                                        <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
-                                    </div>
-                                </div>
+                                
                                 <div class="row">
                                     <div class="small-4 columns">
                                         <label class="right inline">
@@ -180,14 +177,7 @@
                                     </div>
                                     <div class="small-8 columns">
                                         <!-- ko if: timeseries -->
-                                        <div class="row">
-                                            <div class="small-6 columns">
-                                                <select data-bind="options:$parent.groupingOptions, value:groupBy"></select>
-                                            </div>
-                                            <div class="small-6 columns">
-                                                <input type="text" data-bind="value:interval" placeholder="Interval" />
-                                            </div>
-                                        </div>
+                                         <input type="text" data-bind="value:interval" placeholder="Interval" />
                                         <!-- /ko -->
                                     </div>
                                 </div>
@@ -200,6 +190,7 @@
         </div>
     </script>
     <script type="text/html" id="group-template">
+    
         <div class="row collapse" style="position: relative">
             <!-- ko if: $parent.groups-->
             <div class="columns logic-toggler">
@@ -225,6 +216,7 @@
                         <i style="color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
                         <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
                         &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name" />
+                        &nbsp;<select style="width:auto" data-bind="options: $parents[level].groupingOptions", value : groupBy"></select>
                         <!-- /ko -->
 
                     </legend>
@@ -321,26 +313,39 @@
 
     
 
+        <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
-    
+    <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
-    <script type="text/javascript" src="content/js/tempdata.js"></script>
 
-    <script type="text/javascript" src="content/js/utils.js"></script>
+    
+    <script type="text/javascript" src="content/js/sortable.js"></script>
+
     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
 
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
+    <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>
 
-        <script type="text/javascript" src="content/js/models/axis.js"></script>
+    <script type="text/javascript" src="content/js/models/axis.js"></script>
     <script type="text/javascript" src="content/js/models/dots.js"></script>
     <script type="text/javascript" src="content/js/models/labels.js"></script>
     <script type="text/javascript" src="content/js/models/lines.js"></script>
     <script type="text/javascript" src="content/js/models/area.js"></script>
-    <script type="text/javascript" src="content/js/charts/barchart.js"></script>
+    <script type="text/javascript" src="content/js/models/tooltip.js"></script>
+    <script type="text/javascript" src="content/js/charts/linechart.js"></script>
+    <script type="text/javascript" src="content/js/charts/areachart.js"></script>
 
     <script type="text/javascript" src="content/js/segment.js"></script>
+    <script type="text/javascript" src="content/js/charts/pie.js"></script>
+
+    <script type="text/javascript" src="content/js/charts/barchart.js"></script>
+    <script type="text/javascript" src="content/js/charts/scatterplot.js"></script>
+   
+    <script type="text/javascript" src="content/js/tempdata.js"></script>
+       <script type="text/javascript" src="content/js/segment.js"></script>
      <script type="text/javascript" src="content/js/segmentprocessor.js"></script>
 
     <script type="text/javascript">

@@ -6,6 +6,10 @@
     height:400px;
 }
 
+input[type="text"].combo-error {
+    border:1px solid #ff0000;
+    
+}
 ul.combolist {
     border: 1px solid #999999;
     border-top:none;
@@ -24,4 +28,20 @@ ul.combolist li {
 } 
 ul.combolist li:hover {
     background:#e3e3e3;
+}
+.row .columns.combo-dd{
+    position: absolute;
+    width:60px;
+    z-index: 9;
+    height: 2.3125rem;
+    line-height: 2.3125rem;
+    text-align: center;
+    background-color: #e7e7e7;
+    border: 1px solid #cccccc;
+    font-size:0.875rem;
+    border-radius: 4px 0 0 4px;
+    cursor: pointer;
+}
+.row .columns.combo-txt{
+    padding-left:60px;
 }

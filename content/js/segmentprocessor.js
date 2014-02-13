@@ -19,11 +19,29 @@ var SegmentProcessor = function(){
 
         self.outputData(JSON.stringify(result, null, '\t'));
 
-        self.draw(result[0].values);
+        self.draw(model.chartType,result[0].values);
     };
   
-    self.draw = function(mydata){
-        var chart = drata.charts.barChart();
+    self.draw = function(chartType, mydata){
+        var chart;
+        switch(chartType)
+        {
+            case 'line':
+                chart = drata.charts.lineChart();
+            break;
+            case 'bar':
+                chart = drata.charts.barChart();
+                break; 
+            case 'pie':
+                chart = drata.charts.pieChart();
+                mydata = mydata[0];   
+            break;
+            case 'scatter':
+                chart = drata.charts.scatterPlot();
+            break;
+        }
+        d3.select('#graph svg').remove();
+        d3.select('#graph').append('svg');
         d3.select('#graph svg')
             .datum(mydata)
             .call(chart);

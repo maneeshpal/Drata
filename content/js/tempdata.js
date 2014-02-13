@@ -68,22 +68,23 @@ var tempData = {
             //y += (Math.random() * 10 - j%10);
             ordernumber = 10 + (Math.floor(j/ 3) * (3)); // 3 items per order
             data.push({
-                ordernumber : ordernumber,
-                item : items[Math.floor(Math.random() * items.length)],
+                //ordernumber : ordernumber,
+                //item : items[Math.floor(Math.random() * items.length)],
                 price : Math.abs(y[0]) * 100,
                 geography : geos[Math.floor(Math.random() * geos.length)],
-                timestamp : startDate.setHours(startDate.getHours() + j),
-                sex : Math.random() * 10 > 6 ? 'female': 'male',
-                itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
-                hasCoupon :  Math.random() * 10 > 7,
-                discount: Math.abs(Math.floor(y[1])),
+                //timestamp : startDate.setHours(startDate.getHours() + j),
+                timestamp : j * 100,
+                sex : Math.random() * 10 > 5 ? 'female': 'male',
+                //itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
+                //hasCoupon :  Math.random() * 10 > 7,
+                //discount: Math.abs(Math.floor(y[1])),
                 color : colors[Math.abs(Math.floor(y[1]%5))],
-                errorCount: Math.abs(Math.floor(y[2]% 10)),
-                pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
+                //errorCount: Math.abs(Math.floor(y[2]% 10)),
+                //pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
                 tax : Math.abs(y[0]) * 8,
                 shippingPrice: Math.abs(y[0]) * 12,
-                itemAgeGroup : ageGroups[Math.abs(y[4] %5)],
-                totalItems : Math.floor(Math.abs(y[5]) % 10)
+                //itemAgeGroup : ageGroups[Math.abs(y[4] %5)],
+                //totalItems : Math.floor(Math.abs(y[5]) % 10)
             });
         }
         
