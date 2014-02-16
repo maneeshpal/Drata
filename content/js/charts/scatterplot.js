@@ -1,24 +1,25 @@
 
  ;(function(root) {
     var ScatterPlot = function(){
-        var x = d3.scale.linear();
+        //var x = d3.scale.linear();
         var y = d3.scale.ordinal();
         var rs = d3.scale.linear();
 
         var xAxis = drata.models.axis()
-            .scale(x)
-            .orient("bottom");
+            .axisType('x')
+            .orient("bottom")
+            .ticks(5);
 
-        var yAxis = drata.models.axis()
+        var yAxis = d3.svg.axis()
                     .scale(y)
                     .orient("left");
 
         var z = d3.scale.category10();
         var m = {l:0, r:30, t:30, b:30};
-    
+        
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
-                return d3.min(d.values, function(v) {
+                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
                     return v[prop]; 
                 }); 
             });
@@ -26,7 +27,7 @@
 
         var getMax = function(data, prop){
             return d3.max(data, function(d) { 
-                return d3.max(d.values, function(v) { 
+                return d3.max(d.values.filter(function(i){return !i.disabled}), function(v) { 
                     return v[prop]; 
                 }); 
             });
@@ -37,6 +38,14 @@
             selection.each(function(data) {
                 var container = d3.select(this);
                 
+                if(_xAxisType === 'time'){
+                    _.each(data, function(item){
+                        _.each(item.values, function(dataPoint){
+                            dataPoint.x = new Date(dataPoint.x);
+                        });
+                    });
+                }
+
                 var maxlength = 0;
 
                 var enabledData = data.filter(function(d){
@@ -79,15 +88,14 @@
                 var wm = w - m.l - m.r;
                 var hm = h - m.t - m.b;
                 
-                x.range([0, wm]);
-
+                xAxis.axisTicType(_xAxisType).width(wm).height(hm);
                 
                 
-                var xrange = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
+                //var xrange = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
                 var yrange = [getMin(enabledData, 'y'),getMax(enabledData, 'y')];
 
                                 
-                x.domain(xrange);
+                //x.domain(xrange);
                 y.domain(keys);
                 rs.domain(yrange);
 
@@ -136,8 +144,9 @@
                     .datum(data)
                     .call(labels);
 
+                var xScale = xAxis.scale();
                 //dots
-                var dots = drata.models.dots().xScale(x).yScale(function(d){
+                var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                    return y(d.key);
                 }).color(z)
                 .colorfull(true)
@@ -155,6 +164,12 @@
             return chart;
         };
         
+        chart.xAxisType = function(value){
+            if (!arguments.length) return _xAxisType;
+            _xAxisType = value;
+            return chart;
+        };
+
         return chart;
     };
     root.drata.ns('charts').extend({

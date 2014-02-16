@@ -6,7 +6,8 @@ var Segmentor = function(model){
     self.level = 0;
     self.conditionalOperations = ['>', '<', '>=','<=', '=', '!=','exists','like'];
     self.arithmeticOperations = ['+', '-', '*','/'];
-    self.groupingOptions = ko.observableArray(['value','count', 'sum']);
+    self.groupingOptions = ko.observableArray(['value','count', 'sum', 'avg']);
+    self.xAxisTypes = ko.observableArray(['time','linear','currency']);
     self.logics = ['and', 'or'];
     self.filteredData = ko.observable();
     self.outputData = ko.observable();
@@ -299,27 +300,37 @@ var DataGroup = function(model){
     self.template = 'datagroup-template';
     self.xAxisProp = ko.observable();
     self.groupByProp = ko.observable();
-    //self.groupBy = ko.observable();
     self.timeseries = ko.observable();
-    self.hasGrouping = ko.observable();
     self.interval = ko.observable();
     self.divideByProp = ko.observable();
-    // self.groupBy.subscribe(function(newValue){
-    //     self.hasGrouping();
-    // });
+    self.hasGrouping = ko.observable(false);
+    self.hasDivideBy = ko.observable();
+    self.xAxisType = ko.observable();
+    self.hasGrouping.subscribe(function(newValue){
+        if(!newValue){
+            self.groupByProp(undefined);
+            self.divideByProp(undefined);
+            self.hasDivideBy(undefined);
+        }
+    });
+    self.timeseries.subscribe(function(newValue) {
+        if(!newValue) self.interval(undefined);
+    });
 
     self.setProps = function(model){
         self.xAxisProp(model.xAxisProp);
         self.groupByProp(model.groupByProp);
-        //self.groupBy(model.groupBy);
         self.timeseries(model.timeseries);
-        self.hasGrouping(model.hasGrouping);
+        self.hasGrouping(model.groupByProp !== undefined);
         self.interval(model.interval);
         self.divideByProp(model.divideByProp);
+        self.hasDivideBy(model.divideByProp !== undefined);
     };
     self.getModel = function(){
         var dataGroupModel = ko.toJS(self);
         delete dataGroupModel.setProps;
+        delete dataGroupModel.getModel;
+        delete dataGroupModel.template;
         return dataGroupModel;
     }
     model && self.setProps(model);
@@ -339,85 +350,8 @@ var DataRetriever = {
     getDataKeys : function(){
         return ['key1', 'key2', 'Shopper Stop'];
     },
-    getData : function(dataKey){ //data for key 1
-        if(dataKey === 'key1'){
-            return [{
-                a : 10,
-                b : 20,
-                c : 'aaa',
-                timestamp : 10
-            },{
-                a : 12,
-                b : 24,
-                c : 'aaa',
-                timestamp : 20
-            },{
-                a : 18,
-                b : 29,
-                c : 'bbb',
-                timestamp : 25
-            },{
-                a : 32,
-                b : 4,
-                c : 'bbb',
-                timestamp : 45
-            },{
-                a : 2,
-                b : 44,
-                c : 'ccc',
-                timestamp : 50
-            },{
-                a : 34,
-                b : 92,
-                c : 'ccc',
-                timestamp : 52
-            },{
-                a : 55,
-                b : 3,
-                c : 'ccc',
-                timestamp : 54
-            },{
-                b : 32,
-                c : 'ddd',
-                timestamp : 67
-            },
-            {
-                b : 39,
-                c : 'ddd',
-                timestamp : 77
-            }];
-        }
-        else if(dataKey === 'key2'){
-            return [{
-                d : 10,
-                e : 20,
-                f : 'aaa',
-                timestamp : 10
-            },{
-                d : 12,
-                e : 24,
-                f : 'aaa',
-                timestamp : 20
-            },{
-                d : 18,
-                e : 29,
-                f : 'bbb',
-                timestamp : 25
-            },{
-                d : 32,
-                e : 4,
-                f : 'bbb',
-                timestamp : 45
-            },{
-                d : 2,
-                e : 44,
-                f : 'ccc',
-                timestamp : 50
-            }];
-        }
-        else{
-            return tempData.randomProps(50);
-        }
+    getData : function(dataKey){
+        return tempData.randomProps(50);
     }
 };
 
@@ -543,10 +477,10 @@ var Conditioner = {
         if(drata.js.logmsg) console.log(returnValue);
         return returnValue;
     },
-    processDataGroups : function(groupedData, dataGroup, selectionGroup, groupCounter){
+    processDataGroups : function(groupedData, dataGroup, selection, groupCounter){
         var returnGroups = [];
         _.each(groupedData, function(dataItem, groupName){
-            var ret = this.divideByInterval(dataItem, dataGroup, selectionGroup);
+            var ret = this.divideByInterval(dataItem, dataGroup, selection);
             returnGroups.push({
                 //key : groupCounter ? groupName + '-' + groupCounter : groupName,
                 key: groupName,
@@ -563,7 +497,10 @@ var Conditioner = {
             throw "count not allowed for complex selections.";
         if(dataGroup.timeseries){
             var intervalGroup = _.groupBy(data, function(item){
-                return Math.floor(+item[dataGroup.xAxisProp]/ +dataGroup.interval) * (+dataGroup.interval);
+                var val = item[dataGroup.xAxisProp];
+                //TODO: Clean this 
+                if(dataGroup.xAxisType === 'time') val = new Date(val).getTime();
+                return Math.floor(+val/ +dataGroup.interval) * (+dataGroup.interval);
             });
             _.each(intervalGroup, function(gi, time){
                 ret.push({
@@ -640,12 +577,9 @@ var Conditioner = {
                     key: prop.prop,
                     values: Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, prop, groupCounter)
                 });
-                //_.each(groupValues, function(val){result.push(val);});
             }
             else{
                 result.push({
-
-
                     key : prop.prop,
                     values : Conditioner.divideByInterval(filteredData, segmentModel.dataGroup , prop)
                 });
@@ -668,7 +602,7 @@ var Conditioner = {
         if(isComplex && (selection.groupBy === 'count'))
             throw "Not allowed for complex selections.";
 
-        return _.reduce(objArray, function(memo, num){ 
+        var ret = _.reduce(objArray, function(memo, num){ 
                     var numval;
                     if(isComplex){ //complex selection. so we need to process it.
                         var temp = Conditioner.processGroup(num,selection);
@@ -677,7 +611,7 @@ var Conditioner = {
                     else if(selection.groupBy === 'count'){
                         numval = num[selection.prop]? 1 : 0;
                     }
-                    else if(selection.groupBy === 'sum'){ // sumby
+                    else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
                         numval = +num[selection.prop] || 0;
                     }
                     else{
@@ -685,6 +619,8 @@ var Conditioner = {
                     }
                     return memo + numval; 
         }, 0);
+
+        return selection.groupBy === 'avg' ? ret/objArray.length : ret;
     },
     getPieData: function(segmentModel, inputData){
         var response = [];
@@ -696,7 +632,7 @@ var Conditioner = {
         if(segmentModel.dataGroup.hasGrouping){
             var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
             
-            if(!segmentModel.dataGroup.divideByProp){
+            if(!segmentModel.dataGroup.hasDivideBy){
                 response = [];
                 _.each(segmentModel.selection.props, function(prop){
                     result = [];
@@ -759,7 +695,7 @@ var Conditioner = {
                                 });
                             });
                         }
-                        else if(prop.groupBy === 'sum'){
+                        else if(prop.groupBy === 'sum' || prop.groupBy === 'avg'){
                             var divData = _.groupBy(groupedDataItem, function(val){
                                 return val[segmentModel.dataGroup.divideByProp];
                             });
@@ -769,6 +705,9 @@ var Conditioner = {
                                     value: Conditioner.reduceData(value, prop)
                                 });
                             });
+                        }
+                        else{
+                            throw "When using divideBy, you should specify sum, count or avg on selection";
                         }
 
                         response.push({

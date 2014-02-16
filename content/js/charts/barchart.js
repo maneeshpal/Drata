@@ -5,11 +5,12 @@
     var BarChart = function(){
         var z = d3.scale.category10();
         var m = {t:20, r:20, b:40, l:30};
-        var y = d3.scale.linear();
         var x0 = d3.scale.ordinal();
         var x1 = d3.scale.ordinal();
-        var yAxis = drata.models.axis()
+        var y = d3.scale.linear();
+        var yAxis = d3.svg.axis()
             .scale(y)
+            .tickFormat(d3.format('.2s'))
             .orient("left")
             .ticks(10);
 
@@ -66,8 +67,6 @@
                     });
                 });
 
-
-                
                 var labelKeys = duplKeys.map(function(key){
                     return {key: key, disabled : disabledKeys.indexOf(key) > -1};
                 });
@@ -108,7 +107,7 @@
                 var yrange = [min - (min * 1/5),max + (max * 1/5)];
                 y.domain(yrange);
                 //if(drata.js.logmsg) console.log(yrange);
-                
+               
 
                 x0.rangeRoundBands([0, wm], .2);
                 x0.domain(data.map(function(d) { return d.key; }));
@@ -151,9 +150,10 @@
                     .append("g")
                     .attr("class", "bar-group");
 
-                var rects = barGroup
+                barGroup
                     .attr("transform", function(d) { return "translate(" + x0(d.key) + ",0)"; })
-                    .selectAll('rect')
+                    
+                var rects = barGroup.selectAll('rect')
                     .data(function(d){
                         return d.values;
                     });
@@ -161,6 +161,7 @@
                 rects.enter()
                     .append('rect').attr("height", 0)
                     .attr("y", y(yrange[0]));
+
                 rects
                     .style("fill", function(d, i) { 
                         return z(i); 
@@ -179,12 +180,40 @@
                 rects.exit().transition().duration(300).attr("height", 0)
                     .attr("y", y(yrange[0]))
                     .remove();
+
+                var rectLabels = barGroup.selectAll('text')
+                    .data(function(d){
+                        return d.values;
+                    });
+
+                rectLabels.enter()
+                    .append('text')
+                    .attr("y", y(yrange[0]));
+
+                var labelFormat = d3.format('.1s');
+                rectLabels
+                    .style("fill", "#fff")
+                    .text(function(d){
+                        return labelFormat(d.value);
+                    })
+                    .style('text-anchor', 'middle')
+                    .style("width", x1.rangeBand())
+                    .transition().duration(300)
+                    .attr("x", function(d) { return x1(d.key) + x1.rangeBand()/2; })
+                    .attr("y", function(d) {  
+                        return d.disabled ?  y(yrange[0]) : y(d.value) + 12; 
+                    });
+                    
+
+                rectLabels
+                    .exit()
+                    .remove();                
                 
                 barGroup.exit().remove();
                 gWrapper.exit().remove();
 
                 
-                var labels = drata.models.labels().color(function(d,i){return z(i);}).width(w).height(m.t).align('center').dispatch(dispatch);
+                var labels = drata.models.labels().color(function(d,i){return z(i);}).width(w).height(0).align('center').dispatch(dispatch);
                 gWrapper
                     .select('g.labels-group')
                     .datum(labelKeys)

@@ -134,57 +134,55 @@
             <div class="small-12 columns">
                 <fieldset>
                     <legend>Grouping</legend>
-                    <form>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">
-                                    <input type="checkbox" data-bind="checked:hasGrouping" />
-                                    &nbsp;Group by</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="options:$parent.properties, visible:hasGrouping, value:groupByProp"></select>
-                            </div>
-                        </div>
-
-                        <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Divide by</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="options:$parent.properties, value:divideByProp"></select>
-                            </div>
-                        </div>
-
-                        <!-- /ko -->
-                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
                         <div class="row">
                             <div class="small-8">
                                 <div class="row">
                                     <div class="small-4 columns">
-                                        <label class="right inline">x Axis</label>
+                                        <label class="right inline">
+                                            <input type="checkbox" data-bind="checked:hasGrouping" />
+                                            &nbsp;Group by</label>
                                     </div>
                                     <div class="small-8 columns">
-                                        <select data-bind="options:$parent.properties, value:xAxisProp"></select>
+                                        <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
+                                        </select>
                                     </div>
                                 </div>
-                                
+
+                                <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
                                 <div class="row">
                                     <div class="small-4 columns">
                                         <label class="right inline">
-                                            <input type="checkbox" data-bind="checked:timeseries" />
-                                            TimeSeries</label>
+                                        <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
                                     </div>
                                     <div class="small-8 columns">
-                                        <!-- ko if: timeseries -->
-                                         <input type="text" data-bind="value:interval" placeholder="Interval" />
-                                        <!-- /ko -->
+                                        <select data-bind="enable: hasDivideBy,options:$parent.properties, value:divideByProp, optionsCaption: 'Slice GroupBy'"></select>
                                     </div>
                                 </div>
+
+                                <!-- /ko -->
+                                <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
+                                    <div class="row">
+                                        <div class="small-4 columns">
+                                            <label class="right inline">x Axis</label>
+                                        </div>
+                                    
+                                        <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: $parent.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="small-4 columns">
+                                            <label class="right inline">
+                                                <input type="checkbox" data-bind="checked:timeseries" />
+                                                TimeSeries</label>
+                                        </div>
+                                        <div class="small-8 columns">
+                                            <input type="text" data-bind="enable:timeseries,value:interval" placeholder="Interval" />
+                                        </div>
+                                    </div>
+                                <!-- /ko -->
                             </div>
                         </div>
-                        <!-- /ko -->
-                    </form>
                 </fieldset>
             </div>
         </div>
@@ -298,7 +296,7 @@
             <div class="operation-group columns">
                 <div class="row collapse">
                     <div class="small-10 columns" data-bind="comboBox :{selectedValue: prop, options:$parents[level].properties,optionsCaption:'choose Property'}">
-                        // <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
+                        
                     </div>
                     <div class="small-2 columns">
                         <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>

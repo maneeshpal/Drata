@@ -19,22 +19,22 @@ var SegmentProcessor = function(){
 
         self.outputData(JSON.stringify(result, null, '\t'));
 
-        self.draw(model.chartType,result[0].values);
+        self.draw(model,result[0].values);
     };
   
-    self.draw = function(chartType, mydata){
+    self.draw = function(segmentModel, mydata){
         var chart;
-        switch(chartType)
+        switch(segmentModel.chartType)
         {
             case 'line':
-                chart = drata.charts.lineChart();
+                chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
             break;
             case 'bar':
                 chart = drata.charts.barChart();
                 break; 
             case 'pie':
                 chart = drata.charts.pieChart();
-                mydata = mydata[0];   
+                mydata = mydata[0];
             break;
             case 'scatter':
                 chart = drata.charts.scatterPlot();

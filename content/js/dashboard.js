@@ -43,7 +43,7 @@ var Widget = function(widgetModel, index){
                 content = new LineContent(index);
                 break;
             case 'area':
-                content = new StackedAreaContent(index);
+                content = new AreaContent(index);
                 break;
             case 'pie':
                 content = new PieContent(index);
@@ -71,7 +71,7 @@ var Widget = function(widgetModel, index){
     self.loadWidgetInit = function(){ //runs after render
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
         chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
-        content.drawChart(chartData);
+        content.drawChart(chartData, widgetModel.segmentModel);
     };
 
     self.updateWidget = function (newModel) {
@@ -79,7 +79,7 @@ var Widget = function(widgetModel, index){
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
         chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
         self.chartType(widgetModel.segmentModel.chartType);
-        content.drawChart(chartData);
+        content.drawChart(chartData, widgetModel.segmentModel);
     };
     self.getModel = function (argument) {
         widgetModel.sizex = self.sizex();
@@ -101,7 +101,7 @@ var LineContent = function(index){
         chart && chart.change(newdata.values);
     });
     var _t;
-    self.drawChart = function(_data){
+    self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
 
@@ -110,8 +110,7 @@ var LineContent = function(index){
         }));
         self.selectedPieKey(self.pieKeys()[0]);
 
-        chart = drata.charts.lineChart();
-        
+        chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
@@ -122,7 +121,7 @@ var LineContent = function(index){
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 2000);
+        _t = setTimeout(chart.resize, 500);
     }
 };
 
@@ -140,7 +139,7 @@ var ScatterContent = function(index){
         chart && chart.change(newdata.values);
     });
     var _t;
-    self.drawChart = function(_data){
+    self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
 
@@ -149,7 +148,7 @@ var ScatterContent = function(index){
         }));
         self.selectedPieKey(self.pieKeys()[0]);
 
-        chart = drata.charts.scatterPlot();
+        chart = drata.charts.scatterPlot().xAxisType(segmentModel.dataGroup.xAxisType);
         
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
@@ -161,7 +160,7 @@ var ScatterContent = function(index){
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 2000);
+        _t = setTimeout(chart.resize, 500);
     }
 };
 
@@ -204,11 +203,11 @@ var BarContent = function(index){
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 2000);
+        _t = setTimeout(chart.resize, 500);
     }
 };
 
-var StackedAreaContent = function(index){
+var AreaContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'pie-content-template';
@@ -222,7 +221,7 @@ var StackedAreaContent = function(index){
         chart && chart.change(newdata.values);
     });
     var _t;
-    self.drawChart = function(_data){
+    self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
 
@@ -231,7 +230,7 @@ var StackedAreaContent = function(index){
         }));
         self.selectedPieKey(self.pieKeys()[0]);
 
-        chart = drata.charts.areaChart();
+        chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false);
         
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
@@ -244,7 +243,7 @@ var StackedAreaContent = function(index){
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 2000);
+        _t = setTimeout(chart.resize, 500);
     }
 };
 
@@ -283,7 +282,7 @@ var PieContent = function(index){
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 2000);
+        _t = setTimeout(chart.resize, 500);
     }
 };
 
