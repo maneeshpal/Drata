@@ -8,6 +8,7 @@ var Segmentor = function(model){
     self.arithmeticOperations = ['+', '-', '*','/'];
     self.groupingOptions = ko.observableArray(['value','count', 'sum', 'avg']);
     self.xAxisTypes = ko.observableArray(['time','linear','currency']);
+    self.chartTypes = ['line', 'area', 'scatter', 'pie','bar'];
     self.logics = ['and', 'or'];
     self.filteredData = ko.observable();
     self.outputData = ko.observable();

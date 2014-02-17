@@ -14,7 +14,7 @@
 
     <style>
         #previewgraph {
-            height: 300px;
+            height: 200px;
         }
         
     </style>
@@ -85,16 +85,10 @@
             </nav>
             
             <div class="row">
-                <div class="medium-12 large-6 columns">
-                    <fieldset data-bind="visible:previewGraph">
-                        <legend>Preview</legend>
-                        <div id="previewgraph">
+                <div id="previewgraph" class="small-8 columns" data-bind="visible:previewGraph">
                             <svg></svg>
-                        </div>
-                    </fieldset>
-                    
                 </div>
-                <div class="medium-12 large-6 columns">
+                <div class="columns" data-bind="css : {'small-4' : previewGraph, 'small-12' : !previewGraph()}">
                     <fieldset>
                         <legend>Data Key</legend>
                         <div class="row">
@@ -106,21 +100,11 @@
                             </div>
                         </div>
                     </fieldset>
-                    <!-- ko template: {name: 'segment-template', data: segment} -->
+                </div>
+            </div>
+
+            <!-- ko template: {name: 'segment-template', data: segment} -->
                     <!-- /ko -->
-                </div>
-            </div>
-
-
-            <div class="row">
-                <div class="small-12 columns">
-                    <button class="button success" data-bind="click:preview">Preview</button>
-                    &nbsp;
-                    <button data-bind="click:notifyWidget,text:addUpdateBtnText"></button>
-                    &nbsp;
-                    <button class="button secondary" data-bind="click:widgetCancel">Cancel</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -189,39 +173,6 @@
                 <!-- ko template: {name: 'group-template', data: group} -->
                 <!-- /ko -->
 
-                <ul class="small-block-grid-2 segment-type" data-bind="visible: $root.newWidget">
-                    <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'line','secondary': chartType() !== 'line'},click:setChartType.bind(this, 'line')">
-                            <i class="general foundicon-plus"></i>
-                            <p>LineChart</p>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'pie','secondary': chartType() !== 'pie'},click:setChartType.bind(this, 'pie')">
-                            <i class="general foundicon-plus"></i>
-                            <p>PieChart</p>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'area','secondary': chartType() !== 'area'},click:setChartType.bind(this, 'area')">
-                            <i class="general foundicon-plus"></i>
-                            <p>AreaChart</p>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'bar','secondary': chartType() !== 'bar'},click:setChartType.bind(this, 'bar')">
-                            <i class="general foundicon-plus"></i>
-                            <p>Bar Chart</p>
-                        </span>
-                    </li>
-                    <li>
-                        <span class="label radius" data-bind="css: {'primary': chartType() === 'scatter','secondary': chartType() !== 'scatter'},click:setChartType.bind(this, 'scatter')">
-                            <i class="general foundicon-plus"></i>
-                            <p>ScatterChart</p>
-                        </span>
-                    </li>
-                </ul>
-
                 <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
                 <!-- /ko -->
             </div>
@@ -261,7 +212,7 @@
                 <fieldset>
                     <legend>Grouping</legend>
                         <div class="row">
-                            <div class="small-8">
+                            <div class="small-8 columns">
                                 <div class="row">
                                     <div class="small-4 columns">
                                         <label class="right inline">
@@ -307,6 +258,10 @@
                                         </div>
                                     </div>
                                 <!-- /ko -->
+                            </div>
+                            <div class="small-4 columns">
+                            <select data-bind="options: $parent.chartTypes, value : $parent.chartType, optionsCaption: 'select chart Type'">
+                            </select>
                             </div>
                         </div>
                 </fieldset>

@@ -68,7 +68,7 @@
 }
 
 .mymodal-inner {
-    width: 70%;
+    width: 50%;
     margin: 0 auto;
     background-color: #fff;
 }
@@ -88,3 +88,8 @@
   .ui-sortable-placeholder {
     width: 100%; } }
 
+@media only screen and (max-width: 1024px) {
+  .mymodal-inner {
+    width:100%;
+  }
+}

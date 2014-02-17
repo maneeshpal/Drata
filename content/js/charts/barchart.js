@@ -190,7 +190,7 @@
                     .append('text')
                     .attr("y", y(yrange[0]));
 
-                var labelFormat = d3.format('.1s');
+                var labelFormat = d3.format('.2s');
                 rectLabels
                     .style("fill", "#fff")
                     .text(function(d){

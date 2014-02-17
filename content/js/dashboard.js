@@ -296,7 +296,7 @@ var WidgetProcessor = function(){
     self.selectedDataKey = ko.observable();
     //self.inputData = ko.observable(); 
     //self.outputData = ko.observable();
-    self.newWidget = ko.observable(true);
+    //self.newWidget = ko.observable(true);
     
     self.selectedDataKey.subscribe(function(newValue){
         //self.outputData(undefined);
@@ -327,7 +327,7 @@ var WidgetProcessor = function(){
         self.selectedDataKey(undefined);
         self.previewGraph(false);
         $('#graphBuilder').removeClass('showme');
-        self.newWidget(true);
+        //self.newWidget(true);
     };
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
         var clonemodel = drata.utils.clone(model);
@@ -349,52 +349,50 @@ var WidgetProcessor = function(){
         self.previewGraph(false);
         self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
-        self.newWidget(true);
+        //self.newWidget(true);
     };
+    var chart, _t;
     self.handleGraphPreview = function(segmentModel){
-        // self.chart && self.chart.removeChart();
-        // self.chart = undefined;
-        //self.previewGraph(true);
-        //var inputData = DataRetriever.getData(self.selectedDataKey());
-        //var graphData = Conditioner.getGraphData(segmentModel, inputData);
+        self.previewGraph(true);
+        var inputData = DataRetriever.getData(self.selectedDataKey());
+        var data = Conditioner.getGraphData(segmentModel, inputData);
 
+        var mydata = data[0].values;
+
+        switch(segmentModel.chartType)
+        {
+            case 'line':
+                chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
+            break;
+            case 'area':
+                chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType);
+            break;
+            case 'bar':
+                chart = drata.charts.barChart();
+                break; 
+            case 'pie':
+                chart = drata.charts.pieChart();
+                mydata = mydata[0];
+            break;
+            case 'scatter':
+                chart = drata.charts.scatterPlot();
+            break;
+        }
         d3.select('#previewgraph').selectAll('svg').remove();
         d3.select('#previewgraph').append('svg');
-        var chart;
-        var _t;
-        // switch(segmentModel.chartType){
-        //     case 'line':
-        //         self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
-        //         chart = drata.charts.lineChart();
-        //         d3.select('#previewgraph svg')
-        //             .datum(graphData)
-        //             .call(chart);
-        //         break;
-        //     case 'area':
-        //         self.chart = new drata.charts.LineChart( 'previewgraph', undefined, graphData);
-        //         chart = drata.charts.areaChart();
-        //         d3.select('#previewgraph svg')
-        //             .datum(graphData)
-        //             .call(chart);
-        //         break;
-        //     case 'pie':
-        //         chart = new drata.charts.PreviewPieChart( 'previewgraph', graphData);
-        //         break;
-        //     case 'bar':
-        //         chart = drata.charts.barChart();
-        //         d3.select('#previewgraph svg')
-        //             .datum(graphData)
-        //             .call(chart);
-        //         break;
-        // }
-        // drata.utils.windowResize(function() {
-        //     _t && clearTimeout(_t);
-        //     _t = setTimeout(chart.resize, 2000);
-        // });
-        
-        // console.log(JSON.stringify(graphData, null, '\t'));
-        // console.log(JSON.stringify(inputData, null, '\t'));
+
+        d3.select('#previewgraph svg')
+            .datum(mydata)
+            .call(chart);
+
+        drata.utils.windowResize(function(){
+            if(!chart) return;
+            _t && clearTimeout(_t);
+            _t = setTimeout(chart.resize, 500);
+        });
+
     };
+    
     self.preview = function(){
         self.handleGraphPreview(self.segment.getModel());
     };
@@ -402,6 +400,8 @@ var WidgetProcessor = function(){
         if(!newValue){
             d3.select('#previewgraph').selectAll('svg').remove();
             d3.select('#previewgraph').append('svg');
+            _t && clearTimeout(_t);
+            chart = undefined;   
         }
     });
     // $(window).on('resize', function(){
