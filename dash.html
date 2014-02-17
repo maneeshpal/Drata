@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>Drata</title>
-
+    <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
     <link rel="stylesheet" type="text/css" href="content/style/dashboard.css" />
@@ -121,6 +121,8 @@
                 <section class="top-bar-section">
                     <ul class="right">
                         <li class="divider"></li>
+                        <li><select data-bind="value:selectedPieKey,options: pieKeys"/></li>
+                        <li class="divider"></li>
                         <li>
                         <select data-bind="value:sizex">
                             <option value="1">25%</option>
@@ -160,7 +162,7 @@
         <div data-bind="attr :{id: widgetContentId}" class="widget-content">
             <svg></svg>
         </div>
-        <select style="position:absolute; right: 0;top: -.09rem;width:auto" data-bind="options:pieKeys, value:selectedPieKey, visible:pieKeys().length > 1"></select>
+        
             </div>
         
     </script>

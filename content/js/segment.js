@@ -372,10 +372,10 @@ var Conditioner = {
                 result = +left <= +right;
             break;
             case '=':
-                result = (left === right) || (+left === +right);
+                result = (left === right);
             break;
             case '!=':
-                result = (left !== right) || (+left !== +right);
+                result = (left !== right);
             break;
             case '>=':
                 result = +left >= +right;

@@ -13,7 +13,7 @@ var Dashboard = function(){
     ));
 
     self.loadWidget = function(elem,widget){
-        widget && widget.loadWidgetInit();
+        widget && widget.loadWidget();
     };
 
     self.addWidget = function(widgetModel){
@@ -27,6 +27,8 @@ var Dashboard = function(){
 var Widget = function(widgetModel, index){
     var self = this;
     var chartData;
+    self.pieKeys = ko.observableArray([]);
+    self.selectedPieKey = ko.observable();
     self.name = widgetModel.name || widgetModel.selectedDataKey;
     self.sizex = ko.observable(widgetModel.sizex || 1);
     self.widgetClass= ko.computed(function(){
@@ -68,55 +70,70 @@ var Widget = function(widgetModel, index){
         widgetProcessor.attach(widgetModel, self.updateWidget.bind(self));
     };
 
-    self.loadWidgetInit = function(){ //runs after render
+    self.loadWidget = function(){
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
         chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        if(widgetModel.segmentModel.chartType === 'pie')
+            chartData = chartData[0].values;
+
+        self.pieKeys(chartData.map(function(dataItem){
+            return dataItem.key;
+        }));
+        self.selectedPieKey(self.pieKeys()[0]);
         content.drawChart(chartData, widgetModel.segmentModel);
     };
 
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
-        var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
-        self.chartType(widgetModel.segmentModel.chartType);
-        content.drawChart(chartData, widgetModel.segmentModel);
+        self.loadWidget();
+        // var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
+        // chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        // self.chartType(widgetModel.segmentModel.chartType);
+
+        // self.pieKeys(chartData.map(function(dataItem){
+        //     return dataItem.key;
+        // }));
+
+        // self.selectedPieKey(self.pieKeys()[0]);
+
+        // content.drawChart(chartData, widgetModel.segmentModel);
     };
+
     self.getModel = function (argument) {
         widgetModel.sizex = self.sizex();
         return widgetModel;
-    }
+    };
+    
+    self.selectedPieKey.subscribe(function(newValue){
+        var newdata = _.find(chartData, function(item){
+            return item.key === newValue;
+        });
+        content && content.change && content.change(newdata);
+    });
 };
 
 var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'pie-content-template';
-    self.pieKeys = ko.observableArray([]);
-    self.selectedPieKey = ko.observable();
+    
+    
     var chart, chartData;
-    self.selectedPieKey.subscribe(function(newValue){
-        var newdata = _.find(chartData, function(item){
-            return item.key === newValue;
-        });
-        chart && chart.change(newdata.values);
-    });
+    
     var _t;
     self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
-
-        self.pieKeys(chartData.map(function(dataItem){
-            return dataItem.key;
-        }));
-        self.selectedPieKey(self.pieKeys()[0]);
-
         chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
         drata.utils.windowResize(self.resize.bind(self));
         
-        return chart;
+        //return chart;
+    };
+    self.change = function(_data){
+        chart && chart.change && chart.change(_data.values);
     };
     self.resize = function(){
         if(!chart) return;
@@ -129,24 +146,11 @@ var ScatterContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'pie-content-template';
-    self.pieKeys = ko.observableArray([]);
-    self.selectedPieKey = ko.observable();
     var chart, chartData;
-    self.selectedPieKey.subscribe(function(newValue){
-        var newdata = _.find(chartData, function(item){
-            return item.key === newValue;
-        });
-        chart && chart.change(newdata.values);
-    });
     var _t;
     self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
-
-        self.pieKeys(chartData.map(function(dataItem){
-            return dataItem.key;
-        }));
-        self.selectedPieKey(self.pieKeys()[0]);
 
         chart = drata.charts.scatterPlot().xAxisType(segmentModel.dataGroup.xAxisType);
         
@@ -154,81 +158,55 @@ var ScatterContent = function(index){
             .datum(chartData[0].values)
             .call(chart);
         drata.utils.windowResize(self.resize.bind(self));
-        
-        return chart;
     };
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
         _t = setTimeout(chart.resize, 500);
-    }
+    };
+    self.change = function(_data){
+        chart && chart.change && chart.change(_data.values);
+    };
 };
 
 var BarContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'pie-content-template';
-    self.pieKeys = ko.observableArray([]);
-    self.selectedPieKey = ko.observable();
     self.contentType = 'bar';
     var chart,chartData, _t;
-
-    self.selectedPieKey.subscribe(function(newValue){
-        var newdata = _.find(chartData, function(item){
-            return item.key === newValue;
-        });
-        chart && chart.change(newdata.values);
-    });
 
     self.drawChart = function(_data){
         chartData = _data;
         _t && clearTimeout(_t);
         
-        self.pieKeys(chartData.map(
-            function(dataItem){
-                return dataItem.key;
-            }));
-
-        self.selectedPieKey(self.pieKeys()[0]);
         chart = drata.charts.barChart();
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
         
         drata.utils.windowResize(self.resize.bind(self));
-        
-        //return chart;
     };
 
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
         _t = setTimeout(chart.resize, 500);
-    }
+    };
+    self.change = function(_data){
+        chart && chart.change && chart.change(_data.values);
+    };
 };
 
 var AreaContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.template = 'pie-content-template';
-    self.pieKeys = ko.observableArray([]);
-    self.selectedPieKey = ko.observable();
     var chart, chartData;
-    self.selectedPieKey.subscribe(function(newValue){
-        var newdata = _.find(chartData, function(item){
-            return item.key === newValue;
-        });
-        chart && chart.change(newdata.values);
-    });
     var _t;
     self.drawChart = function(_data, segmentModel){
         chartData = _data;
         _t && clearTimeout(_t);
-
-        self.pieKeys(chartData.map(function(dataItem){
-            return dataItem.key;
-        }));
-        self.selectedPieKey(self.pieKeys()[0]);
 
         chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false);
         
@@ -244,7 +222,10 @@ var AreaContent = function(index){
         if(!chart) return;
         _t && clearTimeout(_t);
         _t = setTimeout(chart.resize, 500);
-    }
+    };
+    self.change = function(_data){
+        chart && chart.change && chart.change(_data.values);
+    };
 };
 
 var PieContent = function(index){
@@ -253,37 +234,28 @@ var PieContent = function(index){
     self.contentType = 'pie';
     self.template = 'pie-content-template';
     var _t = undefined;
-    self.pieKeys = ko.observableArray([]);
-    self.selectedPieKey = ko.observable();
     var chartData = [];
     var chart;
-    self.selectedPieKey.subscribe(function(newValue){
-        var newdata = _.find(chartData, function(item){
-            return item.key === newValue;
-        });
-        chart && chart.change(newdata);
-    });
-
+    
     self.drawChart = function(_data){
-        chartData = _data[0].values;
+        chartData = _data;
         _t && clearTimeout(_t);
-        self.pieKeys(chartData.map(function(dataItem){
-            return dataItem.key;
-        }));
         chart = drata.charts.pieChart();
 
         d3.select('#'+self.widgetContentId + ' svg')
             .datum(chartData[0])
             .call(chart);
         drata.utils.windowResize(self.resize.bind(self));
-        self.selectedPieKey(self.pieKeys()[0]);
     };
 
     self.resize = function(){
         if(!chart) return;
         _t && clearTimeout(_t);
         _t = setTimeout(chart.resize, 500);
-    }
+    };
+    self.change = function(_data){
+        chart && chart.change && chart.change(_data);
+    };
 };
 
 var WidgetProcessor = function(){

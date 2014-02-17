@@ -86,7 +86,27 @@
 
 @media only screen and (max-width: 767px) {
   .ui-sortable-placeholder {
-    width: 100%; } }
+    width: 100%; }
+.widget-size-1{
+  width:100%;
+}
+.widget-size-2{
+  width:100%;
+}
+.widget-size-3{
+  width:100%;
+}
+.widget-size-4{
+  width:100%;
+}
+.widget-size-5{
+  width:100%;
+}
+.widget-size-6{
+  width:100%;
+}
+
+}
 
 @media only screen and (max-width: 1024px) {
   .mymodal-inner {
