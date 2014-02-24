@@ -10,7 +10,7 @@ input[type="text"].combo-error {
     border:1px solid #ff0000;
     
 }
-ul.combolist {
+div.combolist, ul.combolist {
     border: 1px solid #999999;
     border-top:none;
     background: #f2f2f2;
@@ -23,6 +23,7 @@ ul.combolist {
     margin-top:-1rem;
     z-index:9;
 } 
+
 ul.combolist li {
     padding:.5rem;
 } 
@@ -32,7 +33,7 @@ ul.combolist li:hover {
 .row .columns.combo-dd{
     position: absolute;
     width:60px;
-    z-index: 9;
+    z-index: 8;
     height: 2.3125rem;
     line-height: 2.3125rem;
     text-align: center;
@@ -44,4 +45,24 @@ ul.combolist li:hover {
 }
 .row .columns.combo-txt{
     padding-left:60px;
+}
+
+/**COMPLEX COMBO***/
+i.complexcombo-toggle{
+    position: absolute;
+    right: 20px;
+    top: 9px;    
+    color:#358854;
+}
+
+div.combolist.complexcombo{
+    max-height:100%;
+    overflow:hidden;
+    padding: 0 0.9375rem;
+    position:fixed;
+    max-width: 350px;
+}
+.combolist.complexcombo ul.combolist{
+    position:fixed;
+    width:197px;
 }

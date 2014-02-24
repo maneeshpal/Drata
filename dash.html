@@ -108,6 +108,7 @@
         </div>
     </div>
 
+    
     <script type="text/html" id="widget-template">
     <div class="widget-outer" data-bind="css: widgetClass">
         <div class="widget-wrapper">
@@ -157,238 +158,7 @@
             <svg></svg>
         </div>
     </script>
-    <script type="text/html" id="pie-content-template">
-        <div style="position:relative">
-        <div data-bind="attr :{id: widgetContentId}" class="widget-content">
-            <svg></svg>
-        </div>
-        
-            </div>
-        
-    </script>
-    <script type="text/html" id="segment-template">
     
-        <div class="row">
-            <div class="large-12 columns">
-                <!-- ko template: {name: 'selection-template', data: selection} -->
-                <!-- /ko -->
-                <!-- ko template: {name: 'group-template', data: group} -->
-                <!-- /ko -->
-
-                <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
-                <!-- /ko -->
-            </div>
-        </div>
-
-    </script>
-    <script type="text/html" id="selection-template">
-        <div class="row">
-            <div class="large-12 columns">
-                <fieldset>
-                    <legend>Selections 
-                    <span class="label" data-bind="click: addSimpleSelection"><i class="general foundicon-plus"></i>Simple</span>&nbsp;
-                    <span class="label success" data-bind="click: addComplexSelection"><i class="general foundicon-plus"></i>Complex</span>
-                    </legend>
-
-                    <ul class="small-block-grid-3" data-bind="foreach: props">
-                        <li>
-                            <div class="row collapse">
-                                <div class="small-11 columns" data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: $parents[1].groupingOptions ,selectedValue: prop, options:$parents[1].properties,optionsCaption:'choose Property', allowCustom:false}">
-                                </div>
-                               
-                                <div class="small-1 columns">
-                                    <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeSimpleSelection"></i>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                    <!-- ko template: {name: 'group-template', foreach: complexGroups} -->
-                    <!-- /ko -->
-                </fieldset>
-            </div>
-        </div>
-    </script>
-<script type="text/html" id="datagroup-template">
-        <div class="row">
-            <div class="small-12 columns">
-                <fieldset>
-                    <legend>Grouping</legend>
-                        <div class="row">
-                            <div class="small-8 columns">
-                                <div class="row">
-                                    <div class="small-4 columns">
-                                        <label class="right inline">
-                                            <input type="checkbox" data-bind="checked:hasGrouping" />
-                                            &nbsp;Group by</label>
-                                    </div>
-                                    <div class="small-8 columns">
-                                        <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
-                                <div class="row">
-                                    <div class="small-4 columns">
-                                        <label class="right inline">
-                                        <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
-                                    </div>
-                                    <div class="small-8 columns">
-                                        <select data-bind="enable: hasDivideBy,options:$parent.properties, value:divideByProp, optionsCaption: 'Slice GroupBy'"></select>
-                                    </div>
-                                </div>
-
-                                <!-- /ko -->
-                                <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
-                                    <div class="row">
-                                        <div class="small-4 columns">
-                                            <label class="right inline">x Axis</label>
-                                        </div>
-                                    
-                                        <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: $parent.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="small-4 columns">
-                                            <label class="right inline">
-                                                <input type="checkbox" data-bind="checked:timeseries" />
-                                                TimeSeries</label>
-                                        </div>
-                                        <div class="small-8 columns">
-                                            <input type="text" data-bind="enable:timeseries,value:interval" placeholder="Interval" />
-                                        </div>
-                                    </div>
-                                <!-- /ko -->
-                            </div>
-                            <div class="small-4 columns">
-                            <select data-bind="options: $parent.chartTypes, value : $parent.chartType, optionsCaption: 'select chart Type'">
-                            </select>
-                            </div>
-                        </div>
-                </fieldset>
-            </div>
-        </div>
-    </script>
-    <script type="text/html" id="group-template">
-    
-        <div class="row collapse" style="position: relative">
-            <!-- ko if: $parent.groups-->
-            <div class="columns logic-toggler">
-                <div class="logic-wrapper" data-bind="visible: !amIFirst()">
-                    <span data-bind="text: logic" class="logic-text label secondary"></span>
-                    <select class="logic-selection" data-bind="options:(groupType === 'conditions')?$parents[level].logics : $parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
-                </div>
-            </div>
-            <!-- /ko -->
-            <div data-bind="css: ($parent.groups) ? 'operation-group columns' : 'small-12 columns'">
-                <!-- ko if: !editMode() -->
-                <div class="condition-view">
-                    <span class="keystroke" data-bind="text:expression,click: expand"></span>
-                </div>
-                <!-- /ko -->
-                <!-- ko if: editMode() -->
-                <fieldset class="segment">
-                    <legend>
-                        <span data-bind="text: groupTypeName"></span>
-                        <span class="label" data-bind="click: addGroup"><i class="general foundicon-plus"></i>Group</span>&nbsp;
-                <span class="label success" data-bind="click: addCondition"><i class="general foundicon-plus"></i><span data-bind="text:conditionTypeName"></span></span>
-                        <i class="general foundicon-remove remove-group" data-bind="click: $parent.removeGroup, visible : $parent.groups ||  groupType === 'selections'"></i>
-                        <i style="color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible : editMode() && groupType !== 'selections'"></i>
-                        <!-- ko if: !$parent.groups && groupType === 'selections' && $parent.conditionType !== 'conditions' -->
-                        &nbsp;<input class="input-elem" type="text" data-bind="value:selectionName" placeholder="Selection Name" />
-                        &nbsp;<select style="width:auto" data-bind="options: $parents[level].groupingOptions, value : groupBy"></select>
-                        <!-- /ko -->
-
-                    </legend>
-                    <!-- ko template: {name: getTemplate, foreach: groups} -->
-                    <!-- /ko -->
-                </fieldset>
-                <!-- /ko -->
-            </div>
-        </div>
-
-    </script>
-    <script type="text/html" id="condition-template">
-        <div class="row collapse" style="position: relative">
-            <i style="position: absolute; right: -17px; top: 8px; color: #d5d5d5" class="general foundicon-up-arrow" data-bind="click: collapse, visible:editMode"></i>
-            <div class="columns logic-toggler">
-                <div class="logic-wrapper" data-bind="visible: !amIFirst()">
-                    <span data-bind="text: logic" class="logic-text label secondary"></span>
-                    <select class="logic-selection" data-bind="options:$parents[level].logics, optionsCaption:'logic', value: logic"></select>
-                </div>
-            </div>
-            <div class="operation-group columns">
-                <!-- ko if: !editMode() -->
-                <div class="condition-view">
-                    <span class="keystroke" data-bind="text:expression,click: expand"></span>
-                </div>
-                <!-- /ko -->
-
-                <!-- ko if: editMode() -->
-                <div class="row collapse" data-bind="visible : !isComplex()">
-                    <div class="small-5 columns">
-                        <select data-bind="options:$parents[level].properties, optionsCaption:'property', value: prop"></select>
-                    </div>
-                    <div class="small-2 columns">
-                        <select style="margin-left: -1px" data-bind="options:$parents[level].conditionalOperations, value: operation"></select>
-                    </div>
-                    <div class="small-5 columns">
-                        <input type="text" style="margin-left: -2px" data-bind="value:value" placeholder="value"></input>
-                    </div>
-                </div>
-                <!-- ko if: isComplex() -->
-                <!-- ko template: {name: 'group-template', data: selectionGroup} -->
-                <!-- /ko -->
-                <!-- /ko -->
-                <div class="row collapse">
-                    <div class="small-5 columns">
-                        <input type="checkbox" data-bind="checked:isComplex" />
-                        Complex
-                    </div>
-                    <!-- ko if: isComplex() -->
-
-                    <div class="small-3 columns">
-                        <select data-bind="options:$parents[level].conditionalOperations, optionsCaption:'Operation', value: operation"></select>
-                    </div>
-                    <div class="small-3 columns">
-                        <input type="text" data-bind="value:value" placeholder="custom value" style="margin-left: -1px"></input>
-                    </div>
-                    <div class="small-1 columns">
-                        <i style="color: #ff0000" class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
-                    </div>
-                    <!-- /ko -->
-
-                </div>
-                <!-- /ko -->
-            </div>
-        </div>
-
-    </script>
-
-    <script type="text/html" id="operation-template">
-        <div class="row collapse">
-            <div class="columns logic-toggler">
-                <!-- ko if: $parent.groups && $parent.groups.indexOf($data) > 0 -->
-                <div class="logic-wrapper">
-                    <span data-bind="text: logic" class="logic-text label secondary"></span>
-                    <select class="logic-selection" data-bind="options:$parents[level].arithmeticOperations, optionsCaption:'logic', value: logic"></select>
-                </div>
-                <!-- /ko -->
-            </div>
-            <div class="operation-group columns">
-                <div class="row collapse">
-                    <div class="small-10 columns" data-bind="comboBox :{selectedValue: prop, options:$parents[level].properties,optionsCaption:'choose Property'}">
-                        // <select data-bind="options:$parents[level].properties, optionsCaption:'choose Property', value: prop"></select>
-                    </div>
-                    <div class="small-2 columns">
-                        <i class="general foundicon-remove remove-condition" data-bind="click:$parent.removeCondition"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-
     <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
@@ -423,17 +193,20 @@
     <script type="text/javascript" src="content/js/charts/scatterplot.js"></script>
    
     <script type="text/javascript" src="content/js/tempdata.js"></script>
-   
+    <div id="templates"></div>
+
     <script type="text/javascript">
         (function (root, $) {
-            window.dashboard = new Dashboard();
-            ko.applyBindings(dashboard, document.getElementById('dashboard'));
-            window.topBar = new TopBar();
-            ko.applyBindings(topBar, document.getElementById('topbar'));
+            $('#templates').load('content/templates/segment_template.html', function(){
+                window.dashboard = new Dashboard();
+                ko.applyBindings(dashboard, document.getElementById('dashboard'));
+                window.topBar = new TopBar();
+                ko.applyBindings(topBar, document.getElementById('topbar'));
 
-            window.widgetProcessor = new WidgetProcessor();
-            ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
-            $(document).foundation();
+                window.widgetProcessor = new WidgetProcessor();
+                ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
+                $(document).foundation();
+            });
         })(this, jQuery);
     </script>
 </body>

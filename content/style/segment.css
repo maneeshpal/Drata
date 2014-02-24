@@ -71,3 +71,9 @@ ul.segment-type{
 .segment-type p{
     margin-bottom: 0;
 }
+
+/*.segment-logic:before{
+    content:'.';
+    visibility: hidden;
+    clear:both;
+}*/

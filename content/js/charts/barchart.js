@@ -5,6 +5,9 @@
     var BarChart = function(){
         var z = d3.scale.category10();
         var m = {t:20, r:20, b:40, l:30};
+        var dispatch = d3.dispatch('togglePath');
+        var disabledItems = 0;
+        var _showBarLabels = false;
         var x0 = d3.scale.ordinal();
         var x1 = d3.scale.ordinal();
         var y = d3.scale.linear();
@@ -34,8 +37,6 @@
             });
         };
         
-        var dispatch = d3.dispatch('togglePath');
-        var disabledItems = 0;
         function chart(selection){
             selection.each(function(data) {
                 var container = d3.select(this);
@@ -181,34 +182,32 @@
                     .attr("y", y(yrange[0]))
                     .remove();
 
-                var rectLabels = barGroup.selectAll('text')
-                    .data(function(d){
-                        return d.values;
-                    });
+                if(_showBarLabels){
+                    var rectLabels = barGroup.selectAll('text')
+                        .data(function(d){
+                            return d.values;
+                        });
 
-                rectLabels.enter()
-                    .append('text')
-                    .attr("y", y(yrange[0]));
+                    rectLabels.enter()
+                        .append('text')
+                        .attr("y", y(yrange[0]));
 
-                var labelFormat = d3.format('.2s');
-                rectLabels
-                    .style("fill", "#fff")
-                    .text(function(d){
-                        return labelFormat(d.value);
-                    })
-                    .style('text-anchor', 'middle')
-                    .style("width", x1.rangeBand())
-                    .transition().duration(300)
-                    .attr("x", function(d) { return x1(d.key) + x1.rangeBand()/2; })
-                    .attr("y", function(d) {  
-                        return d.disabled ?  y(yrange[0]) : y(d.value) + 12; 
-                    });
-                    
+                    var labelFormat = d3.format('.2s');
+                    rectLabels
+                        .style("fill", "#fff")
+                        .text(function(d){
+                            return labelFormat(d.value);
+                        })
+                        .style('text-anchor', 'middle')
+                        .style("width", x1.rangeBand())
+                        .transition().duration(300)
+                        .attr("x", function(d) { return x1(d.key) + x1.rangeBand()/2; })
+                        .attr("y", function(d) {  
+                            return d.disabled ?  y(yrange[0]) : y(d.value) + 12; 
+                        });
 
-                rectLabels
-                    .exit()
-                    .remove();                
-                
+                    rectLabels.exit().remove();                
+                }
                 barGroup.exit().remove();
                 gWrapper.exit().remove();
 
@@ -223,6 +222,12 @@
             
             return chart;
         };
+        chart.showBarLabels = function(value){
+            if (!arguments.length) return _showBarLabels;
+            _showBarLabels = value;
+            return chart;
+        };
+            
         return chart;
     };
     root.drata.ns('charts').extend({

@@ -6,7 +6,6 @@
 
     <link rel="stylesheet" type="text/css" href="content/style/core/normalize.css" />
     <link rel="stylesheet" type="text/css" href="content/style/core/foundation.css" />
-    <link rel="stylesheet" type="text/css" href="content/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="content/style/combobox.css" />
      <link rel="stylesheet" type="text/css" href="content/style/core/general_foundicons.css" />
        <style type="text/css">
@@ -17,64 +16,50 @@
                 border:1px solid #ccc;
             }
             .combowrapper {
-                width:500px;
+                width:800px;
                 margin: 0 auto;
             }
         </style>
     </head>
 <body>
-   <!--  <div id="graph" class="graph">
-       <svg></svg>
-    </div> -->
-
 
     <div class="combowrapper" id="combowrapepr">
+    <h4>Custom binding handlers</h4>
     <div class="row">
-        <div class="small-6 columns" data-bind="comboBox :{selectedValue: prop, options:properties,optionsCaption:'choose Property'}">
-         </div>
-         <div class="small-6 columns" data-bind="ddComboBox :{selectedPrefix: selectedPrefix , prefixOptions: prefixOptions ,selectedValue: prop2, options:properties,optionsCaption:'choose Property', allowCustom:false}">
-         </div>
+        <div class="large-4 columns" data-bind="template: {name: 'selectionGroupTemplate', data: group}">
+        </div>
     </div>
-</div>
-    <script src="content/js/lib/d3.v3.js"></script>
+    </div>
     <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
 
-    <script type="text/javascript" src="content/js/models/axis.js"></script>
-    <script type="text/javascript" src="content/js/models/dots.js"></script>
-    <script type="text/javascript" src="content/js/models/labels.js"></script>
-    <script type="text/javascript" src="content/js/models/lines.js"></script>
-    <script type="text/javascript" src="content/js/models/area.js"></script>
-    <script type="text/javascript" src="content/js/models/tooltip.js"></script>
-    <script type="text/javascript" src="content/js/tempdata.js"></script>
-
-    <script type="text/javascript" src="content/js/charts/linechart.js"></script>
-    <script type="text/javascript" src="content/js/charts/scatterplot.js"></script>
-
-
-     <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
+    <script type="text/javascript" src="content/js/lib/knockout-2.2.1.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="content/js/segment2.js"></script>
+    
+    <div id="templates"></div>
     <script>
         (function($){
-
+            $('#templates').load('content/templates/segment_template2.html', function(){
+        
             var temp = function(){
                 this.prop = ko.observable();
                 this.prop2 = ko.observable();
                 this.properties = ko.observableArray(['aaa', 'aab', 'abb', 'xxxx']);
                 this.prefixOptions = ko.observableArray(['value','count', 'sum']);
                 this.selectedPrefix = ko.observable();
+                this.group = new SelectionGroup(0,'selections', undefined);
+                
             }
             var a = new temp();
             ko.applyBindings(a, document.getElementById('combowrapper'));
             window.a = a;
-            // var chart = drata.charts.scatterPlot();
-            // d3.select('#graph svg')
-            // .datum(tempData.randomData(10, 1,20))
-            // .call(chart);
+        });
         })(jQuery);
     </script>
+    
 
 </body>
 

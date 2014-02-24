@@ -1,0 +1,296 @@
+<script type="text/html" id="segment-template">
+    
+<div class="row">
+    <div class="large-12 columns">
+        <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
+        <!-- /ko -->
+        <!-- ko template: {name: 'group-template2', data: conditionGroup} -->
+        <!-- /ko -->
+
+        <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
+        <!-- /ko -->
+    </div>
+</div>    
+</script>
+<script type="text/html" id="selection-template">
+<div class="row">
+    <div class="large-12 columns">
+        <fieldset>
+            <legend>Selections
+            <span class="label success" data-bind="click: addItem"><i class="general foundicon-plus"></i>Add Selection</span>
+            </legend>
+
+            <!-- ko foreach: items -->
+            <div class="row">
+                <div class="small-4 columns" style="position:relative">
+                    <!-- ko template: {name: 'selectionGroupTemplate', data: $data} -->
+                    <!-- /ko -->
+                    
+                </div>
+
+                <div class="small-7 columns">
+                    <span class="keystroke" data-bind="text:$data.expression()"></span>
+                </div>
+            </div>
+            <!-- /ko -->
+
+        </fieldset>
+    </div>
+</div>
+</script>
+<script type="text/html" id="datagroup-template">
+<div class="row">
+    <div class="small-12 columns">
+        <fieldset>
+            <legend>Grouping</legend>
+                <div class="row">
+                    <div class="small-8 columns">
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">
+                                    <input type="checkbox" data-bind="checked:hasGrouping" />
+                                    &nbsp;Group by</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">
+                                <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="enable: hasDivideBy,options:$parent.properties, value:divideByProp, optionsCaption: 'Slice GroupBy'"></select>
+                            </div>
+                        </div>
+
+                        <!-- /ko -->
+                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
+                            <div class="row">
+                                <div class="small-4 columns">
+                                    <label class="right inline">x Axis</label>
+                                </div>
+                                    
+                                <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: $parent.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
+                                </div>
+                            </div>
+                                    
+                            <div class="row">
+                                <div class="small-4 columns">
+                                    <label class="right inline">
+                                        <input type="checkbox" data-bind="checked:timeseries" />
+                                        TimeSeries</label>
+                                </div>
+                                <div class="small-8 columns">
+                                    <input type="text" data-bind="enable:timeseries,value:interval" placeholder="Interval" />
+                                </div>
+                            </div>
+                        <!-- /ko -->
+                    </div>
+                    <div class="small-4 columns">
+                    <select data-bind="options: $parent.chartTypes, value : $parent.chartType, optionsCaption: 'select chart Type'">
+                    </select>
+                    </div>
+                </div>
+        </fieldset>
+    </div>
+</div>
+</script>
+
+<script type="text/html" id="group-template">
+<div class="row">
+    <div class="small-10 small-offset-1 columns">
+        <fieldset>
+            <legend>Condition</legend>
+            
+            <!-- ko foreach: items -->
+            <div class="row">
+                <div class="small-12 columns" style="position:relative">
+                    <!-- ko template: {name: 'conditionGroupTemplate', data: $data} -->
+                    <!-- /ko -->
+                </div>
+            </div>
+            <!-- /ko -->
+            <div class="row">
+                <div class="small-4 columns">
+                    <a class="button tiny success" data-bind="click:addItem"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+</script>
+
+<script type="text/html" id="selectionGroupTemplate">
+        <div class="row collapse" style="position:relative">
+           
+            <!-- ko if: renderType === 'topSelection' -->
+                <div class="small-11 columns" style="float:left" data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                </div>
+            <!-- /ko -->
+            <!-- ko if: renderType === 'topCondition' -->
+                <div class="small-12 columns" data-bind="comboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                </div>
+            <!-- /ko -->
+            <!-- ko if: renderType === 'childSelection' -->
+                <div class="small-3 columns" data-bind="visible: $index() > 0">
+                    <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
+                </div>
+                <div class="small-8 columns end" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                </div>
+            <!-- /ko -->
+            <i class="general foundicon-remove" data-bind="visible:renderType !== 'topCondition', click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parents[level-1].removeItem(vm)}} " style="top:9px"></i>
+            <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, attr :{'style': (renderType === 'topCondition') ? 'right: 5px' : 'right:30px'}, click:toggleComplex"></i>
+        </div>
+            
+        <div id="complexWrapper" class="combolist complexcombo" data-bind="visible: showComplex()">
+            <div class="row">
+                <div class="large-12 columns">
+                    <div class="row">
+                        <div class="small-8 columns">
+                             <h6>Complex Selection</h6>
+                        </div>
+                    </div>
+                   
+            <input type="text" data-bind="visible: level === 2, value:aliasName" placeholder="Alias Name"></input>
+                </div>
+            </div>
+            <!-- ko template: {name: 'selectionGroupTemplate', foreach: selections} -->
+            <!-- /ko -->
+            <div class="row">
+                <div class="small-4 columns">
+                    <a class="button tiny success" data-bind="click:addSelection"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny primary" data-bind="click:done"><i class="general foundicon-plus"></i>&nbsp;Done</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny alert" data-bind="click:clearGroups"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                </div>
+                
+            </div>
+        </div>
+    </script>
+
+
+
+    <script type="text/html" id="conditionGroupTemplate">
+        <div class="row collapse" style="position:relative" data-bind="visible: showEditMode()">
+                <div class="small-2 columns" data-bind="visible:$index() > 0">
+                    <select data-bind="options:drata.global.logics, value:logic"></select>
+                </div>
+                <div class="small-4 columns" style="margin-left: -1px;" data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
+                </div>
+                <div class="small-2 columns" style="margin-left: -1px;">
+                    <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
+                </div>
+                <div class="small-2 columns" style="float:left;margin-left: -1px;">
+                    <input type="text" data-bind="value:value" placeholder="value"></input>
+                </div>
+                <div class="small-2 columns small-centered">
+                    <span class="label success round" style="top:6px"><i class="general" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, attr :{'style': ''}, click:toggleComplex"></i>
+                    </span>
+                    <span class="label alert round" style="top:6px">
+                    <i class="general foundicon-remove" data-bind="click: function(vm){if(renderType === 'childCondition'){$parent.removeCondition(vm)}else{$parents[level-1].removeItem(vm)}}" ></i>
+                    </span>
+                </div>
+        </div>
+        <div class="row" data-bind="visible: isComplete() && !editOverride()">
+            <div class="small-12 columns" style="margin-bottom:1rem">
+                <span class="keystroke" style="line-height:1.5rem; "  data-bind="text:expression"></span>
+                <span class="label secondary round"><i class="general foundicon-edit" data-bind="click:function(){editOverride(true)}"></i>
+                    </span>
+            </div>
+        </div>
+
+        <div id="complexWrapper" class="combolist complexcombo" data-bind="visible: showComplex()" style="max-width:400px">
+            <div class="row">
+                <div class="large-12 columns">
+                    <h6>Complex Condition</h6>
+                </div>
+            </div>
+            <!-- ko template: {name: 'conditionGroupTemplate', foreach: conditions} -->
+            <!-- /ko -->
+            <div class="row">
+                <div class="small-4 columns">
+                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny primary" data-bind="click:done"><i class="general foundicon-plus"></i>&nbsp;Done</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny alert" data-bind="click:clearGroups"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                </div>
+                
+            </div>
+        </div>
+    </script>
+
+<script type="text/html" id="group-template2">
+<div class="row">
+    <div class="small-10 small-offset-1 columns">
+        <fieldset>
+            <legend>Condition</legend>
+            <div class="row">
+                <div class="small-4 columns">
+                    <a class="button tiny primary"  data-bind="visible:trace().length > 0,click:goback"><i class="general foundicon-plus"></i>&nbsp;Back</a>
+                </div>
+                <div class="small-8 columns" style="margin-bottom:1rem">
+                    <span class="keystroke" style="line-height:1.5rem; "  data-bind="text:expression"></span>
+                </div>
+            </div>
+            <div data-bind="template:currentTemplate">
+            </div>
+
+        </fieldset>
+    </div>
+</div>
+</script>
+
+<script type="text/html" id="conditionBuilderTemplate">
+    <div class="row">
+        <div class="small-8 small-offset-2 columns" style="border:1px solid #ccc, border-radius:4px">
+            <!-- ko template: {name: 'conditionGroupTemplate2', foreach: conditions} -->
+            <!-- /ko -->
+            <div class="row">
+                <div class="small-4 columns">
+                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny primary" data-bind=""><i class="general foundicon-plus"></i>&nbsp;Done</a>
+                </div>
+                <div class="small-4 columns">
+                     <a class="button tiny alert" data-bind="click:clear"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="conditionGroupTemplate2">
+    <div class="row collapse">
+        <div class="small-2 columns" data-bind="visible:$index() > 0">
+            <select data-bind="options:drata.global.logics, value:logic"></select>
+        </div>
+        <div class="small-4 columns" style="margin-left: -1px;" data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
+        </div>
+        <div class="small-2 columns" style="margin-left: -1px;">
+            <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
+        </div>
+        <div class="small-2 columns" style="float:left;margin-left: -1px;">
+            <input type="text" data-bind="value:value" placeholder="value"></input>
+        </div>
+        <div class="small-2 columns small-centered">
+            <span class="label success round" style="top:6px"><i class="general" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex"></i>
+            </span>
+            <span class="label alert round" style="top:6px">
+            <i class="general foundicon-remove" data-bind="click: $parent.removeCondition"></i>
+            </span>
+        </div>
+    </div>    
+</script>
+

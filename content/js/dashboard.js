@@ -86,17 +86,6 @@ var Widget = function(widgetModel, index){
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
         self.loadWidget();
-        // var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        // chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
-        // self.chartType(widgetModel.segmentModel.chartType);
-
-        // self.pieKeys(chartData.map(function(dataItem){
-        //     return dataItem.key;
-        // }));
-
-        // self.selectedPieKey(self.pieKeys()[0]);
-
-        // content.drawChart(chartData, widgetModel.segmentModel);
     };
 
     self.getModel = function (argument) {
@@ -115,9 +104,7 @@ var Widget = function(widgetModel, index){
 var LineContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'pie-content-template';
-    
-    
+    self.template = 'content-template';
     var chart, chartData;
     
     var _t;
@@ -145,7 +132,7 @@ var LineContent = function(index){
 var ScatterContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'pie-content-template';
+    self.template = 'content-template';
     var chart, chartData;
     var _t;
     self.drawChart = function(_data, segmentModel){
@@ -172,7 +159,7 @@ var ScatterContent = function(index){
 var BarContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'pie-content-template';
+    self.template = 'content-template';
     self.contentType = 'bar';
     var chart,chartData, _t;
 
@@ -180,7 +167,7 @@ var BarContent = function(index){
         chartData = _data;
         _t && clearTimeout(_t);
         
-        chart = drata.charts.barChart();
+        chart = drata.charts.barChart().showBarLabels(true);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
@@ -201,7 +188,7 @@ var BarContent = function(index){
 var AreaContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
-    self.template = 'pie-content-template';
+    self.template = 'content-template';
     var chart, chartData;
     var _t;
     self.drawChart = function(_data, segmentModel){
@@ -232,7 +219,7 @@ var PieContent = function(index){
     var self = this;
     self.widgetContentId = 'widgetContent'+index;
     self.contentType = 'pie';
-    self.template = 'pie-content-template';
+    self.template = 'content-template';
     var _t = undefined;
     var chartData = [];
     var chart;

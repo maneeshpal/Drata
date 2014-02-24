@@ -129,9 +129,32 @@
         txt.html(text);
         return txt.width();
     };
+    var head = document.getElementsByTagName('head')[0];
+        
+    var createTemplate = function (templateName, templateString, overrideExisting) {
+        if (document.getElementById(templateName) && !overrideExisting) return document.getElementById(templateName);
+
+        var el = document.createElement('script');
+
+        el.type = 'text/html';
+        el.id = templateName;
+        el.text = templateString;
+        var insertBeforeEl = head && head.getElementsByTagName('base')[0] || null;
+        document.body ? document.body.appendChild(el) : head.insertBefore(el, insertBeforeEl);
+
+        return el;
+    };
 
     drata.ns('js').extend({
         logmsg : false
+    });
+    drata.ns('global').extend({
+        conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like'],
+        arithmeticOperations : ['+', '-', '*','/'],
+        groupingOptions : ['value','count', 'sum', 'avg'],
+        xAxisTypes : ['time','linear','currency'],
+        chartTypes : ['line', 'area', 'scatter', 'pie','bar'],
+        logics : ['and', 'or']
     });
     drata.ns('utils').extend({
         format: format,
@@ -139,7 +162,8 @@
         getUrlParam: getUrlParam,
         clone:clone,
         windowResize:windowResize,
-        textToPixel : textToPixel
+        textToPixel : textToPixel,
+        createTemplate: createTemplate
     });
 })(this);
 
