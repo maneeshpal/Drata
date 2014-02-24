@@ -48,20 +48,18 @@ var Segmentor = function(model){
     //model && self.initialize(model);
 };
 
-var Condition = function(level, model, renderType, onExpand){
+var Condition = function(options){
     var self = this;
-    self.level = level;
+    self.level = options.level;
     self.logic = ko.observable('and');
     self.selection = new Selection(self.level + 1, undefined, 'topCondition');
     self.operation = ko.observable();
     self.value = ko.observable();
     self.conditions = ko.observableArray();
-    self.renderType = renderType;
     self.addCondition = function(){
-        self.conditions.push(new Condition(self.level+1, undefined, 'childCondition', onExpand));
+        self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand}));
     };
-    self.editOverride = ko.observable(false);
-
+    
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
@@ -79,41 +77,11 @@ var Condition = function(level, model, renderType, onExpand){
     //     return isCom;
     // });
 
-    // self.showEditMode = ko.computed(function(){
-    //     return self.editOverride() || !self.isComplete();
-    // });
-    self.showComplex = ko.observable(false);
-    
-    self.hideComplex = ko.computed(function(){
-        return !self.showComplex();
-    });
-
-    self.toggleComplex = function(){
-        //self.showComplex(!self.showComplex());
-       // segmentProcessor.segment.conditionBuilder.attach(self.getModel().groups, self.prefillGroups.bind(self));
-        // if(self.showComplex() && !self.isComplex()){
-        //     self.selectedProp('');
-        // }
-        onExpand && onExpand(self);
+    self.expand = function(){
+        options.onExpand && options.onExpand(self);
 
     };    
 
-    // self.selectedProp.subscribe(function(newValue){
-    //     if(newValue !== undefined && !self.isComplex()){
-    //         self.selections([]);
-    //     }
-    // });
-    self.clearGroups = function(){
-        self.conditions([]);
-        //self.selection(undefined);
-        self.showComplex(false);
-    };
-    self.done = function(){
-        if(self.isComplex()) {
-            self.showComplex(false);
-            //self.selectedProp(self.aliasName());
-        }
-    };
     self.prefill = function(m){
         self.logic(m.logic);
         self.value(m.value);
@@ -125,7 +93,7 @@ var Condition = function(level, model, renderType, onExpand){
         self.conditions(ko.utils.arrayMap(
             m,
             function(groupModel) {
-                return new Condition(self.level+1, groupModel, 'childCondition'); 
+                return new Condition({level:self.level+1, model:groupModel, onExpand: options.onExpand}); 
             }
         )); 
     }
@@ -158,8 +126,8 @@ var Condition = function(level, model, renderType, onExpand){
         expression = '(' + expression + ')';
         return expression;
     });
-    if(model){
-        self.prefill(model);
+    if(options.model){
+        self.prefill(options.model);
     }
 };
 
@@ -190,17 +158,18 @@ var ConditionGroup = function(level, model, xxx){
         self.conditions(ko.utils.arrayMap(
             model,
             function(cond) {
-              return new Condition(self.level+1, cond, undefined, self.onExpand.bind(self));
+              return new Condition({level:self.level+1,model: cond, onExpand:self.onExpand.bind(self)});
             }
         ));
     };
     self.addCondition = function(){
-        self.conditions.push(new Condition(self.level+1,undefined, undefined, self.onExpand.bind(self)));
+        self.conditions.push(new Condition({level:self.level+1, onExpand: self.onExpand.bind(self)}));
     };
     
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
+    
     self.clear = function(){
         self.conditions([]);
     };

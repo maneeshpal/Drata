@@ -101,30 +101,6 @@
 </div>
 </script>
 
-<script type="text/html" id="group-template">
-<div class="row">
-    <div class="small-10 small-offset-1 columns">
-        <fieldset>
-            <legend>Condition</legend>
-            
-            <!-- ko foreach: items -->
-            <div class="row">
-                <div class="small-12 columns" style="position:relative">
-                    <!-- ko template: {name: 'conditionGroupTemplate', data: $data} -->
-                    <!-- /ko -->
-                </div>
-            </div>
-            <!-- /ko -->
-            <div class="row">
-                <div class="small-4 columns">
-                    <a class="button tiny success" data-bind="click:addItem"><i class="general foundicon-plus"></i>&nbsp;Add</a>
-                </div>
-            </div>
-        </fieldset>
-    </div>
-</div>
-</script>
-
 <script type="text/html" id="selectionGroupTemplate">
         <div class="row collapse" style="position:relative">
            
@@ -176,60 +152,6 @@
         </div>
     </script>
 
-
-
-    <script type="text/html" id="conditionGroupTemplate">
-        <div class="row collapse" style="position:relative" data-bind="visible: showEditMode()">
-                <div class="small-2 columns" data-bind="visible:$index() > 0">
-                    <select data-bind="options:drata.global.logics, value:logic"></select>
-                </div>
-                <div class="small-4 columns" style="margin-left: -1px;" data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
-                </div>
-                <div class="small-2 columns" style="margin-left: -1px;">
-                    <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
-                </div>
-                <div class="small-2 columns" style="float:left;margin-left: -1px;">
-                    <input type="text" data-bind="value:value" placeholder="value"></input>
-                </div>
-                <div class="small-2 columns small-centered">
-                    <span class="label success round" style="top:6px"><i class="general" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, attr :{'style': ''}, click:toggleComplex"></i>
-                    </span>
-                    <span class="label alert round" style="top:6px">
-                    <i class="general foundicon-remove" data-bind="click: function(vm){if(renderType === 'childCondition'){$parent.removeCondition(vm)}else{$parents[level-1].removeItem(vm)}}" ></i>
-                    </span>
-                </div>
-        </div>
-        <div class="row" data-bind="visible: isComplete() && !editOverride()">
-            <div class="small-12 columns" style="margin-bottom:1rem">
-                <span class="keystroke" style="line-height:1.5rem; "  data-bind="text:expression"></span>
-                <span class="label secondary round"><i class="general foundicon-edit" data-bind="click:function(){editOverride(true)}"></i>
-                    </span>
-            </div>
-        </div>
-
-        <div id="complexWrapper" class="combolist complexcombo" data-bind="visible: showComplex()" style="max-width:400px">
-            <div class="row">
-                <div class="large-12 columns">
-                    <h6>Complex Condition</h6>
-                </div>
-            </div>
-            <!-- ko template: {name: 'conditionGroupTemplate', foreach: conditions} -->
-            <!-- /ko -->
-            <div class="row">
-                <div class="small-4 columns">
-                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
-                </div>
-                <div class="small-4 columns">
-                     <a class="button tiny primary" data-bind="click:done"><i class="general foundicon-plus"></i>&nbsp;Done</a>
-                </div>
-                <div class="small-4 columns">
-                     <a class="button tiny alert" data-bind="click:clearGroups"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
-                </div>
-                
-            </div>
-        </div>
-    </script>
-
 <script type="text/html" id="group-template2">
 <div class="row">
     <div class="small-10 small-offset-1 columns">
@@ -261,9 +183,6 @@
                     <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
                 </div>
                 <div class="small-4 columns">
-                     <a class="button tiny primary" data-bind=""><i class="general foundicon-plus"></i>&nbsp;Done</a>
-                </div>
-                <div class="small-4 columns">
                      <a class="button tiny alert" data-bind="click:clear"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
                 </div>
             </div>
@@ -285,7 +204,7 @@
             <input type="text" data-bind="value:value" placeholder="value"></input>
         </div>
         <div class="small-2 columns small-centered">
-            <span class="label success round" style="top:6px"><i class="general" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex"></i>
+            <span class="label success round" style="top:6px"><i class="general foundicon-plus" data-bind="click:expand"></i>
             </span>
             <span class="label alert round" style="top:6px">
             <i class="general foundicon-remove" data-bind="click: $parent.removeCondition"></i>
