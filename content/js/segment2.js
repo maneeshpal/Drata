@@ -139,7 +139,7 @@ var ConditionGroup = function(level, model, xxx){
     self.currentBinding = ko.observable(self);
 
     self.currentTemplate = ko.computed(function(){
-        return { name : 'conditionBuilderTemplate', data: self.currentBinding};
+        return { name : 'condition-group-template', data: self.currentBinding};
     });
 
     self.getModel = function(){
@@ -169,7 +169,7 @@ var ConditionGroup = function(level, model, xxx){
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
-    
+
     self.clear = function(){
         self.conditions([]);
     };

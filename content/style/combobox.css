@@ -46,23 +46,3 @@ ul.combolist li:hover {
 .row .columns.combo-txt{
     padding-left:60px;
 }
-
-/**COMPLEX COMBO***/
-i.complexcombo-toggle{
-    position: absolute;
-    right: 20px;
-    top: 9px;    
-    color:#358854;
-}
-
-div.combolist.complexcombo{
-    max-height:100%;
-    overflow:hidden;
-    padding: 0 0.9375rem;
-    position:fixed;
-    max-width: 350px;
-}
-.combolist.complexcombo ul.combolist{
-    position:fixed;
-    width:197px;
-}

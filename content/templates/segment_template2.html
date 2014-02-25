@@ -4,7 +4,7 @@
     <div class="large-12 columns">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
-        <!-- ko template: {name: 'group-template2', data: conditionGroup} -->
+        <!-- ko template: {name: 'group-template', data: conditionGroup} -->
         <!-- /ko -->
 
         <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
@@ -152,9 +152,9 @@
         </div>
     </script>
 
-<script type="text/html" id="group-template2">
+<script type="text/html" id="group-template">
 <div class="row">
-    <div class="small-10 small-offset-1 columns">
+    <div class="small-12 columns">
         <fieldset>
             <legend>Condition</legend>
             <div class="row">
@@ -165,21 +165,20 @@
                     <span class="keystroke" style="line-height:1.5rem; "  data-bind="text:expression"></span>
                 </div>
             </div>
-            <div data-bind="template:currentTemplate">
-            </div>
-
+            <!-- ko template:currentTemplate -->
+            <!-- /ko -->
         </fieldset>
     </div>
 </div>
 </script>
 
-<script type="text/html" id="conditionBuilderTemplate">
+<script type="text/html" id="condition-group-template">
     <div class="row">
-        <div class="small-8 small-offset-2 columns" style="border:1px solid #ccc, border-radius:4px">
-            <!-- ko template: {name: 'conditionGroupTemplate2', foreach: conditions} -->
+        <div class="small-12 columns">
+            <!-- ko template: {name: 'condition-template', foreach: conditions} -->
             <!-- /ko -->
             <div class="row">
-                <div class="small-4 columns">
+                <div class="small-4 columns right">
                     <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
                 </div>
                 <div class="small-4 columns">
@@ -190,7 +189,7 @@
     </div>
 </script>
 
-<script type="text/html" id="conditionGroupTemplate2">
+<script type="text/html" id="condition-template">
     <div class="row collapse">
         <div class="small-2 columns" data-bind="visible:$index() > 0">
             <select data-bind="options:drata.global.logics, value:logic"></select>

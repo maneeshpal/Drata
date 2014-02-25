@@ -72,8 +72,24 @@ ul.segment-type{
     margin-bottom: 0;
 }
 
-/*.segment-logic:before{
-    content:'.';
-    visibility: hidden;
-    clear:both;
-}*/
+i.complexcombo-toggle{
+    position: absolute;
+    right: 20px;
+    top: 9px;    
+    color:#358854;
+}
+
+div.combolist.complexcombo{
+    max-height:100%;
+    overflow:hidden;
+    padding: 0 0.9375rem;
+    position:static;
+    max-width: 350px;
+}
+.combolist.complexcombo ul.combolist{
+    position:static;
+    width:197px;
+}
+.complexcombo .combolist.complexcombo{
+    padding:0;
+}
