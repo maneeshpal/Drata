@@ -22,13 +22,13 @@
 
             <!-- ko foreach: items -->
             <div class="row">
-                <div class="small-4 columns" style="position:relative">
+                <div class="small-6 columns" style="position:relative">
                     <!-- ko template: {name: 'selectionGroupTemplate', data: $data} -->
                     <!-- /ko -->
                     
                 </div>
 
-                <div class="small-7 columns">
+                <div class="small-6 columns">
                     <span class="keystroke" data-bind="text:$data.expression()"></span>
                 </div>
             </div>
@@ -102,28 +102,38 @@
 </script>
 
 <script type="text/html" id="selectionGroupTemplate">
-        <div class="row collapse" style="position:relative">
+        <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:360px'}">
            
             <!-- ko if: renderType === 'topSelection' -->
-                <div class="small-11 columns" style="float:left" data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-10 columns" data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
+                <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
+                </i>
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
                 <div class="small-12 columns" data-bind="comboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
+                <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
+                </i>
             <!-- /ko -->
             <!-- ko if: renderType === 'childSelection' -->
-                <div class="small-3 columns" data-bind="visible: $index() > 0">
+                <div class="small-2 columns" data-bind="visible: $index() > 0">
                     <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
                 </div>
-                <div class="small-8 columns end" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-8 columns end" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
+                <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
+                </i>
             <!-- /ko -->
-            <i class="general foundicon-remove" data-bind="visible:renderType !== 'topCondition', click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parents[level-1].removeItem(vm)}} " style="top:9px"></i>
-            <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, attr :{'style': (renderType === 'topCondition') ? 'right: 5px' : 'right:30px'}, click:toggleComplex"></i>
+            <div class="small-2 columns">
+            <span class="label alert round" style="top:6px" data-bind="visible:renderType !== 'topCondition'">
+                <i class="general foundicon-remove" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parents[level-1].removeItem(vm)}} ">
+            </i>
+            </span>
+            </div>
         </div>
             
-        <div id="complexWrapper" class="combolist complexcombo" data-bind="visible: showComplex()">
+        <div id="complexWrapper" class="complexcombo" data-bind="visible: showComplex()">
             <div class="row">
                 <div class="large-12 columns">
                     <div class="row">
@@ -158,15 +168,15 @@
         <fieldset>
             <legend>Condition</legend>
             <div class="row">
-                <div class="small-4 columns">
-                    <a class="button tiny primary"  data-bind="visible:trace().length > 0,click:goback"><i class="general foundicon-plus"></i>&nbsp;Back</a>
+                <div class="small-4 columns conditioncombo" style="width:500px">
+                    <!-- ko template:currentTemplate -->
+                    <!-- /ko -->
                 </div>
-                <div class="small-8 columns" style="margin-bottom:1rem">
+                <div style="small-8 columns">
                     <span class="keystroke" style="line-height:1.5rem; "  data-bind="text:expression"></span>
                 </div>
             </div>
-            <!-- ko template:currentTemplate -->
-            <!-- /ko -->
+            
         </fieldset>
     </div>
 </div>
@@ -177,12 +187,21 @@
         <div class="small-12 columns">
             <!-- ko template: {name: 'condition-template', foreach: conditions} -->
             <!-- /ko -->
+            <div data-alert class="alert-box info radius" data-bind="visible:conditions().length === 0">
+              You can add more conditions. Go back to access parent conditions.
+              <a href="#" class="close">&times;</a>
+            </div>
+
             <div class="row">
-                <div class="small-4 columns right">
-                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                <div class="small-4 columns">
+                 <a class="button tiny primary"  data-bind="visible:$parent.trace().length > 0,click:$parent.goback"><i class="general foundicon-left-arrow"></i>&nbsp;Back</a>
                 </div>
+                
                 <div class="small-4 columns">
                      <a class="button tiny alert" data-bind="click:clear"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                </div>
+                <div class="small-4 columns right">
+                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
                 </div>
             </div>
         </div>
@@ -190,16 +209,16 @@
 </script>
 
 <script type="text/html" id="condition-template">
-    <div class="row collapse">
+    <div class="row">
         <div class="small-2 columns" data-bind="visible:$index() > 0">
             <select data-bind="options:drata.global.logics, value:logic"></select>
         </div>
-        <div class="small-4 columns" style="margin-left: -1px;" data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
+        <div class="small-4 columns"  data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
         </div>
-        <div class="small-2 columns" style="margin-left: -1px;">
+        <div class="small-2 columns">
             <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
         </div>
-        <div class="small-2 columns" style="float:left;margin-left: -1px;">
+        <div class="small-2 columns">
             <input type="text" data-bind="value:value" placeholder="value"></input>
         </div>
         <div class="small-2 columns small-centered">

@@ -10,7 +10,7 @@ input[type="text"].combo-error {
     border:1px solid #ff0000;
     
 }
-div.combolist, ul.combolist {
+ul.combolist {
     border: 1px solid #999999;
     border-top:none;
     background: #f2f2f2;
