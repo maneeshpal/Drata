@@ -107,3 +107,31 @@ i.complexcombo-toggle{
   padding-right: .6rem;
 }
 
+.complexcombo .row .row, .complexcombo .row .row, .conditioncombo .row .row, .conditioncombo .row .row {
+  margin-left: -0.6rem; /* change the values to anything that you want */
+  margin-right: -0.6rem;
+}
+
+.complex-overlay.top-selection {
+    position: absolute;
+    top: 0;
+    left: 74px;
+    right: 14px;
+    z-index: 10;
+}
+.complex-overlay {
+    height: 2.3125rem;
+    padding:0.7rem 0.5rem 0.5rem 0.5rem;
+    border-style: solid;
+    border-width: 1px;
+    display: block;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    font-size:.8125rem;
+    background-color: #a0d3e8;
+    border-color: #74bfdd;
+    color: #4f4f4f;
+}
+.complex-overlay:hover{
+    background-color:#74bfdd;
+}

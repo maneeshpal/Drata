@@ -59,7 +59,7 @@ var Condition = function(options){
     self.addCondition = function(){
         self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand}));
     };
-    
+    self.boldExpression= ko.observable(false);
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
@@ -71,15 +71,8 @@ var Condition = function(options){
         return self.conditions().length > 0;
     });
 
-    // self.isComplete = ko.computed(function(){
-    //     var isCom = (self.logic()!== undefined && self.operation()!== undefined && self.selection.isComplete() && (self.logic() === 'exists' || (self.value() !== undefined && self.value() !== '')));
-    //     console.log('condition complete: ' + isCom);
-    //     return isCom;
-    // });
-
     self.expand = function(){
         options.onExpand && options.onExpand(self);
-
     };    
 
     self.prefill = function(m){
@@ -123,12 +116,21 @@ var Condition = function(options){
         _.each(innerGroups, function(gr,index){
             expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
         });
-        expression = '(' + expression + ')';
+        if(self.boldExpression()){
+            expression = '<strong style="color:#008cba; font-size:1rem">(' + expression + ')</strong>';
+        }
+        else{
+            expression = '(' + expression + ')';
+        }
         return expression;
+    });
+    self.complexConditionSummary = ko.computed(function(){
+        return 'Complex Condition: <span class="keystroke">' + ((self.expression().length > 27) ? self.expression().substring(0,23) + '...)' : self.expression()) + '</span>';
     });
     if(options.model){
         self.prefill(options.model);
     }
+
 };
 
 var ConditionGroup = function(level, model, xxx){
@@ -137,7 +139,13 @@ var ConditionGroup = function(level, model, xxx){
     self.conditions = ko.observableArray();
     self.trace = ko.observableArray();
     self.currentBinding = ko.observable(self);
+    self.boldExpression = ko.observable(false);
+    self.currentBinding.subscribeChanged(function(newValue, oldValue){
+        newValue.boldExpression(true);
+        oldValue.boldExpression(false);
+    });
 
+    self.boldExpression = ko.observable(false);
     self.currentTemplate = ko.computed(function(){
         return { name : 'condition-group-template', data: self.currentBinding};
     });
@@ -151,7 +159,8 @@ var ConditionGroup = function(level, model, xxx){
     };
 
     self.onExpand = function(condition){
-        self.trace.push(self.currentBinding());
+        var currBinding = self.currentBinding();
+        self.trace.push(currBinding);
         self.currentBinding(condition);
     };
     self.prefill = function(model){
@@ -175,8 +184,14 @@ var ConditionGroup = function(level, model, xxx){
     };
     self.goback = function(){
         var prev = self.trace.pop();
-        //var cond = self;
         self.currentBinding(prev);
+    };
+     self.gobackTo = function(tr){
+        var index = self.trace.indexOf(tr);
+        var removed = self.trace.splice(index, self.trace().length-1 || 1);
+
+        //var cond = self;
+        self.currentBinding(removed[0]);
     };
 
     self.expression = ko.computed(function(){
@@ -185,7 +200,7 @@ var ConditionGroup = function(level, model, xxx){
         _.each(innerGroups, function(gr,index){
             expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
         });
-        expression = '(' + expression + ')';
+        
         return expression;
     });
 
@@ -236,8 +251,13 @@ var Selection = function(level, model, renderType){
     self.toggleComplex = function(){
         self.showComplex(!self.showComplex());
         if(self.showComplex() && !self.isComplex()){
+            var selectedProp = self.selectedProp();
+            if(selectedProp){
+                self.selections.push(new Selection(self.level+1, {selectedProp:selectedProp}, 'childSelection'));
+            }
             self.selectedProp('');
         }
+        
     };
     
     self.selectedProp.subscribe(function(newValue){
@@ -259,8 +279,9 @@ var Selection = function(level, model, renderType){
     
     self.prefill = function(m){
         self.aliasName(m.aliasName);
-        self.logic(m.logic);
+        self.logic(m.logic || '+');
         self.groupBy(m.groupBy);
+        self.selectedProp(m.selectedProp);
         self.selections(ko.utils.arrayMap(
             m.groups,
             function(groupModel) {

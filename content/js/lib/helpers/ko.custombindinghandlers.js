@@ -1,5 +1,15 @@
   
 ;(function(ko, $){
+    ko.subscribable.fn.subscribeChanged = function (callback) {
+        var oldValue;
+        this.subscribe(function (_oldValue) {
+            oldValue = _oldValue;
+        }, this, 'beforeChange');
+
+        this.subscribe(function (newValue) {
+            callback(newValue, oldValue);
+        });
+    };
     var templateEngine = new ko.stringTemplateEngine();
     /********** KO TEMPLATES ******************/
     var comboTemplateStr = [
