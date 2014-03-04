@@ -127,6 +127,18 @@ var Condition = function(options){
     self.complexConditionSummary = ko.computed(function(){
         return 'Complex Condition: <span class="keystroke">' + ((self.expression().length > 27) ? self.expression().substring(0,23) + '...)' : self.expression()) + '</span>';
     });
+
+    self.afterAdd = function(elem){
+      elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
+        $(elem).show();
+      });
+    };
+    self.beforeRemove = function(elem){
+      elem.nodeType === 1 && $(elem).slideUp(100, function(){
+        $(elem).remove();
+      });
+    };
+
     if(options.model){
         self.prefill(options.model);
     }
@@ -182,6 +194,19 @@ var ConditionGroup = function(level, model, xxx){
     self.clear = function(){
         self.conditions([]);
     };
+
+    self.afterAdd = function(elem){
+      elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
+        $(elem).show();
+      });
+    };
+    
+    self.beforeRemove = function(elem){
+      elem.nodeType === 1 && $(elem).slideUp(100, function(){
+        $(elem).remove();
+      });
+    };
+
     self.goback = function(){
         var prev = self.trace.pop();
         self.currentBinding(prev);
@@ -276,7 +301,16 @@ var Selection = function(level, model, renderType){
             self.selectedProp(self.aliasName());
         }
     };
-    
+    self.afterAdd = function(elem){
+      elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
+        $(elem).show();
+      });
+    };
+    self.beforeRemove = function(elem){
+      elem.nodeType === 1 && $(elem).slideUp(100, function(){
+        $(elem).remove();
+      });
+    };
     self.prefill = function(m){
         self.aliasName(m.aliasName);
         self.logic(m.logic || '+');
@@ -343,6 +377,18 @@ var ItemsGroup = function(level, model, renderType){
               return new itemFunc(self.level+1, sel, 'top' + renderType);
             }
         ));
+    };
+
+    self.afterAdd = function(elem){
+      elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
+        $(elem).show();
+      });
+    };
+    
+    self.beforeRemove = function(elem){
+      elem.nodeType === 1 && $(elem).slideUp(100, function(){
+        $(elem).remove();
+      });
     };
 
     model && self.prefill(model);
