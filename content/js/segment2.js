@@ -12,8 +12,6 @@ var Segmentor = function(model){
     self.logics = ['and', 'or'];
     self.filteredData = ko.observable();
     self.outputData = ko.observable();
-   // self.conditionBuilder = new ConditionBuilder({level: self.level+1, properties: self.properties});
-    //self.conditionGroup = new ItemsGroup(self.level + 1, undefined, 'Condition');
     self.conditionGroup = new ConditionGroup(self.level + 1, undefined, 'Condition', self.properties);
     self.selectionGroup = new ItemsGroup(self.level + 1, undefined, 'Selection');
     self.dataGroup = new DataGroup();
@@ -28,8 +26,8 @@ var Segmentor = function(model){
         model = model || {};
         self.properties(model.properties);
         self.chartType(model.chartType);
-        self.conditionGroup.prefill(model.group || {});
-        self.selectionGroup.prefill(model.selection || {});
+        self.conditionGroup.prefill(model.group || []);
+        self.selectionGroup.prefill(model.selection || []);
         self.dataGroup.setProps(model.dataGroup || {});
     };
     self.getModel = function(){
@@ -357,7 +355,7 @@ var ItemsGroup = function(level, model, renderType){
     
     self.prefill = function(model){
         self.items(ko.utils.arrayMap(
-            model.items,
+            model,
             function(sel) {
               return new itemFunc(self.level+1, sel, 'top' + renderType);
             }
@@ -386,13 +384,17 @@ var ItemsGroup = function(level, model, renderType){
         return returnGroups;
     };
     self.expression = ko.computed(function(){
-        var expression = '';
+        var expressions = [], exp;
         var innerGroups = self.items();
         _.each(innerGroups, function(gr,index){
-            expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
+            exp = gr.expression();
+            if(gr.groupBy() !== 'value'){
+                exp = '<em>' + gr.groupBy() + '</em>(' + exp + ')';
+            }
+            expressions.push(exp);
         });
-        expression = '(' + expression + ')';
-        return expression;
+        
+        return 'Select ' + expressions.join(', ');
     });
 };
 

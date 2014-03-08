@@ -49,38 +49,28 @@
 /*Modal segment*/
 .mymodal-wrapper.showme {
     opacity: 1;
-    visibility: visible;
+    top:0;
 }
 
 .mymodal-wrapper {
     position: absolute;
-    /*right: -103%;
-    left: 103%;*/
-    visibility: hidden;
-    transition: visibility .1s, opacity .5s linear;
-    height: auto;
+    top:-200%;
+    transition:  top .5s, opacity .2s linear;
+    height: 100%;
+    width:100%;
     /*transition: all 1s;*/
-    background-color: rgba(0, 0, 0, 0.4);
-    top: 2.8rem;
-    padding: 1.3rem 0;
-    width: 100%;
     opacity: 0;
 }
-
-.mymodal-inner {
-    width: 50%;
-    margin: 0 auto;
-    background-color: #fff;
+.mymodal-inner{
+  width:100%;
+  /*background-color: rgba(0,0,0,.4);*/
 }
-.mymodal-wrapper.chart-type{
-    height:400px;
-    z-index: 9;
-    top: 0;
+.mymodal-inner-temp{
+  width:80%;
+  background-color:#fff;
+  margin:0 auto;
+  box-shadow: 0px 0px 15px 3px #333;
 }
-.mymodal-wrapper.chart-type .mymodal-inner{
-    top:33%;
-}
-
 /*End Modal Segment*/
 
 
@@ -109,7 +99,7 @@
 }
 
 @media only screen and (max-width: 1024px) {
-  .mymodal-inner {
+  .mymodal-inner-temp{
     width:100%;
   }
 }

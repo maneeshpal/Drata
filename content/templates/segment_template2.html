@@ -1,16 +1,17 @@
 <script type="text/html" id="segment-template">
     
 <div class="row">
-    <div class="large-12 columns">
+    <div class="large-5 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
+    </div>
+    <div class="large-7 columns" style="min-width:470px">
         <!-- ko template: {name: 'group-template', data: conditionGroup} -->
         <!-- /ko -->
-
-        <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
-        <!-- /ko -->
     </div>
-</div>    
+</div>
+<!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
+<!-- /ko -->
 </script>
 <script type="text/html" id="selection-template">
 <div class="row">
@@ -18,15 +19,13 @@
         <fieldset>
             <legend>Selections</legend>
 
+            <div class="keystroke expression" data-bind="html:$data.expression()"></div>
+
             <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
             <div class="row">
-                <div class="small-6 columns" style="position:relative">
+                <div class="small-12 columns" style="position:relative">
                     <!-- ko template: {name: 'selectionGroupTemplate', data: $data} -->
                     <!-- /ko -->
-                </div>
-
-                <div class="small-6 columns">
-                    <span class="keystroke" data-bind="text:$data.expression()"></span>
                 </div>
             </div>
             <!-- /ko -->
@@ -103,7 +102,7 @@
         <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:360px'}">
            <!-- ko if: renderType === 'topSelection' -->
                 <div class="small-10 columns">
-                    <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                    <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                     </div>
                     <!-- ko if: isComplex() -->
                     <span class="complex-overlay top-selection" data-bind="click: toggleComplex">
@@ -116,7 +115,7 @@
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
                 <!-- ko if: !isComplex() -->
-                <div class="small-12 columns" data-bind="comboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-12 columns" data-bind="comboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
                 </i>
@@ -135,7 +134,7 @@
                     <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
                 </div>
                 <!-- ko if: !isComplex() -->
-                <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options:segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
                 </i>
@@ -191,13 +190,11 @@
     <div class="small-12 columns">
         <fieldset>
             <legend>Condition</legend>
+             <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
             <div class="row">
-                <div class="small-4 columns conditioncombo" style="width:500px">
+                <div class="small-12 columns conditioncombo">
                     <!-- ko template:currentTemplate -->
                     <!-- /ko -->
-                </div>
-                <div style="small-8 columns">
-                    <span class="keystroke" style="line-height:1.5rem; "  data-bind="html:expression"></span>
                 </div>
             </div>
             

@@ -47,6 +47,8 @@
     </div>
     <div id="graphBuilder" class="mymodal-wrapper">
         <div class="mymodal-inner">
+        <div class="mymodal-inner-temp">
+            
             <nav class="top-bar" id="topbar" data-topbar>
                 <ul class="title-area">
                     <li class="name">
@@ -85,10 +87,10 @@
             </nav>
             
             <div class="row">
-                <div id="previewgraph" class="small-8 columns" data-bind="visible:previewGraph">
-                            <svg></svg>
+                <div id="previewgraph" class="large-7 columns" data-bind="visible:previewGraph">
+                    <svg></svg>
                 </div>
-                <div class="columns" data-bind="css : {'small-4' : previewGraph, 'small-12' : !previewGraph()}">
+                <div class="columns" data-bind="css: {'large-5' : previewGraph, 'large-12' : !previewGraph()}">
                     <fieldset>
                         <legend>Data Key</legend>
                         <div class="row">
@@ -105,6 +107,7 @@
 
             <!-- ko template: {name: 'segment-template', data: segment} -->
                     <!-- /ko -->
+        </div>
         </div>
     </div>
 
@@ -184,7 +187,7 @@
     <script type="text/javascript" src="content/js/charts/linechart.js"></script>
     <script type="text/javascript" src="content/js/charts/areachart.js"></script>
 
-    <script type="text/javascript" src="content/js/segment.js"></script>
+    <script type="text/javascript" src="content/js/segment2.js"></script>
     <script type="text/javascript" src="content/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="content/js/dashboard.js"></script>
     <script type="text/javascript" src="content/js/charts/pie.js"></script>
@@ -197,7 +200,7 @@
 
     <script type="text/javascript">
         (function (root, $) {
-            $('#templates').load('content/templates/segment_template.html', function(){
+            $('#templates').load('content/templates/segment_template2.html', function(){
                 window.dashboard = new Dashboard();
                 ko.applyBindings(dashboard, document.getElementById('dashboard'));
                 window.topBar = new TopBar();
