@@ -159,7 +159,7 @@
                 element: element,
                 options: value.options || [],
                 optionsCaption: value.optionsCaption || 'Select..',
-                enabled: value.enabled,
+                enabled: value.enabled === undefined ? true: value.enabled,
                 allowCustom : value.allowCustom === undefined ? true : value.allowCustom
             };
             
@@ -183,7 +183,7 @@
                 selectedPrefix: value.selectedPrefix || ko.observable(),
                 prefixOptions : value.prefixOptions || ko.observableArray(),
                 optionsCaption: value.optionsCaption || 'Select..',
-                enabled: value.enabled,
+                enabled: value.enabled === undefined ? true: value.enabled,
                 allowCustom : value.allowCustom === undefined ? true : value.allowCustom
             };
             

@@ -15,7 +15,8 @@ var SegmentProcessor = function(){
     self.process = function(){
         var model = self.segment.getModel();
 
-        var result = Conditioner.getGraphData(model, data);
+        Conditioner.properties = properties;
+        var result = Conditioner.getGraphData(model,data);
 
         self.outputData(JSON.stringify(result, null, '\t'));
 

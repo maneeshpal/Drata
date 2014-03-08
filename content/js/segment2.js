@@ -37,9 +37,9 @@ var Segmentor = function(model){
             chartType: self.chartType(),
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
-            group: self.group.getModel(),
+            group: self.conditionGroup.getModel(),
             properties: self.properties()
-        };
+        }
     };
 
     self.setChartType = function(type){
@@ -252,20 +252,6 @@ var Selection = function(level, model, renderType){
         return self.selections().length > 0;
     });
 
-    self.isComplete = ko.computed(function(){
-        var isCom = false;
-        if(!self.isComplex()){
-            isCom =  self.logic() !== undefined 
-            && self.selectedProp() !== '' && self.selectedProp() !== undefined;
-        }
-        else{
-            isCom = self.selections().some(function(sel){
-                return !sel.isComplete();
-            });
-        }
-        console.log('selection complete: ' + isCom);
-        return isCom;
-    });
     self.showComplex = ko.observable(false);
     
     self.hideComplex = ko.computed(function(){
@@ -361,7 +347,6 @@ var ItemsGroup = function(level, model, renderType){
     self.level =level;
     self.items = ko.observableArray();
     var itemFunc = (renderType === 'Condition') ? Condition : Selection;
-    //self.properties = ko.observableArray(['aaa', 'aab', 'abb', 'xxxx']);
     self.addItem = function(){
         self.items.push(new itemFunc(self.level+1, undefined, 'top' + renderType));
     };
@@ -467,7 +452,7 @@ var DataRetriever = {
         return ['key1', 'key2', 'Shopper Stop'];
     },
     getData : function(dataKey){
-        return tempData.randomProps(50);
+        return tempData.randomProps(10);
     }
 };
 
@@ -524,81 +509,67 @@ var Conditioner = {
     },
     applyOperations : function(boolValues){
         var result = boolValues[0].value;
-        //if(boolValues.length > 1){
-            for (var i = 0; i <= boolValues.length-2; i++) {
-                var boolValue = boolValues[i];
-                var nextValue = boolValues[i+1];
-                result = this.calc(result, nextValue.logic, nextValue.value);
-            };
-        //}
+        for (var i = 0; i <= boolValues.length-2; i++) {
+            var boolValue = boolValues[i];
+            var nextValue = boolValues[i+1];
+            result = this.calc(result, nextValue.logic, nextValue.value);
+        };
         return {
             value : result,
             logic : boolValues[0].logic
         };
     },
-    processCondition : function(obj, condition){
+    processSimple : function(obj, group){
         var complexValue, complexType;
-        if(condition.conditionType === 'selections'){
+        if(group.groupType === 'selection'){
             //perform arithmetic operation on selections
-            if(this.properties.indexOf(condition.prop) === -1 && _.isNumber(+condition.prop)){
-                complexValue = +condition.prop;
+            if(this.properties.indexOf(group.selectedProp) === -1 && _.isNumber(+group.selectedProp)){
+                complexValue = +group.selectedProp;
             }else{
-                complexValue = obj[condition.prop];    
+                complexValue = obj[group.selectedProp];    
             }
-            
-        }
-        else if(condition.isComplex){
-            complexType = this.processGroup(obj, condition.selectionGroup);
-            complexValue = this.calc(complexType.value, condition.operation, condition.value);
         }
         else{
-            complexValue = this.calc(obj[condition.prop], condition.operation, condition.value);
+            if(group.selection.isComplex){
+                complexType = this.processGroup(obj, group.selection);
+                complexValue = this.calc(complexType.value, group.operation, group.value);
+            }
+            else{
+                complexValue = this.calc(obj[group.selection.selectedProp], group.operation, group.value);
+            }
         }
+        
         return {
             value : complexValue,
-            logic : condition.logic
+            logic : group.logic
         };
     },
     processGroups : function(obj, groups){
-        var boolValues = [];
+        var boolValues = [], boolValue;
         _.each(groups, function(group){
-            if(group.renderType === 'condition'){
-                boolValues.push(this.processCondition(obj, group));
-            }
-            else{
-                boolValues.push(this.processGroup(obj,group));
-            }
-            
+            boolValue = this.processGroup(obj,group);
+            boolValues.push(boolValue);
         }.bind(this));
 
         var returnValue = this.applyOperations(boolValues);
         
-        if(drata.js.logmsg) console.log('groups:');
-        if(drata.js.logmsg) console.log(returnValue);
         return returnValue;
     },
     processGroup : function(obj, group){
-        //var boolValues = [];
-        //for selection groups, defaulting value to undefined is pretty fucking important. 
-        var boolValues = [{
-            value : (group.groupType === 'conditions') ? true : undefined,
-            logic : group.logic
-        }];
-
-        group.groups.length > 0 && boolValues.push(this.processGroups(obj, group.groups));
-        
-        var returnValue = this.applyOperations(boolValues);
-        //returnValue.logic = group.logic;
-        if(drata.js.logmsg) console.log('group:');
-        if(drata.js.logmsg) console.log(returnValue);
-        return returnValue;
+        var boolValue;
+        if(group.isComplex){
+            boolValue = this.processGroups(obj,group.groups);
+        }
+        else{
+            boolValue = this.processSimple(obj, group);
+        }
+        return boolValue;
     },
-    processDataGroups : function(groupedData, dataGroup, selection, groupCounter){
+    processDataGroups : function(groupedData, dataGroup, selection){
         var returnGroups = [];
         _.each(groupedData, function(dataItem, groupName){
             var ret = this.divideByInterval(dataItem, dataGroup, selection);
             returnGroups.push({
-                //key : groupCounter ? groupName + '-' + groupCounter : groupName,
                 key: groupName,
                 values : ret
             });
@@ -607,9 +578,9 @@ var Conditioner = {
     },
     divideByInterval : function(data, dataGroup, selection){
         var ret = [];
-        var isComplex = selection.groupType !== undefined;
+        //var isComplex = selection.groupType !== undefined;
 
-        if(isComplex && selection.groupBy === 'count')
+        if(selection.isComplex && selection.groupBy === 'count')
             throw "count not allowed for complex selections.";
         if(dataGroup.timeseries){
             var intervalGroup = _.groupBy(data, function(item){
@@ -627,18 +598,18 @@ var Conditioner = {
         }
         else{
             _.each(data, function(item){
-                (item.hasOwnProperty(selection.prop) || isComplex) && ret.push({
+                (item.hasOwnProperty(selection.selectedProp) || selection.isComplex) && ret.push({
                     x: item[dataGroup.xAxisProp],
-                    y: (isComplex)? Conditioner.processGroup(item,selection).value : item[selection.prop]
+                    y: (selection.isComplex)? Conditioner.processGroup(item,selection).value : item[selection.selectedProp]
                 });
             });
         }
         return ret;
     },
-    filterData : function(data, conditionGroup){
-        if (!conditionGroup || conditionGroup.groups.length === 0) return data;
+    filterData : function(data, conditions){
+        if (!conditions || conditions.length === 0) return data;
         var filteredData = data.filter(function(obj, index){
-            var result = this.processGroup(obj, conditionGroup);
+            var result = this.processGroups(obj, conditions);
             return result.value;
         }.bind(this));
         return filteredData;
@@ -663,44 +634,25 @@ var Conditioner = {
         var result = [];
         var groupCounter = 0;
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
-        var multipleGroups = segmentModel.dataGroup.hasGrouping && (segmentModel.selection.complexGroups.length + segmentModel.selection.props.length) > 1;
         var groupedData;
         
         if(segmentModel.dataGroup.hasGrouping){
             groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
         }
-        _.each(segmentModel.selection.complexGroups, function(selectionGroup){
+        _.each(segmentModel.selection, function(selectionGroup){
+           var values;
             if(segmentModel.dataGroup.hasGrouping){
-                multipleGroups && groupCounter ++;
-                result.push({
-                    key:selectionGroup.selectionName,
-                    values:Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, selectionGroup, groupCounter)
-                });
-               // _.each(groupValues, function(val){result.push(val);});
+                values = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, selectionGroup);
             }
             else{
-                result.push({
-                    key : selectionGroup.selectionName,
-                    values : Conditioner.divideByInterval(filteredData, segmentModel.dataGroup, selectionGroup)
-                });
+                values = Conditioner.divideByInterval(filteredData, segmentModel.dataGroup, selectionGroup);
             }
+            result.push({
+                key: selectionGroup.isComplex ? selectionGroup.aliasName || 'selection' : selectionGroup.selectedProp,
+                values: values
+            });
         });
         
-        _.each(segmentModel.selection.props, function(prop){
-            if(segmentModel.dataGroup.hasGrouping){
-                multipleGroups && groupCounter ++;
-                result.push({
-                    key: prop.prop,
-                    values: Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, prop, groupCounter)
-                });
-            }
-            else{
-                result.push({
-                    key : prop.prop,
-                    values : Conditioner.divideByInterval(filteredData, segmentModel.dataGroup , prop)
-                });
-            }
-        });
         if(!segmentModel.dataGroup.hasGrouping){
             return [{
                 key : 'xxx',
@@ -713,27 +665,26 @@ var Conditioner = {
         
     },
     reduceData : function(objArray, selection){
-        var isComplex = selection.groupType !== undefined;
-
-        if(isComplex && (selection.groupBy === 'count'))
+        //var isComplex = selection.groupType !== undefined;
+        if(selection.isComplex && selection.groupBy === 'count')
             throw "Not allowed for complex selections.";
 
         var ret = _.reduce(objArray, function(memo, num){ 
-                    var numval;
-                    if(isComplex){ //complex selection. so we need to process it.
-                        var temp = Conditioner.processGroup(num,selection);
-                        numval = temp.value;
-                    }
-                    else if(selection.groupBy === 'count'){
-                        numval = num[selection.prop]? 1 : 0;
-                    }
-                    else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
-                        numval = +num[selection.prop] || 0;
-                    }
-                    else{
-                        throw 'you should select groupby property for simple selections';
-                    }
-                    return memo + numval; 
+            var numval;
+            if(selection.isComplex){ //complex selection. so we need to process it.
+                var temp = Conditioner.processGroup(num,selection);
+                numval = temp.value;
+            }
+            else if(selection.groupBy === 'count'){
+                numval = num[selection.selectedProp]? 1 : 0;
+            }
+            else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
+                numval = +num[selection.selectedProp] || 0;
+            }
+            else{
+                throw 'you should select groupby property for simple selections';
+            }
+            return memo + numval; 
         }, 0);
 
         return selection.groupBy === 'avg' ? ret/objArray.length : ret;
@@ -750,10 +701,10 @@ var Conditioner = {
             
             if(!segmentModel.dataGroup.hasDivideBy){
                 response = [];
-                _.each(segmentModel.selection.props, function(prop){
+                _.each(segmentModel.selection, function(sel){
                     result = [];
                     _.each(groupedData, function(groupedDataItem, groupName){
-                        var val = Conditioner.reduceData(groupedDataItem,prop);
+                        var val = Conditioner.reduceData(groupedDataItem,sel);
 
                         val >= 0 && result.push({
                             key: groupName,
@@ -762,25 +713,8 @@ var Conditioner = {
                     });
                     
                     response.push({
-                        key : prop.prop,
+                        key : sel.isComplex? sel.selectedProp : sel.aliasName|| 'Selection',
                         groupLevel: 'B',
-                        values: result
-                    });
-                });
-
-                _.each(segmentModel.selection.complexGroups, function(selectionGroup){
-                    result = [];
-                    _.each(groupedData, function(groupedDataItem, groupName){
-                        var val = Conditioner.reduceData(groupedDataItem,selectionGroup);
-                        val > 0 && result.push({
-                            key: groupName,
-                            value: val
-                        });
-                    });
-
-                    response.push({
-                        key : selectionGroup.selectionName,
-                        groupLevel : 'B',
                         values: result
                     });
                 });
@@ -792,15 +726,14 @@ var Conditioner = {
                 });
             }
             else{
-
                 topLevelResponse = [];
-                _.each(segmentModel.selection.props, function(prop){
+                _.each(segmentModel.selection, function(sel){
                     response = [];
                     _.each(groupedData, function(groupedDataItem, groupName){
                         var propCounts;
                         result = [];
                         
-                        if(prop.groupBy === 'count'){
+                        if(sel.groupBy === 'count'){
                             propCounts = _.countBy(groupedDataItem, function(val){
                                 return val[segmentModel.dataGroup.divideByProp];
                             });
@@ -811,14 +744,14 @@ var Conditioner = {
                                 });
                             });
                         }
-                        else if(prop.groupBy === 'sum' || prop.groupBy === 'avg'){
+                        else if(sel.groupBy === 'sum' || sel.groupBy === 'avg'){
                             var divData = _.groupBy(groupedDataItem, function(val){
                                 return val[segmentModel.dataGroup.divideByProp];
                             });
                             _.each(divData, function(value, name){
                                 result.push({
                                     key: name,
-                                    value: Conditioner.reduceData(value, prop)
+                                    value: Conditioner.reduceData(value, sel)
                                 });
                             });
                         }
@@ -834,7 +767,7 @@ var Conditioner = {
                     });
 
                     topLevelResponse.push({
-                        key : prop.prop + '-Group',
+                        key : (sel.isComplex ? sel.aliasName : sel.selectedProp || 'selection') + '-Group',
                         groupLevel : 'A',
                         values: response
                     });
@@ -844,18 +777,11 @@ var Conditioner = {
         else{
             var toplevelkey = 'xxxx';
             result = [];
-            _.each(segmentModel.selection.props, function(prop){
-                var val = Conditioner.reduceData(filteredData, prop);
+            
+            _.each(segmentModel.selection, function(sel){
+                var val = Conditioner.reduceData(filteredData, sel);
                 result.push({
-                    key: prop.prop,
-                    value: val
-                });
-            });
-
-            _.each(segmentModel.selection.complexGroups, function(selectionGroup){
-                var val = Conditioner.reduceData(filteredData, selectionGroup);
-                result.push({
-                    key: selectionGroup.selectionName,
+                    key: sel.isComplex? sel.aliasName : sel.selectedProp || 'selection',
                     value: val
                 });
             });

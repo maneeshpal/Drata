@@ -42,26 +42,30 @@
     </style>
 </head>
 <body>
-    <div class="row" id="segmentProcessor">
+<div id="segmentProcessor">
+    <div class="row">
         <button data-bind="click: process" class="button small">process</button>
         <!-- ko template: {name: 'segment-template', data: segment} -->
             <!-- /ko -->
     </div>
     <div class="row">
-        <div class="small-4 columns">
+        <div class="small-6 columns">
         <h6>Output</h6>
             <textarea style="height:300px" data-bind="text:outputData"></textarea>
         </div>
-        <div class="small-4 columns">
+        <div class="small-6 columns">
         <h6>Input</h6>
             <textarea style="height:300px" data-bind="text:rawData"></textarea>
         </div>
+        </div>
+        <div class="row">
         <div class="small-4 columns">
-        <div id="graph" class="graph">
+            <div id="graph" class="graph">
                 <svg></svg>
             </div>
         </div>
     </div>
+</div>
 
 
 
@@ -90,7 +94,6 @@
     <script type="text/javascript" src="content/js/charts/linechart.js"></script>
     <script type="text/javascript" src="content/js/charts/areachart.js"></script>
 
-    <script type="text/javascript" src="content/js/segment.js"></script>
     <script type="text/javascript" src="content/js/charts/pie.js"></script>
 
     <script type="text/javascript" src="content/js/charts/barchart.js"></script>
