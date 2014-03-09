@@ -100,10 +100,11 @@
 <script type="text/html" id="selectionGroupTemplate">
     <div>
         <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:360px'}">
-           <!-- ko if: renderType === 'topSelection' -->
+          <!-- ko if: renderType === 'topSelection' -->
                 <div class="small-10 columns">
                     <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                     </div>
+                    
                     <!-- ko if: isComplex() -->
                     <span class="complex-overlay top-selection" data-bind="click: toggleComplex">
                         <span data-bind="html : aliasName() ? aliasName() : 'Complex Selection. <em> edit</em>'"></span>
@@ -220,7 +221,7 @@
 
             <div class="row">
                 <div class="small-4 columns">
-                 <a class="button tiny primary"  data-bind="visible:$parent.trace().length > 0,click:$parent.goback"><i class="general foundicon-left-arrow"></i>&nbsp;Back</a>
+                 <a class="button tiny primary"  data-bind="visible:$parent.trace().length > 0,click:$parent.goback"><i class="general foundicon-left-arrow"></i>&nbsp;Done</a>
                 </div>
                 
                 <div class="small-4 columns text-right">
@@ -246,7 +247,7 @@
             <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
         </div>
         <div class="small-2 columns">
-            <input type="text" data-bind="value:value" placeholder="value"></input>
+            <input type="text" data-bind="value:value, visible: operation() !== 'exists'" placeholder="value"></input>
         </div>
         <!-- /ko -->
         <!-- ko if: isComplex -->

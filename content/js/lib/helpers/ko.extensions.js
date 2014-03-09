@@ -53,4 +53,11 @@
         });
     };
     
+    ko.validation.configure({
+        registerExtenders: true,
+        decorateElement: true,
+        decorateInputElement: true,
+        errorElementClass: 'error',
+        errorClass:'error'
+    });
 })(ko);

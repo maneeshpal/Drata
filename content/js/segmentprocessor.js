@@ -13,14 +13,21 @@ var SegmentProcessor = function(){
     self.rawData(JSON.stringify(data, null, '\t'));
  
     self.process = function(){
-        var model = self.segment.getModel();
+        var errors = ko.validation.group(self.segment, {deep:true});
+        if(errors().length > 0){
+            errors.showAllMessages();
+        }
+        else{
+            var model = self.segment.getModel();
 
-        Conditioner.properties = properties;
-        var result = Conditioner.getGraphData(model,data);
+            Conditioner.properties = properties;
+            var result = Conditioner.getGraphData(model,data);
 
-        self.outputData(JSON.stringify(result, null, '\t'));
+            self.outputData(JSON.stringify(result, null, '\t'));
 
-        self.draw(model,result[0].values);
+            self.draw(model,result[0].values);    
+        }
+        
     };
   
     self.draw = function(segmentModel, mydata){

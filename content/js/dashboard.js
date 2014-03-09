@@ -273,6 +273,11 @@ var WidgetProcessor = function(){
 
     self.segment = new Segmentor();
     self.notifyWidget = function () {
+        var errors = ko.validation.group(self.segment, {deep:true});
+        if(errors().length > 0){
+            errors.showAllMessages();
+            return;
+        }
         var widgetModel = {
             selectedDataKey: self.selectedDataKey(),
             segmentModel: self.segment.getModel()
@@ -353,6 +358,11 @@ var WidgetProcessor = function(){
     };
     
     self.preview = function(){
+        var errors = ko.validation.group(self.segment, {deep:true});
+        if(errors().length > 0){
+            errors.showAllMessages();
+            return;
+        }
         self.handleGraphPreview(self.segment.getModel());
     };
     self.previewGraph.subscribe(function(newValue){

@@ -50,7 +50,7 @@ var Condition = function(options){
     var self = this;
     self.level = options.level;
     self.logic = ko.observable('and');
-    self.selection = new Selection(self.level + 1, undefined, 'topCondition');
+    self.selection = new Selection(self.level+1, undefined, 'topCondition');
     self.operation = ko.observable();
     self.value = ko.observable();
     self.conditions = ko.observableArray();
@@ -137,6 +137,37 @@ var Condition = function(options){
       });
     };
 
+    self.isValidCondition = function(){
+        var isValid = true;
+        if(self.isComplex()){
+            var conditions = self.conditions();
+            for(var c= 0; c< conditions.length; c++){
+                if(!conditions[c].isValidCondition()) {
+                    isValid = false;
+                }
+            }
+        }
+        else{
+            var errors = ko.validation.group(self, {deep:false});
+            var selerrors = ko.validation.group(self.selection, {deep:false});
+            
+            if(errors().length + selerrors().length > 0) {
+                errors.showAllMessages();
+                selerrors.showAllMessages();
+                isValid = false;
+            }
+        }
+        return isValid;
+    };
+    self.value.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.operation() !== 'exists';
+            }
+        }
+    });
+
     if(options.model){
         self.prefill(options.model);
     }
@@ -205,11 +236,14 @@ var ConditionGroup = function(level, model, xxx){
       });
     };
 
-    self.goback = function(){
-        var prev = self.trace.pop();
-        self.currentBinding(prev);
+    self.goback = function(condition){
+        var isValid = condition.isValidCondition();
+        if(isValid){
+            var prev = self.trace.pop();
+            self.currentBinding(prev);
+        }
     };
-     self.gobackTo = function(tr){
+    self.gobackTo = function(tr){
         var index = self.trace.indexOf(tr);
         var removed = self.trace.splice(index, self.trace().length-1 || 1);
 
@@ -280,10 +314,16 @@ var Selection = function(level, model, renderType){
         self.showComplex(false);
     };
     self.done = function(){
-        if(self.isComplex()) {
-            self.showComplex(false);
-            self.selectedProp(self.aliasName());
+        var errors = ko.validation.group(self, {deep:true});
+        if(errors().length > 0) {
+            errors.showAllMessages();
         }
+        else{
+            if(self.isComplex()) {
+                self.showComplex(false);
+                self.selectedProp(self.aliasName());
+            }    
+        }        
     };
     self.afterAdd = function(elem){
       elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
@@ -338,6 +378,23 @@ var Selection = function(level, model, renderType){
     if(model){
         self.prefill(model);
     }
+
+    self.selectedProp.extend({
+        required:{
+            message: 'Select property',
+            onlyIf : function(){
+                return !self.isComplex();
+            }
+        }
+    });
+    // self.aliasName.extend({
+    //     required:{
+    //         message: 'Select alias',
+    //         onlyIf : function(){
+    //             return self.renderType === 'topSelection' && self.isComplex();
+    //         }
+    //     }
+    // });
 };
 
 var ItemsGroup = function(level, model, renderType){
@@ -454,7 +511,7 @@ var DataRetriever = {
         return ['key1', 'key2', 'Shopper Stop'];
     },
     getData : function(dataKey){
-        return tempData.randomProps(10);
+        return tempData.randomProps(100);
     }
 };
 

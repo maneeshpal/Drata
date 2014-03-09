@@ -43,7 +43,7 @@ i.complexcombo-toggle{
     top: 0;
     left: 74px;
     right: 14px;
-    z-index: 10;
+    z-index: 9;
 }
 .complex-overlay {
     height: 2.3125rem;
