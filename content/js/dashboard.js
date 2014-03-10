@@ -273,11 +273,8 @@ var WidgetProcessor = function(){
 
     self.segment = new Segmentor();
     self.notifyWidget = function () {
-        var errors = ko.validation.group(self.segment, {deep:true});
-        if(errors().length > 0){
-            errors.showAllMessages();
+        if(!segmentIsValid())
             return;
-        }
         var widgetModel = {
             selectedDataKey: self.selectedDataKey(),
             segmentModel: self.segment.getModel()
@@ -356,13 +353,26 @@ var WidgetProcessor = function(){
         });
 
     };
+    var segmentIsValid = function(){
+        var selerrors = ko.validation.group(self.segment.selectionGroup, {deep:true});
+
+        var conditions = self.segment.conditionGroup.conditions();
+        var conditionsValid = true;
+        for(var c= 0; c< conditions.length; c++){
+            if(!conditions[c].isValidCondition()) {
+                conditionsValid = false;
+            }
+        }
+        if(selerrors().length > 0 || !conditionsValid){
+            selerrors.showAllMessages();
+            return false;
+        }
+        return true;
+    };
     
     self.preview = function(){
-        var errors = ko.validation.group(self.segment, {deep:true});
-        if(errors().length > 0){
-            errors.showAllMessages();
+        if(!segmentIsValid())
             return;
-        }
         self.handleGraphPreview(self.segment.getModel());
     };
     self.previewGraph.subscribe(function(newValue){

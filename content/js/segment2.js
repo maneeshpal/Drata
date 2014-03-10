@@ -387,14 +387,14 @@ var Selection = function(level, model, renderType){
             }
         }
     });
-    // self.aliasName.extend({
-    //     required:{
-    //         message: 'Select alias',
-    //         onlyIf : function(){
-    //             return self.renderType === 'topSelection' && self.isComplex();
-    //         }
-    //     }
-    // });
+    self.aliasName.extend({
+        required:{
+            message: 'Select alias',
+            onlyIf : function(){
+                return self.renderType === 'topSelection' && self.isComplex();
+            }
+        }
+    });
 };
 
 var ItemsGroup = function(level, model, renderType){
