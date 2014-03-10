@@ -772,7 +772,7 @@ var Conditioner = {
                     });
                     
                     response.push({
-                        key : sel.isComplex? sel.selectedProp : sel.aliasName|| 'Selection',
+                        key : sel.isComplex? sel.aliasName : sel.selectedProp|| 'Selection',
                         groupLevel: 'B',
                         values: result
                     });

@@ -4,7 +4,7 @@
         //var x = d3.scale.linear();
         var y = d3.scale.ordinal();
         var rs = d3.scale.linear();
-
+        var _xAxisType = 'linear';
         var xAxis = drata.models.axis()
             .axisType('x')
             .orient("bottom")
