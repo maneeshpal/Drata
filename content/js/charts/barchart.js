@@ -39,6 +39,7 @@
         
         function chart(selection){
             selection.each(function(data) {
+                console.log('bar chart drawn');
                 var container = d3.select(this);
                 chart.resize = function() { 
                     container

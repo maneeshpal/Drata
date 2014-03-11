@@ -151,7 +151,7 @@
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
         function chart(selection){
-            console.log('pie drawn');
+            console.log('pie chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
                 var itemCount = data.values.length;

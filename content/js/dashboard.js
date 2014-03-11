@@ -80,11 +80,18 @@ var Widget = function(widgetModel, index){
             return dataItem.key;
         }));
         self.selectedPieKey(self.pieKeys()[0]);
-        content.drawChart(chartData, widgetModel.segmentModel);
+        var chart = content.drawChart(chartData, widgetModel.segmentModel);
+        var _t;
+        drata.utils.windowResize(function(){
+            _t && clearTimeout(_t);
+            if(!chart) return;
+            _t = setTimeout(chart.resize, 500);
+        });
     };
 
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
+        self.chartType(widgetModel.segmentModel.chartType);
         self.loadWidget();
     };
 
@@ -115,18 +122,11 @@ var LineContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
-        drata.utils.windowResize(self.resize.bind(self));
-        
-        //return chart;
+        return chart;
     };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
-    self.resize = function(){
-        if(!chart) return;
-        _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 500);
-    }
 };
 
 var ScatterContent = function(index){
@@ -144,12 +144,7 @@ var ScatterContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
-        drata.utils.windowResize(self.resize.bind(self));
-    };
-    self.resize = function(){
-        if(!chart) return;
-        _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 500);
+        return chart;
     };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
@@ -171,15 +166,9 @@ var BarContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
-        
-        drata.utils.windowResize(self.resize.bind(self));
+        return chart;
     };
 
-    self.resize = function(){
-        if(!chart) return;
-        _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 500);
-    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
@@ -200,16 +189,9 @@ var AreaContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(chartData[0].values)
             .call(chart);
-        drata.utils.windowResize(self.resize.bind(self));
-        
         return chart;
     };
 
-    self.resize = function(){
-        if(!chart) return;
-        _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 500);
-    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
@@ -232,14 +214,9 @@ var PieContent = function(index){
         d3.select('#'+self.widgetContentId + ' svg')
             .datum(chartData[0])
             .call(chart);
-        drata.utils.windowResize(self.resize.bind(self));
+        return chart;
     };
 
-    self.resize = function(){
-        if(!chart) return;
-        _t && clearTimeout(_t);
-        _t = setTimeout(chart.resize, 500);
-    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data);
     };
