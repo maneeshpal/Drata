@@ -70,6 +70,8 @@ var Widget = function(widgetModel, index){
         widgetProcessor.attach(widgetModel, self.updateWidget.bind(self));
     };
 
+    var _t = undefined;
+
     self.loadWidget = function(){
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
         chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
@@ -81,10 +83,11 @@ var Widget = function(widgetModel, index){
         }));
         self.selectedPieKey(self.pieKeys()[0]);
         var chart = content.drawChart(chartData, widgetModel.segmentModel);
-        var _t;
+        
         drata.utils.windowResize(function(){
             _t && clearTimeout(_t);
             if(!chart) return;
+            console.log('current chart: ' + self.chartType());
             _t = setTimeout(chart.resize, 500);
         });
     };
