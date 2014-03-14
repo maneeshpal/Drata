@@ -89,6 +89,7 @@
                 
                 gWrapperEnter.append("g").attr("class", "area-group");
                 
+                gWrapperEnter.append("g").attr("class", "line-group");
                 
                 gWrapper.select('g.x.axis')
                     .attr("transform", "translate(" + m.l +"," + (hm + m.t) + ")")
@@ -103,6 +104,13 @@
                     //.transition().duration(500)
                     .call(yAxis);
                 
+                var lines = drata.models.lines().xScale(xScale).yScale(yScale).color(function(){return '#fff'}).interpolate('monotone');
+                
+                gWrapper
+                    .select('g.line-group')
+                    .attr("transform", "translate(" + m.l +"," + m.t + ")")
+                    .call(lines);
+
                 var area = drata.models.area().xScale(xScale).yScale(yScale).color(z).interpolate('monotone').height(hm);
                 gWrapper
                     .select('g.area-group')

@@ -520,6 +520,7 @@ var Conditioner = {
         if(left === undefined) return right;
         if(right === undefined) return left;
         var result = false;
+        var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
         switch (operation){
             case '>':
                 result = +left > +right;
@@ -564,6 +565,15 @@ var Conditioner = {
                 result = (+left) / (+right);
         }
 
+        if(isNaN(result)){
+            var message = '';
+            if(numericOperations.indexOf(operation) > -1){
+                throw 'Invalid arithmetic operation: <strong>( '  + left + ' ' + operation + ' ' + right + ' )</strong>';
+            }
+            else{
+                throw "There seems to be issue with your data. Please check your Selections."
+            }
+        }
         return result;
     },
     applyOperations : function(boolValues){
@@ -738,6 +748,8 @@ var Conditioner = {
                 numval = num[selection.selectedProp]? 1 : 0;
             }
             else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
+                if(isNaN(+num[selection.selectedProp]))
+                    throw 'Attempt to calculate <em>' +selection.groupBy+ '</em> of property: <strong>' + selection.selectedProp + '</strong> with non-numeric value "' + num[selection.selectedProp] + '" detected';
                 numval = +num[selection.selectedProp] || 0;
             }
             else{
@@ -792,31 +804,35 @@ var Conditioner = {
                         var propCounts;
                         result = [];
                         
-                        if(sel.groupBy === 'count'){
-                            propCounts = _.countBy(groupedDataItem, function(val){
-                                return val[segmentModel.dataGroup.divideByProp];
-                            });
-                            _.each(propCounts, function(value, name){
-                                result.push({
-                                    key: name,
-                                    value: value
-                                });
-                            });
+                        // if(sel.groupBy === 'count'){
+                        //     propCounts = _.countBy(groupedDataItem, function(val){
+                        //         return val[segmentModel.dataGroup.divideByProp];
+                        //     });
+                        //     _.each(propCounts, function(value, name){
+                        //         result.push({
+                        //             key: name,
+                        //             value: value
+                        //         });
+                        //     });
+                        // }
+
+                        if(sel.groupBy === 'value'){
+                            throw "When using <em>GroupBy</em>, you should specify <em>sum</em>, <em>count</em> or <em>avg</em> on selection. Selecting value is not permitted";
                         }
-                        else if(sel.groupBy === 'sum' || sel.groupBy === 'avg'){
-                            var divData = _.groupBy(groupedDataItem, function(val){
-                                return val[segmentModel.dataGroup.divideByProp];
-                            });
-                            _.each(divData, function(value, name){
-                                result.push({
-                                    key: name,
-                                    value: Conditioner.reduceData(value, sel)
-                                });
-                            });
+
+                        if(sel.isComplex && sel.groupBy === 'count'){
+                            throw '<em>Count</em> not allowed for Complex Selection : ' + sel.aliasName ;
                         }
-                        else{
-                            throw "When using divideBy, you should specify sum, count or avg on selection";
-                        }
+
+                        var divData = _.groupBy(groupedDataItem, function(val){
+                            return val[segmentModel.dataGroup.divideByProp];
+                        });
+                        _.each(divData, function(value, name){
+                            result.push({
+                                key: name,
+                                value: Conditioner.reduceData(value, sel)
+                            });
+                        });
 
                         response.push({
                             key : groupName,

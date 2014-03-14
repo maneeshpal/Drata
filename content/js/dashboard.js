@@ -34,10 +34,8 @@ var Widget = function(widgetModel, index){
     self.widgetClass= ko.computed(function(){
         return 'widget-size-' + self.sizex();
     });
+    self.parseError = ko.observable();
     var content;
-    self.sizex.subscribe(function(){
-        content.resize();
-    });
     self.chartType = ko.observable(widgetModel.segmentModel.chartType);
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
@@ -72,9 +70,23 @@ var Widget = function(widgetModel, index){
 
     var _t = undefined;
 
+    self.resizeContent = function(){
+        _t && clearTimeout(_t);
+        if(!content || !content.resize || !!self.parseError()) return;
+        _t = setTimeout(content.resize, 500);
+    };
+
     self.loadWidget = function(){
+        self.parseError(undefined);
         var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        try{
+            chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+        }
+        catch(e){
+            self.parseError(e);
+            return;
+        }
+
         if(widgetModel.segmentModel.chartType === 'pie')
             chartData = chartData[0].values;
 
@@ -82,14 +94,11 @@ var Widget = function(widgetModel, index){
             return dataItem.key;
         }));
         self.selectedPieKey(self.pieKeys()[0]);
-        var chart = content.drawChart(chartData, widgetModel.segmentModel);
-        
-        drata.utils.windowResize(function(){
-            _t && clearTimeout(_t);
-            if(!chart) return;
-            console.log('current chart: ' + self.chartType());
-            _t = setTimeout(chart.resize, 500);
-        });
+        content.drawChart(chartData, widgetModel.segmentModel);
+        //prevent double draw on page load
+        setTimeout(function(){
+            drata.utils.windowResize(self.resizeContent.bind(self));
+        }, 200);
     };
 
     self.updateWidget = function (newModel) {
@@ -109,6 +118,7 @@ var Widget = function(widgetModel, index){
         });
         content && content.change && content.change(newdata);
     });
+    self.sizex.subscribe(self.resizeContent.bind(self));
 };
 
 var LineContent = function(index){
@@ -126,6 +136,9 @@ var LineContent = function(index){
             .datum(chartData[0].values)
             .call(chart);
         return chart;
+    };
+    self.resize = function(){
+        chart && chart.resize && chart.resize();
     };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
@@ -149,6 +162,9 @@ var ScatterContent = function(index){
             .call(chart);
         return chart;
     };
+    self.resize = function(){
+        chart && chart.resize && chart.resize();
+    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
@@ -171,7 +187,9 @@ var BarContent = function(index){
             .call(chart);
         return chart;
     };
-
+    self.resize = function(){
+        chart && chart.resize && chart.resize();
+    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
@@ -194,7 +212,9 @@ var AreaContent = function(index){
             .call(chart);
         return chart;
     };
-
+    self.resize = function(){
+        chart && chart.resize && chart.resize();
+    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data.values);
     };
@@ -219,7 +239,9 @@ var PieContent = function(index){
             .call(chart);
         return chart;
     };
-
+    self.resize = function(){
+        chart && chart.resize && chart.resize();
+    };
     self.change = function(_data){
         chart && chart.change && chart.change(_data);
     };
@@ -236,7 +258,8 @@ var WidgetProcessor = function(){
     //self.inputData = ko.observable(); 
     //self.outputData = ko.observable();
     //self.newWidget = ko.observable(true);
-    
+    self.parseError = ko.observable();
+
     self.selectedDataKey.subscribe(function(newValue){
         //self.outputData(undefined);
         //self.inputData(undefined);
@@ -294,10 +317,19 @@ var WidgetProcessor = function(){
     };
     var chart, _t;
     self.handleGraphPreview = function(segmentModel){
-        self.previewGraph(true);
+        self.parseError(undefined);
         var inputData = DataRetriever.getData(self.selectedDataKey());
-        var data = Conditioner.getGraphData(segmentModel, inputData);
+        var data;
+        try{
+            data = Conditioner.getGraphData(segmentModel, inputData);
+        }
+        catch(e){
+            self.parseError(e);
+        }
+        if(!data) return;         
 
+        self.previewGraph(true);
+        
         var mydata = data[0].values;
 
         switch(segmentModel.chartType)

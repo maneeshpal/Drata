@@ -104,7 +104,9 @@
                     </fieldset>
                 </div>
             </div>
-
+            <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
+                
+            </div>
             <!-- ko template: {name: 'segment-template', data: segment, if : selectedDataKey() !== undefined} -->
                     <!-- /ko -->
         </div>
@@ -151,8 +153,12 @@
 
                 </section>
             </nav>
-            <!-- ko template: contentTemplate() -->
-            <!-- /ko -->
+             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
+            </div>
+            <div data-bind="visible: !parseError()">
+                <!-- ko template: contentTemplate() -->
+                <!-- /ko -->
+            </div>
         </div>
         </div>
     </script>
