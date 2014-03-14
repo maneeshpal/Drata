@@ -521,52 +521,55 @@ var Conditioner = {
         if(right === undefined) return left;
         var result = false;
         var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
-        switch (operation){
-            case '>':
-                result = +left > +right;
-            break;
-            case '<':
-                result = +left < +right;
-            break;
-            case '<=':
-                result = +left <= +right;
-            break;
-            case '=':
-                result = (left === right);
-            break;
-            case '!=':
-                result = (left !== right);
-            break;
-            case '>=':
-                result = +left >= +right;
-            break;
-            case 'exists':
-                result = left !== undefined;
-            break;
-            case 'and':
-                result = left && right;
-            break;
-            case 'or':
-                result = left || right;
-            break;
-            case '+':
-                result = (+left) + (+right);
-            break;
-            case '-':
-                result = (+left) - (+right);
-            break;
-            case '*':
-                result = (+left) * (+right);
-            break;
-            case 'like':
-            result = left.indexOf(right) > -1;
-            break;
-            case '/':
-                result = (+left) / (+right);
+        
+        var hasError = (numericOperations.indexOf(operation) > -1 && (isNaN(+left) || isNaN(+right)));
+        if(!hasError){
+            switch (operation){
+                case '>':
+                    result = +left > +right;
+                break;
+                case '<':
+                    result = +left < +right;
+                break;
+                case '<=':
+                    result = +left <= +right;
+                break;
+                case '=':
+                    result = (left === right);
+                break;
+                case '!=':
+                    result = (left !== right);
+                break;
+                case '>=':
+                    result = +left >= +right;
+                break;
+                case 'exists':
+                    result = left !== undefined;
+                break;
+                case 'and':
+                    result = left && right;
+                break;
+                case 'or':
+                    result = left || right;
+                break;
+                case '+':
+                    result = (+left) + (+right);
+                break;
+                case '-':
+                    result = (+left) - (+right);
+                break;
+                case '*':
+                    result = (+left) * (+right);
+                break;
+                case 'like':
+                result = left.indexOf(right) > -1;
+                break;
+                case '/':
+                    result = (+left) / (+right);
+            }
         }
 
-        if(isNaN(result)){
-            var message = '';
+        if(hasError || isNaN(result)){
             if(numericOperations.indexOf(operation) > -1){
                 throw 'Invalid arithmetic operation: <strong>( '  + left + ' ' + operation + ' ' + right + ' )</strong>';
             }
@@ -608,6 +611,10 @@ var Conditioner = {
             }
         }
         
+        if(isNaN(+complexValue)){
+            throw "Non numeric value detected: " + complexValue;
+        }
+
         return {
             value : complexValue,
             logic : group.logic
@@ -646,7 +653,7 @@ var Conditioner = {
         return returnGroups;
     },
     divideByInterval : function(data, dataGroup, selection){
-        var ret = [];
+        var ret = [], yValue;
         //var isComplex = selection.groupType !== undefined;
 
         if(selection.isComplex && selection.groupBy === 'count')
@@ -667,9 +674,10 @@ var Conditioner = {
         }
         else{
             _.each(data, function(item){
+                yValue = Conditioner.processGroup(item,selection).value;
                 (item.hasOwnProperty(selection.selectedProp) || selection.isComplex) && ret.push({
                     x: item[dataGroup.xAxisProp],
-                    y: (selection.isComplex)? Conditioner.processGroup(item,selection).value : item[selection.selectedProp]
+                    y: yValue
                 });
             });
         }
@@ -736,7 +744,7 @@ var Conditioner = {
     reduceData : function(objArray, selection){
         //var isComplex = selection.groupType !== undefined;
         if(selection.isComplex && selection.groupBy === 'count')
-            throw "Not allowed for complex selections.";
+            throw "Count Not allowed for complex selections.";
 
         var ret = _.reduce(objArray, function(memo, num){ 
             var numval;
