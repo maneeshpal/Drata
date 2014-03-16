@@ -10,8 +10,7 @@ var fs = require("fs");
  
 console.log("Starting web server at " + serverUrl + ":" + port);
  
-http.createServer( function(req, res) {
- 
+http.createServer( function(req, res) { 
 	var now = new Date();
  	var filename = req.url === '/' ? "/index.html" : req.url;
 	console.log(filename);

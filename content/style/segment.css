@@ -27,7 +27,9 @@ i.complexcombo-toggle{
 .complexcombo .complexcombo{
     margin-left:-6px;
 }
-
+.conditioncombo{
+    overflow: hidden;
+}
 .complexcombo .row .columns, .complexcombo .row .column, .conditioncombo .row .columns, .conditioncombo .row .column {
   padding-left: .6rem; /* change the values to anything that you want */
   padding-right: .6rem;
@@ -41,10 +43,11 @@ i.complexcombo-toggle{
 .complex-overlay.top-selection {
     position: absolute;
     top: 0;
-    left: 74px;
+    left: 77px;
     right: 14px;
     z-index: 9;
 }
+
 .complex-overlay {
     height: 2.3125rem;
     padding:0.7rem 0.5rem 0.5rem 0.5rem;
@@ -58,6 +61,7 @@ i.complexcombo-toggle{
     border-color: #74bfdd;
     color: #4f4f4f;
 }
+
 .complex-overlay:hover{
     background-color:#74bfdd;
 }
@@ -69,4 +73,17 @@ i.complexcombo-toggle{
 
 fieldset legend {
     background:transparent;
+}
+
+.condition-wrapper{
+    left:100%;
+    transition:  left .5s;
+    position:relative;
+}
+.condition-wrapper.enter{
+    left:0;
+}
+.condition-wrapper.enter-no-tr{
+    position:static;
+    left:0;
 }

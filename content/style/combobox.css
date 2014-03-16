@@ -32,17 +32,17 @@ ul.combolist li:hover {
 }
 .row .columns.combo-dd{
     position: absolute;
-    width:60px;
+    width:65px;
     z-index: 8;
     height: 2.3125rem;
-    line-height: 2.3125rem;
     text-align: center;
     background-color: #e7e7e7;
     border: 1px solid #cccccc;
     font-size:0.875rem;
     border-radius: 4px 0 0 4px;
     cursor: pointer;
+    text-indent:8px;
 }
 .row .columns.combo-txt{
-    padding-left:60px;
+    padding-left:65px;
 }

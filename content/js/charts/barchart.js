@@ -195,7 +195,7 @@
 
                     var labelFormat = d3.format('.2s');
                     rectLabels
-                        .style("fill", "#fff")
+                        .style("fill", "#ccc")
                         .text(function(d){
                             return labelFormat(d.value);
                         })

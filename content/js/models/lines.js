@@ -8,7 +8,6 @@
             _color = d3.scale.category20();
         
         var line = d3.svg.line()
-            .interpolate(_interpolate)
             .x(function(d) { return _xScale(d.x); })
             .y(function(d) { return _yScale(d.y); });
 
@@ -18,7 +17,7 @@
             selection.each(function(data) {
                 var container = d3.select(this);
                 // xdiff = _xScale(data[0].values[1].x) - _xScale(data[0].values[0].x);
-
+                line.interpolate(_interpolate);
                 var moveleft = function(){
                     this.attr("transform","translate(" + xdiff + ")")
                         .transition()

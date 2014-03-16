@@ -16,34 +16,29 @@ var Segmentor = function(model){
     self.selectionGroup = new ItemsGroup(self.level + 1, undefined, 'Selection');
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
-    self.chartType = ko.observable();
+    //self.chartType = ko.observable();
 
-    self.chartType.subscribe(function(){
-        self.dataGroup.setProps({});
-    });
+    // self.chartType.subscribe(function(){
+    //     self.dataGroup.setProps({});
+    // });
 
     self.initialize = function(model){
         model = model || {};
         self.properties(model.properties);
-        self.chartType(model.chartType);
+        //self.chartType(model.chartType);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataGroup.setProps(model.dataGroup || {});
     };
     self.getModel = function(){
         return {
-            chartType: self.chartType(),
+            //chartType: self.chartType(),
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
             properties: self.properties()
         }
     };
-
-    self.setChartType = function(type){
-        self.chartType(type);
-    };
-    //model && self.initialize(model);
 };
 
 var Condition = function(options){
@@ -51,12 +46,21 @@ var Condition = function(options){
     self.level = options.level;
     self.logic = ko.observable('and');
     self.selection = new Selection(self.level+1, undefined, 'topCondition');
-    self.operation = ko.observable();
+    self.operation = ko.observable('=');
     self.value = ko.observable();
     self.conditions = ko.observableArray();
+
     self.addCondition = function(){
         self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand}));
+        console.log('added simple condition');
     };
+    
+    self.addComplexCondition = function(){
+        self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand, expand:true}));
+        console.log('added complex condition');
+    };
+    
+    
     self.boldExpression= ko.observable(false);
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
@@ -171,7 +175,7 @@ var Condition = function(options){
     if(options.model){
         self.prefill(options.model);
     }
-
+    options.expand && self.expand();
 };
 
 var ConditionGroup = function(level, model, xxx){
@@ -185,12 +189,9 @@ var ConditionGroup = function(level, model, xxx){
         newValue.boldExpression(true);
         oldValue.boldExpression(false);
     });
-
+    var goingback = false;
     self.boldExpression = ko.observable(false);
-    self.currentTemplate = ko.computed(function(){
-        return { name : 'condition-group-template', data: self.currentBinding};
-    });
-
+   
     self.getModel = function(){
         var returnGroups = [];
         _.each(self.conditions(), function(sel){
@@ -215,13 +216,27 @@ var ConditionGroup = function(level, model, xxx){
     self.addCondition = function(){
         self.conditions.push(new Condition({level:self.level+1, onExpand: self.onExpand.bind(self)}));
     };
-    
+    self.addComplexCondition = function(){
+        self.conditions.push(new Condition({level:self.level+1, onExpand: self.onExpand.bind(self), expand:true}));
+    };
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
 
     self.clear = function(){
         self.conditions([]);
+    };
+
+    self.afterRender = function(elem){
+        _.delay(function(){
+            $(elem).addClass(goingback?'enter-no-tr':'enter');
+            goingback = false;
+        }, goingback ? 100:10);
+        
+    };
+
+    self.beforeLeave = function(elem){
+        $(elem).hide().removeClass('exit').show().removeClass('enter');
     };
 
     self.afterAdd = function(elem){
@@ -237,18 +252,29 @@ var ConditionGroup = function(level, model, xxx){
     };
 
     self.goback = function(condition){
-        var isValid = condition.isValidCondition();
+        var isValid = !condition.isComplex() || condition.isValidCondition();
         if(isValid){
-            var prev = self.trace.pop();
-            self.currentBinding(prev);
+            goingback = true;
+            $('#conditionWrapper').removeClass('enter-no-tr');
+            _.delay(function(){
+                $('#conditionWrapper').removeClass('enter');
+                _.delay(function(){
+                    var prev = self.trace.pop();
+                    self.currentBinding(prev);
+                },100);                
+            }, 10);            
         }
     };
-    self.gobackTo = function(tr){
-        var index = self.trace.indexOf(tr);
-        var removed = self.trace.splice(index, self.trace().length-1 || 1);
-
-        //var cond = self;
-        self.currentBinding(removed[0]);
+    self.goBackTopLevel = function(){
+        self.trace([]);
+        goingback = true;
+        $('#conditionWrapper').removeClass('enter-no-tr');
+        _.delay(function(){
+            $('#conditionWrapper').removeClass('enter');
+            _.delay(function(){
+                self.currentBinding(self);
+            },100);                
+        }, 10);
     };
 
     self.expression = ko.computed(function(){
@@ -466,6 +492,8 @@ var DataGroup = function(model){
     self.hasGrouping = ko.observable(false);
     self.hasDivideBy = ko.observable();
     self.xAxisType = ko.observable();
+    self.chartType = ko.observable();
+
     self.hasGrouping.subscribe(function(newValue){
         if(!newValue){
             self.groupByProp(undefined);
@@ -485,6 +513,7 @@ var DataGroup = function(model){
         self.interval(model.interval);
         self.divideByProp(model.divideByProp);
         self.hasDivideBy(model.divideByProp !== undefined);
+        self.chartType(model.chartType);
     };
     self.getModel = function(){
         var dataGroupModel = ko.toJS(self);
@@ -493,6 +522,34 @@ var DataGroup = function(model){
         delete dataGroupModel.template;
         return dataGroupModel;
     }
+
+    self.groupByProp.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.hasGrouping();
+            }
+        }
+    });
+
+    self.interval.extend({
+        required: { 
+            message : 'Interval required',
+            onlyIf : function(){
+                return self.timeseries();
+            }
+        }
+    });
+
+    self.xAxisProp.extend({
+        required: { 
+            message : 'Select x axis',
+            onlyIf : function(){
+                return self.chartType() == 'line' || self.chartType() == 'area' || self.chartType() == 'scatter';
+            }
+        }
+    });
+
     model && self.setProps(model);
 };
 
@@ -694,7 +751,7 @@ var Conditioner = {
     getGraphData: function(segmentModel, inputData){
         this.properties = segmentModel.properties;
         var returnData;
-        switch (segmentModel.chartType){
+        switch (segmentModel.dataGroup.chartType){
             case 'line':
             case 'area':
             case 'scatter':
@@ -761,7 +818,7 @@ var Conditioner = {
                 numval = +num[selection.selectedProp] || 0;
             }
             else{
-                throw 'you should select groupby property for simple selections';
+                throw 'When you have aggregation (GroupBy), your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>';
             }
             return memo + numval; 
         }, 0);
@@ -811,19 +868,6 @@ var Conditioner = {
                     _.each(groupedData, function(groupedDataItem, groupName){
                         var propCounts;
                         result = [];
-                        
-                        // if(sel.groupBy === 'count'){
-                        //     propCounts = _.countBy(groupedDataItem, function(val){
-                        //         return val[segmentModel.dataGroup.divideByProp];
-                        //     });
-                        //     _.each(propCounts, function(value, name){
-                        //         result.push({
-                        //             key: name,
-                        //             value: value
-                        //         });
-                        //     });
-                        // }
-
                         if(sel.groupBy === 'value'){
                             throw "When using <em>GroupBy</em>, you should specify <em>sum</em>, <em>count</em> or <em>avg</em> on selection. Selecting value is not permitted";
                         }
@@ -850,7 +894,7 @@ var Conditioner = {
                     });
 
                     topLevelResponse.push({
-                        key : (sel.isComplex ? sel.aliasName : sel.selectedProp || 'selection') + '-Group',
+                        key : (sel.isComplex ? sel.aliasName : sel.selectedProp || 'selection') + '-' + sel.groupBy + ' -Group',
                         groupLevel : 'A',
                         values: response
                     });
@@ -881,10 +925,6 @@ var Conditioner = {
                 values: response
             });
         }
-        
-        
-        
-
         return topLevelResponse;
     }
 }

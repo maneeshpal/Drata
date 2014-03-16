@@ -15,8 +15,8 @@
 
     var ddComboTemplateStr = [
             '<div class="row collapse">',
-                '<div class="combo-dd columns" data-bind="text: selectedPrefix,click:changePrefix">',
-                '</div>',
+                '<select class="combo-dd columns" data-bind="value: selectedPrefix, options: prefixOptions">',
+                '</select>',
                 '<div class="combo-txt columns" data-bind="template : {name: \'comboTemplate\', data : $data}">',
                 '</div>',
             '</div>'            
@@ -103,53 +103,6 @@
         };
     };
 
-    var DdComboVM = function(config){
-        var self = this;
-        $.extend(self, new ComboVM(config));
-        self.changePrefix = function(){
-            var currPrefix = self.selectedPrefix();
-            var index = 0;
-            if(currPrefix){
-                index = self.prefixOptions.indexOf(currPrefix) + 1;
-                index = index < self.prefixOptions().length ? index : 0;
-            } 
-            self.selectedPrefix(self.prefixOptions()[index]);
-        };
-        self.prefixOptions = ko.isObservable(config.prefixOptions) ? config.prefixOptions : ko.observableArray(config.prefixOptions);
-        self.selectedPrefix = ko.isObservable(config.selectedPrefix) ? config.selectedPrefix : ko.observable(config.selectedPrefix);
-        if(self.selectedPrefix() === undefined)
-            self.selectedPrefix(self.prefixOptions()[0]);
-
-    };
-
-    /**************************************/
-    /**************************************/
-    /*************COMBOCOMPLEX*************/
-    /**************************************/
-    /**************************************/
-
-    // var ComplexComboVM = function(config){
-    //     var self = this;
-    //     $.extend(self, new ComboVM(config));
-    //     self.group = new Group(config.level,'selections', undefined, self);
-    //     var $complexWrapper;
-    //     self.accessComplexComboElements = function(nodes){
-    //         self.accessComboElements(nodes);
-    //         $complexWrapper = $(nodes).find('#complexWrapper');
-           
-    //     }
-    //     self.template = {name: 'complexCombo', data : self, afterRender:self.accessComplexComboElements.bind(self)};
-    //     //self.complex = ko.observable(false);
-    //     // self.toggleComplex = function(){
-    //     //     self.complex(!self.complex());
-    //     //     if(self.complex() && self.groups().length === 0) {
-    //     //         self.addCondition();
-    //     //     }
-    //     //     //else if(!self.complex() && )
-    //     // };
-    // };
-
-
     var comboBindingHandler = {
         init: function (element, valueAccessor) {
             var value = valueAccessor();
@@ -171,6 +124,28 @@
         }
     };
 
+    var DdComboVM = function(config){
+        var self = this;
+        $.extend(self, new ComboVM(config));
+        // self.changePrefix = function(){
+        //     var currPrefix = self.selectedPrefix();
+        //     var index = 0;
+        //     if(currPrefix){
+        //         index = self.prefixOptions.indexOf(currPrefix) + 1;
+        //         index = index < self.prefixOptions().length ? index : 0;
+        //     } 
+        //     self.selectedPrefix(self.prefixOptions()[index]);
+        // };
+
+        self.prefixOptions = ko.isObservable(config.prefixOptions) ? config.prefixOptions : ko.observableArray(config.prefixOptions);
+        self.selectedPrefix = ko.isObservable(config.selectedPrefix) ? config.selectedPrefix : ko.observable(config.selectedPrefix);
+        if(self.selectedPrefix() === undefined)
+            self.selectedPrefix(self.prefixOptions()[0]);
+
+    };
+
+
+    
     var ddComboBindingHandler = {
         init: function (element, valueAccessor) {
             var value = valueAccessor();
@@ -194,27 +169,6 @@
             return { controlsDescendantBindings: true };
         }
     };
-
-    // var complexComboBindingHandler = {
-    //     init: function (element, valueAccessor) {
-    //         var value = valueAccessor();
-    //         var template = 'complexComboStr';
-    //         var config = {
-    //             selectedValue : value.selectedValue|| ko.observable(),
-    //             element: element,
-    //             level: value.level,
-    //             options: value.options || [],
-    //             optionsCaption: value.optionsCaption || 'Select..',
-    //             allowCustom : value.allowCustom === undefined ? true : value.allowCustom
-    //         };
-            
-    //         window.complexCombo = new ComplexComboVM(config);
-
-    //         ko.renderTemplate(template, complexCombo, { templateEngine: templateEngine}, element, 'replaceChildren');
-
-    //         return { controlsDescendantBindings: true };
-    //     }
-    // };
 
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;

@@ -36,7 +36,7 @@ var Widget = function(widgetModel, index){
     });
     self.parseError = ko.observable();
     var content;
-    self.chartType = ko.observable(widgetModel.segmentModel.chartType);
+    self.chartType = ko.observable(widgetModel.segmentModel.dataGroup.chartType);
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
             case 'line':
@@ -87,7 +87,7 @@ var Widget = function(widgetModel, index){
             return;
         }
 
-        if(widgetModel.segmentModel.chartType === 'pie')
+        if(widgetModel.segmentModel.dataGroup.chartType === 'pie')
             chartData = chartData[0].values;
 
         self.pieKeys(chartData.map(function(dataItem){
@@ -103,7 +103,7 @@ var Widget = function(widgetModel, index){
 
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
-        self.chartType(widgetModel.segmentModel.chartType);
+        self.chartType(widgetModel.segmentModel.dataGroup.chartType);
         self.loadWidget();
     };
 
@@ -299,7 +299,6 @@ var WidgetProcessor = function(){
         self.selectedDataKey(clonemodel.selectedDataKey);
         self.processSegment = true;
         self.segment.initialize(clonemodel.segmentModel);
-        //self.newWidget(false);
         self.previewGraph(true);
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
@@ -307,13 +306,13 @@ var WidgetProcessor = function(){
         self.handleGraphPreview(clonemodel.segmentModel);
     };
     self.widgetCancel = function() {
+        self.parseError(undefined);
         self.onWidgetUpdate = undefined;
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add Widget');
         self.previewGraph(false);
         self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
-        //self.newWidget(true);
     };
     var chart, _t;
     self.handleGraphPreview = function(segmentModel){
@@ -332,7 +331,7 @@ var WidgetProcessor = function(){
         
         var mydata = data[0].values;
 
-        switch(segmentModel.chartType)
+        switch(segmentModel.dataGroup.chartType)
         {
             case 'line':
                 chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
@@ -367,7 +366,7 @@ var WidgetProcessor = function(){
     };
     var segmentIsValid = function(){
         var selerrors = ko.validation.group(self.segment.selectionGroup, {deep:true});
-
+        var dataGroupErrors = ko.validation.group(self.segment.dataGroup, {deep:true});
         var conditions = self.segment.conditionGroup.conditions();
         var conditionsValid = true;
         for(var c= 0; c< conditions.length; c++){
@@ -375,8 +374,9 @@ var WidgetProcessor = function(){
                 conditionsValid = false;
             }
         }
-        if(selerrors().length > 0 || !conditionsValid){
+        if(selerrors().length > 0 || dataGroupErrors().length > 0 || !conditionsValid){
             selerrors.showAllMessages();
+            dataGroupErrors.showAllMessages();
             return false;
         }
         return true;

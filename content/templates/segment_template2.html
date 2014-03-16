@@ -1,16 +1,16 @@
 <script type="text/html" id="segment-template">
     
 <div class="row">
-    <div class="large-5 columns" style="min-width:300px">
+    <div class="large-7 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
     </div>
-    <div class="large-7 columns" style="min-width:470px">
-        <!-- ko template: {name: 'group-template', data: conditionGroup} -->
+    <div class="large-5 columns">
+        <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
         <!-- /ko -->
     </div>
 </div>
-<!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
+<!-- ko template: {name: 'group-template', data: conditionGroup} -->
 <!-- /ko -->
 </script>
 <script type="text/html" id="selection-template">
@@ -39,8 +39,18 @@
     <div class="small-12 columns">
         <fieldset>
             <legend>Grouping</legend>
-                <div class="row">
-                    <div class="small-8 columns">
+                
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">
+                                    Chart Type</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options: $parent.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="small-4 columns">
                                 <label class="right inline">
@@ -53,7 +63,7 @@
                             </div>
                         </div>
 
-                        <!-- ko if:($parent.chartType() === 'pie' || $parent.chartType() === 'bar') && hasGrouping -->
+                        <!-- ko if:(chartType() === 'pie' || chartType() === 'bar') && hasGrouping -->
                         <div class="row">
                             <div class="small-4 columns">
                                 <label class="right inline">
@@ -65,7 +75,7 @@
                         </div>
 
                         <!-- /ko -->
-                        <!-- ko if:$parent.chartType() === 'line' || $parent.chartType() === 'area'|| $parent.chartType() === 'scatter'  -->
+                        <!-- ko if:chartType() === 'line' || chartType() === 'area'|| chartType() === 'scatter'  -->
                             <div class="row">
                                 <div class="small-4 columns">
                                     <label class="right inline">x Axis</label>
@@ -86,12 +96,6 @@
                                 </div>
                             </div>
                         <!-- /ko -->
-                    </div>
-                    <div class="small-4 columns">
-                    <select data-bind="options: $parent.chartTypes, value : $parent.chartType, optionsCaption: 'select chart Type'">
-                    </select>
-                    </div>
-                </div>
         </fieldset>
     </div>
 </div>
@@ -190,11 +194,11 @@
 <div class="row">
     <div class="small-12 columns">
         <fieldset>
-            <legend>Condition</legend>
+            <legend>Conditions</legend>
              <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
             <div class="row">
                 <div class="small-12 columns conditioncombo">
-                    <!-- ko template:currentTemplate -->
+                    <!-- ko template: {name : 'condition-group-template', data: currentBinding, afterRender: afterRender, beforeRemove : beforeLeave} -->
                     <!-- /ko -->
                 </div>
             </div>
@@ -205,33 +209,28 @@
 </script>
 
 <script type="text/html" id="condition-group-template">
-    <ul class="inline-list">
-        <li data-bind="visible: $parent.trace().length > 0">Go Back to :</li>
-    <!-- ko foreach: $parent.trace -->
-        <li data-bind="click:$parents[1].gobackTo"><a data-bind="text: $index() === 0 ? 'Top Level ' :'Condition ' "></a> </li>
-    <!-- /ko -->
-    </ul>
+    <div id="conditionWrapper" class="condition-wrapper">
+    
     <div class="row">
         <div class="small-12 columns">
             <!-- ko template: {name: 'condition-template', foreach: conditions, afterAdd: afterAdd, beforeRemove: beforeRemove} -->
             <!-- /ko -->
-            <div data-alert class="complex-overlay" data-bind="slideVisible:conditions().length === 0">
-                Click <em>Add</em> to add Conditions.
+
+            <div data-alert class="alert-box secondary" data-bind="visible:conditions().length === 0">
+                You may add simple condition (Ex: a > b) or, a complex condition (a > b <em>or</em> (b < c <em>and</em> c = d))
             </div>
 
             <div class="row">
-                <div class="small-4 columns">
-                 <a class="button tiny primary"  data-bind="visible:$parent.trace().length > 0,click:$parent.goback"><i class="general foundicon-left-arrow"></i>&nbsp;Done</a>
-                </div>
-                
-                <div class="small-4 columns text-right">
-                     <a class="button tiny alert" data-bind="click:clear"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
-                </div>
-                <div class="small-4 columns right">
-                    <a class="button tiny success" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                <div class="large-12 columns">
+                   <a class="button left tiny secondary" style="margin-right:10px" data-bind="click:$parent.goBackTopLevel, visible:$parent.trace().length > 0"> <i class="general foundicon-left-arrow"></i>&nbsp;Top Level</a>
+                    <a class="button left tiny primary" style="margin-right:10px" data-bind="visible:$parent.trace().length > 0,click:$parent.goback"><i class="general foundicon-left-arrow"></i>&nbsp;Done</a>
+                     <a class="button left tiny alert" style="margin-right:10px" data-bind="click:clear"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                    <a class="button left tiny success" style="margin-right:10px" data-bind="click:addComplexCondition"><i class="general foundicon-plus"></i>&nbsp;Complex</a>
+                    <a class="button left tiny success" style="margin-right:10px" data-bind="click:addCondition"><i class="general foundicon-plus"></i>&nbsp;Simple</a>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </script>
 
