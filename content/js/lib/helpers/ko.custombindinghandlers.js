@@ -15,7 +15,7 @@
 
     var ddComboTemplateStr = [
             '<div class="row collapse">',
-                '<select class="combo-dd columns" data-bind="value: selectedPrefix, options: prefixOptions">',
+                '<select class="combo-dd columns" data-bind="enable: enabled,value: selectedPrefix, options: prefixOptions">',
                 '</select>',
                 '<div class="combo-txt columns" data-bind="template : {name: \'comboTemplate\', data : $data}">',
                 '</div>',
@@ -45,8 +45,9 @@
             $combolist.hide();
             if(!config.allowCustom){
                 var sel = self.selectedValue();
+                //need to fix property casing
                 var selExists = self.availableOptions().some(function(opt){
-                    return opt.indexOf(sel) > -1;
+                    return opt.toLowerCase().indexOf(sel) > -1;
                 });
                 if(!selExists) {
                     self.selectedValue('');
@@ -57,7 +58,7 @@
         var filterOptions = function(){
             var inputval = $elem.val();
             var filteredList = self.availableOptions().filter(function(opt){
-                return opt.indexOf(inputval) > -1;
+                return opt.toLowerCase().indexOf(inputval) > -1;
             });
             if(!config.allowCustom){
                 if(filteredList.length === 0){
@@ -144,8 +145,6 @@
 
     };
 
-
-    
     var ddComboBindingHandler = {
         init: function (element, valueAccessor) {
             var value = valueAccessor();

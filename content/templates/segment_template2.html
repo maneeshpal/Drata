@@ -1,11 +1,11 @@
 <script type="text/html" id="segment-template">
     
 <div class="row">
-    <div class="large-7 columns" style="min-width:300px">
+    <div class="large-6 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
     </div>
-    <div class="large-5 columns">
+    <div class="large-6 columns">
         <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
         <!-- /ko -->
     </div>
@@ -24,7 +24,7 @@
             <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
             <div class="row">
                 <div class="small-12 columns" style="position:relative">
-                    <!-- ko template: {name: 'selectionGroupTemplate', data: $data} -->
+                    <!-- ko template: {name: 'selectionGroupTemplate'} -->
                     <!-- /ko -->
                 </div>
             </div>
@@ -39,66 +39,93 @@
     <div class="small-12 columns">
         <fieldset>
             <legend>Grouping</legend>
-                
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">
-                                    Chart Type</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="options: $parent.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">
-                                    <input type="checkbox" data-bind="checked:hasGrouping" />
-                                    &nbsp;Group by</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- ko if:(chartType() === 'pie' || chartType() === 'bar') && hasGrouping -->
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">
-                                <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <select data-bind="enable: hasDivideBy,options:$parent.properties, value:divideByProp, optionsCaption: 'Slice GroupBy'"></select>
-                            </div>
-                        </div>
-
-                        <!-- /ko -->
-                        <!-- ko if:chartType() === 'line' || chartType() === 'area'|| chartType() === 'scatter'  -->
-                            <div class="row">
-                                <div class="small-4 columns">
-                                    <label class="right inline">x Axis</label>
-                                </div>
-                                    
-                                <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: $parent.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
-                                </div>
-                            </div>
-                                    
-                            <div class="row">
-                                <div class="small-4 columns">
-                                    <label class="right inline">
-                                        <input type="checkbox" data-bind="checked:timeseries" />
-                                        TimeSeries</label>
-                                </div>
-                                <div class="small-8 columns">
-                                    <input type="text" data-bind="enable:timeseries,value:interval" placeholder="Interval" />
-                                </div>
-                            </div>
-                        <!-- /ko -->
+                <div class="row">
+                    <div class="small-3 columns">
+                        <label class="right inline">
+                            Chart Type</label>
+                    </div>
+                    <div class="small-9 columns">
+                        <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
+                        </select>
+                    </div>
+                </div>
+                <!-- ko template : {if: chartType() !== undefined, name : dataGroupType() === 'comparison'? 'pieDataGroupTemplate': 'lineDataGroupTemplate'} -->
+                <!-- /ko -->
         </fieldset>
     </div>
 </div>
+</script>
+<script type="text/html" id="pieDataGroupTemplate">
+    <div class="row">
+        <div class="small-3 columns">
+            <label class="right inline">
+                <input type="checkbox" data-bind="checked:hasGrouping" />
+                &nbsp;Groupby</label>
+        </div>
+        <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'GroupBy', allowCustom:false}">
+        </div>
+        <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string'  -->
+        <div class="small-3 columns">
+             <input type="text" data-bind="value:groupByIntervalRaw" placeholder="Interval"></input>
+        </div>
+        <!-- /ko -->
+    </div>
+
+    <!-- ko if:hasGrouping -->
+    <div class="row">
+        <div class="small-3 columns">
+            <label class="right inline">
+            <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
+        </div>
+        <div class="columns" data-bind="css: {'small-6' : divideByIntervalType() !== 'string','small-9' : divideByIntervalType() === 'string'}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
+        </div>
+        <!-- ko if: hasDivideBy() && divideByIntervalType() !== 'string'  -->
+        <div class="small-3 columns">
+             <input type="text" data-bind="value:divideByIntervalRaw" placeholder="Interval"></input>
+        </div>
+        <!-- /ko -->                            
+    </div>
+
+    <!-- /ko -->
+</script>
+<script type="text/html" id="lineDataGroupTemplate">
+    <div class="row">
+        <div class="small-3 columns">
+            <label class="right inline">
+                <input type="checkbox" data-bind="checked:hasGrouping" />
+                &nbsp;Groupby</label>
+        </div>
+        <div class="small-9 columns">
+            <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
+            </select>
+        </div>
+        
+    </div>
+
+    <div class="row">
+        <div class="small-3 columns">
+            <label class="right inline">x Axis</label>
+        </div>
+            
+        <div class="small-9 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
+        </div>
+    </div>
+     
+    <div class="row">
+        <div class="small-3 columns">
+            <label class="right inline">
+                <input type="checkbox" data-bind="checked:timeseries" />
+                TimeSeries</label>
+        </div>
+        <div class="small-9 columns">
+            <select data-bind="enable:timeseries,value:timeseriesInterval, optionsCaption: 'Interval'">
+                <option value='300000'>5 nin</option>
+                <option value='3600000'>1 hour</option>
+                <option value='21600000'>6 hours</option>
+                <option value='86400000'>1 day</option>
+            </select>
+        </div>
+    </div>
 </script>
 
 <script type="text/html" id="selectionGroupTemplate">

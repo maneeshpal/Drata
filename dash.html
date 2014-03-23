@@ -101,6 +101,17 @@
                                 <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Time Range</label>
+                            </div>
+                            <div class="small-4 columns">
+                                <input type="date" data-bind="value:segment.dataFilter.startDate" placeholder="Start Date"></input>
+                            </div>
+                            <div class="small-4 columns">
+                                <input type="date" data-bind="value:segment.dataFilter.endDate" placeholder="End Date"></input>
+                            </div>
+                        </div>
                     </fieldset>
                 </div>
             </div>

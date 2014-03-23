@@ -78,27 +78,29 @@ var Widget = function(widgetModel, index){
 
     self.loadWidget = function(){
         self.parseError(undefined);
-        var inputData = DataRetriever.getData(widgetModel.selectedDataKey);
-        try{
-            chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
-        }
-        catch(e){
-            self.parseError(e);
-            return;
-        }
+        DataRetriever.getData({dataKey: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(inputData){
+            try{
+                chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+            }
+            catch(e){
+                self.parseError(e);
+                return;
+            }
 
-        if(widgetModel.segmentModel.dataGroup.chartType === 'pie')
-            chartData = chartData[0].values;
+            if(widgetModel.segmentModel.dataGroup.chartType === 'pie')
+                chartData = chartData[0].values;
 
-        self.pieKeys(chartData.map(function(dataItem){
-            return dataItem.key;
-        }));
-        self.selectedPieKey(self.pieKeys()[0]);
-        content.drawChart(chartData, widgetModel.segmentModel);
-        //prevent double draw on page load
-        setTimeout(function(){
-            drata.utils.windowResize(self.resizeContent.bind(self));
-        }, 200);
+            self.pieKeys(chartData.map(function(dataItem){
+                return dataItem.key;
+            }));
+            self.selectedPieKey(self.pieKeys()[0]);
+            content.drawChart(chartData, widgetModel.segmentModel);
+            //prevent double draw on page load
+            setTimeout(function(){
+                drata.utils.windowResize(self.resizeContent.bind(self));
+            }, 200);
+        });
+        
     };
 
     self.updateWidget = function (newModel) {
@@ -253,11 +255,11 @@ var WidgetProcessor = function(){
     self.addUpdateBtnText = ko.observable('Add Widget');
     self.processSegment = true;
     self.previewGraph = ko.observable(false);
-    self.dataKeys = ko.observableArray(DataRetriever.getDataKeys());
+    self.dataKeys = ko.observableArray();
+    DataRetriever.getDataKeys(function(resp){
+        self.dataKeys(resp);
+    });
     self.selectedDataKey = ko.observable();
-    //self.inputData = ko.observable(); 
-    //self.outputData = ko.observable();
-    //self.newWidget = ko.observable(true);
     self.parseError = ko.observable();
 
     self.selectedDataKey.subscribe(function(newValue){
@@ -267,11 +269,10 @@ var WidgetProcessor = function(){
             self.segment.initialize();
         }
         else if(self.processSegment){
-            var data = DataRetriever.getData(newValue);
-            var properties = DataRetriever.getUniqueProperties(data);
-            self.segment.initialize({properties:properties});    
+            DataRetriever.getUniqueProperties(newValue, function(properties){
+                self.segment.initialize({properties:properties});
+            });
         }
-
     });
 
     self.segment = new Segmentor();
@@ -317,52 +318,52 @@ var WidgetProcessor = function(){
     var chart, _t;
     self.handleGraphPreview = function(segmentModel){
         self.parseError(undefined);
-        var inputData = DataRetriever.getData(self.selectedDataKey());
-        var data;
-        try{
-            data = Conditioner.getGraphData(segmentModel, inputData);
-        }
-        catch(e){
-            self.parseError(e);
-        }
-        if(!data) return;         
+        DataRetriever.getData({dataKey: self.selectedDataKey(), segment: segmentModel}, function(inputData){
+            var data;
+            try{
+                data = Conditioner.getGraphData(segmentModel, inputData);
+            }
+            catch(e){
+                self.parseError(e);
+            }
+            if(!data) return;         
 
-        self.previewGraph(true);
-        
-        var mydata = data[0].values;
+            self.previewGraph(true);
+            
+            var mydata = data[0].values;
 
-        switch(segmentModel.dataGroup.chartType)
-        {
-            case 'line':
-                chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
-            break;
-            case 'area':
-                chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType);
-            break;
-            case 'bar':
-                chart = drata.charts.barChart();
-                break; 
-            case 'pie':
-                chart = drata.charts.pieChart();
-                mydata = mydata[0];
-            break;
-            case 'scatter':
-                chart = drata.charts.scatterPlot();
-            break;
-        }
-        d3.select('#previewgraph').selectAll('svg').remove();
-        d3.select('#previewgraph').append('svg');
+            switch(segmentModel.dataGroup.chartType)
+            {
+                case 'line':
+                    chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
+                break;
+                case 'area':
+                    chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType);
+                break;
+                case 'bar':
+                    chart = drata.charts.barChart();
+                    break; 
+                case 'pie':
+                    chart = drata.charts.pieChart();
+                    mydata = mydata[0];
+                break;
+                case 'scatter':
+                    chart = drata.charts.scatterPlot();
+                break;
+            }
+            d3.select('#previewgraph').selectAll('svg').remove();
+            d3.select('#previewgraph').append('svg');
 
-        d3.select('#previewgraph svg')
-            .datum(mydata)
-            .call(chart);
+            d3.select('#previewgraph svg')
+                .datum(mydata)
+                .call(chart);
 
-        drata.utils.windowResize(function(){
-            if(!chart) return;
-            _t && clearTimeout(_t);
-            _t = setTimeout(chart.resize, 500);
+            drata.utils.windowResize(function(){
+                if(!chart) return;
+                _t && clearTimeout(_t);
+                _t = setTimeout(chart.resize, 500);
+            });
         });
-
     };
     var segmentIsValid = function(){
         var selerrors = ko.validation.group(self.segment.selectionGroup, {deep:true});

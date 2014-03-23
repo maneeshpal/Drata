@@ -1,7 +1,7 @@
 
  ;(function(root) {
     var AreaChart = function(){
-        var _xAxisType = 'linear', _dataMarkers = false;
+        var _xAxisType = 'numeric', _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
             .axisType('x')
@@ -63,7 +63,7 @@
                 var hm = h - m.t - m.b;
                 
                 xAxis.axisTicType(_xAxisType).width(wm).height(hm);
-                yAxis.axisTicType('linear').width(wm).height(hm).tickSize(-wm);
+                yAxis.axisTicType('numeric').width(wm).height(hm).tickSize(-wm);
                                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 

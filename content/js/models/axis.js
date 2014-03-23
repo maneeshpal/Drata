@@ -105,7 +105,7 @@
             if (!arguments.length) return _axisTicType;
             _axisTicType = value;
             switch(_axisTicType){
-                case 'linear':
+                case 'numeric':
                     _scale = d3.scale.linear();
                     _tickFormat = d3.format('.3s');
                     break;
@@ -118,7 +118,7 @@
                     break;
                 case 'time':
                     _scale = d3.time.scale();
-                    _tickFormat = d3.time.format("%Y %b %d");
+                    _tickFormat = d3.time.format("%Y %b %d %H:%M");
                     break;
             }
             return chart;

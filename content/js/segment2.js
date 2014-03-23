@@ -1,44 +1,50 @@
 
 var Segmentor = function(model){
-    //model = model || defaultSegmentModel;
     var self = this;
     self.properties = ko.observableArray();
     self.level = 0;
-    self.conditionalOperations = ['>', '<', '>=','<=', '=', '!=','exists','like'];
-    self.arithmeticOperations = ['+', '-', '*','/'];
-    self.groupingOptions = ko.observableArray(['value','count', 'sum', 'avg']);
-    self.xAxisTypes = ko.observableArray(['time','linear','currency']);
-    self.chartTypes = ['line', 'area', 'scatter', 'pie','bar'];
-    self.logics = ['and', 'or'];
     self.filteredData = ko.observable();
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup(self.level + 1, undefined, 'Condition', self.properties);
     self.selectionGroup = new ItemsGroup(self.level + 1, undefined, 'Selection');
     self.dataGroup = new DataGroup();
     self.groupData = ko.observable();
-    //self.chartType = ko.observable();
-
-    // self.chartType.subscribe(function(){
-    //     self.dataGroup.setProps({});
-    // });
+    self.dataFilter = new DataFilter();
 
     self.initialize = function(model){
         model = model || {};
         self.properties(model.properties);
-        //self.chartType(model.chartType);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataGroup.setProps(model.dataGroup || {});
+        self.dataFilter.prefill(model.dataFilter || {});
     };
     self.getModel = function(){
         return {
-            //chartType: self.chartType(),
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
-            properties: self.properties()
+            properties: self.properties(),
+            dataFilter: self.dataFilter.getModel()
         }
     };
+};
+
+var DataFilter = function(){
+    var self = this;
+    self.startDate = ko.observable();
+    self.endDate = ko.observable();
+
+    self.getModel = function(){
+        return {
+            startDate: self.startDate(),
+            endDate: self.endDate()
+        }
+    };
+    self.prefill = function(model){
+        self.startDate(model.startDate);
+        self.startDate(model.endDate);
+    }
 };
 
 var Condition = function(options){
@@ -484,25 +490,65 @@ var ItemsGroup = function(level, model, renderType){
 var DataGroup = function(model){
     var self = this;
     self.template = 'datagroup-template';
-    self.xAxisProp = ko.observable();
-    self.groupByProp = ko.observable();
-    self.timeseries = ko.observable();
-    self.interval = ko.observable();
-    self.divideByProp = ko.observable();
+    
+
     self.hasGrouping = ko.observable(false);
-    self.hasDivideBy = ko.observable();
+    self.groupByProp = ko.observable();
+    self.groupByIntervalRaw = ko.observable();
+    self.groupByIntervalType = ko.observable('string');
+
+    self.hasDivideBy = ko.observable(false);
+    self.divideByProp = ko.observable();
+    self.divideByIntervalRaw = ko.observable();
+    self.divideByIntervalType = ko.observable('string');
+
+    //for line, scatter, area
     self.xAxisType = ko.observable();
     self.chartType = ko.observable();
+    self.timeseries = ko.observable();
+    self.xAxisProp = ko.observable();
+    self.timeseriesInterval = ko.observable();
+
+    self.groupByInterval = ko.computed(function(){
+        return self.groupByIntervalType() !== 'time' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
+    });
+
+    self.divideByInterval = ko.computed(function(){
+        return self.divideByIntervalType() !== 'time' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
+    });
+
+    self.dataGroupType = ko.computed(function(){
+        return ['pie', 'bar'].indexOf(self.chartType())>-1?'comparison' : 'track';
+    });
 
     self.hasGrouping.subscribe(function(newValue){
         if(!newValue){
             self.groupByProp(undefined);
-            self.divideByProp(undefined);
             self.hasDivideBy(undefined);
+            self.groupByIntervalType('string');
         }
     });
+
+    self.hasDivideBy.subscribe(function(newValue){
+        if(!newValue){
+            self.divideByProp(undefined);
+            self.divideByIntervalType('string');
+        }
+    });
+
+    self.groupByIntervalType.subscribe(function(newValue){
+        if(newValue === 'string'){
+            self.groupByIntervalRaw(undefined);
+        }
+    });
+    self.divideByIntervalType.subscribe(function(newValue){
+        if(newValue === 'string'){
+            self.divideByIntervalRaw(undefined);
+        }
+    });
+
     self.timeseries.subscribe(function(newValue) {
-        if(!newValue) self.interval(undefined);
+        if(!newValue) self.timeseriesInterval(undefined);
     });
 
     self.setProps = function(model){
@@ -510,7 +556,7 @@ var DataGroup = function(model){
         self.groupByProp(model.groupByProp);
         self.timeseries(model.timeseries);
         self.hasGrouping(model.groupByProp !== undefined);
-        self.interval(model.interval);
+        self.timeseriesInterval(model.timeseriesInterval);
         self.divideByProp(model.divideByProp);
         self.hasDivideBy(model.divideByProp !== undefined);
         self.chartType(model.chartType);
@@ -532,11 +578,20 @@ var DataGroup = function(model){
         }
     });
 
-    self.interval.extend({
+    self.divideByProp.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.hasDivideBy();
+            }
+        }
+    });
+
+    self.timeseriesInterval.extend({
         required: { 
             message : 'Interval required',
             onlyIf : function(){
-                return self.timeseries();
+                return self.dataGroupType() === 'track' && self.timeseries();
             }
         }
     });
@@ -545,30 +600,75 @@ var DataGroup = function(model){
         required: { 
             message : 'Select x axis',
             onlyIf : function(){
-                return self.chartType() == 'line' || self.chartType() == 'area' || self.chartType() == 'scatter';
+                return self.dataGroupType() === 'track';
             }
         }
     });
 
     model && self.setProps(model);
 };
+var db = 'shopperstop';
 
 var DataRetriever = {
-    getUniqueProperties : function(data){
-        var returnArr = [];
-        for (var i = data.length - 1; i >= 0; i--) {
-            var dataValue = data[i];
-            for (var property in dataValue) {
-                (dataValue.hasOwnProperty(property) && returnArr.indexOf(property) === -1) && returnArr.push(property);
-            }
-        };
-        return returnArr;
+    getUniqueProperties : function(dataKey, callback){
+        callback([
+          "price",
+          "geography",
+          "timestamp",
+          "sex",
+          "color",
+          "tax",
+          "shippingPrice"
+        ]);
+
+        // $.ajax({
+        //     type: "GET",
+        //     url: 'http://localhost:3000/'+ db +'/'+ dataKey +'/properties',
+        //     dataType: 'json',
+        //     headers: { 'Access-Control-Allow-Origin': '*' },
+        //     success: function(response){
+        //         callback && callback(response);
+        //     }
+        // });
     },
-    getDataKeys : function(){
-        return ['key1', 'key2', 'Shopper Stop'];
+    getDataKeys : function(callback){
+        callback(['key1', 'key2', 'Shopper Stop']);
+        // $.ajax({
+        //     type: "GET",
+        //     url: 'http://localhost:3000/'+ db +'/keys',
+        //     dataType: 'json',
+        //     headers: { 'Access-Control-Allow-Origin': '*' },
+        //     success: function(response){
+        //         callback && callback(response);
+        //     }
+        // });
     },
-    getData : function(dataKey){
-        return tempData.randomProps(100);
+    getData : function(model,callback){
+        if(!this._t){
+            this._t = tempData.randomProps(10);    
+        }
+        console.log(this._t);
+        callback(this._t);
+        // $.ajax({
+        //     type: "POST",
+        //     url: 'http://localhost:3000/'+ db +'/'+ model.dataKey,
+        //     data: {
+        //         selection: model.segment.selection,
+        //         dataGroup: model.segment.dataGroup,
+        //         dataFilter: model.segment.dataFilter,
+        //         group: model.segment.group
+        //     },
+        //     dataType: 'json',
+        //     headers: { 'Access-Control-Allow-Origin': '*' },
+        //     success: function(response){
+        //         var result = [];
+        //         for(var i = 0; i< response.length; i++){
+        //             result.push(drata.utils.flatten(response[i]));
+        //         }
+        //         console.log('total records :'+result.length);
+        //         callback && callback(result);
+        //     }
+        // });
     }
 };
 
@@ -576,58 +676,16 @@ var Conditioner = {
     calc : function(left, operation, right){
         if(left === undefined) return right;
         if(right === undefined) return left;
-        var result = false;
-        var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
         
-        var hasError = (numericOperations.indexOf(operation) > -1 && (isNaN(+left) || isNaN(+right)));
+        var hasError = (drata.global.numericOperations.indexOf(operation) > -1 && (isNaN(+left) || isNaN(+right)));
+        var result;
+        
         if(!hasError){
-            switch (operation){
-                case '>':
-                    result = +left > +right;
-                break;
-                case '<':
-                    result = +left < +right;
-                break;
-                case '<=':
-                    result = +left <= +right;
-                break;
-                case '=':
-                    result = (left === right);
-                break;
-                case '!=':
-                    result = (left !== right);
-                break;
-                case '>=':
-                    result = +left >= +right;
-                break;
-                case 'exists':
-                    result = left !== undefined;
-                break;
-                case 'and':
-                    result = left && right;
-                break;
-                case 'or':
-                    result = left || right;
-                break;
-                case '+':
-                    result = (+left) + (+right);
-                break;
-                case '-':
-                    result = (+left) - (+right);
-                break;
-                case '*':
-                    result = (+left) * (+right);
-                break;
-                case 'like':
-                result = left.indexOf(right) > -1;
-                break;
-                case '/':
-                    result = (+left) / (+right);
-            }
+            result = drata.utils.calc(left, operation, right);
         }
 
         if(hasError || isNaN(result)){
-            if(numericOperations.indexOf(operation) > -1){
+            if(drata.global.numericOperations.indexOf(operation) > -1){
                 throw 'Invalid arithmetic operation: <strong>( '  + left + ' ' + operation + ' ' + right + ' )</strong>';
             }
             else{
@@ -701,7 +759,7 @@ var Conditioner = {
     processDataGroups : function(groupedData, dataGroup, selection){
         var returnGroups = [];
         _.each(groupedData, function(dataItem, groupName){
-            var ret = this.divideByInterval(dataItem, dataGroup, selection);
+            var ret = this.groupByInterval(dataItem, dataGroup, selection);
             returnGroups.push({
                 key: groupName,
                 values : ret
@@ -709,19 +767,19 @@ var Conditioner = {
         }.bind(this));
         return returnGroups;
     },
-    divideByInterval : function(data, dataGroup, selection){
+    groupByInterval : function(data, dataGroup, selection){
         var ret = [], yValue;
-        //var isComplex = selection.groupType !== undefined;
-
         if(selection.isComplex && selection.groupBy === 'count')
             throw "count not allowed for complex selections.";
+
         if(dataGroup.timeseries){
-            var intervalGroup = _.groupBy(data, function(item){
-                var val = item[dataGroup.xAxisProp];
-                //TODO: Clean this 
-                if(dataGroup.xAxisType === 'time') val = new Date(val).getTime();
-                return Math.floor(+val/ +dataGroup.interval) * (+dataGroup.interval);
+            var intervalGroup = drata.utils.divideDataByInterval({
+                data: data,
+                intervalType: dataGroup.xAxisType,
+                interval: dataGroup.timeseriesInterval,
+                property: dataGroup.xAxisProp
             });
+            
             _.each(intervalGroup, function(gi, time){
                 ret.push({
                     x: +time, 
@@ -729,13 +787,16 @@ var Conditioner = {
                 });
             });
         }
-        else{
+        else {
             _.each(data, function(item){
                 yValue = Conditioner.processGroup(item,selection).value;
-                (item.hasOwnProperty(selection.selectedProp) || selection.isComplex) && ret.push({
-                    x: item[dataGroup.xAxisProp],
-                    y: yValue
-                });
+
+                if(item.hasOwnProperty(selection.selectedProp) || selection.isComplex) {
+                    ret.push({
+                        x: item[dataGroup.xAxisProp],
+                        y: yValue
+                    });
+                }
             });
         }
         return ret;
@@ -762,6 +823,7 @@ var Conditioner = {
                 returnData = this.getPieData(segmentModel, inputData);
                 break;
         }
+        console.log(returnData);
         return returnData;
     },
     getLineCharData: function(segmentModel, inputData){
@@ -779,7 +841,7 @@ var Conditioner = {
                 values = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, selectionGroup);
             }
             else{
-                values = Conditioner.divideByInterval(filteredData, segmentModel.dataGroup, selectionGroup);
+                values = Conditioner.groupByInterval(filteredData, segmentModel.dataGroup, selectionGroup);
             }
             result.push({
                 key: selectionGroup.isComplex ? selectionGroup.aliasName || 'selection' : selectionGroup.selectedProp,
@@ -787,6 +849,7 @@ var Conditioner = {
             });
         });
         
+
         if(!segmentModel.dataGroup.hasGrouping){
             return [{
                 key : 'xxx',
@@ -833,8 +896,15 @@ var Conditioner = {
         var topLevelResponse = [];
 
         if(segmentModel.dataGroup.hasGrouping){
-            var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
+            //var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
             
+            var groupedData = drata.utils.divideDataByInterval({
+                data: filteredData,
+                property: segmentModel.dataGroup.groupByProp,
+                interval: segmentModel.dataGroup.groupByInterval,
+                intervalType: segmentModel.dataGroup.groupByIntervalType
+            });
+
             if(!segmentModel.dataGroup.hasDivideBy){
                 response = [];
                 _.each(segmentModel.selection, function(sel){

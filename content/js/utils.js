@@ -145,16 +145,136 @@
         return el;
     };
 
+    var parseTime = function(input){
+        if(!input) return input;
+        var hmsConv = {
+            h: 60 * 60 * 1000,
+            m: 60 * 1000,
+            s: 1000,
+            d: 60 * 60 * 1000 * 24,
+            m: 60 * 60 * 1000 * 24 * 30,
+            y: 60 * 60 * 1000 * 24 * 365,
+            w: 60 * 60 * 1000 * 24 * 7
+        };
+        var hms = input.split(/[^a-z]/gi).filter(function(j){return !!j && hmsConv.hasOwnProperty(j)});
+        var num = input.split(/\D/g).map(function(i){return +i}).filter(function(j){return !!j});
+        if(hms.length <= 0 || hms.length !== num.length) return null;
+        var output = 0;
+        
+        for(var i=0;i<hms.length;i++){
+            output = output + hmsConv[hms[i]] * num[i];
+        }
+        return output;
+    };
+
+    var flatten = function(data) {
+        var result = {};
+        function recurse (cur, prop) {
+            if (Object(cur) !== cur) {
+                result[prop] = cur;
+            } else if (Array.isArray(cur)) {
+                //  for(var i=0, l=cur.length; i<l; i++)
+                //      recurse(cur[i], prop + "[" + i + "]");
+                // if (l == 0)
+                //     result[prop] = [];
+            } else {
+                var isEmpty = true;
+                for (var p in cur) {
+                    isEmpty = false;
+                    recurse(cur[p], prop ? prop+"."+p : p);
+                }
+                if (isEmpty && prop)
+                    result[prop] = {};
+            }
+        }
+        recurse(data, "");
+        return result;
+    };
+
+    var calc = function(left, operation, right){
+        var result;
+        switch (operation){
+            case '>':
+                result = +left > +right;
+                break;
+            case '<':
+                result = +left < +right;
+                break;
+            case '<=':
+                result = +left <= +right;
+                break;
+            case '=':
+                result = (left === right) || (+left === +right);
+                break;
+            case '!=':
+                result = (left !== right);
+                break;
+            case '>=':
+                result = +left >= +right;
+                break;
+            case 'exists':
+                result = left !== undefined;
+                break;
+            case 'and':
+                result = left && right;
+                break;
+            case 'or':
+                result = left || right;
+                break;
+            case '+':
+                result = (+left) + (+right);
+                break;
+            case '-':
+                result = (+left) - (+right);
+                break;
+            case '*':
+                result = (+left) * (+right);
+                break;
+            case 'like':
+                result = left.indexOf(right) > -1;
+                break;
+            case '/':
+                result = (+left) / (+right);
+        }
+
+        return result;
+    };
+
+    var divideDataByInterval = function(params){
+        var val, groupBy;
+        var intervalGroup = _.groupBy(params.data, function(item){
+            val = item[params.property];
+            //TODO: Clean this 
+            switch(params.intervalType){
+                case 'time':
+                    groupBy = Math.floor(+(new Date(val))/ +params.interval) * (+params.interval);
+                break;
+                case 'numeric':
+                case 'currency':
+                    groupBy = Math.floor(+val/ +params.interval) * (+params.interval);
+                    break;
+                default :
+                    groupBy = val;
+            }
+            return groupBy;
+        });
+
+        return intervalGroup;
+    };
+
     drata.ns('js').extend({
         logmsg : false
     });
+
     drata.ns('global').extend({
         conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like'],
         arithmeticOperations : ['+', '-', '*','/'],
         groupingOptions : ['value','count', 'sum', 'avg'],
-        xAxisTypes : ['time','linear','currency'],
+        xAxisTypes : ['time','numeric','currency'],
         chartTypes : ['line', 'area', 'scatter', 'pie','bar'],
-        logics : ['and', 'or']
+        logics : ['and', 'or'],
+        intervalTypes: ['string', 'time', 'numeric'],
+        numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/']
     });
     drata.ns('utils').extend({
         format: format,
@@ -163,7 +283,11 @@
         clone:clone,
         windowResize:windowResize,
         textToPixel : textToPixel,
-        createTemplate: createTemplate
+        createTemplate: createTemplate,
+        flatten: flatten,
+        parseTime: parseTime,
+        calc: calc,
+        divideDataByInterval: divideDataByInterval
     });
 })(this);
 
