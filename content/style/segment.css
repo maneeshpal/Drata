@@ -87,3 +87,14 @@ fieldset legend {
     position:static;
     left:0;
 }
+
+select.error{
+    margin-bottom:0;
+    border:1px solid #f04124;
+}
+
+
+
+
+
+

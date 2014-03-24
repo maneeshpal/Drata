@@ -36,7 +36,7 @@ var Widget = function(widgetModel, index){
     });
     self.parseError = ko.observable();
     var content;
-    self.chartType = ko.observable(widgetModel.segmentModel.dataGroup.chartType);
+    self.chartType = ko.observable(widgetModel.segmentModel.chartType);
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
             case 'line':
@@ -87,7 +87,7 @@ var Widget = function(widgetModel, index){
                 return;
             }
 
-            if(widgetModel.segmentModel.dataGroup.chartType === 'pie')
+            if(widgetModel.segmentModel.chartType === 'pie')
                 chartData = chartData[0].values;
 
             self.pieKeys(chartData.map(function(dataItem){
@@ -105,7 +105,7 @@ var Widget = function(widgetModel, index){
 
     self.updateWidget = function (newModel) {
         widgetModel = newModel;
-        self.chartType(widgetModel.segmentModel.dataGroup.chartType);
+        self.chartType(widgetModel.segmentModel.chartType);
         self.loadWidget();
     };
 
@@ -263,8 +263,6 @@ var WidgetProcessor = function(){
     self.parseError = ko.observable();
 
     self.selectedDataKey.subscribe(function(newValue){
-        //self.outputData(undefined);
-        //self.inputData(undefined);
         if(!newValue){
             self.segment.initialize();
         }
@@ -277,13 +275,14 @@ var WidgetProcessor = function(){
 
     self.segment = new Segmentor();
     self.notifyWidget = function () {
-        if(!segmentIsValid())
-            return;
+        
         var widgetModel = {
             selectedDataKey: self.selectedDataKey(),
             segmentModel: self.segment.getModel()
         };
-        
+        if(!widgetModel.segmentModel)
+            return;
+
         self.onWidgetUpdate && self.onWidgetUpdate(widgetModel);
         !self.onWidgetUpdate && dashboard.addWidget(widgetModel);
         self.onWidgetUpdate = undefined;
@@ -332,7 +331,7 @@ var WidgetProcessor = function(){
             
             var mydata = data[0].values;
 
-            switch(segmentModel.dataGroup.chartType)
+            switch(segmentModel.chartType)
             {
                 case 'line':
                     chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType);
@@ -365,28 +364,11 @@ var WidgetProcessor = function(){
             });
         });
     };
-    var segmentIsValid = function(){
-        var selerrors = ko.validation.group(self.segment.selectionGroup, {deep:true});
-        var dataGroupErrors = ko.validation.group(self.segment.dataGroup, {deep:true});
-        var conditions = self.segment.conditionGroup.conditions();
-        var conditionsValid = true;
-        for(var c= 0; c< conditions.length; c++){
-            if(!conditions[c].isValidCondition()) {
-                conditionsValid = false;
-            }
-        }
-        if(selerrors().length > 0 || dataGroupErrors().length > 0 || !conditionsValid){
-            selerrors.showAllMessages();
-            dataGroupErrors.showAllMessages();
-            return false;
-        }
-        return true;
-    };
     
     self.preview = function(){
-        if(!segmentIsValid())
-            return;
-        self.handleGraphPreview(self.segment.getModel());
+        var model = self.segment.getModel();
+        if(!model) return;
+        self.handleGraphPreview(model);
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){

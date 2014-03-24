@@ -1,15 +1,31 @@
 <script type="text/html" id="segment-template">
     
 <div class="row">
-    <div class="large-6 columns" style="min-width:300px">
+    <div class="large-8 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
     </div>
-    <div class="large-6 columns">
-        <!-- ko template: {name : 'datagroup-template', data : dataGroup} -->
-        <!-- /ko -->
+    <div class="large-4 columns">
+        <fieldset>
+            <legend>Select Chart Type</legend>
+                <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
+                </select>
+        </fieldset>
     </div>
 </div>
+
+<!-- ko if: chartType()-->
+<div class="row">
+    <div class="small-12 columns">
+        <fieldset>
+            <legend>Grouping</legend>
+            <!-- ko template: dataGroupTemplate -->
+            <!-- /ko -->
+        </fieldset>
+    </div>
+</div>
+<!-- /ko -->
+
 <!-- ko template: {name: 'group-template', data: conditionGroup} -->
 <!-- /ko -->
 </script>
@@ -34,35 +50,15 @@
     </div>
 </div>
 </script>
-<script type="text/html" id="datagroup-template">
-<div class="row">
-    <div class="small-12 columns">
-        <fieldset>
-            <legend>Grouping</legend>
-                <div class="row">
-                    <div class="small-3 columns">
-                        <label class="right inline">
-                            Chart Type</label>
-                    </div>
-                    <div class="small-9 columns">
-                        <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
-                        </select>
-                    </div>
-                </div>
-                <!-- ko template : {if: chartType() !== undefined, name : dataGroupType() === 'comparison'? 'pieDataGroupTemplate': 'lineDataGroupTemplate'} -->
-                <!-- /ko -->
-        </fieldset>
-    </div>
-</div>
-</script>
-<script type="text/html" id="pieDataGroupTemplate">
+
+<script type="text/html" id="comp-datagroup-template">
     <div class="row">
         <div class="small-3 columns">
             <label class="right inline">
                 <input type="checkbox" data-bind="checked:hasGrouping" />
                 &nbsp;Groupby</label>
         </div>
-        <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'GroupBy', allowCustom:false}">
+        <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
         </div>
         <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string'  -->
         <div class="small-3 columns">
@@ -88,7 +84,7 @@
 
     <!-- /ko -->
 </script>
-<script type="text/html" id="lineDataGroupTemplate">
+<script type="text/html" id="track-datagroup-template">
     <div class="row">
         <div class="small-3 columns">
             <label class="right inline">
@@ -181,7 +177,7 @@
             <!-- /ko -->
             <div class="small-2 columns">
             <span class="label alert round" style="top:6px" data-bind="visible:renderType !== 'topCondition'">
-                <i class="general foundicon-remove" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parents[level-1].removeItem(vm)}} ">
+                <i class="general foundicon-remove" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parent.removeItem(vm)}} ">
             </i>
             </span>
             </div>

@@ -7,29 +7,256 @@ var Segmentor = function(model){
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup(self.level + 1, undefined, 'Condition', self.properties);
     self.selectionGroup = new ItemsGroup(self.level + 1, undefined, 'Selection');
-    self.dataGroup = new DataGroup();
+
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
+    self.chartType = ko.observable();
 
+    var compDataGroup, trackDataGroup, currentDataGroupTemplate;
+    self.dataGroup = undefined;
     self.initialize = function(model){
         model = model || {};
         self.properties(model.properties);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
-        self.dataGroup.setProps(model.dataGroup || {});
         self.dataFilter.prefill(model.dataFilter || {});
+        self.chartType(model.chartType);
+        self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
     };
+    
+    self.dataGroupTemplate = ko.computed(function(){
+        switch(self.chartType()){
+            case 'line':
+            case 'area':
+            case 'scatter':
+                self.dataGroup =  compDataGroup || new TrackDataGroup();
+                currentDataGroupTemplate = 'track-datagroup-template';
+                break;
+            case 'pie':
+            case 'bar':
+                self.dataGroup =  trackDataGroup || new ComparisonDataGroup();
+                currentDataGroupTemplate = 'comp-datagroup-template';
+                break;
+        }
+
+        return {
+            name: currentDataGroupTemplate,
+            data: self.dataGroup
+        };
+
+    });
+    
     self.getModel = function(){
+        if(!self.isValidSegment()) return;
         return {
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
             properties: self.properties(),
-            dataFilter: self.dataFilter.getModel()
-        }
+            dataFilter: self.dataFilter.getModel(),
+            chartType: self.chartType()
+        };
     };
+    self.getM = function(){
+        return {
+            selection: self.selectionGroup.getModel(),
+            dataGroup: self.dataGroup.getModel(),
+            group: self.conditionGroup.getModel(),
+            properties: self.properties(),
+            dataFilter: self.dataFilter.getModel(),
+            chartType: self.chartType()
+        };
+    };
+    self.isValidSegment = function(){
+        var selerrors = ko.validation.group(self.selectionGroup, {deep:true});
+        var conditions = self.conditionGroup.conditions();
+        var topLevelErrors = ko.validation.group(self, {deep:false});
+        var isValid = true;
+        for(var c= 0; c< conditions.length; c++){
+            if(!conditions[c].isValidCondition()) {
+                isValid = false;
+            }
+        }
+        if(selerrors().length > 0 ){
+            isValid = false;
+            selerrors.showAllMessages();
+        }
+        if(topLevelErrors().length > 0){
+            isValid = false;
+            topLevelErrors.showAllMessages();
+        }
+        if(self.dataGroup){
+            var dataGroupErrors = ko.validation.group(self.dataGroup, {deep:true});
+            if(dataGroupErrors().length > 0) {
+                isValid = false;
+                dataGroupErrors.showAllMessages();
+            }
+        }
+        
+        return isValid;
+    };
+    self.chartType.extend({
+        required: {'message': 'Select Chart Type'}
+    });
 };
 
+var TrackDataGroup = function(){
+    var self = this;    
+
+    self.hasGrouping = ko.observable(false);
+    self.groupByProp = ko.observable();
+
+    self.xAxisType = ko.observable();
+    //self.chartType = ko.observable();
+    self.timeseries = ko.observable();
+    self.xAxisProp = ko.observable();
+    self.timeseriesInterval = ko.observable();
+
+    self.hasGrouping.subscribe(function(newValue){
+        if(!newValue){
+            self.groupByProp(undefined);
+        }
+    });
+
+    self.timeseries.subscribe(function(newValue) {
+        if(!newValue) self.timeseriesInterval(undefined);
+    });
+
+    self.setProps = function(model){
+        self.xAxisProp(model.xAxisProp);
+        self.groupByProp(model.groupByProp);
+        self.timeseries(model.timeseries);
+        self.hasGrouping(model.groupByProp !== undefined);
+        self.timeseriesInterval(model.timeseriesInterval);
+        
+        //self.chartType(model.chartType);
+    };
+    self.getModel = function(){
+        var dataGroupModel = ko.toJS(self);
+        delete dataGroupModel.setProps;
+        delete dataGroupModel.getModel;
+        delete dataGroupModel.template;
+        return dataGroupModel;
+    }
+
+    self.groupByProp.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.hasGrouping();
+            }
+        }
+    });
+
+    self.timeseriesInterval.extend({
+        required: { 
+            message : 'Interval required',
+            onlyIf : function(){
+                return self.timeseries();
+            }
+        }
+    });
+
+    self.xAxisProp.extend({
+        required: { 
+            message : 'Select x axis'
+        }
+    });
+
+    //model && self.setProps(model);
+};
+
+var ComparisonDataGroup = function(model){
+    var self = this;
+
+    self.hasGrouping = ko.observable(false);
+    self.groupByProp = ko.observable();
+    self.groupByIntervalRaw = ko.observable();
+    self.groupByIntervalType = ko.observable('string');
+
+    self.hasDivideBy = ko.observable(false);
+    self.divideByProp = ko.observable();
+    self.divideByIntervalRaw = ko.observable();
+    self.divideByIntervalType = ko.observable('string');
+
+    //for line, scatter, area
+    
+    self.groupByInterval = ko.computed(function(){
+        return self.groupByIntervalType() !== 'time' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
+    });
+
+    self.divideByInterval = ko.computed(function(){
+        return self.divideByIntervalType() !== 'time' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
+    });
+
+    self.hasGrouping.subscribe(function(newValue){
+        if(!newValue){
+            self.groupByProp(undefined);
+            self.hasDivideBy(undefined);
+            self.groupByIntervalType('string');
+        }
+    });
+
+    self.hasDivideBy.subscribe(function(newValue){
+        if(!newValue){
+            self.divideByProp(undefined);
+            self.divideByIntervalType('string');
+        }
+    });
+
+    //string type groupby does not have interval.
+    self.groupByIntervalType.subscribe(function(newValue){
+        if(newValue === 'string'){
+            self.groupByIntervalRaw(undefined);
+        }
+    });
+    self.divideByIntervalType.subscribe(function(newValue){
+        if(newValue === 'string'){
+            self.divideByIntervalRaw(undefined);
+        }
+    });
+    
+    self.setProps = function(model){
+        self.groupByIntervalRaw(model.groupByIntervalRaw);
+        self.divideByIntervalRaw(model.divideByIntervalRaw);
+
+        self.groupByIntervalType(model.groupByIntervalType);
+        self.divideByIntervalType(model.divideByIntervalType);
+
+        self.groupByProp(model.groupByProp);
+        self.hasGrouping(model.groupByProp !== undefined);
+        
+        self.divideByProp(model.divideByProp);
+        self.hasDivideBy(model.divideByProp !== undefined);        
+    };
+
+    self.getModel = function(){
+        var dataGroupModel = ko.toJS(self);
+        delete dataGroupModel.setProps;
+        delete dataGroupModel.getModel;
+        return dataGroupModel;
+    }
+
+    self.groupByProp.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.hasGrouping();
+            }
+        }
+    });
+
+    self.divideByProp.extend({
+        required: { 
+            message : 'Enter Value',
+            onlyIf : function(){
+                return self.hasDivideBy();
+            }
+        }
+    });
+
+    //model && self.setProps(model);
+};
 var DataFilter = function(){
     var self = this;
     self.startDate = ko.observable();
@@ -487,126 +714,7 @@ var ItemsGroup = function(level, model, renderType){
     });
 };
 
-var DataGroup = function(model){
-    var self = this;
-    self.template = 'datagroup-template';
-    
 
-    self.hasGrouping = ko.observable(false);
-    self.groupByProp = ko.observable();
-    self.groupByIntervalRaw = ko.observable();
-    self.groupByIntervalType = ko.observable('string');
-
-    self.hasDivideBy = ko.observable(false);
-    self.divideByProp = ko.observable();
-    self.divideByIntervalRaw = ko.observable();
-    self.divideByIntervalType = ko.observable('string');
-
-    //for line, scatter, area
-    self.xAxisType = ko.observable();
-    self.chartType = ko.observable();
-    self.timeseries = ko.observable();
-    self.xAxisProp = ko.observable();
-    self.timeseriesInterval = ko.observable();
-
-    self.groupByInterval = ko.computed(function(){
-        return self.groupByIntervalType() !== 'time' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
-    });
-
-    self.divideByInterval = ko.computed(function(){
-        return self.divideByIntervalType() !== 'time' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
-    });
-
-    self.dataGroupType = ko.computed(function(){
-        return ['pie', 'bar'].indexOf(self.chartType())>-1?'comparison' : 'track';
-    });
-
-    self.hasGrouping.subscribe(function(newValue){
-        if(!newValue){
-            self.groupByProp(undefined);
-            self.hasDivideBy(undefined);
-            self.groupByIntervalType('string');
-        }
-    });
-
-    self.hasDivideBy.subscribe(function(newValue){
-        if(!newValue){
-            self.divideByProp(undefined);
-            self.divideByIntervalType('string');
-        }
-    });
-
-    self.groupByIntervalType.subscribe(function(newValue){
-        if(newValue === 'string'){
-            self.groupByIntervalRaw(undefined);
-        }
-    });
-    self.divideByIntervalType.subscribe(function(newValue){
-        if(newValue === 'string'){
-            self.divideByIntervalRaw(undefined);
-        }
-    });
-
-    self.timeseries.subscribe(function(newValue) {
-        if(!newValue) self.timeseriesInterval(undefined);
-    });
-
-    self.setProps = function(model){
-        self.xAxisProp(model.xAxisProp);
-        self.groupByProp(model.groupByProp);
-        self.timeseries(model.timeseries);
-        self.hasGrouping(model.groupByProp !== undefined);
-        self.timeseriesInterval(model.timeseriesInterval);
-        self.divideByProp(model.divideByProp);
-        self.hasDivideBy(model.divideByProp !== undefined);
-        self.chartType(model.chartType);
-    };
-    self.getModel = function(){
-        var dataGroupModel = ko.toJS(self);
-        delete dataGroupModel.setProps;
-        delete dataGroupModel.getModel;
-        delete dataGroupModel.template;
-        return dataGroupModel;
-    }
-
-    self.groupByProp.extend({
-        required: { 
-            message : 'Enter Value',
-            onlyIf : function(){
-                return self.hasGrouping();
-            }
-        }
-    });
-
-    self.divideByProp.extend({
-        required: { 
-            message : 'Enter Value',
-            onlyIf : function(){
-                return self.hasDivideBy();
-            }
-        }
-    });
-
-    self.timeseriesInterval.extend({
-        required: { 
-            message : 'Interval required',
-            onlyIf : function(){
-                return self.dataGroupType() === 'track' && self.timeseries();
-            }
-        }
-    });
-
-    self.xAxisProp.extend({
-        required: { 
-            message : 'Select x axis',
-            onlyIf : function(){
-                return self.dataGroupType() === 'track';
-            }
-        }
-    });
-
-    model && self.setProps(model);
-};
 var db = 'shopperstop';
 
 var DataRetriever = {
@@ -810,9 +918,11 @@ var Conditioner = {
         return filteredData;
     },
     getGraphData: function(segmentModel, inputData){
+        if(segmentModel.selection.length === 0)
+            throw "Selections required";
         this.properties = segmentModel.properties;
         var returnData;
-        switch (segmentModel.dataGroup.chartType){
+        switch (segmentModel.chartType){
             case 'line':
             case 'area':
             case 'scatter':
@@ -881,7 +991,7 @@ var Conditioner = {
                 numval = +num[selection.selectedProp] || 0;
             }
             else{
-                throw 'When you have aggregation (GroupBy), your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>';
+                throw 'For this visualization, you need Your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>';
             }
             return memo + numval; 
         }, 0);
@@ -894,6 +1004,19 @@ var Conditioner = {
         var filteredData = Conditioner.filterData(inputData, segmentModel.group);
         var result = [];
         var topLevelResponse = [];
+        var timeFormat = d3.time.format("%d.%b.%y %H:%M");
+        var numFormat = d3.format('.3s');
+        var formattingTypes = {
+            time: function(name){
+                return timeFormat(new Date(+name));
+            },
+            numeric: function(name){
+                return numFormat(+name);
+            },
+            string: function(name){
+                return name;
+            }
+        };
 
         if(segmentModel.dataGroup.hasGrouping){
             //var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
@@ -904,14 +1027,16 @@ var Conditioner = {
                 interval: segmentModel.dataGroup.groupByInterval,
                 intervalType: segmentModel.dataGroup.groupByIntervalType
             });
-
+            
+            
             if(!segmentModel.dataGroup.hasDivideBy){
                 response = [];
                 _.each(segmentModel.selection, function(sel){
                     result = [];
                     _.each(groupedData, function(groupedDataItem, groupName){
                         var val = Conditioner.reduceData(groupedDataItem,sel);
-
+                        groupName = formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName);
+                        
                         val >= 0 && result.push({
                             key: groupName,
                             value: val
@@ -949,7 +1074,10 @@ var Conditioner = {
                         var divData = _.groupBy(groupedDataItem, function(val){
                             return val[segmentModel.dataGroup.divideByProp];
                         });
+                        
+
                         _.each(divData, function(value, name){
+                            name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name);
                             result.push({
                                 key: name,
                                 value: Conditioner.reduceData(value, sel)
@@ -957,7 +1085,7 @@ var Conditioner = {
                         });
 
                         response.push({
-                            key : groupName,
+                            key : formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName),
                             groupLevel: 'B',
                             values: result
                         });

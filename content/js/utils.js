@@ -152,7 +152,6 @@
             m: 60 * 1000,
             s: 1000,
             d: 60 * 60 * 1000 * 24,
-            m: 60 * 60 * 1000 * 24 * 30,
             y: 60 * 60 * 1000 * 24 * 365,
             w: 60 * 60 * 1000 * 24 * 7
         };
@@ -260,6 +259,14 @@
         });
 
         return intervalGroup;
+    };
+
+    var contentToMongo = function(conditions){
+
+        function processCondition(condition){
+
+        }
+        
     };
 
     drata.ns('js').extend({
