@@ -19,7 +19,7 @@
                 console.log('area chart drawn');
                 var container = d3.select(this);
 
-                if(_xAxisType === 'time'){
+                if(_xAxisType === 'date'){
                     _.each(data, function(item){
                         _.each(item.values, function(dataPoint){
                             dataPoint.x = new Date(dataPoint.x);

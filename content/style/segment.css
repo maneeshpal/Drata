@@ -28,7 +28,7 @@ i.complexcombo-toggle{
     margin-left:-6px;
 }
 .conditioncombo{
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 .complexcombo .row .columns, .complexcombo .row .column, .conditioncombo .row .columns, .conditioncombo .row .column {
   padding-left: .6rem; /* change the values to anything that you want */

@@ -79,7 +79,7 @@ var tempData = {
                 //hasCoupon :  Math.random() * 10 > 7,
                 //discount: Math.abs(Math.floor(y[1])),
                 color : colors[Math.abs(Math.floor(y[1]%5))],
-                //errorCount: Math.abs(Math.floor(y[2]% 10)),
+                errorCount: Math.abs(Math.floor(y[2]% 10)),
                 //pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
                 tax : Math.abs(y[0]) * 8,
                 shippingPrice: Math.abs(y[0]) * 12,

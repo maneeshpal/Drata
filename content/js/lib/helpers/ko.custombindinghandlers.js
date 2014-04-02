@@ -45,10 +45,15 @@
             $combolist.hide();
             if(!config.allowCustom){
                 var sel = self.selectedValue();
+                var selExists;
                 //need to fix property casing
-                var selExists = self.availableOptions().some(function(opt){
-                    return opt.toLowerCase().indexOf(sel) > -1;
-                });
+                if(sel){
+                    sel = sel.toLowerCase();
+                    selExists = self.availableOptions().some(function(opt){
+                        return opt.toLowerCase().indexOf(sel) > -1;
+                    });
+                }
+                
                 if(!selExists) {
                     self.selectedValue('');
                     $elem.removeClass('combo-error');

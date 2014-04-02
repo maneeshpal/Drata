@@ -78,7 +78,8 @@ var Widget = function(widgetModel, index){
 
     self.loadWidget = function(){
         self.parseError(undefined);
-        DataRetriever.getData({dataKey: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(inputData){
+
+        DataRetriever.getData({applyClientfilters:false, dataKey: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(inputData){
             try{
                 chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
             }
@@ -268,7 +269,7 @@ var WidgetProcessor = function(){
         }
         else if(self.processSegment){
             DataRetriever.getUniqueProperties(newValue, function(properties){
-                self.segment.initialize({properties:properties});
+                self.segment.initialize({propertyTypes:properties});
             });
         }
     });
@@ -293,6 +294,7 @@ var WidgetProcessor = function(){
         $('#graphBuilder').removeClass('showme');
         //self.newWidget(true);
     };
+    
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
         var clonemodel = drata.utils.clone(model);
         self.processSegment = false;
@@ -305,6 +307,7 @@ var WidgetProcessor = function(){
         self.onWidgetCancel = onWidgetCancel;
         self.handleGraphPreview(clonemodel.segmentModel);
     };
+
     self.widgetCancel = function() {
         self.parseError(undefined);
         self.onWidgetUpdate = undefined;
@@ -317,7 +320,7 @@ var WidgetProcessor = function(){
     var chart, _t;
     self.handleGraphPreview = function(segmentModel){
         self.parseError(undefined);
-        DataRetriever.getData({dataKey: self.selectedDataKey(), segment: segmentModel}, function(inputData){
+        DataRetriever.getData({applyClientfilters: false, dataKey: self.selectedDataKey(), segment: segmentModel}, function(inputData){
             var data;
             try{
                 data = Conditioner.getGraphData(segmentModel, inputData);

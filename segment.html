@@ -15,6 +15,9 @@
         .graph {
             height:200px;
         }
+        textarea{
+            font-size:13px;
+        }
         /*Modal segment*/
         .mymodal-wrapper.showme {
             opacity: 1;
@@ -44,9 +47,8 @@
 <body>
 <div id="segmentProcessor">
     <div class="row">
-        <button data-bind="click: process" class="button small">process</button>
-        <!-- ko template: {name: 'segment-template', data: segment} -->
-            <!-- /ko -->
+        
+        
     </div>
     <div class="row">
         <div class="small-6 columns">
@@ -57,8 +59,11 @@
         <h6>Input</h6>
             <textarea style="height:300px" data-bind="text:rawData"></textarea>
         </div>
-        </div>
-        <div class="row">
+    </div>
+    <button data-bind="click: process" class="button small">process</button>
+    <!-- ko template: {name: 'segment-template', data: segment} -->
+            <!-- /ko -->
+    <div class="row">
         <div class="small-4 columns">
             <div id="graph" class="graph">
                 <svg></svg>

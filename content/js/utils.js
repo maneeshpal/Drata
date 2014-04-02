@@ -169,7 +169,7 @@
     var flatten = function(data) {
         var result = {};
         function recurse (cur, prop) {
-            if (Object(cur) !== cur) {
+            if (Object(cur) !== cur || _.isDate(cur)) {
                 result[prop] = cur;
             } else if (Array.isArray(cur)) {
                 //  for(var i=0, l=cur.length; i<l; i++)
@@ -194,22 +194,22 @@
         var result;
         switch (operation){
             case '>':
-                result = +left > +right;
+                result = left > right;
                 break;
             case '<':
-                result = +left < +right;
+                result = left < right;
                 break;
             case '<=':
-                result = +left <= +right;
+                result = left <= right;
                 break;
             case '=':
-                result = (left === right) || (+left === +right);
+                result = (left === right);
                 break;
             case '!=':
                 result = (left !== right);
                 break;
             case '>=':
-                result = +left >= +right;
+                result = left >= right;
                 break;
             case 'exists':
                 result = left !== undefined;
@@ -245,7 +245,7 @@
             val = item[params.property];
             //TODO: Clean this 
             switch(params.intervalType){
-                case 'time':
+                case 'date':
                     groupBy = Math.floor(+(new Date(val))/ +params.interval) * (+params.interval);
                 break;
                 case 'numeric':
@@ -257,32 +257,131 @@
             }
             return groupBy;
         });
-
         return intervalGroup;
     };
 
-    var contentToMongo = function(conditions){
+    var mongoSymbolMap = {
+        '<': '$lt',
+        '>': '$gt',
+        '<=': '$lte',
+        '>=': '$gte',
+        '!=': '$ne',
+        'exists': '$exists'
+    };
 
-        function processCondition(condition){
+    var getMongoQuery = function(conditions){
+        if(!conditions || conditions.length === 0)
+            return {};
+        var result = processCondition(conditions[0]);
 
+        var fl = undefined;
+        //result[fl] = [];
+        for(var i=1;i<conditions.length;i++){
+            var c = conditions[i];
+            var logic = '$'+ c.logic;
+            if(logic !== fl){
+                var x = clone(result);
+                result = {};
+                result[logic] = [];
+                result[logic].push(x);
+            }
+            result[logic].push(processCondition(c));
+            fl = logic;
         }
-        
+        return result;
+    };
+
+    var processCondition = function(c){
+        if(c.isComplex == 'false'){
+            var a = {}, b = {};
+            var mc
+            switch(c.operation){
+                case '=':
+                    b = c.value;
+                    break;
+                case 'exists':
+                    b[mongoSymbolMap[c.operation]] = true;
+                    break;
+                default :
+                    b[mongoSymbolMap[c.operation]] = c.value;
+                    break;
+            }
+            a[c.selection.selectedProp] = b;
+            return a;
+        }
+        else{
+           return getMongoQuery(c.groups);
+        }
+    };
+
+    var getType = function(val){
+        if(_.isNumber(val))
+            return 'number';
+        if(_.isString(val))
+            return 'string';
+        if(_.isBoolean(val))
+            return 'bool';
+        if(_.isDate(val))
+            return 'date';
+
+        return 'unknown';
+    };
+
+
+    var getUniqueProperties = function(data){
+        var flattened = data.map(function(d){
+            return flatten(d);  
+        });
+        var propertyTypes = {};
+        var max = Math.min(flattened.length -1, 40);
+        for (var i = max; i >= 0; i--) {
+            var dataValue = flattened[i];
+            for (var property in dataValue) {
+                if(!propertyTypes[property]){
+                    propertyTypes[property] = [];
+                }
+                propertyTypes[property].push(getType(dataValue[property]));
+                //(dataValue.hasOwnProperty(property) && returnArr.indexOf(property) === -1) && returnArr.push(property);
+            }
+        };
+        var uniqueTypes = [];
+        for (var property in propertyTypes) {
+            var counts = _.countBy(propertyTypes[property], function(pType){
+                return pType;
+            });
+            var returnType = 'unknown', tempCount = 0;
+            for(var i in counts){
+                if(counts.hasOwnProperty(i) && i !== 'unknown'){
+                    if(tempCount < counts[i]){
+                        returnType = i;
+                        tempCount = counts[i];
+                    }    
+                }
+            }
+            uniqueTypes[property] = returnType;
+        }
+       
+        return uniqueTypes;
     };
 
     drata.ns('js').extend({
         logmsg : false
     });
 
+    window.debug = {};
+
     drata.ns('global').extend({
         conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like'],
         arithmeticOperations : ['+', '-', '*','/'],
         groupingOptions : ['value','count', 'sum', 'avg'],
-        xAxisTypes : ['time','numeric','currency'],
+        xAxisTypes : ['date','numeric','currency'],
         chartTypes : ['line', 'area', 'scatter', 'pie','bar'],
         logics : ['and', 'or'],
-        intervalTypes: ['string', 'time', 'numeric'],
-        numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/']
+        propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
+        numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
+        timeframes : ['Last Month', 'Last Quarter', 'Last Year']
     });
+
     drata.ns('utils').extend({
         format: format,
         extend: extend,
@@ -294,7 +393,9 @@
         flatten: flatten,
         parseTime: parseTime,
         calc: calc,
-        divideDataByInterval: divideDataByInterval
+        divideDataByInterval: divideDataByInterval,
+        getMongoQuery: getMongoQuery,
+        getUniqueProperties: getUniqueProperties
     });
 })(this);
 

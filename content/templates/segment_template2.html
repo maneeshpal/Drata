@@ -1,5 +1,5 @@
 <script type="text/html" id="segment-template">
-    
+
 <div class="row">
     <div class="large-8 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
@@ -26,8 +26,44 @@
 </div>
 <!-- /ko -->
 
+<!-- ko template: {name: 'datafilter-template', data: dataFilter} -->
+<!-- /ko -->
+
 <!-- ko template: {name: 'group-template', data: conditionGroup} -->
 <!-- /ko -->
+
+</script>
+<script type="text/html" id="datafilter-template">
+    <fieldset>
+        <legend>Select Date Range </legend>
+        <div class="row">
+            <div class="large-4 columns">
+                <input type="radio" name="datafilter" id="rbexact" /><label for="rbexact">For the past</label>
+            </div>
+            <div class="large-8 columns">
+                <input type="text" placeholder="eg: 2d3h (For the past 2 days 3 hours)" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="large-4 small-12 columns">
+                <input type="radio" name="datafilter" id="rbrange" /><label for="rbrange">For a date range of</label>
+            </div>
+            <div class="large-4 small-6 columns">
+                <input type="date" data-bind="value:startDate" placeholder="Start Date"></input>
+            </div>
+            <div class="large-4 small-6 columns">
+                <input type="date" data-bind="value:endDate" placeholder="End Date"></input>
+            </div>
+        </div>
+        <div class="row">
+            <div class="large-4 columns">
+                <input type="radio" name="datafilter" id="rbpast" /><label for="rbpast">In the past</label>
+            </div>
+            <div class="large-8 columns">
+                 <select data-bind="options: drata.global.timeframes"></select>
+            </div>
+        </div>
+    </fieldset>
 </script>
 <script type="text/html" id="selection-template">
 <div class="row">
@@ -58,9 +94,9 @@
                 <input type="checkbox" data-bind="checked:hasGrouping" />
                 &nbsp;Groupby</label>
         </div>
-        <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
+        <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string' || groupByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
         </div>
-        <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string'  -->
+        <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string' && groupByIntervalType() !== 'unknown'  -->
         <div class="small-3 columns">
              <input type="text" data-bind="value:groupByIntervalRaw" placeholder="Interval"></input>
         </div>
@@ -73,9 +109,9 @@
             <label class="right inline">
             <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by</label>
         </div>
-        <div class="columns" data-bind="css: {'small-6' : divideByIntervalType() !== 'string','small-9' : divideByIntervalType() === 'string'}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType , prefixOptions: drata.global.intervalTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
+        <div class="columns" data-bind="css: {'small-6' : divideByIntervalType() !== 'string','small-9' : divideByIntervalType() === 'string' || divideByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
         </div>
-        <!-- ko if: hasDivideBy() && divideByIntervalType() !== 'string'  -->
+        <!-- ko if: hasDivideBy() && divideByIntervalType() !== 'string' && divideByIntervalType() !== 'unknown'  -->
         <div class="small-3 columns">
              <input type="text" data-bind="value:divideByIntervalRaw" placeholder="Interval"></input>
         </div>
@@ -143,7 +179,7 @@
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
                 <!-- ko if: !isComplex() -->
-                <div class="small-12 columns" data-bind="comboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
                 </i>
@@ -218,14 +254,13 @@
     <div class="small-12 columns">
         <fieldset>
             <legend>Conditions</legend>
-             <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
+            <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
             <div class="row">
                 <div class="small-12 columns conditioncombo">
                     <!-- ko template: {name : 'condition-group-template', data: currentBinding, afterRender: afterRender, beforeRemove : beforeLeave} -->
                     <!-- /ko -->
                 </div>
             </div>
-            
         </fieldset>
     </div>
 </div>
@@ -263,13 +298,15 @@
             <select data-bind="options:drata.global.logics, value:logic"></select>
         </div>
         <!-- ko if: !isComplex() -->
-        <div class="small-4 columns"  data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
+        <div class="small-3 columns"  data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
         </div>
         <div class="small-2 columns">
             <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
         </div>
-        <div class="small-2 columns">
-            <input type="text" data-bind="value:value, visible: operation() !== 'exists'" placeholder="value"></input>
+        <div class="small-3 columns" data-bind="visible: operation() !== 'exists'">
+            <div data-bind=" ddComboBox :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, options:availableValues,optionsCaption:'value'}">
+                </div>
+            <!-- <input type="text" data-bind="value:value, visible: operation() !== 'exists'" placeholder="value"></input> -->
         </div>
         <!-- /ko -->
         <!-- ko if: isComplex -->

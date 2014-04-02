@@ -116,7 +116,7 @@
                         return '$' + f(d);
                     };
                     break;
-                case 'time':
+                case 'date':
                     _scale = d3.time.scale();
                     _tickFormat = d3.time.format("%Y %b %d %H:%M");
                     break;

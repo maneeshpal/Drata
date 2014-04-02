@@ -1,12 +1,13 @@
 
+
 var Segmentor = function(model){
     var self = this;
+    self.propertyTypes = {};
     self.properties = ko.observableArray();
     self.level = 0;
-    self.filteredData = ko.observable();
     self.outputData = ko.observable();
-    self.conditionGroup = new ConditionGroup(self.level + 1, undefined, 'Condition', self.properties);
-    self.selectionGroup = new ItemsGroup(self.level + 1, undefined, 'Selection');
+    self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition', propertyTypes: self.propertyTypes });
+    self.selectionGroup = new SelectionGroup({ level: self.level + 1, propertyTypes: self.propertyTypes });
 
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
@@ -14,9 +15,19 @@ var Segmentor = function(model){
 
     var compDataGroup, trackDataGroup, currentDataGroupTemplate;
     self.dataGroup = undefined;
+    self.setPropertyTypes = function(propertyTypes){
+        var propList = [];
+        for(var prop in propertyTypes){
+            if(propertyTypes.hasOwnProperty(prop)){
+                propList.push(prop);
+                self.propertyTypes[prop] = ko.observable(propertyTypes[prop]);  
+            }
+        }
+        self.properties(propList);
+    };
     self.initialize = function(model){
         model = model || {};
-        self.properties(model.properties);
+        self.setPropertyTypes(model.propertyTypes);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataFilter.prefill(model.dataFilter || {});
@@ -29,12 +40,12 @@ var Segmentor = function(model){
             case 'line':
             case 'area':
             case 'scatter':
-                self.dataGroup =  compDataGroup || new TrackDataGroup();
+                self.dataGroup =  compDataGroup || new TrackDataGroup({propertyTypes: self.propertyTypes});
                 currentDataGroupTemplate = 'track-datagroup-template';
                 break;
             case 'pie':
             case 'bar':
-                self.dataGroup =  trackDataGroup || new ComparisonDataGroup();
+                self.dataGroup =  trackDataGroup || new ComparisonDataGroup({propertyTypes: self.propertyTypes});
                 currentDataGroupTemplate = 'comp-datagroup-template';
                 break;
         }
@@ -52,7 +63,7 @@ var Segmentor = function(model){
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
-            properties: self.properties(),
+            propertyTypes: ko.toJS(self.propertyTypes),
             dataFilter: self.dataFilter.getModel(),
             chartType: self.chartType()
         };
@@ -62,7 +73,7 @@ var Segmentor = function(model){
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
-            properties: self.properties(),
+            propertyTypes: ko.toJS(self.propertyTypes),
             dataFilter: self.dataFilter.getModel(),
             chartType: self.chartType()
         };
@@ -166,63 +177,67 @@ var TrackDataGroup = function(){
     //model && self.setProps(model);
 };
 
-var ComparisonDataGroup = function(model){
+var ComparisonDataGroup = function(options){
     var self = this;
 
     self.hasGrouping = ko.observable(false);
     self.groupByProp = ko.observable();
     self.groupByIntervalRaw = ko.observable();
-    self.groupByIntervalType = ko.observable('string');
+    self._giType = ko.observable();
+    
+    self.groupByIntervalType = ko.computed({
+        read: function(){
+            var newType = options.propertyTypes[self.groupByProp()];
+            return newType? newType() : 'unknown';
+        },
+        write: function(newValue){
+            if(newValue === 'string' || newValue === 'unknown'){
+                self.groupByIntervalRaw(undefined);
+            }
+            newValue && options.propertyTypes[self.groupByProp()](newValue);
+        }
+    });
 
     self.hasDivideBy = ko.observable(false);
     self.divideByProp = ko.observable();
     self.divideByIntervalRaw = ko.observable();
-    self.divideByIntervalType = ko.observable('string');
+    self.divideByIntervalType = ko.computed({
+        read: function(){
+            var newType = options.propertyTypes[self.divideByProp()];
+            return newType? newType() : 'unknown';
+        },
+        write: function(newValue){
+            if(newValue === 'string' || newValue === 'unknown'){
+                self.divideByIntervalRaw(undefined);
+            }
+            newValue && options.propertyTypes[self.divideByProp()](newValue);
+        }
+    });
 
-    //for line, scatter, area
-    
     self.groupByInterval = ko.computed(function(){
-        return self.groupByIntervalType() !== 'time' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
+        return self.groupByIntervalType() !== 'date' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
     });
 
     self.divideByInterval = ko.computed(function(){
-        return self.divideByIntervalType() !== 'time' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
+        return self.divideByIntervalType() !== 'date' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
     });
 
     self.hasGrouping.subscribe(function(newValue){
         if(!newValue){
             self.groupByProp(undefined);
             self.hasDivideBy(undefined);
-            self.groupByIntervalType('string');
         }
     });
 
     self.hasDivideBy.subscribe(function(newValue){
         if(!newValue){
             self.divideByProp(undefined);
-            self.divideByIntervalType('string');
         }
     });
 
-    //string type groupby does not have interval.
-    self.groupByIntervalType.subscribe(function(newValue){
-        if(newValue === 'string'){
-            self.groupByIntervalRaw(undefined);
-        }
-    });
-    self.divideByIntervalType.subscribe(function(newValue){
-        if(newValue === 'string'){
-            self.divideByIntervalRaw(undefined);
-        }
-    });
-    
     self.setProps = function(model){
         self.groupByIntervalRaw(model.groupByIntervalRaw);
         self.divideByIntervalRaw(model.divideByIntervalRaw);
-
-        self.groupByIntervalType(model.groupByIntervalType);
-        self.divideByIntervalType(model.divideByIntervalType);
-
         self.groupByProp(model.groupByProp);
         self.hasGrouping(model.groupByProp !== undefined);
         
@@ -270,7 +285,7 @@ var DataFilter = function(){
     };
     self.prefill = function(model){
         self.startDate(model.startDate);
-        self.startDate(model.endDate);
+        self.endDate(model.endDate);
     }
 };
 
@@ -278,18 +293,46 @@ var Condition = function(options){
     var self = this;
     self.level = options.level;
     self.logic = ko.observable('and');
-    self.selection = new Selection(self.level+1, undefined, 'topCondition');
+    self.selection = new Selection({ level: options.level+1, renderType: 'topCondition', propertyTypes: options.propertyTypes });
     self.operation = ko.observable('=');
     self.value = ko.observable();
     self.conditions = ko.observableArray();
 
+    var _valType = ko.observable('unknown');
+    //propertytype
+    self.valType = ko.computed({
+        read: function(){
+            if(self.selection.isComplex())
+                return;
+
+            var newType = options.propertyTypes[self.selection.selectedProp()];
+            return newType? newType() : _valType();
+        },
+        write: function(newValue){
+            _valType(newValue);
+            
+            if(self.selection.isComplex())
+                return;
+
+            var propExists = options.propertyTypes[self.selection.selectedProp()] !== undefined;
+            if(propExists) options.propertyTypes[self.selection.selectedProp()](newValue);
+        }
+    });
+    
+    self.availableValues = ko.computed(function(){
+        if(self.valType() === 'bool'){
+            return ['true', 'false'];
+        }
+        return [];
+    });
+
     self.addCondition = function(){
-        self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand}));
+        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, propertyTypes: options.propertyTypes }));
         console.log('added simple condition');
     };
     
     self.addComplexCondition = function(){
-        self.conditions.push(new Condition({level:self.level+1,onExpand: options.onExpand, expand:true}));
+        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true, propertyTypes: options.propertyTypes }));
         console.log('added complex condition');
     };
     
@@ -321,7 +364,7 @@ var Condition = function(options){
         self.conditions(ko.utils.arrayMap(
             m,
             function(groupModel) {
-                return new Condition({level:self.level+1, model:groupModel, onExpand: options.onExpand}); 
+                return new Condition({ level:options.level+1, model:groupModel, onExpand: options.onExpand, propertyTypes: options.propertyTypes }); 
             }
         )); 
     }
@@ -337,7 +380,8 @@ var Condition = function(options){
             selection: self.selection.getModel(),
             isComplex : self.isComplex(),
             operation: self.operation(),
-            value : self.value()
+            value : self.value(),
+            valType: self.valType()
         }
     };
 
@@ -411,9 +455,9 @@ var Condition = function(options){
     options.expand && self.expand();
 };
 
-var ConditionGroup = function(level, model, xxx){
+var ConditionGroup = function(options){
     var self = this;
-    self.level =level;
+    self.level =options.level;
     self.conditions = ko.observableArray();
     self.trace = ko.observableArray();
     self.currentBinding = ko.observable(self);
@@ -442,15 +486,15 @@ var ConditionGroup = function(level, model, xxx){
         self.conditions(ko.utils.arrayMap(
             model,
             function(cond) {
-              return new Condition({level:self.level+1,model: cond, onExpand:self.onExpand.bind(self)});
+              return new Condition({ level:options.level+1,model: cond, onExpand:self.onExpand.bind(self), propertyTypes: options.propertyTypes });
             }
         ));
     };
     self.addCondition = function(){
-        self.conditions.push(new Condition({level:self.level+1, onExpand: self.onExpand.bind(self)}));
+        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), propertyTypes: options.propertyTypes }));
     };
     self.addComplexCondition = function(){
-        self.conditions.push(new Condition({level:self.level+1, onExpand: self.onExpand.bind(self), expand:true}));
+        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), expand:true, propertyTypes: options.propertyTypes }));
     };
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
@@ -519,20 +563,33 @@ var ConditionGroup = function(level, model, xxx){
         
         return expression;
     });
-
 };
 
-var Selection = function(level, model, renderType){
+var Selection = function(options){
     var self = this;
-    self.level = level;
+    self.level = options.level;
+    self.renderType = options.renderType;
     self.logic = ko.observable('+');
     self.selections = ko.observableArray();
     self.aliasName = ko.observable();
     self.groupBy = ko.observable();
     self.selectedProp = ko.observable();
+    // var _valType = ko.observable('unknown');
+    // //propertytype
+    // self.valType = ko.computed({
+    //     read: function(){
+    //         var newType = options.propertyTypes[self.selectedProp()];
+    //         return newType? newType() : _valType();
+    //     },
+    //     write: function(newValue){
+    //         _valType(newValue);
+    //         var propExists = options.propertyTypes[self.selectedProp()] !== undefined;
+    //         if(propExists) options.propertyTypes[self.selectedProp()](newValue);
+    //     }
+    // });
 
     self.addSelection = function(){
-        self.selections.push(new Selection(self.level+1, undefined, 'childSelection'));
+        self.selections.push(new Selection({level:options.level+1, renderType: 'childSelection'}));
     };
     
     self.removeSelection = function(selection){
@@ -549,17 +606,16 @@ var Selection = function(level, model, renderType){
         return !self.showComplex();
     });
 
-    self.renderType = renderType;
+    //self.renderType = renderType;
     self.toggleComplex = function(){
         self.showComplex(!self.showComplex());
         if(self.showComplex() && !self.isComplex()){
             var selectedProp = self.selectedProp();
             if(selectedProp){
-                self.selections.push(new Selection(self.level+1, {selectedProp:selectedProp}, 'childSelection'));
+                self.selections.push(new Selection({ level:options.level+1, model: { selectedProp:selectedProp }, renderType: 'childSelection' }));
             }
             self.selectedProp('');
-        }
-        
+        }        
     };
     
     self.selectedProp.subscribe(function(newValue){
@@ -602,7 +658,7 @@ var Selection = function(level, model, renderType){
         self.selections(ko.utils.arrayMap(
             m.groups,
             function(groupModel) {
-                return new Selection(self.level+1, groupModel, 'childSelection'); 
+                return new Selection({ level: options.level+1, model: groupModel, renderType: 'childSelection' }); 
             }
         )); 
     };
@@ -618,7 +674,8 @@ var Selection = function(level, model, renderType){
             aliasName: self.aliasName(),
             groupBy: self.groupBy(),
             selectedProp: self.selectedProp(),
-            isComplex : self.isComplex()
+            isComplex : self.isComplex() //,
+            //propertyType: self.propertyType()
         }
     };
     self.expression = ko.computed(function(){
@@ -634,9 +691,6 @@ var Selection = function(level, model, renderType){
         expression = '(' + expression + ')';
         return expression;
     });
-    if(model){
-        self.prefill(model);
-    }
 
     self.selectedProp.extend({
         required:{
@@ -650,19 +704,21 @@ var Selection = function(level, model, renderType){
         required:{
             message: 'Select alias',
             onlyIf : function(){
-                return self.renderType === 'topSelection' && self.isComplex();
+                return options.renderType === 'topSelection' && self.isComplex();
             }
         }
     });
+
+    options.model && self.prefill(options.model);
 };
 
-var ItemsGroup = function(level, model, renderType){
+var SelectionGroup = function(options){
     var self = this;
-    self.level =level;
+    //self.level =level;
     self.items = ko.observableArray();
-    var itemFunc = (renderType === 'Condition') ? Condition : Selection;
+    //var itemFunc = (renderType === 'Condition') ? ;
     self.addItem = function(){
-        self.items.push(new itemFunc(self.level+1, undefined, 'top' + renderType));
+        self.items.push(new Selection({ level: options.level+1, model: undefined, renderType: 'topSelection' }));
     };
     
     self.removeItem = function(item){
@@ -673,7 +729,7 @@ var ItemsGroup = function(level, model, renderType){
         self.items(ko.utils.arrayMap(
             model,
             function(sel) {
-              return new itemFunc(self.level+1, sel, 'top' + renderType);
+              return new Selection({ level: options.level+1, model: sel, renderType: 'topSelection' });
             }
         ));
     };
@@ -690,7 +746,7 @@ var ItemsGroup = function(level, model, renderType){
       });
     };
 
-    model && self.prefill(model);
+    //model && self.prefill(model);
 
     self.getModel = function(){
         var returnGroups = [];
@@ -719,71 +775,82 @@ var db = 'shopperstop';
 
 var DataRetriever = {
     getUniqueProperties : function(dataKey, callback){
-        callback([
-          "price",
-          "geography",
-          "timestamp",
-          "sex",
-          "color",
-          "tax",
-          "shippingPrice"
-        ]);
+        // callback([
+        //   "price",
+        //   "geography",
+        //   "timestamp",
+        //   "sex",
+        //   "color",
+        //   "tax",
+        //   "shippingPrice"
+        // ]);
 
-        // $.ajax({
-        //     type: "GET",
-        //     url: 'http://localhost:3000/'+ db +'/'+ dataKey +'/properties',
-        //     dataType: 'json',
-        //     headers: { 'Access-Control-Allow-Origin': '*' },
-        //     success: function(response){
-        //         callback && callback(response);
-        //     }
-        // });
+        $.ajax({
+            type: "GET",
+            url: 'http://localhost:3000/'+ db +'/'+ dataKey +'/properties',
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            success: function(response){
+                callback && callback(response);
+            }
+        });
     },
     getDataKeys : function(callback){
-        callback(['key1', 'key2', 'Shopper Stop']);
-        // $.ajax({
-        //     type: "GET",
-        //     url: 'http://localhost:3000/'+ db +'/keys',
-        //     dataType: 'json',
-        //     headers: { 'Access-Control-Allow-Origin': '*' },
-        //     success: function(response){
-        //         callback && callback(response);
-        //     }
-        // });
+        //callback(['key1', 'key2', 'Shopper Stop']);
+        $.ajax({
+            type: "GET",
+            url: 'http://localhost:3000/'+ db +'/keys',
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            success: function(response){
+                callback && callback(response);
+            }
+        });
     },
     getData : function(model,callback){
-        if(!this._t){
-            this._t = tempData.randomProps(10);    
-        }
-        console.log(this._t);
-        callback(this._t);
-        // $.ajax({
-        //     type: "POST",
-        //     url: 'http://localhost:3000/'+ db +'/'+ model.dataKey,
-        //     data: {
-        //         selection: model.segment.selection,
-        //         dataGroup: model.segment.dataGroup,
-        //         dataFilter: model.segment.dataFilter,
-        //         group: model.segment.group
-        //     },
-        //     dataType: 'json',
-        //     headers: { 'Access-Control-Allow-Origin': '*' },
-        //     success: function(response){
-        //         var result = [];
-        //         for(var i = 0; i< response.length; i++){
-        //             result.push(drata.utils.flatten(response[i]));
-        //         }
-        //         console.log('total records :'+result.length);
-        //         callback && callback(result);
-        //     }
-        // });
+        // if(!this._t){
+        //     this._t = tempData.randomProps(10);    
+        // }
+        // console.log(this._t);
+        //callback(this._t);
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost:3000/'+ db +'/'+ model.dataKey,
+            data: {
+                selection: model.segment.selection,
+                dataGroup: model.segment.dataGroup,
+                dataFilter: model.segment.dataFilter,
+                group: model.segment.group
+            },
+            dataType: 'json',
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            success: function(response){
+                var result = [];
+                for(var i = 0; i< response.length; i++){
+                    result.push(drata.utils.flatten(response[i]));
+                }
+                //remove this
+                window.debug.dataresponse = result;
+
+                console.log('total records :'+result.length);
+                //Apply filters client side if the response isnt already filtered.
+                if(model.applyClientfilters){
+                    result = Conditioner.filterData(result, model.segmentModel.group);
+                }
+                callback && callback(result);
+            }
+        });
     }
 };
 
 var Conditioner = {
-    calc : function(left, operation, right){
+    calc : function(left, operation, right, type){
         if(left === undefined) return right;
         if(right === undefined) return left;
+
+        if(type === 'numeric') right = +right;
+        if(type === 'bool') right = right == 'true';
+
         
         var hasError = (drata.global.numericOperations.indexOf(operation) > -1 && (isNaN(+left) || isNaN(+right)));
         var result;
@@ -814,23 +881,27 @@ var Conditioner = {
             logic : boolValues[0].logic
         };
     },
+    hasProperty: function(name){
+        return this.propertyTypes[name];
+    },
     processSimple : function(obj, group){
         var complexValue, complexType;
         if(group.groupType === 'selection'){
             //perform arithmetic operation on selections
-            if(this.properties.indexOf(group.selectedProp) === -1 && _.isNumber(+group.selectedProp)){
-                complexValue = +group.selectedProp;
-            }else{
-                complexValue = obj[group.selectedProp];    
-            }
+            complexValue = isNaN(+group.selectedProp) ? obj[group.selectedProp] : +group.selectedProp;
+            // if(!isNaN(+group.selectedProp)){
+            //     complexValue = +group.selectedProp;
+            // }else{
+            //     complexValue = obj[group.selectedProp];    
+            // }
         }
         else{
             if(group.selection.isComplex){
                 complexType = this.processGroup(obj, group.selection);
-                complexValue = this.calc(complexType.value, group.operation, group.value);
+                complexValue = this.calc(complexType.value, group.operation, group.value, group.valType);
             }
             else{
-                complexValue = this.calc(obj[group.selection.selectedProp], group.operation, group.value);
+                complexValue = this.calc(obj[group.selection.selectedProp], group.operation, group.value, group.valType);
             }
         }
         
@@ -911,16 +982,15 @@ var Conditioner = {
     },
     filterData : function(data, conditions){
         if (!conditions || conditions.length === 0) return data;
-        var filteredData = data.filter(function(obj, index){
+        return data.filter(function(obj, index){
             var result = this.processGroups(obj, conditions);
             return result.value;
         }.bind(this));
-        return filteredData;
     },
     getGraphData: function(segmentModel, inputData){
         if(segmentModel.selection.length === 0)
             throw "Selections required";
-        this.properties = segmentModel.properties;
+        this.propertyTypes = segmentModel.propertyTypes;
         var returnData;
         switch (segmentModel.chartType){
             case 'line':
@@ -933,28 +1003,27 @@ var Conditioner = {
                 returnData = this.getPieData(segmentModel, inputData);
                 break;
         }
-        console.log(returnData);
+        window.debug.chartdata = returnData;
         return returnData;
     },
     getLineCharData: function(segmentModel, inputData){
         var result = [];
         var groupCounter = 0;
-        var filteredData = Conditioner.filterData(inputData, segmentModel.group);
         var groupedData;
         
         if(segmentModel.dataGroup.hasGrouping){
-            groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
+            groupedData = _.groupBy(inputData, function(item){return item[segmentModel.dataGroup.groupByProp]});
         }
-        _.each(segmentModel.selection, function(selectionGroup){
+        _.each(segmentModel.selection, function(sel){
            var values;
             if(segmentModel.dataGroup.hasGrouping){
-                values = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, selectionGroup);
+                values = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, sel);
             }
             else{
-                values = Conditioner.groupByInterval(filteredData, segmentModel.dataGroup, selectionGroup);
+                values = Conditioner.groupByInterval(inputData, segmentModel.dataGroup, sel);
             }
             result.push({
-                key: selectionGroup.isComplex ? selectionGroup.aliasName || 'selection' : selectionGroup.selectedProp,
+                key: sel.isComplex ? sel.aliasName || 'selection' : sel.selectedProp,
                 values: values
             });
         });
@@ -1001,13 +1070,12 @@ var Conditioner = {
     getPieData: function(segmentModel, inputData){
         var response = [];
         var groupCounter = 0;
-        var filteredData = Conditioner.filterData(inputData, segmentModel.group);
         var result = [];
         var topLevelResponse = [];
         var timeFormat = d3.time.format("%d.%b.%y %H:%M");
         var numFormat = d3.format('.3s');
         var formattingTypes = {
-            time: function(name){
+            date: function(name){
                 return timeFormat(new Date(+name));
             },
             numeric: function(name){
@@ -1019,10 +1087,8 @@ var Conditioner = {
         };
 
         if(segmentModel.dataGroup.hasGrouping){
-            //var groupedData = _.groupBy(filteredData, function(item){return item[segmentModel.dataGroup.groupByProp]});
-            
             var groupedData = drata.utils.divideDataByInterval({
-                data: filteredData,
+                data: inputData,
                 property: segmentModel.dataGroup.groupByProp,
                 interval: segmentModel.dataGroup.groupByInterval,
                 intervalType: segmentModel.dataGroup.groupByIntervalType
@@ -1104,7 +1170,7 @@ var Conditioner = {
             result = [];
             
             _.each(segmentModel.selection, function(sel){
-                var val = Conditioner.reduceData(filteredData, sel);
+                var val = Conditioner.reduceData(inputData, sel);
                 result.push({
                     key: sel.isComplex? sel.aliasName : sel.selectedProp || 'selection',
                     value: val

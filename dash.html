@@ -101,17 +101,7 @@
                                 <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Time Range</label>
-                            </div>
-                            <div class="small-4 columns">
-                                <input type="date" data-bind="value:segment.dataFilter.startDate" placeholder="Start Date"></input>
-                            </div>
-                            <div class="small-4 columns">
-                                <input type="date" data-bind="value:segment.dataFilter.endDate" placeholder="End Date"></input>
-                            </div>
-                        </div>
+                        
                     </fieldset>
                 </div>
             </div>
@@ -182,11 +172,11 @@
         </div>
     </script>
     
-    <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+    <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
-
+    <script type="text/javascript" src="content/js/utils.js"></script>
     
     <script type="text/javascript" src="content/js/sortable.js"></script>
 
@@ -196,7 +186,8 @@
     <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
 
-    <script type="text/javascript" src="content/js/lib/underscore-min.js"></script>
+
+    
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.topbar.js"></script>
 
