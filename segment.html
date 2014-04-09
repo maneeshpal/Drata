@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="content/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="content/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="content/style/combobox.css" />
-    
+    <link rel="stylesheet" type="text/css" href="content/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
     <style>
         .graph {
             height:200px;
@@ -52,12 +52,20 @@
     </div>
     <div class="row">
         <div class="small-6 columns">
-        <h6>Output</h6>
+        <h6>Input</h6>
+            <textarea style="height:300px" data-bind="text:rawData"></textarea>
+        </div>
+        <div class="small-6 columns">
+        <h6>query</h6>
+            <textarea style="height:300px" data-bind="text:query"></textarea>
+        </div>
+        <div class="small-6 columns">
+        <h6>mongo filtered</h6>
             <textarea style="height:300px" data-bind="text:outputData"></textarea>
         </div>
         <div class="small-6 columns">
-        <h6>Input</h6>
-            <textarea style="height:300px" data-bind="text:rawData"></textarea>
+        <h6>jsfiltered</h6>
+            <textarea style="height:300px" data-bind="text:opjs"></textarea>
         </div>
     </div>
     <button data-bind="click: process" class="button small">process</button>
@@ -76,7 +84,7 @@
 
     <script type="text/javascript" src="content/js/utils.js"></script>
     <script type="text/javascript" src="content/js/lib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.3.custom.min.js"></script>
+    <script type="text/javascript" src="content/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
     <script src="content/js/lib/d3.v3.js"></script>
 
     

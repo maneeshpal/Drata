@@ -7,7 +7,7 @@ var Segmentor = function(model){
     self.level = 0;
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition', propertyTypes: self.propertyTypes });
-    self.selectionGroup = new SelectionGroup({ level: self.level + 1, propertyTypes: self.propertyTypes });
+    self.selectionGroup = new SelectionGroup({ level: self.level, propertyTypes: self.propertyTypes });
 
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
@@ -109,6 +109,7 @@ var Segmentor = function(model){
     self.chartType.extend({
         required: {'message': 'Select Chart Type'}
     });
+
 };
 
 var TrackDataGroup = function(){
@@ -274,26 +275,81 @@ var ComparisonDataGroup = function(options){
 };
 var DataFilter = function(){
     var self = this;
-    self.startDate = ko.observable();
-    self.endDate = ko.observable();
+    self.min = ko.observable();
+    self.max = ko.observable();
+    
+    var slider;
+
+    self.intervalType = ko.observable();
+
+    self.intervalKind = ko.observable();
+    
+    self.intervalKind.subscribe(function(newValue){
+        if(slider){
+            var bounds = drata.utils.getBounds(newValue);
+            var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
+            slider.slider( "option", "min", bounds[0]);
+            slider.slider( "option", "max", bounds[1]);
+            slider.slider( "option", "values", pre);
+        }
+    });
+    self.intervalType.subscribe(function(newValue){
+        slider && slider.slider(newValue === 'dynamic'? 'enable': 'disable');
+    });
+    
 
     self.getModel = function(){
         return {
-            startDate: self.startDate(),
-            endDate: self.endDate()
+            intervalKind: self.intervalKind(),
+            intervalType: self.intervalType(),
+            min: self.min(),
+            max: self.max()
         }
     };
     self.prefill = function(model){
-        self.startDate(model.startDate);
-        self.endDate(model.endDate);
-    }
+        self.intervalType(model.intervalType || 'dynamic');
+        self.intervalKind(model.intervalKind || 'day');
+        model.min && self.min(model.min);
+        model.max && self.max(model.max);
+    };
+
+    self.expression = ko.computed(function(){
+        var range = drata.utils.getDateRange(self.getModel());
+        return drata.utils.format('{0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'));
+        
+    }).extend({ throttle: 500 });
+
+    var setupSlider = function(){
+        //if(slider) return;
+        console.log('set slider');
+        if(!self.intervalKind()) self.intervalKind('day');
+        var bounds = drata.utils.getBounds(self.intervalKind());
+        var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
+        self.min(pre[0]);
+        self.max(pre[1]);
+        slider = $("#myslider").slider({
+            range: true,
+            min: bounds[0],
+            max: bounds[1],
+            values: pre,
+            slide: function( event, ui ) {
+                self.min(ui.values[0]);
+                self.max(ui.values[1]);
+            }
+        });
+
+    };
+
+    self.afterRender = function(elem){
+        setupSlider();
+    };
 };
 
 var Condition = function(options){
     var self = this;
     self.level = options.level;
     self.logic = ko.observable('and');
-    self.selection = new Selection({ level: options.level+1, renderType: 'topCondition', propertyTypes: options.propertyTypes });
+    self.selection = new Selection({ level: options.level, renderType: 'topCondition', propertyTypes: options.propertyTypes });
     self.operation = ko.observable('=');
     self.value = ko.observable();
     self.conditions = ko.observableArray();
@@ -457,7 +513,7 @@ var Condition = function(options){
 
 var ConditionGroup = function(options){
     var self = this;
-    self.level =options.level;
+    self.level = options.level;
     self.conditions = ko.observableArray();
     self.trace = ko.observableArray();
     self.currentBinding = ko.observable(self);
@@ -491,7 +547,7 @@ var ConditionGroup = function(options){
         ));
     };
     self.addCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), propertyTypes: options.propertyTypes }));
+        self.conditions.push(new Condition({ level: options.level+1, onExpand: self.onExpand.bind(self), propertyTypes: options.propertyTypes }));
     };
     self.addComplexCondition = function(){
         self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), expand:true, propertyTypes: options.propertyTypes }));
@@ -787,7 +843,7 @@ var DataRetriever = {
 
         $.ajax({
             type: "GET",
-            url: 'http://localhost:3000/'+ db +'/'+ dataKey +'/properties',
+            url: drata.utils.format('http://localhost:3000/{0}/{1}/properties', db, dataKey),
             dataType: 'json',
             headers: { 'Access-Control-Allow-Origin': '*' },
             success: function(response){
@@ -799,7 +855,7 @@ var DataRetriever = {
         //callback(['key1', 'key2', 'Shopper Stop']);
         $.ajax({
             type: "GET",
-            url: 'http://localhost:3000/'+ db +'/keys',
+            url: drata.utils.format('http://localhost:3000/{0}/keys', db),
             dataType: 'json',
             headers: { 'Access-Control-Allow-Origin': '*' },
             success: function(response){
@@ -815,12 +871,12 @@ var DataRetriever = {
         //callback(this._t);
         $.ajax({
             type: "POST",
-            url: 'http://localhost:3000/'+ db +'/'+ model.dataKey,
+            url: drata.utils.format('http://localhost:3000/{0}/{1}', db, model.dataKey),
             data: {
                 selection: model.segment.selection,
                 dataGroup: model.segment.dataGroup,
                 dataFilter: model.segment.dataFilter,
-                group: model.segment.group
+                group: model.applyClientfilters ? undefined: model.segment.group
             },
             dataType: 'json',
             headers: { 'Access-Control-Allow-Origin': '*' },
@@ -830,12 +886,12 @@ var DataRetriever = {
                     result.push(drata.utils.flatten(response[i]));
                 }
                 //remove this
-                window.debug.dataresponse = result;
+                //window.debug.dataresponse = result;
 
-                console.log('total records :'+result.length);
+                console.log('total records :' + result.length);
                 //Apply filters client side if the response isnt already filtered.
                 if(model.applyClientfilters){
-                    result = Conditioner.filterData(result, model.segmentModel.group);
+                    result = Conditioner.filterData(result, model.segment);
                 }
                 callback && callback(result);
             }
@@ -846,7 +902,7 @@ var DataRetriever = {
 var Conditioner = {
     calc : function(left, operation, right, type){
         if(left === undefined) return right;
-        if(right === undefined) return left;
+        if(right === undefined && operation !== 'exists') return left;
 
         if(type === 'numeric') right = +right;
         if(type === 'bool') right = right == 'true';
@@ -980,11 +1036,14 @@ var Conditioner = {
         }
         return ret;
     },
-    filterData : function(data, conditions){
-        if (!conditions || conditions.length === 0) return data;
-        return data.filter(function(obj, index){
-            var result = this.processGroups(obj, conditions);
-            return result.value;
+    filterData : function(data, segment){
+        var range = drata.utils.getDateRange(segment.dataFilter);
+        
+        if(!data || !data.length || !segment.dataFilter) return data;
+        if (!segment.group || segment.group.length === 0) return data;
+        return data.filter(function(item, index){
+            if(item.timestamp < range.min || item.timestamp > range.max) return false;
+            return this.processGroups(item, segment.group).value;
         }.bind(this));
     },
     getGraphData: function(segmentModel, inputData){

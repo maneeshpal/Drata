@@ -25,42 +25,56 @@
     </div>
 </div>
 <!-- /ko -->
-
-<!-- ko template: {name: 'datafilter-template', data: dataFilter} -->
+<div class="row">
+    <div class="small-12 columns">
+<!-- ko template: { name: 'datafilter-template', data: dataFilter, afterRender: dataFilter.afterRender } -->
 <!-- /ko -->
-
-<!-- ko template: {name: 'group-template', data: conditionGroup} -->
-<!-- /ko -->
-
+    </div>
+</div>
+<div class="row">
+    <div class="small-12 columns" data-bind="with: conditionGroup">
+        <fieldset>
+            <legend>Conditions</legend>
+            <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
+            <div class="row">
+                <div class="small-12 columns conditioncombo">
+                    <!-- ko template: { name : 'condition-group-template', data: currentBinding, afterRender: afterRender, beforeRemove : beforeLeave } -->
+                    <!-- /ko -->
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
 </script>
 <script type="text/html" id="datafilter-template">
     <fieldset>
         <legend>Select Date Range </legend>
         <div class="row">
-            <div class="large-4 columns">
-                <input type="radio" name="datafilter" id="rbexact" /><label for="rbexact">For the past</label>
+            <div class="large-12 columns">
+                <div class="keystroke expression" data-bind="html:expression"></div>
             </div>
-            <div class="large-8 columns">
-                <input type="text" placeholder="eg: 2d3h (For the past 2 days 3 hours)" />
+        </div>
+        <div class="row">
+            <div class="medium-3 columns">
+                <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
+            </div>
+            <div class="medium-5 columns">
+                <div id="myslider"></div>
+            </div>
+            <div class="medium-4 columns">
+                <select data-bind="enable: intervalType() === 'dynamic', options: drata.global.timeframes,value: intervalKind">
+                </select>
             </div>
         </div>
         <div class="row">
             <div class="large-4 small-12 columns">
-                <input type="radio" name="datafilter" id="rbrange" /><label for="rbrange">For a date range of</label>
+                <input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /><label for="rbRange">Specify Date Range</label>
             </div>
             <div class="large-4 small-6 columns">
-                <input type="date" data-bind="value:startDate" placeholder="Start Date"></input>
+                <input type="date" data-bind="value:min" placeholder="Start Date"></input>
             </div>
             <div class="large-4 small-6 columns">
-                <input type="date" data-bind="value:endDate" placeholder="End Date"></input>
-            </div>
-        </div>
-        <div class="row">
-            <div class="large-4 columns">
-                <input type="radio" name="datafilter" id="rbpast" /><label for="rbpast">In the past</label>
-            </div>
-            <div class="large-8 columns">
-                 <select data-bind="options: drata.global.timeframes"></select>
+                <input type="date" data-bind="value:max" placeholder="End Date"></input>
             </div>
         </div>
     </fieldset>
@@ -165,7 +179,7 @@
         <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:360px'}">
           <!-- ko if: renderType === 'topSelection' -->
                 <div class="small-10 columns">
-                    <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                   <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                     </div>
                     
                     <!-- ko if: isComplex() -->
@@ -179,7 +193,8 @@
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
                 <!-- ko if: !isComplex() -->
-                <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                
+                 <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
                 </i>
@@ -198,7 +213,7 @@
                     <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
                 </div>
                 <!-- ko if: !isComplex() -->
-                <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options:widgetProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                cs <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
                 </i>
@@ -228,7 +243,7 @@
                         </div>
                     </div>
                    
-            <input type="text" data-bind="visible: level === 2, value:aliasName" placeholder="Alias Name"></input>
+            <input type="text" data-bind="visible: level === 1, value:aliasName" placeholder="Alias Name"></input>
                 </div>
             </div>
             <!-- ko template: {name: 'selectionGroupTemplate', foreach: selections, afterAdd: afterAdd, beforeRemove: beforeRemove} -->
@@ -248,23 +263,6 @@
         </div>
         </div>
     </script>
-
-<script type="text/html" id="group-template">
-<div class="row">
-    <div class="small-12 columns">
-        <fieldset>
-            <legend>Conditions</legend>
-            <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
-            <div class="row">
-                <div class="small-12 columns conditioncombo">
-                    <!-- ko template: {name : 'condition-group-template', data: currentBinding, afterRender: afterRender, beforeRemove : beforeLeave} -->
-                    <!-- /ko -->
-                </div>
-            </div>
-        </fieldset>
-    </div>
-</div>
-</script>
 
 <script type="text/html" id="condition-group-template">
     <div id="conditionWrapper" class="condition-wrapper">

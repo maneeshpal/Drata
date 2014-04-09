@@ -42,13 +42,19 @@
     var isArray = Array.isArray || function(obj) {
         return Object.prototype.toString.call(obj) == '[object Array]';
     };
-
+    var toArray = function(args,ix){
+        return Array.prototype.slice.call(args,ix || 0); 
+    }; 
     var format = function(format /*, ...replacements*/) {
         var replacements = toArray(arguments, 1);
         for (var i = 0, j = replacements.length; i < j; i++) {
             format = format.replace(new RegExp('\\{' + (i) + '\\}', 'g'), replacements[i]);
         }
         return format;
+    };
+    
+    var formatDate = function(dt){
+        return (dt instanceof Date) ? format('{0}/{1}/{2} {3}:{4}', dt.getMonth() + 1, dt.getDate(), dt.getFullYear(), dt.getHours(), dt.getMinutes()): '__';
     };
 
     var extend = function(target, source /*, ...sources */) {
@@ -269,11 +275,21 @@
         'exists': '$exists'
     };
 
-    var getMongoQuery = function(conditions){
+    var getMongoQuery = function(segment){
+        var query = segment.group ? processConditions(segment.group) : {};
+        var dateRange = getDateRange(segment.dataFilter);
+        
+        query.timestamp = {
+            $gte : dateRange.min, 
+            $lte: dateRange.max
+        };
+        return query;
+    };
+
+    var processConditions = function(conditions){
         if(!conditions || conditions.length === 0)
             return {};
         var result = processCondition(conditions[0]);
-
         var fl = undefined;
         //result[fl] = [];
         for(var i=1;i<conditions.length;i++){
@@ -292,26 +308,76 @@
     };
 
     var processCondition = function(c){
-        if(c.isComplex == 'false'){
-            var a = {}, b = {};
-            var mc
-            switch(c.operation){
+        if(!c.isComplex){ // this is different in the actual mongo query
+            var a = {}, b = {}, val;
+            switch(c.valType){
+                case 'date':
+                    val = new Date(c.value);
+                break;
+                case 'numeric':
+                    val = +c.value;
+                break;
+                case 'bool':
+                    val = c.value == 'true' || c.value == '1';
+                break;
+                case 'string':
+                    val = c.value + '';
+                break;
+                default:
+                    val = c.value;
+            }
+            if(c.selection.isComplex){
+                a['$where'] = selectExpression(c.selection, false) + ' ' + c.operation + ' ' + val;
+            }
+            else{
+                switch(c.operation){
                 case '=':
-                    b = c.value;
+                    b = val;
                     break;
                 case 'exists':
                     b[mongoSymbolMap[c.operation]] = true;
                     break;
                 default :
-                    b[mongoSymbolMap[c.operation]] = c.value;
+                    b[mongoSymbolMap[c.operation]] = val;
                     break;
+                }
+                a[c.selection.selectedProp] = b;
             }
-            a[c.selection.selectedProp] = b;
+            
             return a;
         }
-        else{
+        else {
            return getMongoQuery(c.groups);
         }
+    };
+
+    var selectExpression = function(selection, includeBracket){
+        var expression = '';
+        if(!selection.isComplex){
+            return 'obj.' + selection.selectedProp;
+        }
+        _.each(selection.groups, function(sel,index){
+            expression = expression + ((index === 0)? selectExpression(sel, true) : ' ' + sel.logic + ' ' + selectExpression(sel, true));
+        });
+        if(includeBracket) expression = '(' + expression + ')';
+        return expression;
+    };
+
+    var getSelectionProperties = function(selections){
+        var ret = {};
+        _.each(selections, function(sel){
+            if(!sel.isComplex){
+                ret[sel.selectedProp.split('.')[0]] = 1;
+            }
+            else {
+                innerSel = getSelectionProperties(sel.groups);
+                for(var inner in innerSel){
+                    if(innerSel.hasOwnProperty(inner)) ret[inner] = 1;
+                }
+                //ret = _.union(ret, );    
+            }
+        });        
+        return ret;
     };
 
     var getType = function(val){
@@ -327,6 +393,96 @@
         return 'unknown';
     };
 
+    var getValidDate = function(dateVal, isUs) {
+        var matches = /^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/.exec(dateVal);
+        if (matches == null) return undefined;
+        
+        var d = isUs? matches[2]:matches[1];
+        var m = isUs? matches[1]-1:matches[2]-1;
+        var y = matches[3];
+        var composedDate = new Date(y, m, d);
+        return (composedDate.getDate() == d &&
+                composedDate.getMonth() == m &&
+                composedDate.getFullYear() == y) ? composedDate : undefined;
+    };
+
+    var getBounds = function(type){
+        var bounds = [];
+        switch(type){
+            case 'day' :
+                bounds = [1, 60];
+                break;
+            case 'minute':
+                bounds = [1,60];
+                break;
+            case 'hour':
+                bounds = [1, 72];
+                break;
+            case 'month':
+                bounds = [0,24];
+                break;
+            case 'year':
+                bounds = [0,5];
+                break;
+        }
+        return bounds;
+    }
+
+    var getDateRange = function(dataFilter){
+        var min, max;
+        switch(dataFilter.intervalType){
+            case 'static':
+                min = getValidDate(dataFilter.min, true);
+                max = getValidDate(dataFilter.max, true);
+                break;
+            case 'dynamic':
+                var bounds = getBounds(dataFilter.intervalKind);
+                var multiplier;
+                min = bounds[1] - dataFilter.min;
+                max = bounds[1] - dataFilter.max;
+                var cd = new Date();
+
+                if(!isNaN(+min) && !isNaN(+max)){
+                    switch(dataFilter.intervalKind){
+                        case 'day':
+                            multiplier = 86400000;
+                            min = new Date(+cd - (multiplier * min));
+                            max = new Date(+cd - (multiplier * max));
+                            break;
+                        break;
+                        case 'minute':
+                            multiplier = 60000;
+                            min = new Date(+cd - (multiplier * min));
+                            max = new Date(+cd - (multiplier * max));
+                            break;
+                        case 'hour':
+                            multiplier = 3600000;
+                            min = new Date(+cd - (multiplier * min));
+                            max = new Date(+cd - (multiplier * max));
+                            
+                            break;
+                        case 'month':
+                            var cm = cd.getMonth();
+                            var d1 = new Date(cd);
+                            min = new Date(cd.setMonth(cm-min));
+                            max = new Date(d1.setMonth(cm-max));
+                            break;
+                        case 'year':
+                            var cy = cd.getFullYear();
+                            var d1 = new Date(cd);
+                            min = new Date(cd.setFullYear(cy-min));
+                            max = new Date(d1.setFullYear(cy-max));
+                            break;
+                    }
+                }
+            break;
+        }
+
+        return {
+            min: min,
+            max: max
+        };
+    };
 
     var getUniqueProperties = function(data){
         var flattened = data.map(function(d){
@@ -379,7 +535,7 @@
         logics : ['and', 'or'],
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
-        timeframes : ['Last Month', 'Last Quarter', 'Last Year']
+        timeframes : ['minute', 'hour', 'day', 'month', 'year']
     });
 
     drata.ns('utils').extend({
@@ -395,7 +551,13 @@
         calc: calc,
         divideDataByInterval: divideDataByInterval,
         getMongoQuery: getMongoQuery,
-        getUniqueProperties: getUniqueProperties
+        getUniqueProperties: getUniqueProperties,
+        getBounds: getBounds,
+        getValidDate: getValidDate,
+        getDateRange: getDateRange,
+        formatDate: formatDate,
+        selectExpression: selectExpression,
+        getSelectionProperties: getSelectionProperties
     });
 })(this);
 

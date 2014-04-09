@@ -4,7 +4,10 @@ var SegmentProcessor = function(){
     self.segment = new Segmentor();
     self.newWidget = ko.observable(true);
     self.rawData = ko.observable();
-    var dataKey = 'APIQuoteRequest';
+    self.query = ko.observable();
+    var dataKey = 'shoppercheckout';
+    self.opjs = ko.observable();
+
     // DataRetriever.getData('', function(res){
     //     data = res;
          
@@ -13,7 +16,7 @@ var SegmentProcessor = function(){
 
     DataRetriever.getUniqueProperties(dataKey,function(res){
         //var group = JSON.parse('[{"groupType":"condition","groups":[],"logic":"and","selection":{"groupType":"selection","groups":[],"logic":"+","selectedProp":"price","isComplex":false},"isComplex":false,"operation":"=","value":"500"},{"groupType":"condition","groups":[{"groupType":"condition","groups":[],"logic":"and","selection":{"groupType":"selection","groups":[],"logic":"+","selectedProp":"tax","isComplex":false},"isComplex":false,"operation":"=","value":"40"},{"groupType":"condition","groups":[],"logic":"or","selection":{"groupType":"selection","groups":[],"logic":"+","selectedProp":"errorCount","isComplex":false},"isComplex":false,"operation":"=","value":"2"}],"logic":"and","selection":{"groupType":"selection","groups":[],"logic":"+","isComplex":false},"isComplex":true,"operation":"="}]');
-        self.segment.initialize({properties:res, chartType : 'bar'});    
+        self.segment.initialize({propertyTypes:res, chartType : 'bar'});    
     });
     
     self.outputData = ko.observable();
@@ -23,11 +26,15 @@ var SegmentProcessor = function(){
         var segmentModel = self.segment.getModel();
 
         self.rawData(JSON.stringify(segmentModel.group, null, '\t'));
-        //self.outputData(JSON.stringify(drata.utils.getMongoQuery(segmentModel.group), null, '\t'));
+        self.query(JSON.stringify(drata.utils.getMongoQuery(segmentModel), null, '\t'));
 
         var data;
         DataRetriever.getData({applyClientfilters: false, dataKey: dataKey, segment:segmentModel}, function(res){
             self.outputData(JSON.stringify(res, null, '\t'));
+        });
+
+        DataRetriever.getData({applyClientfilters: true, dataKey: dataKey, segment:segmentModel}, function(res){
+            self.opjs(JSON.stringify(res, null, '\t'));
         });
 
 
