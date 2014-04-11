@@ -2,9 +2,9 @@
  ;(function(root) {
     var Axis = function(){
 
-        var _orient, _scale, _w, _h, _domain, _m, _axisType, _axisTicType, _ticks, _tickSize = 0, _tickFormat;
+        var _orient, _scale, _domain, _gl = false, _dims, _axisType, _axisTicType, _ticks, _tickFormat;
         var axis = d3.svg.axis();
-        var _m = {l:30, r:10, t:30, b:30};
+        //var _m = {l:30, r:10, t:30, b:30};
         
         
         var getMin = function(data, prop){
@@ -22,6 +22,31 @@
                 }); 
             });
         };
+
+        var intervalFormats = {
+            month : {format: '%b %Y', b: 30, l: 50},
+            year: {format: '%Y', b: 20, l: 30},
+            day: {format: '%Y %b %d', b: 40, l: 60},
+            hours: {format: '%Y %b %d %H:%M', b: 60,l: 80},
+            get: function(range){
+                var msDay = 172800000, msMonth = 7776000000, msYear = 31536000000;
+                var interval = range[1] - range[0];
+                if(interval <= msDay){
+                    // 3 days
+                    return this.hours;
+                }
+                if(interval <= msMonth){
+                    //3 months
+                    return this.day;
+                }
+                if(interval <= msYear){
+                    //1 year
+                    return this.month;
+                }
+                return this.year;
+            }
+        };
+
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
@@ -29,39 +54,73 @@
                 var enabledData = data.filter(function(d){
                     return !d.disabled;
                 });
-
-                _scale.range(_axisType === 'y' ? [_h, 0] : [0, _w]);
                 
+                var dataLength = enabledData.length;
+                var intFormat;
                 _domain = [getMin(enabledData, _axisType),getMax(enabledData, _axisType)];
+                
+                switch(_axisTicType){
+                    case 'numeric':
+                        _scale = d3.scale.linear();
+                        _tickFormat = d3.format('.1f');
+                        break;
+                    case 'currency':
+                        _scale = d3.scale.linear();
+                        _tickFormat = function(d) {
+                            var f = d3.format('.3s');
+                            return '$' + f(d);
+                        };
+                        break;
+                    case 'date':
+                        intFormat = intervalFormats.get(_domain);
+                        _dims.m.b = intFormat.b;
+                        _dims.m.l = intFormat.l;
+                        _scale = d3.time.scale();
+                        _tickFormat = d3.time.format(intFormat.format);
+                        break;
+                }
+
+                var tickSize = 0;
+                var wm = _dims.w - _dims.m.l - _dims.m.r;
+                var hm = _dims.h - _dims.m.t - _dims.m.b;
+                if(_axisType === 'y'){
+                    _scale.range([hm, 0]);
+                    if(_gl) tickSize = -wm;
+                }
+                else{
+                    _scale.range([0, wm]);
+                    if(_gl) tickSize = hm;
+                }
+
                 _scale.domain(_domain);
 
                 axis
                     .scale(_scale)
                     .tickFormat(_tickFormat)
                     .orient(_orient);
+                
                 _ticks > 0 && axis.ticks(_ticks);
-                _tickSize!==0 && axis.tickSize(_tickSize);
-                container
-                    .call(axis);
+                
+                tickSize !== 0 && axis.tickSize(-wm);
+                
+                var xis = container.call(axis);
+                if(_axisType === 'x' && intFormat){
+                    xis.selectAll('text')
+                    .style("text-anchor", "end")
+                    .attr("dx", "0")
+                    .attr("dy", ".50em")
+                    .attr("transform", function(d) {
+                        return "rotate(-30)"
+                    });
+                }
+                
             });
             return chart;
         };
         
-        chart.width = function(value){
-            if (!arguments.length) return _w;
-            _w = value;
-            return chart;
-        };
-
-        chart.height = function(value){
-            if (!arguments.length) return _h;
-            _h = value;
-            return chart;
-        };
-
-        chart.margin = function(value){
-            if (!arguments.length) return _m;
-            _m = value;
+        chart.dims = function(value){
+            if (!arguments.length) return _dims;
+            _dims = value;
             return chart;
         };
 
@@ -78,9 +137,9 @@
             return chart;
         };
 
-        chart.tickSize = function(value){
-            if (!arguments.length) return _tickSize;
-            _tickSize = value;
+        chart.includeGridLines = function(value){
+            if (!arguments.length) return _gl;
+            _gl = value;
             return chart;
         };
         chart.ticks = function(value){
@@ -104,23 +163,7 @@
         chart.axisTicType = function(value){
             if (!arguments.length) return _axisTicType;
             _axisTicType = value;
-            switch(_axisTicType){
-                case 'numeric':
-                    _scale = d3.scale.linear();
-                    _tickFormat = d3.format('.3s');
-                    break;
-                case 'currency':
-                    _scale = d3.scale.linear();
-                    _tickFormat = function(d) {
-                        var f = d3.format('.3s');
-                        return '$' + f(d);
-                    };
-                    break;
-                case 'date':
-                    _scale = d3.time.scale();
-                    _tickFormat = d3.time.format("%Y %b %d %H:%M");
-                    break;
-            }
+            
             return chart;
         };
         return chart;

@@ -188,7 +188,7 @@
     
     <script type="text/javascript" src="content/js/lib/helpers/ko.extensions.js"></script>
     <script type="text/javascript" src="content/js/lib/helpers/ko.custombindinghandlers.js"></script>
-
+    <script type="text/javascript" src="content/js/lib/helpers/ko.validation.extensions.js"></script>
 
     
     <script type="text/javascript" src="content/foundation/js/foundation/foundation.js"></script>
@@ -223,8 +223,8 @@
                 window.topBar = new TopBar();
                 ko.applyBindings(topBar, document.getElementById('topbar'));
 
-                window.widgetProcessor = new WidgetProcessor();
-                ko.applyBindings(widgetProcessor, document.getElementById('graphBuilder'));
+                window.segmentProcessor = new SegmentProcessor();
+                ko.applyBindings(segmentProcessor, document.getElementById('graphBuilder'));
                 $(document).foundation();
             });
         })(this, jQuery);

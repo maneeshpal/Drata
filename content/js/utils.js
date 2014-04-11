@@ -279,7 +279,7 @@
         var query = segment.group ? processConditions(segment.group) : {};
         var dateRange = getDateRange(segment.dataFilter);
         
-        query.timestamp = {
+        query[segment.dataFilter.dateProp] = {
             $gte : dateRange.min, 
             $lte: dateRange.max
         };

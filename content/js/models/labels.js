@@ -2,36 +2,53 @@
  ;(function(root) {
     var Labels = function(){
 
-        var _w, _h, _color, _align, _dispatch = d3.dispatch();
+        var _w, _h, _color, _align, _dispatch = d3.dispatch(), _dims;
         
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-                var temp = 0;
+                //var temp = 0;
 
-                var exl = data.map(function(d){
-                    temp = temp + drata.utils.textToPixel(d.key) + 20;
-                    return temp;
-                });
+                // var exl = data.map(function(d){
+                //     temp = temp + drata.utils.textToPixel(d.key) + 20;
+                //     return temp;
+                // });
 
                 var labelsWrapper = container
                     .selectAll('g.label-group')
                     .data(data);
-
+console.log('i broke center alignment for labels');
                 if(_align === 'center') {
                     container.attr('transform', 'translate('+ (_w-temp)/2 + ',' + _h +')');
                 }
                 
-                exl.splice(0, 0 , 0);
+                //exl.splice(0, 0 , 0);
 
                 var labelWrapper = labelsWrapper.enter()
                     .append('g')
                     .attr('class','label-group');
-                    
-                container.selectAll('g.label-group')
+                
+                var prev = 0, cols = 0;  wm = _dims.w - _dims.m.l - _dims.m.r;
+
+                container
+                    .selectAll('g.label-group')
                     .attr('transform', function(d, i){
-                        return 'translate('+ exl[i] +')';
-                });
+                        var len = drata.utils.textToPixel(d.key) + 20;
+                        if(prev + len >= wm) {
+                            prev = 0;
+                            cols ++;
+                        }
+                        else{
+                            
+                        }
+                        var ret = 'translate('+ prev +', ' + (cols * 24) + ')';
+                        prev = prev + len;
+                        return ret;
+                        //return 'translate('+ exl[i] +')';
+                    });
+
+                    _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * 24)+5);
+
                 labelWrapper.append('text').attr('class', 'label-text');
                 labelWrapper.append('circle').attr('class', 'label-circle');
 
@@ -96,6 +113,12 @@
             _align = value;
             return chart;
         };
+        chart.dims= function(value){
+            if (!arguments.length) return _dims;
+            _dims = value;
+            return chart;
+        };
+
         return chart;
     };
     root.drata.ns('models').extend({

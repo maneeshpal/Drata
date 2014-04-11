@@ -222,7 +222,7 @@
 .ui-datepicker th {
 	padding: .7em .3em;
 	text-align: center;
-	font-weight: bold;
+	font-weight: normal;
 	border: 0;
 }
 .ui-datepicker td {
@@ -334,6 +334,9 @@
 	width: 1.2em;
 	height: 1.2em;
 	cursor: default;
+	background-color:#fff;
+	border:1px solid #aaaaaa;
+	border-radius: 2px;
 }
 .ui-slider .ui-slider-range {
 	position: absolute;
@@ -413,8 +416,6 @@
 	color: #222222;
 }
 .ui-widget-header {
-	border: 1px solid #aaaaaa;
-	background: #cccccc url(images/ui-bg_highlight-soft_75_cccccc_1x100.png) 50% 50% repeat-x;
 	color: #222222;
 	font-weight: bold;
 }
@@ -427,8 +428,6 @@
 .ui-state-default,
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default {
-	border: 1px solid #d3d3d3;
-	background: #e6e6e6 url(images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x;
 	font-weight: normal;
 	color: #555555;
 }
@@ -444,8 +443,7 @@
 .ui-state-focus,
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
-	border: 1px solid #999999;
-	background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;
+	background: #dadada;
 	font-weight: normal;
 	color: #212121;
 }

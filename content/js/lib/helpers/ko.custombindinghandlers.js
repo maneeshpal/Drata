@@ -36,7 +36,10 @@
         var self = this;
         self.selectedValue = config.selectedValue;
         self.availableOptions = ko.isObservable(config.options) ? config.options : ko.observableArray(config.options);
-        self.filteredOptions =  ko.observable(ko.utils.unwrapObservable(self.availableOptions));
+        self.filteredOptions =  ko.observableArray(self.availableOptions());
+        self.availableOptions.subscribe(function(newValue){
+            self.filteredOptions(newValue);
+        });
         self.optionsCaption = config.optionsCaption;
         self.enabled = ko.isObservable(config.enabled) ? config.enabled : ko.observable(config.enabled);
         var $elem;
@@ -116,7 +119,7 @@
             var config = {
                 selectedValue : value.selectedValue|| ko.observable(),
                 element: element,
-                options: value.options || [],
+                options: value.options,
                 optionsCaption: value.optionsCaption || 'Select..',
                 enabled: value.enabled === undefined ? true: value.enabled,
                 allowCustom : value.allowCustom === undefined ? true : value.allowCustom

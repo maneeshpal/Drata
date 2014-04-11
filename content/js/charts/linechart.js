@@ -4,16 +4,15 @@
         var _xAxisType = 'numeric', _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
-            .axisType('x')
-            .ticks(5);
+            .axisType('x');
         var yAxis = drata.models.axis()
             .orient("left")
-            .axisType('y')
-            .ticks(5);
+            .axisType('y').ticks(5);
      
         var z = d3.scale.category20();
-        var m = {l:30, r:10, t:30, b:30};
-    
+        var dims = {
+                    m: {l:30, r:10, t:30, b:30}
+                }
         
         function chart(selection) {
             console.log('line chart drawn');
@@ -57,14 +56,14 @@
                     .call(chart);
                 };
 
-                var w = $(this.parentNode).width();
-                var h = $(this.parentNode).height();
+                dims.w = $(this.parentNode).width();
+                dims.h = $(this.parentNode).height();
                 
-                var wm = w - m.l - m.r;
-                var hm = h - m.t - m.b;
+                dims.wm = dims.w - dims.m.l - dims.m.r;
+                dims.hm = dims.h - dims.m.t - dims.m.b;
                 
-                xAxis.axisTicType(_xAxisType).width(wm).height(hm);
-                yAxis.axisTicType('numeric').width(wm).height(hm).tickSize(-wm);
+                xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
+                yAxis.axisTicType('numeric').dims(dims).includeGridLines(true);
                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
@@ -74,7 +73,7 @@
                     chart.resize();
                 });
 
-                container.attr('width', w).attr('height', h);
+                container.attr('width', dims.w).attr('height', dims.h);
                 
                 var gWrapper =  container
                     .selectAll('g.topgroup')
@@ -92,14 +91,23 @@
                 
                 gWrapperEnter.append("g").attr("class", "labels-group");
                 
+                //labels
+                var labels = drata.models.labels().color(z).dispatch(dispatch).dims(dims);
                 
-                gWrapper.select('g.x.axis')
-                    .attr("transform", "translate(" + m.l +"," + (hm + m.t) + ")")
-                    //.transition().duration(500)
-                    .call(xAxis);
+                var labelContainer = gWrapper.select('g.labels-group');
+                
+                labelContainer.datum(data).call(labels);
+                    
+                var xAxisContainer = gWrapper.select('g.x.axis');
+                xAxisContainer.call(xAxis);
+                
+                xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
+                
+                labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
+                    
 
                 gWrapper.select('g.y.axis')
-                    .attr("transform", "translate(" + m.l +"," + m.t + ")")
+                    .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     //.transition().duration(500)
                     .call(yAxis);
 
@@ -109,16 +117,10 @@
                 
                 gWrapper
                     .select('g.line-group')
-                    .attr("transform", "translate(" + m.l +"," + m.t + ")")
+                    .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     .call(lines);
 
-                //labels
-                var labels = drata.models.labels().color(z).dispatch(dispatch);
-                gWrapper
-                    .select('g.labels-group')
-                    .attr("transform", "translate(" + (m.l + 10) +")")
-                    .datum(data)
-                    .call(labels);
+                
 
                 if(_dataMarkers){
                     gWrapperEnter.append("g").attr("class", "dot-group");
@@ -127,7 +129,7 @@
                     }).color(z).dispatch(dispatch);
                     gWrapper
                         .select('g.dot-group')
-                        .attr("transform", "translate(" + m.l +"," + m.t + ")")
+                        .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                         .datum(data)
                         .call(dots);
 
@@ -135,7 +137,7 @@
                     var toolTip = drata.models.toolTip().dispatch(dispatch);
                     gWrapper
                         .select('g.tooltip-group')
-                        .attr("transform", "translate(" + (w-5) +", " +  (m.t-10) +")")
+                        .attr("transform", "translate(" + (dims.w-5) +", " +  (dims.m.t-10) +")")
                         .call(toolTip);                        
                 }
                 

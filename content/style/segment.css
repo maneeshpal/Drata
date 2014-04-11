@@ -93,8 +93,10 @@ select.error{
     border:1px solid #f04124;
 }
 
-
-
-
-
+@media only screen and (max-width: 350px) {
+    .ui-datepicker-div{
+        width:100%;
+        left:0;
+    }
+}
 

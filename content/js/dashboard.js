@@ -65,7 +65,7 @@ var Widget = function(widgetModel, index){
 
     self.editWidget = function () {
         $('#graphBuilder').addClass('showme');
-        widgetProcessor.attach(widgetModel, self.updateWidget.bind(self));
+        segmentProcessor.attach(widgetModel, self.updateWidget.bind(self));
     };
 
     var _t = undefined;
@@ -250,7 +250,7 @@ var PieContent = function(index){
     };
 };
 
-var WidgetProcessor = function(){
+var SegmentProcessor = function(){
     var self = this;
     self.widgetName = ko.observable();
     self.addUpdateBtnText = ko.observable('Add Widget');

@@ -84,11 +84,15 @@
 
                 var w = $(this.parentNode).width();
                 var h = $(this.parentNode).height();
-                
+                var dims = {
+                    w: w,
+                    h: h,
+                    m: m
+                }
                 var wm = w - m.l - m.r;
                 var hm = h - m.t - m.b;
                 
-                xAxis.axisTicType(_xAxisType).width(wm).height(hm);
+                xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
                 
                 
                 //var xrange = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
@@ -127,11 +131,11 @@
 
                 gWrapperEnter.append("g").attr("class", "labels-group");
                 
-                gWrapper.select('g.x.axis')
-                    .attr("transform", "translate(" + m.l +"," + (hm + m.t) + ")")
+                var xAxisContainer = gWrapper.select('g.x.axis');
                     //.transition().duration(500)
-                    .call(xAxis);
-
+                xAxisContainer.call(xAxis);
+                xAxisContainer.attr("transform", "translate(" + m.l +"," + (dims.h - dims.m.b) + ")");
+                   
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + m.l +"," + m.t + ")")
                     //.transition().duration(500)

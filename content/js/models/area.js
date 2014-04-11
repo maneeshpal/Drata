@@ -5,7 +5,8 @@
         var  _interpolate = 'linear',
             _xScale = d3.scale.linear(),
             _yScale = d3.scale.linear(),
-            _color = d3.scale.category20();
+            _color = d3.scale.category20(),
+            _dims;
         
         var area = d3.svg.area()
             .x(function(d) { return _xScale(d.x); })
@@ -16,7 +17,7 @@
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-                xdiff = _xScale(data[0].values[1].x) - _xScale(data[0].values[0].x);
+                //xdiff = _xScale(data[0].values[1].x) - _xScale(data[0].values[0].x);
 
                 var moveleft = function(){
                     this.attr("transform","translate(" + xdiff + ")")
@@ -37,7 +38,7 @@
 
 
                 area.interpolate(_interpolate);
-                area.y0(_hm);
+                area.y0(_dims.h -_dims.m.t - _dims.m.b);
                 var paths = container
                     .selectAll('.line')
                     .data(data);
@@ -89,9 +90,9 @@
             return chart;
         };
 
-        chart.height = function(value){
-            if (!arguments.length) return _hm;
-            _hm = value;
+        chart.dims = function(value){
+            if (!arguments.length) return _dims;
+            _dims = value;
             return chart;
         };
 

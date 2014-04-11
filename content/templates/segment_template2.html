@@ -49,11 +49,22 @@
 <script type="text/html" id="datafilter-template">
     <fieldset>
         <legend>Select Date Range </legend>
+        
         <div class="row">
-            <div class="large-12 columns">
+        <div class="small-3 columns">
+            <label class="right inline">Date Property</label>
+        </div>
+            <div class="small-9 columns" data-bind="comboBox :{selectedValue: dateProp, options: $parent.properties,optionsCaption:'choose Property',allowCustom:false}">
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="large-8 columns">
                 <div class="keystroke expression" data-bind="html:expression"></div>
             </div>
         </div>
+       
         <div class="row">
             <div class="medium-3 columns">
                 <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
@@ -67,14 +78,29 @@
             </div>
         </div>
         <div class="row">
-            <div class="large-4 small-12 columns">
+            <div class="large-3 small-12 columns">
                 <input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /><label for="rbRange">Specify Date Range</label>
             </div>
             <div class="large-4 small-6 columns">
-                <input type="date" data-bind="value:min" placeholder="Start Date"></input>
+                <div class="row collapse">
+                    <div class="small-10 columns">
+                        <input type="text" id="from" data-bind="enable : intervalType() === 'static', value:minDate" placeholder="Start Date"></input>
+                    </div>
+                    <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'start')">
+                        <span class="postfix"><i class="general foundicon-calendar"></i></span>
+                    </div>
+                </div>
             </div>
             <div class="large-4 small-6 columns">
-                <input type="date" data-bind="value:max" placeholder="End Date"></input>
+                <div class="row collapse">
+                    <div class="small-10 columns">
+                        <input type="text" id="to" data-bind="enable : intervalType() === 'static', value:maxDate" placeholder="End Date"></input>
+                    </div>
+                    <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'end')">
+                        <span class="postfix"><i class="general foundicon-calendar"></i></span>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </fieldset>

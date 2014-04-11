@@ -5,6 +5,7 @@ var Segmentor = function(model){
     self.propertyTypes = {};
     self.properties = ko.observableArray();
     self.level = 0;
+    self.temp = ko.observable();
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition', propertyTypes: self.propertyTypes });
     self.selectionGroup = new SelectionGroup({ level: self.level, propertyTypes: self.propertyTypes });
@@ -81,6 +82,7 @@ var Segmentor = function(model){
     self.isValidSegment = function(){
         var selerrors = ko.validation.group(self.selectionGroup, {deep:true});
         var conditions = self.conditionGroup.conditions();
+        var dataFilterErrors = ko.validation.group(self.dataFilter, {deep:true});
         var topLevelErrors = ko.validation.group(self, {deep:false});
         var isValid = true;
         for(var c= 0; c< conditions.length; c++){
@@ -95,6 +97,10 @@ var Segmentor = function(model){
         if(topLevelErrors().length > 0){
             isValid = false;
             topLevelErrors.showAllMessages();
+        }
+        if(dataFilterErrors().length > 0){
+            isValid = false;
+            dataFilterErrors.showAllMessages();
         }
         if(self.dataGroup){
             var dataGroupErrors = ko.validation.group(self.dataGroup, {deep:true});
@@ -277,12 +283,18 @@ var DataFilter = function(){
     var self = this;
     self.min = ko.observable();
     self.max = ko.observable();
+    self.minDate = ko.observable();
+    self.maxDate = ko.observable();
     
     var slider;
 
     self.intervalType = ko.observable();
 
     self.intervalKind = ko.observable();
+    
+    self.dateProp = ko.observable().extend({
+        required: {message: 'Enter your Date Property'}
+    });
     
     self.intervalKind.subscribe(function(newValue){
         if(slider){
@@ -302,15 +314,23 @@ var DataFilter = function(){
         return {
             intervalKind: self.intervalKind(),
             intervalType: self.intervalType(),
-            min: self.min(),
-            max: self.max()
+            min: (self.intervalType() == 'static') ? self.minDate() : self.min(),
+            max: (self.intervalType() == 'static') ? self.maxDate() :self.max(),
+            dateProp:self.dateProp()
         }
     };
+
     self.prefill = function(model){
         self.intervalType(model.intervalType || 'dynamic');
         self.intervalKind(model.intervalKind || 'day');
-        model.min && self.min(model.min);
-        model.max && self.max(model.max);
+        if(model.intervalType === 'static'){
+            model.min && self.minDate(model.min);
+            model.max && self.maxDate(model.max);
+        } else if(model.intervalType === 'dynamic'){
+            model.min && self.min(model.min);
+            model.max && self.max(model.max);
+        }
+        model.dateProp && self.dateProp(model.dateProp);
     };
 
     self.expression = ko.computed(function(){
@@ -339,10 +359,58 @@ var DataFilter = function(){
         });
 
     };
+    self.showDatePicker = function(val){
+        if(self.intervalType() !== 'static') return;
+        if(val === 'start'){
+            self.startDp && self.startDp.datepicker('show');
+        }else if(val === 'end'){
+            self.endDp && self.endDp.datepicker('show');
+        }
+    };
+
+    var setupDatePicker = function(){
+        self.startDp = $( "#from" ).datepicker({
+            defaultDate: "-1m",
+            changeMonth: true,
+            changeYear: true,
+            numberOfMonths: 1,
+            maxDate: new Date(),
+            onClose: function( selectedDate ) {
+                $( "#to" ).datepicker( "option", "minDate", selectedDate );
+            }
+        });
+        self.endDp = $( "#to" ).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            numberOfMonths: 1,
+            onClose: function( selectedDate ) {
+                $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+            }
+        });
+    };
 
     self.afterRender = function(elem){
         setupSlider();
+        setupDatePicker();
     };
+
+    self.minDate.extend({
+        validDataFilterDate : {
+            message: 'Invalid Date',
+            onlyIf: function(){
+                return self.intervalType() == 'static';
+            }
+        }
+    });
+
+    self.maxDate.extend({
+        validDataFilterDate : {
+            message: 'Invalid Date',
+            onlyIf: function(){
+                return self.intervalType() == 'static';
+            }
+        }
+    });
 };
 
 var Condition = function(options){
