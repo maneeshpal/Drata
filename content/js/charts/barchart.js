@@ -4,7 +4,7 @@
  ;(function(root) {
     var BarChart = function(){
         var z = d3.scale.category10();
-        var m = {t:20, r:20, b:40, l:30};
+        var dims = {m: {t:20, r:20, b:40, l:30}};
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
         var _showBarLabels = false;
@@ -94,31 +94,11 @@
                     chart.resize();
                 });
 
-                var w = $(this.parentNode).width();
-                var h = $(this.parentNode).height();
+                dims.w = $(this.parentNode).width();
+                dims.h = $(this.parentNode).height();
 
-                container.attr('width', w).attr('height', h);
+                container.attr('width', dims.w).attr('height', dims.h);
                 
-                var hm = h - m.t - m.b;
-                var wm = w - m.l - m.r;
-
-                y.range([hm, 0]);
- 
-
-                var min = getMin(data, 'value'), max = getMax(data, 'value');
-                var yrange = [min - (min * 1/5),max + (max * 1/5)];
-                y.domain(yrange);
-                //if(drata.js.logmsg) console.log(yrange);
-               
-
-                x0.rangeRoundBands([0, wm], .2);
-                x0.domain(data.map(function(d) { return d.key; }));
-                x1.domain(duplKeys).rangeRoundBands([0, x0.rangeBand()]);
-
-                //z.domain(keys);
-                
-                if(drata.js.logmsg) console.log(z.domain());
-
                 var gWrapper =  container
                     .selectAll('g.topgroup')
                     .data([data]);
@@ -131,94 +111,113 @@
                 gWrapperEnter.append("g").attr("class", 'y axis');
                 gWrapperEnter.append("g").attr("class", 'x axis');
                 gWrapperEnter.append("g").attr("class", 'labels-group');
+                
+                var yrange;
+                function setYaxis(){
+                    y.range([dims.h - dims.m.t - dims.m.b, 0]);
+                    var min = getMin(data, 'value'), max = getMax(data, 'value');
+                    yrange = [min - (min * 1/5),max + (max * 1/5)];
+                    y.domain(yrange);
 
-                gWrapper.select('g.y.axis')
-                    .attr("transform", "translate(" + m.l +"," + m.t + ")")
+                    gWrapper.select('g.y.axis')
+                    .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     .call(yAxis);
-                gWrapper.select('g.x.axis')
-                    .attr("transform", "translate(" + m.l +"," + (hm +m.t) + ")")
+                }
+
+                function setXaxis(){
+                    x0.rangeRoundBands([0, dims.w - dims.m.l - dims.m.r], .2);
+                    x0.domain(data.map(function(d) { return d.key; }));
+                    x1.domain(duplKeys).rangeRoundBands([0, x0.rangeBand()]);
+                    gWrapper.select('g.x.axis')
+                    .attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")")
                     .call(xAxis);
+                }
 
-                var barGroup = gWrapper
-                    .select("g.bars-group")
-                    .attr("transform", "translate(" + m.l +"," + m.t + ")")
-                    .selectAll('g.bar-group')
-                    .data(function(d){
-                        return d;
-                    });
+                function setLabels(){
+                    var labels = drata.models.labels().color(function(d,i){return z(i);}).dims(dims).align('topcenter').dispatch(dispatch);
+                    gWrapper.select('g.labels-group')
+                    .datum(labelKeys)
+                    .call(labels);
+                }
+                
+                function drawBars(){
+                    var barGroup = gWrapper
+                        .select("g.bars-group")
+                        .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
+                        .selectAll('g.bar-group')
+                        .data(function(d){
+                            return d;
+                        });
 
-                barGroup
-                    .enter()
-                    .append("g")
-                    .attr("class", "bar-group");
+                    barGroup
+                        .enter()
+                        .append("g")
+                        .attr("class", "bar-group");
 
-                barGroup
-                    .attr("transform", function(d) { return "translate(" + x0(d.key) + ",0)"; })
-                    
-                var rects = barGroup.selectAll('rect')
-                    .data(function(d){
-                        return d.values;
-                    });
-
-                rects.enter()
-                    .append('rect').attr("height", 0)
-                    .attr("y", y(yrange[0]));
-
-                rects
-                    .style("fill", function(d, i) { 
-                        return z(i); 
-                    })
-                    .attr("stroke", '#fff')
-                    .attr("stroke-width", 1)
-                    .transition().duration(300)
-                    .attr("x", function(d) { return x1(d.key); })
-                    .attr("y", function(d) {  
-                        return d.disabled ?  y(yrange[0]) : y(d.value); 
-                    })
-                    .attr("width", x1.rangeBand())
-                    .attr("height", function(d) {  return d.disabled ? 0 : hm - y(d.value); });
-                    
-
-                rects.exit().transition().duration(300).attr("height", 0)
-                    .attr("y", y(yrange[0]))
-                    .remove();
-
-                if(_showBarLabels){
-                    var rectLabels = barGroup.selectAll('text')
+                    barGroup
+                        .attr("transform", function(d) { return "translate(" + x0(d.key) + ",0)"; });
+                        
+                    var rects = barGroup.selectAll('rect')
                         .data(function(d){
                             return d.values;
                         });
 
-                    rectLabels.enter()
-                        .append('text')
+                    rects.enter()
+                        .append('rect').attr("height", 0)
                         .attr("y", y(yrange[0]));
 
-                    var labelFormat = d3.format('.2s');
-                    rectLabels
-                        .style("fill", "#ccc")
-                        .text(function(d){
-                            return labelFormat(d.value);
+                    rects
+                        .style("fill", function(d, i) { 
+                            return z(i); 
                         })
-                        .style('text-anchor', 'middle')
-                        .style("width", x1.rangeBand())
+                        .attr("stroke", '#fff')
+                        .attr("stroke-width", 1)
                         .transition().duration(300)
-                        .attr("x", function(d) { return x1(d.key) + x1.rangeBand()/2; })
+                        .attr("x", function(d) { return x1(d.key); })
                         .attr("y", function(d) {  
-                            return d.disabled ?  y(yrange[0]) : y(d.value) + 12; 
-                        });
+                            return d.disabled ?  y(yrange[0]) : y(d.value); 
+                        })
+                        .attr("width", x1.rangeBand())
+                        .attr("height", function(d) {  return d.disabled ? 0 : (dims.h - dims.m.t - dims.m.b) - y(d.value); });
+                        
 
-                    rectLabels.exit().remove();                
+                    rects.exit().transition().duration(300).attr("height", 0)
+                        .attr("y", y(yrange[0]))
+                        .remove();
+
+                    if(_showBarLabels){
+                        var rectLabels = barGroup.selectAll('text')
+                            .data(function(d){
+                                return d.values;
+                            });
+
+                        rectLabels.enter()
+                            .append('text')
+                            .attr("y", y(yrange[0]));
+
+                        var labelFormat = d3.format('.2s');
+                        rectLabels
+                            .style("fill", "#ccc")
+                            .text(function(d){
+                                return labelFormat(d.value);
+                            })
+                            .style('text-anchor', 'middle')
+                            .style("width", x1.rangeBand())
+                            .transition().duration(300)
+                            .attr("x", function(d) { return x1(d.key) + x1.rangeBand()/2; })
+                            .attr("y", function(d) {  
+                                return d.disabled ?  y(yrange[0]) : y(d.value) + 12; 
+                            });
+
+                        rectLabels.exit().remove();                
+                    }
+                    barGroup.exit().remove();
                 }
-                barGroup.exit().remove();
+                setLabels();
+                setXaxis();
+                setYaxis();
+                drawBars();
                 gWrapper.exit().remove();
-
-                
-                var labels = drata.models.labels().color(function(d,i){return z(i);}).width(w).height(0).align('center').dispatch(dispatch);
-                gWrapper
-                    .select('g.labels-group')
-                    .datum(labelKeys)
-                    .call(labels);
-                
             });
             
             return chart;

@@ -38,7 +38,7 @@ var SegmentProcessor = function(){
                 mydata = mydata[0];
             break;
             case 'scatter':
-                chart = drata.charts.scatterPlot();
+                chart = drata.charts.scatterPlot().xAxisType(segmentModel.dataGroup.xAxisType);
             break;
         }
         d3.select('#graph svg').remove();
@@ -50,7 +50,7 @@ var SegmentProcessor = function(){
     };
 
     DataRetriever.getUniqueProperties(dataKey,function(res){
-        var group = JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false}],"dataGroup":{"hasGrouping":false,"xAxisType":"date","xAxisProp":"timestamp","timeseriesInterval":"300000","errors":[]},"group":[],"dataFilter":{"intervalKind":"day","intervalType":"dynamic","min":19,"max":60,"dateProp":"timestamp"},"chartType":"area"}');
+        var group = JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false}],"dataGroup":{"hasGrouping":false,"xAxisType":"currency","xAxisProp":"price","timeseriesInterval":"","errors":[]},"group":[],"dataFilter":{"intervalKind":"day","intervalType":"dynamic","min":30,"max":32,"dateProp":"timestamp"},"chartType":"area"}');
         group.propertyTypes = res;
         self.segment.initialize(group);
         self.process();

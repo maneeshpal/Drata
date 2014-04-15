@@ -24,10 +24,10 @@
         };
 
         var intervalFormats = {
-            month : {format: '%b %Y', b: 30, l: 50},
-            year: {format: '%Y', b: 20, l: 30},
-            day: {format: '%Y %b %d', b: 40, l: 60},
-            hours: {format: '%Y %b %d %H:%M', b: 60,l: 80},
+            month : {format: '%b %Y', mb: 55, ml: 55},
+            year: {format: '%Y', mb: 30, ml: 30},
+            day: {format: '%Y %b %d', mb: 60, ml: 60},
+            hours: {format: '%Y %b %d %H:%M', mb: 70, ml: 60},
             get: function(range){
                 var msDay = 172800000, msMonth = 7776000000, msYear = 31536000000;
                 var interval = range[1] - range[0];
@@ -58,31 +58,37 @@
                 var dataLength = enabledData.length;
                 var intFormat;
                 _domain = [getMin(enabledData, _axisType),getMax(enabledData, _axisType)];
-                
+                var ml = 0, mb = 0;
                 switch(_axisTicType){
                     case 'numeric':
+                        ml = 50; mb = 50;
                         _scale = d3.scale.linear();
-                        _tickFormat = d3.format('.1f');
+                        _tickFormat = d3.format('.2s');
                         break;
                     case 'currency':
+                        ml = 30; mb= 30;
                         _scale = d3.scale.linear();
                         _tickFormat = function(d) {
-                            var f = d3.format('.3s');
+                            var f = d3.format('.2s');
                             return '$' + f(d);
                         };
                         break;
                     case 'date':
                         intFormat = intervalFormats.get(_domain);
-                        _dims.m.b = intFormat.b;
-                        _dims.m.l = intFormat.l;
+                        mb = intFormat.mb;
+                        ml = intFormat.ml;
                         _scale = d3.time.scale();
                         _tickFormat = d3.time.format(intFormat.format);
                         break;
                 }
 
                 var tickSize = 0;
+                if(_axisType === 'x'){
+                    //_dims.m.l = ml;
+                }
                 var wm = _dims.w - _dims.m.l - _dims.m.r;
                 var hm = _dims.h - _dims.m.t - _dims.m.b;
+                
                 if(_axisType === 'y'){
                     _scale.range([hm, 0]);
                     if(_gl) tickSize = -wm;
@@ -94,25 +100,41 @@
 
                 _scale.domain(_domain);
 
-                axis
-                    .scale(_scale)
-                    .tickFormat(_tickFormat)
-                    .orient(_orient);
-                
-                _ticks > 0 && axis.ticks(_ticks);
-                
                 tickSize !== 0 && axis.tickSize(-wm);
-                
+
+
+                //var axisLabelLength = 0,c=0,a;
+                axis.scale(_scale)
+                    .tickFormat(function(d){
+                        a = _tickFormat(d);
+                        // if(_axisType !== 'x') return a;
+
+                        // c = drata.utils.textToPixel(a);
+                        // axisLabelLength += c;
+                        return a;
+                    })
+                    .orient(_orient);
+
                 var xis = container.call(axis);
-                if(_axisType === 'x' && intFormat){
+                //var turnXaxis = axisLabelLength > _dims.w - _dims.m.l - _dims.m.r - 20;
+
+                //maxLabelLength = Math.sin(Math.PI/180 * 30) * (maxLabelLength);
+                //_ticks > 0 && axis.ticks(_ticks);
+                 
+                var angle = (_dims.w < 250)? -60 : -30;
+                if(_axisType === 'x' && _axisTicType === 'date'){
                     xis.selectAll('text')
                     .style("text-anchor", "end")
                     .attr("dx", "0")
                     .attr("dy", ".50em")
                     .attr("transform", function(d) {
-                        return "rotate(-30)"
+                        return "rotate("+ angle +")"
                     });
+                    
+                _dims.m.b = mb;
+
                 }
+                
                 
             });
             return chart;
@@ -126,9 +148,10 @@
 
         chart.scale = function(value){
             if (!arguments.length) return _scale;
-            if(_axisTicType) throw "Cant set both AxisTicType and Scale";
-            _scale = value;
-            return _scale;
+            //if(_axisTicType) throw "Cant set both AxisTicType and Scale";
+            //_scale = value;
+            //return _scale;
+            throw "scale is readonly property of Axis";
         };
 
         chart.orient = function(value){

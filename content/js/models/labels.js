@@ -7,33 +7,22 @@
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-                //var temp = 0;
-
-                // var exl = data.map(function(d){
-                //     temp = temp + drata.utils.textToPixel(d.key) + 20;
-                //     return temp;
-                // });
-
+                
                 var labelsWrapper = container
                     .selectAll('g.label-group')
                     .data(data);
-console.log('i broke center alignment for labels');
-                if(_align === 'center') {
-                    container.attr('transform', 'translate('+ (_w-temp)/2 + ',' + _h +')');
-                }
                 
-                //exl.splice(0, 0 , 0);
-
                 var labelWrapper = labelsWrapper.enter()
                     .append('g')
                     .attr('class','label-group');
                 
-                var prev = 0, cols = 0;  wm = _dims.w - _dims.m.l - _dims.m.r;
+                var prev = 0, cols = 0; totalLen = 0, wm = _dims.w - _dims.m.l - _dims.m.r;
 
                 container
                     .selectAll('g.label-group')
                     .attr('transform', function(d, i){
                         var len = drata.utils.textToPixel(d.key) + 20;
+                        totalLen += len;
                         if(prev + len >= wm) {
                             prev = 0;
                             cols ++;
@@ -48,6 +37,12 @@ console.log('i broke center alignment for labels');
                     });
 
                     _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * 24)+5);
+                
+                if(_align === 'center') {
+                    container.attr('transform', 'translate('+ (_dims.w - (totalLen/(cols + 1)))/2 + ',' + (_dims.h - _dims.m.b) +')');
+                } else if(_align === 'topcenter'){
+                    container.attr('transform', 'translate('+ (_dims.w - (totalLen/(cols + 1)))/2 + ')');
+                }
 
                 labelWrapper.append('text').attr('class', 'label-text');
                 labelWrapper.append('circle').attr('class', 'label-circle');

@@ -31,9 +31,20 @@ var Widget = function(widgetModel, index){
     self.selectedPieKey = ko.observable();
     self.name = widgetModel.name || widgetModel.selectedDataKey;
     self.sizex = ko.observable(widgetModel.sizex || 1);
+    self.sizey = ko.observable(widgetModel.sizey || 1);
     self.widgetClass= ko.computed(function(){
         return 'widget-size-' + self.sizex();
     });
+
+    self.widgetYClass = ko.computed(function(){
+        return 'widget-size-y-' + self.sizey();
+    });
+
+    self.editing = ko.observable(false);
+    self.editSettings = function(){
+        self.editing(!self.editing());
+    };
+
     self.parseError = ko.observable();
     var content;
     self.chartType = ko.observable(widgetModel.segmentModel.chartType);
@@ -112,6 +123,7 @@ var Widget = function(widgetModel, index){
 
     self.getModel = function (argument) {
         widgetModel.sizex = self.sizex();
+        widgetModel.sizey = self.sizey();
         return widgetModel;
     };
     
@@ -122,6 +134,7 @@ var Widget = function(widgetModel, index){
         content && content.change && content.change(newdata);
     });
     self.sizex.subscribe(self.resizeContent.bind(self));
+    self.sizey.subscribe(self.resizeContent.bind(self));
 };
 
 var LineContent = function(index){
@@ -262,14 +275,20 @@ var SegmentProcessor = function(){
     });
     self.selectedDataKey = ko.observable();
     self.parseError = ko.observable();
-
+    var cloneModel;
     self.selectedDataKey.subscribe(function(newValue){
         if(!newValue){
             self.segment.initialize();
         }
-        else if(self.processSegment){
+        else {
             DataRetriever.getUniqueProperties(newValue, function(properties){
-                self.segment.initialize({propertyTypes:properties});
+                if(cloneModel && newValue === cloneModel.selectedDataKey){
+                    cloneModel.segmentModel.propertyTypes = properties;
+                    self.segment.initialize(cloneModel.segmentModel);    
+                }
+                else{
+                    self.segment.initialize({propertyTypes:properties});
+                }
             });
         }
     });
@@ -296,16 +315,16 @@ var SegmentProcessor = function(){
     };
     
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
-        var clonemodel = drata.utils.clone(model);
-        self.processSegment = false;
-        self.selectedDataKey(clonemodel.selectedDataKey);
-        self.processSegment = true;
-        self.segment.initialize(clonemodel.segmentModel);
+        cloneModel = drata.utils.clone(model);
+        //self.processSegment = false;
+        self.selectedDataKey(cloneModel.selectedDataKey);
+        //self.processSegment = true;
+        //self.segment.initialize(clonemodel.segmentModel);
         self.previewGraph(true);
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
-        self.handleGraphPreview(clonemodel.segmentModel);
+        self.handleGraphPreview(cloneModel.segmentModel);
     };
 
     self.widgetCancel = function() {

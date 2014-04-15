@@ -32,19 +32,95 @@
 .widget-size-6{
   width:66.666%;
 }
+.widget-size-y-1{
+  height:300px;
+}
+
+.widget-size-y-2{
+  height:647px;
+}
+
 
 .widget-wrapper {
   border: 1px solid #CCC;
-  height: 400px;
+  heimght: 400px;
   width:100%;
   background-color: #f2f2f2;
   box-shadow: 0px 0px 5px .5px #ccc;
+  position: relative;
+  overflow: hidden;
 }
 .widget-wrapper:last-child{
   float:right;
 }
+
 .widget-content {
-  height: 365px; }
+  height:300px;
+}
+.widget-content-wrapper{
+  position: relative;
+  left:0;
+  transition:all .1s linear;
+}
+.widgetcontentedit{
+  left:-200px;
+}
+
+/*.widget-size-3 .widget-content {
+  height:650px;
+}*/
+
+/*widger nav*/
+
+.widget-nav{
+  border-bottom:1px dashed #ccc;
+}
+.widget-nav .title{
+  line-height: 2rem;
+  padding-left:1rem;
+}
+ul.widget-nav-list{
+  list-style: none;
+}
+ul.widget-nav-list li{
+  list-style: none;
+  float:left;
+  display:block;
+  line-height: 2rem;
+  border-left:1px solid #ccc;
+}
+
+ul.widget-nav-list li.divider:after{
+  content:'.';
+  visibility: hidden;
+}
+
+ul.widget-nav-list li.action-icon{
+  padding:0 5px;
+}
+
+.widget-nav ul.widget-nav-list, .widget-nav ul.widget-nav-list select {
+  margin:0;
+  border:none;
+}
+.widget-nav ul.widget-nav-list select {
+  background: none;
+  padding-top:0;
+  padding-bottom: 0;
+  height: 2.2rem;
+}
+/*widger nav*/
+/*widget-settings*/
+.widget-settings{
+  position: absolute;
+  width: 200px;
+  border-left:1px dashed #ccc;
+  right:-200px;
+  padding:.8rem;
+  height: 100%;
+  top:0;
+}
+/*end widget-settinhs*/
 
 /*Modal segment*/
 .mymodal-wrapper.showme {

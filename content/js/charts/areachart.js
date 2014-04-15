@@ -60,10 +60,6 @@
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
                 
-                dims.wm = dims.w - dims.m.l - dims.m.r;
-                dims.hm = dims.h - dims.m.t - dims.m.b;
-                
-                
                 xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
                 yAxis.axisTicType('numeric').dims(dims).includeGridLines(true);
                                 
@@ -103,8 +99,14 @@
                 labelContainer.datum(data).call(labels);
 
                 var xAxisContainer = gWrapper.select('g.x.axis');
-
+ 
+                console.log('before x axis');
+                console.log(dims.m);
+                
                 xAxisContainer.call(xAxis);
+                
+                console.log('after x axis');
+                console.log(dims.m);
                 
                 xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
                 

@@ -144,6 +144,7 @@ var TrackDataGroup = function(){
         self.xAxisProp(model.xAxisProp);
         self.groupByProp(model.groupByProp);
         self.timeseries(model.timeseries);
+        self.xAxisType(model.xAxisType);
         self.hasGrouping(model.groupByProp !== undefined);
         self.timeseriesInterval(model.timeseriesInterval);
         
@@ -322,13 +323,16 @@ var DataFilter = function(){
 
     self.prefill = function(model){
         self.intervalType(model.intervalType || 'dynamic');
-        self.intervalKind(model.intervalKind || 'day');
+        self.intervalKind(model.intervalKind);
         if(model.intervalType === 'static'){
             model.min && self.minDate(model.min);
             model.max && self.maxDate(model.max);
         } else if(model.intervalType === 'dynamic'){
             model.min && self.min(model.min);
             model.max && self.max(model.max);
+            if(model.min && model.max && slider){
+                slider.slider( "option", "values", [model.min, model.max]); 
+            }
         }
         model.dateProp && self.dateProp(model.dateProp);
     };
@@ -342,8 +346,8 @@ var DataFilter = function(){
     var setupSlider = function(){
         //if(slider) return;
         console.log('set slider');
-        if(!self.intervalKind()) self.intervalKind('day');
-        var bounds = drata.utils.getBounds(self.intervalKind());
+        //if(!self.intervalKind()) self.intervalKind('day');
+        var bounds = drata.utils.getBounds('day');
         var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
         self.min(pre[0]);
         self.max(pre[1]);

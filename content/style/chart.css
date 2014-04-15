@@ -14,7 +14,7 @@
       shape-rendering: crispEdges;
     }
     .axis text{
-        fill: #ccc;
+        fill: #1f77b4;
     }
     .label-group text{
         font:12px arial;
