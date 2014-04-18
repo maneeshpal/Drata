@@ -915,7 +915,7 @@ var DataRetriever = {
 
         $.ajax({
             type: "GET",
-            url: drata.utils.format('http://localhost:3000/{0}/{1}/properties', db, dataKey),
+            url: drata.utils.format('/api/{0}/{1}/properties', db, dataKey),
             dataType: 'json',
             headers: { 'Access-Control-Allow-Origin': '*' },
             success: function(response){
@@ -927,7 +927,7 @@ var DataRetriever = {
         //callback(['key1', 'key2', 'Shopper Stop']);
         $.ajax({
             type: "GET",
-            url: drata.utils.format('http://localhost:3000/{0}/keys', db),
+            url: drata.utils.format('/api/{0}/keys', db),
             dataType: 'json',
             headers: { 'Access-Control-Allow-Origin': '*' },
             success: function(response){
@@ -943,7 +943,7 @@ var DataRetriever = {
         //callback(this._t);
         $.ajax({
             type: "POST",
-            url: drata.utils.format('http://localhost:3000/{0}/{1}', db, model.dataKey),
+            url: drata.utils.format('/api/{0}/{1}', db, model.dataKey),
             data: {
                 selection: model.segment.selection,
                 dataGroup: model.segment.dataGroup,
