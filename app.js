@@ -48,14 +48,15 @@ var app = express();
  
 app.configure(function () {
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
-    app.use(express.bodyParser());
+    //app.use(express.bodyParser());
+    app.use(express.json());
     //app.use(cors());
     app.use(express.urlencoded());
     app.use(express.static(path.join(__dirname, 'content')));
 });
 
 app.set('port', process.env.PORT || 3000);
-app.get('/', function(req, res){
+app.get('/dashboard/:dashboardId', function(req, res){
   res.sendfile('dash.html');
 });
 
@@ -67,22 +68,34 @@ app.get('/temp', function(req, res){
   res.sendfile('temp.html');
 });
 
-app.get('/api/dashboards/:id', drataRepository.findDashboard);
-app.get('/api/dashboards', drataRepository.findDashboards);
+//app.get('/api/dashboard/pop', drataRepository.pop);
 
-app.post('/api/dashboards', drataRepository.createDashboard);
-app.post('/api/dashboards/:id', drataRepository.updateDashboard);
+//get dashboard
+app.get('/api/dashboard/:id', drataRepository.findDashboard);
 
-app.get('/api/dashboards/:id/widgets', drataRepository.findWidgets);
-app.get('/api/dashboards/:id/widgets/:id', drataRepository.findWidget);
+//get widgets of dashboard
+app.get('/api/dashboard/:id/widgets', drataRepository.findWidgetsOfDashboard);
 
-app.post('/api/dashboards/:id/widgets', drataRepository.updateWidgets);
-app.post('/api/dashboards/:id/widgets/:id', drataRepository.updateWidget);
+// //find all dashboards. dont include widgets
+// app.get('/api/dashboards', drataRepository.findDashboards);
+// //find a widget
+// app.get('/api/widget/:id', drataRepository.findWidget);
+
+// //update dashboard
+// app.put('/api/dashboard/:id', drataRepository.updateDashboard);
+//update widget
+app.put('/api/widget', drataRepository.upsertWidget);
+//create widget
+app.post('/api/widget', drataRepository.upsertWidget);
+//delete widget
+app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
+// //create dashboard
+// app.post('/api/dashboard', drataRepository.createDashboard);
 
 
-app.get('/api/:dbname/keys', mongoRepository.findAllKeys);
-app.get('/api/:dbname/:collectionName/properties', mongoRepository.findProperties);
-app.post('/api/:dbname/:collectionName', mongoRepository.findCollection);
+app.get('/api/external/:dbname/keys', mongoRepository.findAllKeys);
+app.get('/api/external/:dbname/:collectionName/properties', mongoRepository.findProperties);
+app.post('/api/external/:dbname/:collectionName', mongoRepository.findCollection);
 
 // app.get('/shopperstop/keys', shopperstop.findAllKeys);
 // app.get('/shopperstop/pop', shopperstop.pop);

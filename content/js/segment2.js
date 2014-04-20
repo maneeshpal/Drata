@@ -26,9 +26,9 @@ var Segmentor = function(model){
         }
         self.properties(propList);
     };
-    self.initialize = function(model){
+    self.initialize = function(model, propertyTypes){
         model = model || {};
-        self.setPropertyTypes(model.propertyTypes);
+        self.setPropertyTypes(propertyTypes);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataFilter.prefill(model.dataFilter || {});
@@ -64,7 +64,6 @@ var Segmentor = function(model){
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
-            propertyTypes: ko.toJS(self.propertyTypes),
             dataFilter: self.dataFilter.getModel(),
             chartType: self.chartType()
         };
@@ -74,7 +73,6 @@ var Segmentor = function(model){
             selection: self.selectionGroup.getModel(),
             dataGroup: self.dataGroup.getModel(),
             group: self.conditionGroup.getModel(),
-            propertyTypes: ko.toJS(self.propertyTypes),
             dataFilter: self.dataFilter.getModel(),
             chartType: self.chartType()
         };
@@ -258,7 +256,7 @@ var ComparisonDataGroup = function(options){
         delete dataGroupModel.setProps;
         delete dataGroupModel.getModel;
         return dataGroupModel;
-    }
+    };
 
     self.groupByProp.extend({
         required: { 
@@ -903,70 +901,32 @@ var db = 'shopperstop';
 
 var DataRetriever = {
     getUniqueProperties : function(dataKey, callback){
-        // callback([
-        //   "price",
-        //   "geography",
-        //   "timestamp",
-        //   "sex",
-        //   "color",
-        //   "tax",
-        //   "shippingPrice"
-        // ]);
-
-        $.ajax({
-            type: "GET",
-            url: drata.utils.format('/api/{0}/{1}/properties', db, dataKey),
-            dataType: 'json',
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            success: function(response){
-                callback && callback(response);
-            }
-        });
+        drata.apiClient.getUniqueProperties(dataKey, callback);
     },
     getDataKeys : function(callback){
-        //callback(['key1', 'key2', 'Shopper Stop']);
-        $.ajax({
-            type: "GET",
-            url: drata.utils.format('/api/{0}/keys', db),
-            dataType: 'json',
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            success: function(response){
-                callback && callback(response);
-            }
-        });
+        drata.apiClient.getDataKeys(callback);
     },
     getData : function(model,callback){
-        // if(!this._t){
-        //     this._t = tempData.randomProps(10);    
-        // }
-        // console.log(this._t);
-        //callback(this._t);
-        $.ajax({
-            type: "POST",
-            url: drata.utils.format('/api/{0}/{1}', db, model.dataKey),
-            data: {
-                selection: model.segment.selection,
-                dataGroup: model.segment.dataGroup,
-                dataFilter: model.segment.dataFilter,
-                group: model.applyClientfilters ? undefined: model.segment.group
-            },
-            dataType: 'json',
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            success: function(response){
-                var result = [];
-                for(var i = 0; i< response.length; i++){
-                    result.push(drata.utils.flatten(response[i]));
-                }
-                //remove this
-                //window.debug.dataresponse = result;
-
-                console.log('total records :' + result.length);
-                //Apply filters client side if the response isnt already filtered.
-                if(model.applyClientfilters){
-                    result = Conditioner.filterData(result, model.segment);
-                }
-                callback && callback(result);
+        var postData = {
+            selection: model.segment.selection,
+            dataGroup: model.segment.dataGroup,
+            dataFilter: model.segment.dataFilter
+        };
+        if(!model.applyClientfilters){
+            postData.group = model.segment.group;
+        }
+        drata.apiClient.getData(postData, model.dataKey, function(response){
+            var result = [];
+            for(var i = 0; i< response.length; i++){
+                result.push(drata.utils.flatten(response[i]));
             }
+            
+            console.log('total records :' + result.length);
+            //Apply filters client side if the response isnt already filtered.
+            if(model.applyClientfilters){
+                result = Conditioner.filterData(result, model.segment);
+            }
+            callback && callback(result);
         });
     }
 };

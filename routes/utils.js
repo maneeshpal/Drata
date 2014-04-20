@@ -119,7 +119,7 @@ var processConditions = function(conditions){
 };
 
 var processCondition = function(c){
-    if(c.isComplex == 'false'){
+    if(!c.isComplex){
         var a = {}, b = {}, val;
         switch(c.valType){
             case 'date':
@@ -129,7 +129,7 @@ var processCondition = function(c){
                 val = +c.value;
             break;
             case 'bool':
-                val = c.value == 'true' || c.value == '1';
+                val = c.value == 'true' || c.value == '1' || c.value === true;
             break;
             case 'string':
                 val = c.value + '';
@@ -170,7 +170,7 @@ var processCondition = function(c){
 
 var selectExpression = function(selection, includeBracket){
     var expression = '';
-    if(selection.isComplex == 'false'){
+    if(!selection.isComplex){
         return 'obj.' + selection.selectedProp;
     }
     _.each(selection.groups, function(sel,index){
@@ -303,9 +303,8 @@ var getDateRange = function(dataFilter){
 
 var buildReturnPoperties = function(segment){
     var ret = getSelectionProperties(segment.selection);
-    console.log('selecccc ' + JSON.stringify(ret, null, '\t'));
-    if(segment.dataGroup.hasGrouping == 'true') ret[segment.dataGroup.groupByProp] = 1;
-    if(segment.dataGroup.hasDivideBy == 'true') ret[segment.dataGroup.divideByProp] = 1;
+    if(segment.dataGroup.hasGrouping) ret[segment.dataGroup.groupByProp] = 1;
+    if(segment.dataGroup.hasDivideBy) ret[segment.dataGroup.divideByProp] = 1;
     if(segment.dataGroup.xAxisProp) ret[segment.dataGroup.xAxisProp] = 1; 
     ret['_id'] = 0;
     return ret;
@@ -314,7 +313,7 @@ var buildReturnPoperties = function(segment){
 var getSelectionProperties = function(selections){
     var ret = {};
     _.each(selections, function(sel){
-        if(sel.isComplex == 'false'){
+        if(!sel.isComplex){
             ret[sel.selectedProp.split('.')[0]] = 1;
         }
         else {

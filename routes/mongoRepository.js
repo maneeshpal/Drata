@@ -23,7 +23,6 @@ var dbInstance = function(name){
     var _name = name;
 
     function connecta(callback){
-        console.log('dbname is :' + _name);
         // var db = new Db(_name, server);
         // db.open(function(err, db){
         //     callback && callback(db);
@@ -69,12 +68,12 @@ exports.pop = function(req, res){
 
 exports.findAllKeys = function(req, res) {
     dbInstance(req.params.dbname)(function(db){
-        console.log('got my db');
+        //console.log('got my db');
         db.collectionNames(function(err, result) {
             if(err){
-                console.log(JSON.stringify(err, null, '\t'));
+                res.send(404);
             }
-            console.log('getting collections');
+            //console.log('getting collections');
             //console.log(JSON.stringify(result, null, '\t'));
             var returnCollections = result.filter(function(v){
                 return v.name.indexOf('.system.') < 0;
@@ -106,8 +105,8 @@ exports.findCollection = function(req, res) {
         console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
         var query = utils.getMongoQuery(segment);
         var selectOnly = utils.buildReturnPoperties(segment);
-        console.log('mongo query :' + JSON.stringify(query, null, '\t'));
-        console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
+        //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
+        //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
         db.collection(collectionName, function(err, collection) {
             if(!err){
                 collection.find(query, selectOnly).toArray(function(err, items) {
@@ -116,22 +115,12 @@ exports.findCollection = function(req, res) {
                 });
             }
             else{
-                res.send({'error':'An error has occurred'});
+                res.send(404);
             }
         });
     });
 };
 
-// exports.findEventByCollectionAndId = function(req, res) {
-//     var id = req.params.id;
-//     var collectionName = req.params.collectionName;
-//     db.collection(collectionName, function(err, collection) {
-//         collection.findOne({'_id':new BSON.ObjectID(id)}, function(err, item) {
-//             res.send(item);
-//         });
-//     });
-// };
- 
 /*--------------------------------------------------------------------------------------------------------------------*/
 // Populate database with sample data -- Only used once: the first time the application is started.
 // You'd typically not find this code in a real-life app, since the database would already exist.
