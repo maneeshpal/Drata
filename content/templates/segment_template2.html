@@ -51,9 +51,9 @@
         <legend>Select Date Range </legend>
         
         <div class="row">
-        <div class="small-3 columns">
-            <label class="right inline">Date Property</label>
-        </div>
+            <div class="small-3 columns">
+                <label class="right inline">Date Property</label>
+            </div>
             <div class="small-9 columns" data-bind="comboBox :{selectedValue: dateProp, options: $parent.properties,optionsCaption:'choose Property',allowCustom:false}">
             </div>
         </div>
@@ -337,7 +337,7 @@
         <div class="small-8 columns" data-bind="css : {'small-offset-2': $index() === 0},click:expand">
             <div data-alert class="complex-overlay" data-bind="html: complexConditionSummary">
             </div>
-            </div>
+        </div>
         <!-- /ko -->
         <div class="small-2 columns small-centered">
             <span class="label success round" style="top:6px"><i class="general foundicon-plus" data-bind="click:expand"></i>

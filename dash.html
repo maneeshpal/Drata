@@ -4,15 +4,15 @@
 <head>
     <title>Drata</title>
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" type="text/css" href="/style/core/normalize.css" />
-    <link rel="stylesheet" type="text/css" href="/style/core/foundation.css" />
+    <link rel="stylesheet" type="text/css" href="/style/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/style/app.css" />
     <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
 
     <link rel="stylesheet" type="text/css" href="/style/dashboard.css" />
     <link rel="stylesheet" type="text/css" href="/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
-    <link rel="stylesheet" type="text/css" href="/style/core/general_foundicons.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
    
 
     <style>
@@ -36,6 +36,11 @@
             <ul class="right">
                 <li class="divider"></li>
                 <li class="has-form">
+                    <a data-bind="click:manageDashboards" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
+                </li>
+
+                <li class="divider"></li>
+                <li class="has-form">
                     <a data-bind="click:addWidget" class="button success"><i class="general foundicon-plus"></i>&nbsp;Add Widget</a>
                 </li>
                 
@@ -52,7 +57,7 @@
         <div class="mymodal-inner">
         <div class="mymodal-inner-temp">
             
-            <nav class="top-bar" id="topbar" data-topbar>
+            <nav class="top-bar" data-topbar>
                 <ul class="title-area">
                     <li class="name">
                         <h1><a href="#">Widget Processor</a></h1>
@@ -116,14 +121,73 @@
         </div>
         </div>
     </div>
-
     
+    <div id="dashboardManager" class="mymodal-wrapper">
+        <div class="mymodal-inner">
+            <div class="mymodal-inner-temp">
+                <nav class="top-bar" data-topbar>
+                    <ul class="title-area">
+                        <li class="name">
+                            <h1><a>Dashboard Manager</a></h1>
+                        </li>
+                    </ul>
+
+                    <section class="top-bar-section">
+                        <!-- Right Nav Section -->
+                        <ul class="right">
+                            <li class="divider"></li>
+                            <li class="has-form">
+                                <a data-bind="click:closeDashboardManager" class="button alert"><i class="general foundicon-remove"></i></a>
+                            </li>
+                        </ul>
+                    </section>
+                </nav>
+                <div class="row">
+                    <div class="large-12 columns">
+                    <fieldset>
+                        <legend>
+                            Add new Dashboard
+                        </legend>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Name :</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <input type="text" data-bind="value: newName" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="large-8 large-offset-4 columns">
+                                <button class="button left tiny success" data-bind="click:addNewDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Existing Dashboards</legend>
+                        <!-- ko foreach: dashboards -->
+                        <div class="row">
+                            <div class="large-4 columns">
+                                <a data-bind="text:name,attr: {href: url}"></a>
+                            </div>
+                            
+                        </div>
+                        <!-- /ko -->
+                    </fieldset>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+
     <script type="text/html" id="widget-template">
     <div class="widget-outer" data-bind="css: widgetClass">
         <div class="widget-wrapper">
             <div class="row collapse widget-nav handle">
                 <div class="left title">
-                    Title
+                    <input style="margin-bottom:0" type="text" data-bind="value: name"></input>
                 </div>
                 <div class="right">
                     <ul class="widget-nav-list right">
@@ -212,13 +276,13 @@
     <script type="text/javascript" src="/js/lib/knockout-3.0.0.js"></script>
     <script type="text/javascript" src="/js/lib/knockout.validation.min.js"></script>
     
-    <script type="text/javascript" src="/js/lib/helpers/ko.extensions.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.custombindinghandlers.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.validation.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.validation.extensions.js"></script>
 
     
-    <script type="text/javascript" src="/foundation/js/foundation/foundation.js"></script>
-    <script type="text/javascript" src="/foundation/js/foundation/foundation.topbar.js"></script>
+    <script type="text/javascript" src="/js/foundation.js"></script>
+    <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
 
     <script type="text/javascript" src="/js/models/axis.js"></script>
     <script type="text/javascript" src="/js/models/dots.js"></script>
@@ -251,6 +315,10 @@
 
                 window.segmentProcessor = new SegmentProcessor();
                 ko.applyBindings(segmentProcessor, document.getElementById('graphBuilder'));
+
+                window.dashboardManager = new DashboardManager();
+                ko.applyBindings(dashboardManager, document.getElementById('dashboardManager'));
+
                 $(document).foundation();
             });
         })(this, jQuery);

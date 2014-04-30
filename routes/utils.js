@@ -87,7 +87,7 @@ var mongoSymbolMap = {
 };
 
 var getMongoQuery = function(segment){
-    var query = segment.group ? processConditions(segment.group) : {};
+    var query = segment.group ? getMongoConditions(segment.group) : {};
     var dateRange = getDateRange(segment.dataFilter);
     
     query[segment.dataFilter.dateProp] = {
@@ -97,10 +97,10 @@ var getMongoQuery = function(segment){
     return query;
 };
 
-var processConditions = function(conditions){
+var getMongoConditions = function(conditions){
     if(!conditions || conditions.length === 0)
 		return {};
-    var result = processCondition(conditions[0]);
+    var result = getMongoCondition(conditions[0]);
     var fl = undefined;
     //result[fl] = [];
     for(var i=1;i<conditions.length;i++){
@@ -112,13 +112,13 @@ var processConditions = function(conditions){
             result[logic] = [];
             result[logic].push(x);
         }
-        result[logic].push(processCondition(c));
+        result[logic].push(getMongoCondition(c));
         fl = logic;
     }
     return result;
 };
 
-var processCondition = function(c){
+var getMongoCondition = function(c){
     if(!c.isComplex){
         var a = {}, b = {}, val;
         switch(c.valType){
@@ -143,14 +143,7 @@ var processCondition = function(c){
             else{
                 switch(c.operation){
                     case '=':
-                    	//if(!isNaN(+val)) val = +val;
-                    	//if(val === 'true' || val === 'false') val = val === 'true';
-                        // if(c.operation === '!='){
-                        // 	b[mongoSymbolMap[c.operation]] = val;
-                        // }
-                        // else{
-                        	b = val;
-                        //}
+                        b = val;
                         break;
                     case 'exists':
                         b[mongoSymbolMap[c.operation]] = true;
@@ -164,7 +157,7 @@ var processCondition = function(c){
         return a;
     }
     else {
-       return processConditions(c.groups);
+       return getMongoConditions(c.groups);
     }
 };
 

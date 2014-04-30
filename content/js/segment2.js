@@ -529,6 +529,7 @@ var Condition = function(options){
         }
         return expression;
     });
+
     self.complexConditionSummary = ko.computed(function(){
         return 'Complex Condition: <span class="keystroke">' + ((self.expression().length > 27) ? self.expression().substring(0,23) + '...)' : self.expression()) + '</span>';
     });
@@ -700,20 +701,6 @@ var Selection = function(options){
     self.aliasName = ko.observable();
     self.groupBy = ko.observable();
     self.selectedProp = ko.observable();
-    // var _valType = ko.observable('unknown');
-    // //propertytype
-    // self.valType = ko.computed({
-    //     read: function(){
-    //         var newType = options.propertyTypes[self.selectedProp()];
-    //         return newType? newType() : _valType();
-    //     },
-    //     write: function(newValue){
-    //         _valType(newValue);
-    //         var propExists = options.propertyTypes[self.selectedProp()] !== undefined;
-    //         if(propExists) options.propertyTypes[self.selectedProp()](newValue);
-    //     }
-    // });
-
     self.addSelection = function(){
         self.selections.push(new Selection({level:options.level+1, renderType: 'childSelection'}));
     };

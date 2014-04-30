@@ -15,9 +15,25 @@ mongoClient.open(function(err, mongoClient) {
     }
 });
 
-// exports.pop = function(req, res){
-//     populateDB(req, res);
-// };
+exports.pop = function(req, res){
+    db.collection('dashboard',function(err, collection) {
+        if(err){
+            res.send(404);
+        }
+        else{
+            // collection.update({},
+            //    { $set: { dateUpdated: new Date().toISOString() } },
+            //    { multi: true },function(err, result) {
+            //     res.send(result);
+            // });
+
+            // collection.update({_id: mongo.ObjectID('53531185b6cdcec0069a6530')},
+            //    { $set: { name: 'maneesh'} },function(err, result) {
+            //     res.send(result);
+            // });
+        }
+    });
+};
 
 exports.findDashboard = function(req, res) {
     var dashboardId = req.params.id;
@@ -48,21 +64,21 @@ exports.findWidgetsOfDashboard = function(req, res) {
     });
 };
 
-exports.createWidget = function(req, res){
-    db.collection('widget',function(err, collection) {
-        if(err){
-            console.log(JSON.stringify(err, null, '\t'));
-            res.send(404);
-        }
-        else{
-            collection.insert(req.body, {safe:true}, function(err, result) {
-                //console.log(JSON.stringify(werr));
+// exports.createWidget = function(req, res){
+//     db.collection('widget',function(err, collection) {
+//         if(err){
+//             console.log(JSON.stringify(err, null, '\t'));
+//             res.send(404);
+//         }
+//         else{
+//             collection.insert(req.body, {safe:true}, function(err, result) {
+//                 //console.log(JSON.stringify(werr));
                 
-                res.send(result[0]._id);
-            });
-        }
-    });
-};
+//                 res.send(result[0]._id);
+//             });
+//         }
+//     });
+// };
 
 exports.upsertWidget = function(req, res){
     console.log(JSON.stringify(req.body, null, '\t'));
@@ -72,11 +88,16 @@ exports.upsertWidget = function(req, res){
             res.send(404);
         }
         else{
-            var widgetId = req.body._id;
             var widgetModel = req.body;
             if(widgetModel._id){
                 widgetModel._id = mongo.ObjectID(widgetModel._id);
             }
+
+            if(!widgetModel.dateCreated){
+                widgetModel.dateCreated = new Date().toISOString();
+            }
+            widgetModel.dateUpdated = new Date().toISOString();
+            
             //delete widgetModel._id;
             collection.save(widgetModel, {safe:true}, function(err, result) {
                 console.log(JSON.stringify(err));
@@ -97,7 +118,7 @@ exports.deleteWidget = function(req, res){
             res.send(404);
         }
         else{
-            collection.remove({_id : widgetId}, {safe:true}, function(err, result) {
+            collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
                 //console.log(JSON.stringify(werr));
                 console.log('deleted ' + req.params.widgetId);
                 res.send(200);
@@ -106,14 +127,110 @@ exports.deleteWidget = function(req, res){
     });
 };
 
-exports.findDashboards = function(req, res) {
-    db.collection('dashboard',function(err, result) {
+exports.upsertDashboard = function(req, res){
+    db.collection('dashboard',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            var dashboardModel = req.body;
+            if(dashboardModel._id){
+                dashboardModel._id = mongo.ObjectID(dashboardModel._id);
+            }
+            if(!dashboardModel.dateCreated){
+                dashboardModel.dateCreated = new Date().toISOString();
+            }
+            dashboardModel.dateUpdated = new Date().toISOString();
+            collection.save(dashboardModel, {safe:true}, function(err, result) {
+                console.log(JSON.stringify(err));
+                if(err) res.send(404);
+                console.log(JSON.stringify(result));
+                
+                res.send(result);
+            });
+        }
+    });
+};
+
+exports.deleteDashboard = function(req, res){
+    var dashboardId = mongo.ObjectID(req.params.dashboardId);
+    db.collection('dshboard',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            collection.remove({_id : dashboardId}, {safe:true,justOne:true}, function(err, result) {
+                //console.log(JSON.stringify(werr));
+                //console.log('deleted ' + req.params.widgetId);
+                res.send(200);
+            });
+        }
+    });
+};
+
+exports.getAllDashboards = function(req, res) {
+    db.collection('dashboard',function(err, collection) {
         if(err){
             res.send(404);
         }
         else{
             collection.find().toArray(function(err, result) {
                 res.send(result);
+            });
+        }
+    });
+};
+
+exports.getAllTags = function(req, res){
+    db.collection('tags',function(err, collection) {
+        if(err){
+            res.send(404);
+        }
+        else{
+            collection.find().toArray(function(err, result) {
+                res.send(result);
+            });
+        }
+    });
+};
+
+exports.getAllTagsOfDashboard = function(req, res){
+    var dashboardId = req.params.dashboardId;
+    db.collection('tags',function(err, collection) {
+        if(err){
+            res.send(404);
+        }
+        else{
+            collection.find({dashboardId: dashboardId}).toArray(function(err, result) {
+                res.send(result);
+            });
+        }
+    });
+};
+
+exports.addTag = function(req, res){
+    db.collection('tags',function(err, collection) {
+        if(err){
+            res.send(404);
+        }
+        else{
+            var tagModel = req.body;
+            if(!tagModel)
+                res.send(404);
+            delete tagModel._id;
+            collection.update({
+                tagName: tagModel.tagName,
+                dashboardId: tagModel.dashboardId
+            },
+            tagModel,
+            { upsert: true },
+            function(err, result){
+                //console.log(JSON.stringify(err));
+                if(err) res.send(404);
+                console.log(JSON.stringify(result));
+                res.send(200);
             });
         }
     });

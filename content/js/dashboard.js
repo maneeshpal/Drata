@@ -47,7 +47,7 @@ var Widget = function(widgetModel, index){
     var chartData;
     self.pieKeys = ko.observableArray([]);
     self.selectedPieKey = ko.observable();
-    self.name = widgetModel.name || widgetModel.selectedDataKey;
+    self.name = ko.observable(widgetModel.name || 'widget x');
     self.sizex = ko.observable(widgetModel.sizex || 1);
     self.sizey = ko.observable(widgetModel.sizey || 1);
     self.widgetClass= ko.computed(function(){
@@ -143,6 +143,7 @@ var Widget = function(widgetModel, index){
     self.getModel = function (argument) {
         widgetModel.sizex = self.sizex();
         widgetModel.sizey = self.sizey();
+        widgetModel.name = self.name();
         return widgetModel;
     };
     
@@ -432,14 +433,49 @@ var SegmentProcessor = function(){
             chart = undefined;   
         }
     });
-    // $(window).on('resize', function(){
-    //     self.chart && self.chart.onResize();   
-    // });
+};
+
+var DashboardManager = function(){
+    this.dashboards = ko.observableArray();
+
+    this.closeDashboardManager = function(){
+        $('#dashboardManager').removeClass('showme');
+    };
+    this.newName = ko.observable();
+    
+    this.addNewDashboard = function(){
+        var dashboardModel = {
+            name: this.newName()
+        };
+        drata.apiClient.upsertDashboard(dashboardModel, function(response){
+            this.dashboards.push(new DashboardItem(response));
+        }.bind(this));
+    };
+    this.populateDashboards = function(){
+        drata.apiClient.getAllDashboards(function(dashs){
+            this.dashboards(ko.utils.arrayMap(
+                dashs,
+                function(model) {
+                    return new DashboardItem(model); 
+                }
+            ));
+        }.bind(this));
+    };
+    this.populateDashboards();
+};
+
+var DashboardItem = function(model){
+    this.name = ko.observable(model.name);
+    this.url = '/dashboard/' + model._id;
 };
 
 var TopBar = function(){
     var self = this;
     self.addWidget = function(){
         $('#graphBuilder').toggleClass('showme');
+    };
+    self.manageDashboards = function(){
+        $('#dashboardManager').toggleClass('showme');
     }
+
 }

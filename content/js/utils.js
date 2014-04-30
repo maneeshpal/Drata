@@ -266,120 +266,6 @@
         return intervalGroup;
     };
 
-    var mongoSymbolMap = {
-        '<': '$lt',
-        '>': '$gt',
-        '<=': '$lte',
-        '>=': '$gte',
-        '!=': '$ne',
-        'exists': '$exists'
-    };
-
-    var getMongoQuery = function(segment){
-        var query = segment.group ? processConditions(segment.group) : {};
-        var dateRange = getDateRange(segment.dataFilter);
-        
-        query[segment.dataFilter.dateProp] = {
-            $gte : dateRange.min, 
-            $lte: dateRange.max
-        };
-        return query;
-    };
-
-    var processConditions = function(conditions){
-        if(!conditions || conditions.length === 0)
-            return {};
-        var result = processCondition(conditions[0]);
-        var fl = undefined;
-        //result[fl] = [];
-        for(var i=1;i<conditions.length;i++){
-            var c = conditions[i];
-            var logic = '$'+ c.logic;
-            if(logic !== fl){
-                var x = clone(result);
-                result = {};
-                result[logic] = [];
-                result[logic].push(x);
-            }
-            result[logic].push(processCondition(c));
-            fl = logic;
-        }
-        return result;
-    };
-
-    var processCondition = function(c){
-        if(!c.isComplex){ // this is different in the actual mongo query
-            var a = {}, b = {}, val;
-            switch(c.valType){
-                case 'date':
-                    val = new Date(c.value);
-                break;
-                case 'numeric':
-                    val = +c.value;
-                break;
-                case 'bool':
-                    val = c.value == 'true' || c.value == '1';
-                break;
-                case 'string':
-                    val = c.value + '';
-                break;
-                default:
-                    val = c.value;
-            }
-            if(c.selection.isComplex){
-                a['$where'] = selectExpression(c.selection, false) + ' ' + c.operation + ' ' + val;
-            }
-            else{
-                switch(c.operation){
-                case '=':
-                    b = val;
-                    break;
-                case 'exists':
-                    b[mongoSymbolMap[c.operation]] = true;
-                    break;
-                default :
-                    b[mongoSymbolMap[c.operation]] = val;
-                    break;
-                }
-                a[c.selection.selectedProp] = b;
-            }
-            
-            return a;
-        }
-        else {
-           return getMongoQuery(c.groups);
-        }
-    };
-
-    var selectExpression = function(selection, includeBracket){
-        var expression = '';
-        if(!selection.isComplex){
-            return 'obj.' + selection.selectedProp;
-        }
-        _.each(selection.groups, function(sel,index){
-            expression = expression + ((index === 0)? selectExpression(sel, true) : ' ' + sel.logic + ' ' + selectExpression(sel, true));
-        });
-        if(includeBracket) expression = '(' + expression + ')';
-        return expression;
-    };
-
-    var getSelectionProperties = function(selections){
-        var ret = {};
-        _.each(selections, function(sel){
-            if(!sel.isComplex){
-                ret[sel.selectedProp.split('.')[0]] = 1;
-            }
-            else {
-                innerSel = getSelectionProperties(sel.groups);
-                for(var inner in innerSel){
-                    if(innerSel.hasOwnProperty(inner)) ret[inner] = 1;
-                }
-                //ret = _.union(ret, );    
-            }
-        });        
-        return ret;
-    };
-
     var getType = function(val){
         if(_.isNumber(val))
             return 'number';
@@ -524,6 +410,57 @@
         logmsg : false
     });
 
+    var conditionExpression = function(condition){
+        var expression = '';
+        if(condition.isComplex){
+            return conditionsExpression(condition.groups);
+        }
+        else{
+            return  selectionExpression(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': (condition.value ? condition.value : '__'));
+        }
+    };
+
+    var conditionsExpression = function(conditions){
+        var expression = '';
+        _.each(conditions, function(gr,index){
+            expression = expression + ((index === 0)? conditionExpression(gr) : ' ' + gr.logic + ' ' + conditionExpression(gr));
+        });
+        return !expression? '' : '(' + expression + ')';
+    };
+
+    var selectionExpression = function(selection){
+        var expression = '';
+        if(!selection.isComplex){
+            return selection.selectedProp ? selection.selectedProp : '__';
+        }
+        else{
+            return selectionsExpression(selection.groups);
+        }
+        
+    };
+
+    var selectionsExpression = function(selections, isTopLevel){
+        var expression='';
+        if(isTopLevel){
+            var expressions = [];
+            _.each(selections, function(gr,index){
+                expression = selectionExpression(gr);
+                if(gr.groupBy !== 'value'){
+                    expression = '<em>' + gr.groupBy + '</em>(' + expression + ')';
+                }
+                expressions.push(expression);
+            });
+            
+            return expressions.join(', ');
+        }
+        else{
+            _.each(selections, function(gr,index){
+                expression = expression + ((index === 0)? selectionExpression(gr) : ' ' + gr.logic + ' ' + selectionExpression(gr));
+            });    
+            return '(' + expression + ')';
+        }
+    };
+
     window.debug = {};
 
     drata.ns('global').extend({
@@ -550,14 +487,13 @@
         parseTime: parseTime,
         calc: calc,
         divideDataByInterval: divideDataByInterval,
-        getMongoQuery: getMongoQuery,
         getUniqueProperties: getUniqueProperties,
         getBounds: getBounds,
         getValidDate: getValidDate,
         getDateRange: getDateRange,
         formatDate: formatDate,
-        selectExpression: selectExpression,
-        getSelectionProperties: getSelectionProperties
+        selectionsExpression: selectionsExpression,
+        conditionsExpression: conditionsExpression
     });
 })(this);
 

@@ -125,13 +125,13 @@ ul.widget-nav-list li.action-icon{
 /*Modal segment*/
 .mymodal-wrapper.showme {
     opacity: 1;
-    top:0;
+    visibility:visible;
 }
-
 .mymodal-wrapper {
     position: absolute;
-    top:-400%;
-    transition: top .5s, opacity .2s linear;
+    top:0;
+    visibility:hidden;
+    transition: visibility .5s, opacity .2s linear;
     height: 100%;
     width:100%;
     /*transition: all 1s;*/

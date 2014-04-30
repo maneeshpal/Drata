@@ -1,0 +1,296 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Drata Dashboard Manager</title>
+    <meta name="viewport" content="width=device-width">
+    
+    <link rel="stylesheet" type="text/css" href="/style/app.css" />
+    <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
+
+    <link rel="stylesheet" type="text/css" href="/style/dashboardmanager.css" />
+    <link rel="stylesheet" type="text/css" href="/style/chart.css" />
+    <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
+   
+
+    <style>
+        .label.tag{
+            margin-bottom: 10px;
+            border-radius: 10px 0 0 10px;
+            padding-left: 20px;
+        }
+        h3 small.bent{
+            font-style: italic;
+        }
+        
+        .row.fancytable{
+            padding:.5rem 0;
+            border-left:1px solid #ccc;
+            border-right:1px solid #ccc;
+            font-size:80%;
+            margin:0;
+        }
+        .row.fancytable .row.fancytable{
+            font-size: 100%;
+        }
+
+        .row.fancytable.header{
+            border-top:1px solid #ccc;
+            background:#f5f5f5;
+        }
+        .fancytable .fancytable.header{
+            background:#fff;
+            border-left:none;
+            border-right: none;
+        }
+        .row.fancytable.content{
+            border-top:1px solid #ccc;
+            position:relative;
+            cursor: pointer;
+        }
+        .fancytable .fancytable.content{
+            border-top:1px dashed #ccc;
+            border-left:none;
+            border-right: none;
+        }
+        .row.fancytable.content:hover{
+            baxckground:#f5f5f5;
+        }
+        .row.fancytable.content-extended{
+            border-top: 1px dashed #ccc;
+            margin-top: .5rem;
+            border-left: none;
+            border-right: none;
+            font-size:100%;
+            padding-left: 1rem;
+            padding-bottom: 0; 
+        }
+        .row.fancytable.content:last-child{
+            border-bottom:1px solid #ccc;
+        }
+        .row.fancytable:last-child{
+            border-bottom:1px solid #ccc;
+        }
+        .row.fancytable.content-extended:last-child{
+            border-bottom:none;
+        }
+        .fancytable.open .dashboard-name {
+            font-size:1.125rem;
+        }
+        .fancytable.open .fancytable{
+            padding-top:0;
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboardManager">
+        <div class="row">
+            <div class="large-12 columns">
+                <h4>Dashboard Manager </h4>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="medium-4 columns">
+                <div class="row collapse" style="position:relative">
+                    <div class="small-10 columns">
+                        <input style="margin-bottom:0" type="text" data-bind="" placeholder="Search"></input>
+                    </div>
+                    <div class="small-2 columns" data-bind="">
+                        <span class="postfix"><i class="general foundicon-search"></i></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-12 columns">
+                        <ul class="combolist no-bullet" style="position:relative;margin-top:0; border-color:#ccc; box-shadow:none; background:#fff; max-height:100%">
+                            <li> <strong>Filter by tags: </strong>
+                             <a class="right" data-bind="click:toggleAllTags.bind($data, false)">&nbsp;Clear All</a>
+                             <a class="right" data-bind="click:toggleAllTags.bind($data, true)"> Select All&nbsp;</a>
+                             </li>
+                            <!-- ko foreach: availableTags -->
+                            <li>
+                                <input id="chk" type="checkbox" style="margin:0" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
+                                <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
+                            </li>
+                            <!-- /ko -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="medium-8 columns">
+                <h5>Dashboards</h5>
+                    <div class="row fancytable header">
+                        <div class="medium-4 columns">Dashboard Name</div>
+                        <div class="medium-8 columns">Date Created</div>
+                    </div>
+                <!-- ko foreach: filteredDashboards -->
+                    <div class="row fancytable content" data-bind="css: {'open': toggleExtendedDetails}, click: viewDetails">
+                        <div class="small-4 columns">
+                            <a style="display:inline" class="dashboard-name" data-bind="text:name,attr: {href: url}"></a>
+                        </div>
+                        <div class="small-8 columns" data-bind="text: dateCreated">
+                        </div>
+                    </div>
+
+                    <!-- ko if: toggleExtendedDetails -->
+                        <!-- ko template: {name: 'dashboardView-template', data: $data} -->
+                        <!-- /ko --> 
+                    <!-- /ko -->
+                <!-- /ko -->
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="large-12 columns">
+            <fieldset>
+                <legend>
+                    Add new Dashboard
+                </legend>
+                <div class="row">
+                    <div class="small-4 columns">
+                        <label class="right inline">Name :</label>
+                    </div>
+                    <div class="small-8 columns">
+                        <input type="text" data-bind="value: newName" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-8 large-offset-4 columns">
+                        <button class="button left tiny success" data-bind="click:addNewDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+                    </div>
+                </div>
+            </fieldset>
+                
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/html" id="dashboardView-template">
+        
+        <div class="row fancytable">
+            <div class="medium-12 columns">
+                    <div class="row fancytable header">
+                        <div class="medium-4 columns">Widget Name</div>
+                        <div class="medium-2 columns">Chart Type</div>
+                        <div class="medium-3 columns">Collection</div>
+                        <div class="medium-3 columns">Last Updated</div>
+                    </div>
+
+                    <!-- ko template :{name:'widgetDetails-template', foreach: widgetList} -->
+                    <!-- /ko -->
+            </div>
+
+            <div class="medium-12 columns">
+                    <div class="row">
+                        <div class="small-12 columns" style="margin:1rem 0">
+
+                            <strong>Tags:</strong>
+
+                            <!-- ko foreach: tagList -->
+                                <span class="label secondary tiny tag" data-bind="text: tagName"></span>
+                            <!-- /ko -->
+                             <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="general foundicon-plus"></i> Add Tag</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-12 medium-6 columns" data-bind="visible: addingTag">
+                            <div class="row collapse">
+                                <div class="small-8 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
+                                </div>
+                                <div class="small-2 columns">
+                                    <a data-bind="click:addTag" class="button postfix success"><i class="general foundicon-checkmark"></i></a>
+                                </div>
+                                <div class="small-2 columns">
+                                    <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="general foundicon-remove"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </script>
+    
+    <script id="widgetDetails-template" type="text/html">
+        <div class="row fancytable content">
+            <div class="large-12 columns">
+                <div class="row" data-bind="click: toggleExtendedDetails">
+                    <div class="medium-4 small-6 columns">
+                        <i class="general" data-bind="{css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}}"></i> &nbsp;
+                        <span data-bind="text:name"></span>
+                    </div>
+                    <div class="medium-2 small-6 columns" data-bind="text:chartType"></div>
+                    <div class="medium-3 small-6 columns" data-bind="text: selectedDataKey"></div>
+                    <div class="medium-3 small-6 columns" data-bind="text:dateUpdated"></div>
+                </div>
+                <!-- ko if:viewDetails -->
+                <div class="row fancytable content-extended">
+                    <div class="medium-4 small-12 columns">
+                    Date Range:</div>
+                    <div class="medium-8 small-12 columns" data-bind="html:dataFilterExpression"></div>
+                </div>
+                <div class="row fancytable content-extended">
+                    <div class="medium-4 small-12 columns">
+                    Selections:</div>
+                    <div class="medium-8 small-12 columns" data-bind="html:selectionsExpression"></div>
+                </div>
+                <div class="row fancytable content-extended">
+                    <div class="medium-4 small-12 columns">
+                    Filters:
+                    </div>
+                    <div class="medium-8 small-12 columns" data-bind="html:conditionsExpression"></div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+        
+    </script>
+    
+    <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
+    <script src="/js/lib/d3.v3.js"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/apiClient.js"></script>
+    
+    <script type="text/javascript" src="/js/sortable.js"></script>
+
+    <script type="text/javascript" src="/js/lib/knockout-3.0.0.js"></script>
+    <script type="text/javascript" src="/js/lib/knockout.validation.min.js"></script>
+    
+    <script type="text/javascript" src="/js/lib/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="/js/lib/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="/js/lib/helpers/ko.validation.extensions.js"></script>
+
+    
+    <script type="text/javascript" src="/js/foundation.js"></script>
+    <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
+    <script type="text/javascript" src="/js/foundation/foundation.dropdown.js"></script>
+    <script type="text/javascript" src="/js/models/axis.js"></script>
+    <script type="text/javascript" src="/js/models/dots.js"></script>
+    <script type="text/javascript" src="/js/models/labels.js"></script>
+    <script type="text/javascript" src="/js/models/lines.js"></script>
+    <script type="text/javascript" src="/js/models/area.js"></script>
+    <script type="text/javascript" src="/js/models/tooltip.js"></script>
+    <script type="text/javascript" src="/js/charts/linechart.js"></script>
+    <script type="text/javascript" src="/js/charts/areachart.js"></script>
+
+
+    <script type="text/javascript" src="/js/segment2.js"></script>
+    <script type="text/javascript" src="/js/dashboardmodel.js"></script>
+    <script type="text/javascript" src="/js/dashboardmanager.js"></script>
+    <script type="text/javascript" src="/js/charts/pie.js"></script>
+
+    <script type="text/javascript" src="/js/charts/barchart.js"></script>
+    <script type="text/javascript" src="/js/charts/scatterplot.js"></script>
+   
+    <script type="text/javascript" src="/js/tempdata.js"></script>
+    
+    <script type="text/javascript">
+        (function (root, $) {
+            root.dashboardManager = new DashboardManager();
+            ko.applyBindings(root.dashboardManager, document.getElementById('dashboardManager'));
+            $(document).foundation();
+        })(this, jQuery);
+    </script>
+</body>
+</html>

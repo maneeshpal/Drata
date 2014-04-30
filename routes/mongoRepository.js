@@ -66,7 +66,20 @@ exports.pop = function(req, res){
     populateDB(req, res);
 };
 
-exports.findAllKeys = function(req, res) {
+exports.getDataSourceNames = function(req, res){
+    dbInstance('shopperstop')(function(db){
+        db.admin().listDatabases(function(err, resp){
+            if(err) res.send(404);
+
+            res.json(resp.databases.map(function(d){
+                return d.name;
+            }));    
+        });
+    });
+    //res.json(['shopperstop']);
+};
+
+exports.getCollectionNames = function(req, res) {
     dbInstance(req.params.dbname)(function(db){
         //console.log('got my db');
         db.collectionNames(function(err, result) {
