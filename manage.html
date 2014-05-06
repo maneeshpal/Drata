@@ -12,13 +12,17 @@
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
+    <link rel="stylesheet" type="text/css" href="/style/custombindinghandlers/editlabel.css" />
    
 
     <style>
+        .row {
+            max-width: 62.3rem;
+        }
         .label.tag{
             margin-bottom: 10px;
             border-radius: 10px 0 0 10px;
-            padding-left: 20px;
+            padding-left: 10px;
         }
         h3 small.bent{
             font-style: italic;
@@ -81,6 +85,49 @@
         .fancytable.open .fancytable{
             padding-top:0;
         }
+        .dashboard-name{
+            display: inline;
+        }
+        .dashboard-name:hover{
+            text-decoration: underline;
+        }
+
+        /*tag filter*/
+        ul.tag-filter{
+            font-size: .8rem;
+        }
+        ul.tag-filter li{
+            padding:.5rem;
+        }
+
+        /*modal*/
+        .dr-modal{
+            position: absolute;
+            visibility: hidden;
+            height:0;
+            min-width:300px;
+            opacity: 0;
+            border: 1px solid #999;
+            background-color: #f5f5f5;
+            z-index: 9;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 0 5px #999999;
+            transition: opacity 5s,visibility:.1s ease-in-out;
+        }
+        .dr-modal.showme{
+            height:auto;
+            visibility: visible;
+            opacity: 1;
+        }
+        .dr-modal .closepopup{
+            position: absolute;
+            right: 2px;
+            top: 2px;
+            color: #ccc;
+        }
+        /*end modal*/
+
     </style>
 </head>
 <body>
@@ -89,46 +136,80 @@
             <div class="large-12 columns">
                 <h4>Dashboard Manager </h4>
             </div>
-        </div>  
+        </div>
         <div class="row">
-            <div class="medium-4 columns">
-                <div class="row collapse" style="position:relative">
-                    <div class="small-10 columns">
-                        <input style="margin-bottom:0" type="text" data-bind="" placeholder="Search"></input>
-                    </div>
-                    <div class="small-2 columns" data-bind="">
-                        <span class="postfix"><i class="general foundicon-search"></i></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="large-12 columns">
-                        <ul class="combolist no-bullet" style="position:relative;margin-top:0; border-color:#ccc; box-shadow:none; background:#fff; max-height:100%">
+            <div class="medium-3 columns">
+                <ul class="tag-filter no-bullet">
                             <li> <strong>Filter by tags: </strong>
-                             <a class="right" data-bind="click:toggleAllTags.bind($data, false)">&nbsp;Clear All</a>
-                             <a class="right" data-bind="click:toggleAllTags.bind($data, true)"> Select All&nbsp;</a>
+                             </li>
+                             <li data-bind="">
+                                 <input type="checkbox" id="chkAll" style="margin:0" data-bind="click: toggleAllTags" />
+                                <label>Select All</label>
                              </li>
                             <!-- ko foreach: availableTags -->
                             <li>
-                                <input id="chk" type="checkbox" style="margin:0" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
+                                <input type="checkbox" style="margin:0" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
                                 <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
                             </li>
                             <!-- /ko -->
                         </ul>
                     </div>
-                </div>
-            </div>
-            <div class="medium-8 columns">
-                <h5>Dashboards</h5>
-                    <div class="row fancytable header">
-                        <div class="medium-4 columns">Dashboard Name</div>
-                        <div class="medium-8 columns">Date Created</div>
+            <div class="left medium-9 columns">
+                <div class="row">
+                    <div class="small-3 columns">
+                        <h5>Dashboards</h5>
                     </div>
-                <!-- ko foreach: filteredDashboards -->
-                    <div class="row fancytable content" data-bind="css: {'open': toggleExtendedDetails}, click: viewDetails">
-                        <div class="small-4 columns">
-                            <a style="display:inline" class="dashboard-name" data-bind="text:name,attr: {href: url}"></a>
+                    <div class="small-3 columns">
+                        <button class="tiny" data-bind="click: showAddDashboard">Add Dashboard</button>
+                        <div class="dr-modal" data-bind="with: dashboardHolder, css: {'showme': addingDashboard}">
+                            <div class="row">
+                                
+                                <div class="small-12 columns">
+                                    <label>Specify Dashboard Name
+                                    <input type="text" placeholder="Dashboard name" data-bind="value: name" />
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- ko template : {name: 'tags-template'} -->
+                            <!-- /ko -->
+                            <div class="row">
+                                <div class="small-6 columns">
+                                    <button style="margin-bottom:0" class="button left tiny success" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+                                </div>
+                                <div class="small-6 columns">
+                                    <button style="margin-bottom:0" class="right button alert tiny" data-bind="click:$parent.closePopup.bind($parent)"><i class="general foundicon-remove"></i>&nbsp;Cancel</button>
+                                </div>
+                            </div>
+
+                            <i class="closepopup general foundicon-remove"  data-bind="click: $parent.closePopup.bind($parent)"></i>
                         </div>
-                        <div class="small-8 columns" data-bind="text: dateCreated">
+                    </div>
+                    <div class="small-6 columns">
+                        <div class="row collapse">
+                            <div class="small-10 columns">
+                                <input type="text" data-bind="" placeholder="Search"></input>
+                            </div>
+                            <div class="small-2 columns">
+                                <span class="postfix"><i class="general foundicon-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row fancytable header">
+                    <div class="medium-6 columns">Dashboard Name</div>
+                    <div class="medium-6 columns">Date Created</div>
+                </div>
+                <!-- ko foreach: filteredDashboards -->
+                    <div class="row fancytable content">
+                    <div class="small-1 columns">
+                        <i class="general" data-bind="{click: viewDetails,css: {'foundicon-plus': !toggleExtendedDetails(), 'foundicon-minus': toggleExtendedDetails}}"></i> 
+                    </div>
+                    <div class="small-5 columns" data-bind="editLabel: {title: name, href:url}">
+                       
+                    </div>
+                        
+                    <div class="small-6 columns" data-bind="text: dateCreated">
                         </div>
                     </div>
 
@@ -137,30 +218,6 @@
                         <!-- /ko --> 
                     <!-- /ko -->
                 <!-- /ko -->
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="large-12 columns">
-            <fieldset>
-                <legend>
-                    Add new Dashboard
-                </legend>
-                <div class="row">
-                    <div class="small-4 columns">
-                        <label class="right inline">Name :</label>
-                    </div>
-                    <div class="small-8 columns">
-                        <input type="text" data-bind="value: newName" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="large-8 large-offset-4 columns">
-                        <button class="button left tiny success" data-bind="click:addNewDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
-                    </div>
-                </div>
-            </fieldset>
-                
             </div>
         </div>
     </div>
@@ -180,43 +237,54 @@
                     <!-- /ko -->
             </div>
 
-            <div class="medium-12 columns">
-                    <div class="row">
-                        <div class="small-12 columns" style="margin:1rem 0">
-
-                            <strong>Tags:</strong>
-
-                            <!-- ko foreach: tagList -->
-                                <span class="label secondary tiny tag" data-bind="text: tagName"></span>
-                            <!-- /ko -->
-                             <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="general foundicon-plus"></i> Add Tag</a>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-12 medium-6 columns" data-bind="visible: addingTag">
-                            <div class="row collapse">
-                                <div class="small-8 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
-                                </div>
-                                <div class="small-2 columns">
-                                    <a data-bind="click:addTag" class="button postfix success"><i class="general foundicon-checkmark"></i></a>
-                                </div>
-                                <div class="small-2 columns">
-                                    <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="general foundicon-remove"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div class="medium-12 columns" data-bind="template: {name: 'tags-template'}">
             </div>
         </div>
     </script>
     
+    <script type="text/html" id="tags-template">
+        <div class="row">
+            <div class="small-12 columns" style="margin:1rem 0">
+                <strong>Tags:</strong>
+                <!-- ko foreach: pendingTags -->
+                    <span class="label secondary tiny tag">
+                        <i class="general foundicon-remove" data-bind="click:$parent.removePendingTag"></i>
+                        <!--ko text: $data --><!-- /ko --> 
+                    </span>
+                <!-- /ko -->
+                <!-- ko foreach: tagList -->
+                    <span class="label success tiny tag">
+                        <i class="general foundicon-remove" data-bind="click:$parent.removeTag"></i>
+                        <!--ko text: tagName --><!-- /ko --> 
+                    </span>
+                <!-- /ko -->
+                 <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="general foundicon-plus"></i> Add Tag</a>
+            </div>
+        </div>
+        <div class="row">
+            <div style="min-width:250px" class="small-12 medium-6 columns" data-bind="visible: addingTag">
+                <div class="row collapse">
+                    <div class="small-8 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
+                    </div>
+                    <div class="small-2 columns">
+                        <a data-bind="click:addTag" class="button postfix success"><i class="general foundicon-checkmark"></i></a>
+                    </div>
+                    <div class="small-2 columns">
+                        <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="general foundicon-remove"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
     <script id="widgetDetails-template" type="text/html">
         <div class="row fancytable content">
             <div class="large-12 columns">
-                <div class="row" data-bind="click: toggleExtendedDetails">
-                    <div class="medium-4 small-6 columns">
-                        <i class="general" data-bind="{css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}}"></i> &nbsp;
-                        <span data-bind="text:name"></span>
+                <div class="row">
+                    <div class="medium-4 small-12 columns">
+                        <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.chosenWidgets, " style="margin-bottom:0"></input>
+                         &nbsp;&nbsp;
+                        <span data-bind="text:name,click: toggleExtendedDetails"></span>
+                        &nbsp;<i class="general" data-bind=" click: toggleExtendedDetails, css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}"></i>
                     </div>
                     <div class="medium-2 small-6 columns" data-bind="text:chartType"></div>
                     <div class="medium-3 small-6 columns" data-bind="text: selectedDataKey"></div>
@@ -246,44 +314,23 @@
     </script>
     
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
     <script src="/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="/js/utils.js"></script>
     <script type="text/javascript" src="/js/apiClient.js"></script>
     
-    <script type="text/javascript" src="/js/sortable.js"></script>
-
     <script type="text/javascript" src="/js/lib/knockout-3.0.0.js"></script>
     <script type="text/javascript" src="/js/lib/knockout.validation.min.js"></script>
     
-    <script type="text/javascript" src="/js/lib/helpers/ko.extensions.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.custombindinghandlers.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.validation.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.validation.extensions.js"></script>
 
     
     <script type="text/javascript" src="/js/foundation.js"></script>
     <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
     <script type="text/javascript" src="/js/foundation/foundation.dropdown.js"></script>
-    <script type="text/javascript" src="/js/models/axis.js"></script>
-    <script type="text/javascript" src="/js/models/dots.js"></script>
-    <script type="text/javascript" src="/js/models/labels.js"></script>
-    <script type="text/javascript" src="/js/models/lines.js"></script>
-    <script type="text/javascript" src="/js/models/area.js"></script>
-    <script type="text/javascript" src="/js/models/tooltip.js"></script>
-    <script type="text/javascript" src="/js/charts/linechart.js"></script>
-    <script type="text/javascript" src="/js/charts/areachart.js"></script>
-
-
-    <script type="text/javascript" src="/js/segment2.js"></script>
-    <script type="text/javascript" src="/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="/js/dashboardmanager.js"></script>
-    <script type="text/javascript" src="/js/charts/pie.js"></script>
-
-    <script type="text/javascript" src="/js/charts/barchart.js"></script>
-    <script type="text/javascript" src="/js/charts/scatterplot.js"></script>
-   
-    <script type="text/javascript" src="/js/tempdata.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {

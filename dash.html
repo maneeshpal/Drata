@@ -13,20 +13,20 @@
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
-   
+    <link rel="stylesheet" type="text/css" href="/style/custombindinghandlers/editlabel.css" />
 
     <style>
         #previewgraph {
             height: 200px;
         }
-        
     </style>
 </head>
 <body>
     <nav class="top-bar dashboard" id="topbar" data-topbar>
         <ul class="title-area">
+            
             <li class="name">
-                <h1><a href="#">Drata</a></h1>
+                <h1><a data-bind="text: currentDashboardName"></a></h1>
             </li>
             <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
         </ul>
@@ -36,18 +36,37 @@
             <ul class="right">
                 <li class="divider"></li>
                 <li class="has-form">
-                    <a data-bind="click:manageDashboards" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
-                </li>
-
-                <li class="divider"></li>
-                <li class="has-form">
                     <a data-bind="click:addWidget" class="button success"><i class="general foundicon-plus"></i>&nbsp;Add Widget</a>
                 </li>
-                
             </ul>
 
             <!-- Left Nav Section -->
             <ul class="left">
+                <li class="divider"></li>
+                <li class="has-dropdown">
+                    <a href="#">Dashboards</a>
+                    <ul class="dropdown">
+                    <li><label>Tags</label></li>
+                    <!-- ko foreach: tagList -->
+                      <li class="has-dropdown not-click">
+                        <a data-bind="text: $data.tagName"></a>
+                        <ul class="dropdown">
+                            <li><label>Dashboards</label></li>
+                            <!-- ko foreach: dashboards -->
+                            <li>
+                                <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId },text: $data.dashboardName"></a>
+                            </li>
+                            <!-- /ko -->
+                        </ul>
+                      </li>
+                      <!-- /ko -->
+                      <li class="has-form">
+                        <a href="/dashboard/manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
+                        </li>
+                    </ul>
+
+                </li>
+                <li class="divider"></li>
             </ul>
         </section>
     </nav>
@@ -186,8 +205,8 @@
     <div class="widget-outer" data-bind="css: widgetClass">
         <div class="widget-wrapper">
             <div class="row collapse widget-nav handle">
-                <div class="left title">
-                    <input style="margin-bottom:0" type="text" data-bind="value: name"></input>
+                <div class="left title" data-bind="editLabel: {title: name}">
+                    
                 </div>
                 <div class="right">
                     <ul class="widget-nav-list right">

@@ -42,13 +42,15 @@
 
 
 .widget-wrapper {
-  border: 1px solid #CCC;
-  heimght: 400px;
+  xborder: 1px solid #CCC;
   width:100%;
-  background-color: #f2f2f2;
-  box-shadow: 0px 0px 5px .5px #ccc;
+  xbackground-color: #f2f2f2;
+  xbox-shadow: 0px 0px 5px .5px #ccc;
   position: relative;
   overflow: hidden;
+}
+.widget-wrapper:hover {
+  box-shadow: 0px 0px 0px 1px #ccc;
 }
 .widget-wrapper:last-child{
   float:right;
@@ -59,16 +61,10 @@
 }
 .widget-content-wrapper{
   position: relative;
-  left:0;
-  transition:all .1s linear;
 }
-.widgetcontentedit{
-  left:-200px;
+.widgetcontentedit .widget-settings{
+  right:0;
 }
-
-/*.widget-size-3 .widget-content {
-  height:650px;
-}*/
 
 /*widger nav*/
 
@@ -87,7 +83,7 @@ ul.widget-nav-list li{
   float:left;
   display:block;
   line-height: 2rem;
-  border-left:1px solid #ccc;
+  xborder-left:1px solid #ccc;
 }
 
 ul.widget-nav-list li.divider:after{
@@ -109,16 +105,18 @@ ul.widget-nav-list li.action-icon{
   padding-bottom: 0;
   height: 2.2rem;
 }
-/*widger nav*/
+/*widget nav*/
 /*widget-settings*/
 .widget-settings{
   position: absolute;
+  transition:all .1s linear;
   width: 200px;
   border-left:1px dashed #ccc;
   right:-200px;
   padding:.8rem;
   height: 100%;
   top:0;
+  background: rgba(255,255,255,.7);
 }
 /*end widget-settinhs*/
 

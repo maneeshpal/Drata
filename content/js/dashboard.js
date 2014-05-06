@@ -14,6 +14,7 @@ var Dashboard = function(){
 
     drata.apiClient.getDashboard(dashboardId, function(resp){
         self.name(resp.name);
+        topBar.currentDashboardName(resp.name);
         dashboardId = resp._id;
         drata.apiClient.getWidgetsOfDashboard(resp._id, function(widgets){
             self.widgets(ko.utils.arrayMap(
@@ -476,6 +477,18 @@ var TopBar = function(){
     };
     self.manageDashboards = function(){
         $('#dashboardManager').toggleClass('showme');
-    }
-
+    };
+    self.tagList = ko.observableArray();
+    drata.apiClient.getAllTags(function(resp){
+        var tagDashboardList = _.groupBy(resp, function(item){
+            return item.tagName;
+        });
+        for(var i in tagDashboardList){
+            if(tagDashboardList.hasOwnProperty(i)){
+                var a = tagDashboardList[i];
+                self.tagList.push({tagName: i, dashboards: a});
+            }
+        }
+    });
+    self.currentDashboardName = ko.observable();
 }

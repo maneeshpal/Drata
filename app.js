@@ -39,6 +39,11 @@ app.get('/temp', function(req, res){
   res.sendfile('temp.html');
 });
 
+app.get('/tcup', function(req, res){
+  res.sendfile('tcup.html');
+});
+
+
 app.get('/api/dashboardpop', drataRepository.pop);
 
 //get dashboard
@@ -68,6 +73,8 @@ app.put('/api/widget', drataRepository.upsertWidget);
 app.post('/api/widget', drataRepository.upsertWidget);
 //delete widget
 app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
+
+
 // //create dashboard
 // app.post('/api/dashboard', drataRepository.createDashboard);
 
@@ -76,6 +83,8 @@ app.get('/api/tags', drataRepository.getAllTags);
 app.get('/api/dashboard/:dashboardId/tags', drataRepository.getAllTagsOfDashboard);
 
 app.put('/api/tags', drataRepository.addTag);
+
+app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
 app.get('/api/external/datasources', mongoRepository.getDataSourceNames);
 app.get('/api/external/:dbname/collectionNames', mongoRepository.getCollectionNames);

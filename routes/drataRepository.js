@@ -155,7 +155,7 @@ exports.upsertDashboard = function(req, res){
 
 exports.deleteDashboard = function(req, res){
     var dashboardId = mongo.ObjectID(req.params.dashboardId);
-    db.collection('dshboard',function(err, collection) {
+    db.collection('dashboard',function(err, collection) {
         if(err){
             console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
@@ -235,6 +235,24 @@ exports.addTag = function(req, res){
         }
     });
 };
+
+exports.removeTag = function(req, res){
+    var tagId = mongo.ObjectID(req.params.tagId);
+    db.collection('tags',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            collection.remove({_id : tagId}, {safe:true,justOne:true}, function(err, result) {
+                //console.log(JSON.stringify(werr));
+                //console.log('deleted ' + req.params.widgetId);
+                res.send(200);
+            });
+        }
+    });
+};
+
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 // Populate database with sample data -- Only used once: the first time the application is started.

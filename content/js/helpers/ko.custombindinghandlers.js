@@ -22,13 +22,35 @@
             '</div>'            
     ].join('');
 
-    // var complexComboStr = [
-    //     '<!-- ko template : template -->',
-    //     '<!-- /ko -->'
-    // ].join('');
+    var editLabelTemplateStr = [
+        '<div class="edit-label" data-bind="css: {\'edit\': editingTitle}">',
+            '<div class="title-display">',
+                '<a data-bind="visible: href(), text:title, attr: {\'href\': href}"></a>',
+                '<span data-bind="visible: !href(), text:title, click: editTitle"></span>',
+                '<i class="general foundicon-edit" data-bind="click: editTitle"></i>',
+            '</div>',
+            '<div class="row collapse title-edit">',
+                '<div class="small-8 columns">',
+                    '<input type="text" data-bind="value: title"></input>',
+                '</div>',
+                '<div class="small-2 columns" data-bind="click: acceptEdit">',
+                    '<span class="postfix">',
+                        '<i class="general foundicon-checkmark"></i>',
+                    '</span>',
+                '</div>',
+                '<div class="small-2 columns" data-bind="click: cancelEdit">',
+                    '<span class="postfix">',
+                        '<i class="general foundicon-remove"></i>',
+                    '</span>',
+                '</div>',
+            '</div>',
+        '</div>'
+    ].join('');
+
+
     templateEngine.addTemplate('comboTemplateStr', comboTemplateStr);
     templateEngine.addTemplate('ddComboTemplateStr', ddComboTemplateStr);
-    //templateEngine.addTemplate('complexComboStr', complexComboStr);
+    templateEngine.addTemplate('editLabelTemplateStr', editLabelTemplateStr);
 
     /********** KO TEMPLATES ******************/
 
@@ -136,16 +158,6 @@
     var DdComboVM = function(config){
         var self = this;
         $.extend(self, new ComboVM(config));
-        // self.changePrefix = function(){
-        //     var currPrefix = self.selectedPrefix();
-        //     var index = 0;
-        //     if(currPrefix){
-        //         index = self.prefixOptions.indexOf(currPrefix) + 1;
-        //         index = index < self.prefixOptions().length ? index : 0;
-        //     } 
-        //     self.selectedPrefix(self.prefixOptions()[index]);
-        // };
-
         self.prefixOptions = ko.isObservable(config.prefixOptions) ? config.prefixOptions : ko.observableArray(config.prefixOptions);
         self.selectedPrefix = ko.isObservable(config.selectedPrefix) ? config.selectedPrefix : ko.observable(config.selectedPrefix);
         if(self.selectedPrefix() === undefined)
@@ -177,7 +189,44 @@
         }
     };
 
+    var EditLabelVM = function(config){
+        this.title = config.title;
+        this.editingTitle = ko.observable(false);
+        this.href = ko.isObservable(config.href) ? config.href: ko.observable(config.href);
+        var temp = this.title();
+        this.editTitle = function(){
+            temp = this.title();
+            this.editingTitle(true);
+            return false;
+        }
+        this.cancelEdit = function(){
+            this.title(temp);
+            this.editingTitle(false);
+        }
+        this.acceptEdit = function(){
+            this.editingTitle(false);
+            temp = this.title();
+        }
+    };
+
+    var editLabelBindingHandler = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var template = 'editLabelTemplateStr';
+            var config = {
+                title: value.title,
+                href: value.href
+            };
+            
+            var editLabel = new EditLabelVM(config);
+
+            ko.renderTemplate(template, editLabel, { templateEngine: templateEngine}, element, 'replaceChildren');
+
+            return { controlsDescendantBindings: true };
+        }
+    };
+
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;
-   // ko.bindingHandlers.complexCombo = complexComboBindingHandler;
+    ko.bindingHandlers.editLabel = editLabelBindingHandler;
 })(ko, jQuery);

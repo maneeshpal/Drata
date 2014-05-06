@@ -18,7 +18,7 @@
                 callback && callback(response);
             }
         };
-        if(verb === 'PUT' || verb === 'POST'){
+        if(body){
             options.data = JSON.stringify(body);
         }
                   
@@ -63,7 +63,24 @@
 
     var getAllTags = function(callback){
         var url = apiRoot + 'tags';
-        _perform('GET',url, undefined, callback);
+        var len = 0, tagList = [];
+        var self = this;
+        function xyz(d){
+            
+        }
+        _perform('GET',url, undefined, function(resp){
+            len = resp.length, tagList = [];
+            _.each(resp, function(tag){
+                getDashboard(tag.dashboardId, function(dash){
+                    len --;
+                    tag.dashboardName = dash.name;
+                    
+                    if(len === 0){
+                        callback && callback(resp);
+                    }
+                });
+            })
+        });
     };
 
     var getAllTagsOfDashboard = function(dashboardId, callback){
@@ -74,6 +91,12 @@
     var addTag = function(model, callback){
         _perform('PUT', apiRoot + 'tags',model, callback);
     };
+
+    var removeTag = function(tagId, callback){
+        var url = apiRoot + drata.utils.format('tags/{0}', tagId);
+        _perform('DELETE', url,undefined, callback);
+    };
+
 
     //EXTERNAL API
     var getUniqueProperties = function(dataKey, callback){
@@ -103,6 +126,7 @@
         getAllTags: getAllTags,
         getAllTagsOfDashboard: getAllTagsOfDashboard,
         addTag: addTag,
+        removeTag: removeTag,
         getDataKeys: getDataKeys,
         getUniqueProperties: getUniqueProperties,
         getData: getData

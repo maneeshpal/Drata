@@ -477,6 +477,7 @@
 
     drata.ns('utils').extend({
         format: format,
+        toArray:toArray,
         extend: extend,
         getUrlParam: getUrlParam,
         clone:clone,
