@@ -3,9 +3,7 @@
     var PieChart = function(){
         var arc = d3.svg.arc();
         var z = d3.scale.category20();
-        var dims = {
-                    m: {l:10, r:10, t:30, b:50}
-                }
+        var dims = {m: {l:10, r:10, t:10, b:10}};
         var pie = d3.layout.pie();
 
         var enterAntiClockwise = {
@@ -24,6 +22,7 @@
                 var container = d3.select(this);
                 var itemCount = data.values.length;
                 chart.resize = function() { 
+                    dims = {m: {l:10, r:10, t:10, b:10}};
                     container
                     .transition()
                     .duration(1000)
@@ -70,17 +69,17 @@
                 gWrapperEnter.append("g").attr('class', 'arcs-group');
                 gWrapperEnter.append("g").attr("class", 'labels-group');
 
-                var labels = drata.models.labels().color(z).dims(dims).align('center').dispatch(dispatch);
+                var labels = drata.models.labels().color(z).dims(dims).align('topcenter').dispatch(dispatch);
                 gWrapper
                     .select('g.labels-group')
                     .datum(data.values)
                     .call(labels);
                 
                 z.domain(data.values.map(function(d){
-                    return d.key
+                    return d.key;
                 }));
                 
-                var r = Math.min(dims.w - dims.m.l -dims.m.r, dims.h - dims.m.t - dims.m.b)/2;
+                var r = Math.min(dims.w - dims.m.l - dims.m.r, dims.h - dims.m.t - dims.m.b)/2;
 
                 pie.value(function(d) {
                     return d.disabled ? 0 : d.value;

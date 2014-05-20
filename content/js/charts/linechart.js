@@ -1,24 +1,22 @@
 
  ;(function(root) {
     var LineChart = function(){
-        var _xAxisType = 'numeric', _dataMarkers = false;
+        var _xAxisType = 'numeric', _drawXAxis = true, _drawYAxis = true, _yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
             .axisType('x');
         var yAxis = drata.models.axis()
             .orient("left")
-            .axisType('y').ticks(5);
+            .axisType('y');
      
         var z = d3.scale.category20();
-        var dims = {
-                    m: {l:30, r:10, t:30, b:30}
-                }
+        var dims = {m: {l:30, r:10, t:10, b:30}};
         
         function chart(selection) {
             console.log('line chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
-                
+                _yticks > 0 && yAxis.ticks(_yticks);
                 if(_xAxisType === 'date'){
                     _.each(data, function(item){
                         _.each(item.values, function(dataPoint){
@@ -29,6 +27,7 @@
                 z.domain(data.map(function(d){return d.key}));
                 
                 chart.resize = function() { 
+                    dims = {m: {l:30, r:10, t:30, b:30}};
                     container
                     .transition().duration(500)
                     .call(chart);
@@ -59,7 +58,7 @@
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
                 
-                xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
                 yAxis.axisTicType('numeric').dims(dims).includeGridLines(true);
                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
@@ -86,23 +85,27 @@
                 
                 gWrapperEnter.append("g").attr("class", "line-group");
                 
-                gWrapperEnter.append("g").attr("class", "labels-group");
-                
                 //labels
-                var labels = drata.models.labels().color(z).dispatch(dispatch).dims(dims);
+                if(_drawLabels){
+                    gWrapperEnter.append("g").attr("class", "labels-group");
                 
-                var labelContainer = gWrapper.select('g.labels-group');
+                    var labels = drata.models.labels().color(z).dispatch(dispatch).dims(dims);
                 
-                labelContainer.datum(data).call(labels);
+                    var labelContainer = gWrapper.select('g.labels-group');
+                    
+                    labelContainer.datum(data).call(labels);    
+                }
+                
+                
                     
                 var xAxisContainer = gWrapper.select('g.x.axis');
                 
                 xAxisContainer.call(xAxis);
                 
                 xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
-                
-                labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
-                    
+                if(_drawLabels){
+                    labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
+                }
 
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
@@ -149,6 +152,36 @@
             _xAxisType = value;
             return chart;
         };
+
+        chart.yticks = function(value){
+            if (!arguments.length) return _yticks;
+            _yticks = value;
+            return chart;
+        };
+
+        chart.dateInterval = function(value){
+            if (!arguments.length) return _dateInterval;
+            _dateInterval = value;
+            return chart;
+        };
+
+        chart.drawLabels = function(value){
+            if (!arguments.length) return _drawLabels;
+            _drawLabels = value;
+            return chart;
+        };
+
+        chart.drawYAxis = function(value){
+            if (!arguments.length) return _drawYAxis;
+            _drawYAxis = value;
+            return chart;
+        };
+        chart.drawXAxis = function(value){
+            if (!arguments.length) return _drawXAxis;
+            _drawXAxis = value;
+            return chart;
+        };
+
         chart.includeDataMarkers = function(value){
             if (!arguments.length) return _dataMarkers;
             _dataMarkers = value;

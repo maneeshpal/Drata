@@ -1,36 +1,38 @@
 <script type="text/html" id="segment-template">
 
 <div class="row">
-    <div class="large-8 columns" style="min-width:300px">
+    <div class="large-12 columns" style="min-width:300px">
         <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
         <!-- /ko -->
     </div>
-    <div class="large-4 columns">
+</div>
+
+
+<div class="row">
+    <div class="medium-6 columns">
         <fieldset>
             <legend>Select Chart Type</legend>
                 <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
                 </select>
         </fieldset>
-    </div>
-</div>
-
-<!-- ko if: chartType()-->
-<div class="row">
-    <div class="small-12 columns">
+        <!-- ko if: chartType()-->
         <fieldset>
             <legend>Grouping</legend>
             <!-- ko template: dataGroupTemplate -->
             <!-- /ko -->
         </fieldset>
+        <!-- /ko -->
+    </div>
+    <div class="medium-6 columns">
+        <fieldset>
+        <legend>Select Date Range </legend>
+            <!-- ko template: { name: 'datafilter-template', data: dataFilter, afterRender: dataFilter.afterRender } -->
+            <!-- /ko -->
+        </fieldset>
     </div>
 </div>
-<!-- /ko -->
-<div class="row">
-    <div class="small-12 columns">
-<!-- ko template: { name: 'datafilter-template', data: dataFilter, afterRender: dataFilter.afterRender } -->
-<!-- /ko -->
-    </div>
-</div>
+
+
 <div class="row">
     <div class="small-12 columns" data-bind="with: conditionGroup">
         <fieldset>
@@ -47,63 +49,57 @@
 </div>
 </script>
 <script type="text/html" id="datafilter-template">
-    <fieldset>
-        <legend>Select Date Range </legend>
-        
-        <div class="row">
-            <div class="small-3 columns">
-                <label class="right inline">Date Property</label>
-            </div>
-            <div class="small-9 columns" data-bind="comboBox :{selectedValue: dateProp, options: $parent.properties,optionsCaption:'choose Property',allowCustom:false}">
-            </div>
+    <div class="row">
+        <div class="small-12 columns">
+            <div class="keystroke expression" data-bind="html:expression"></div>
         </div>
-
-        <div class="row">
-            
-            <div class="large-8 columns">
-                <div class="keystroke expression" data-bind="html:expression"></div>
-            </div>
-        </div>
-       
-        <div class="row">
-            <div class="medium-3 columns">
-                <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
-            </div>
-            <div class="medium-5 columns">
-                <div id="myslider"></div>
-            </div>
-            <div class="medium-4 columns">
-                <select data-bind="enable: intervalType() === 'dynamic', options: drata.global.timeframes,optionsCaption: 'Interval',value: intervalKind">
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="large-3 small-12 columns">
-                <input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /><label for="rbRange">Specify Date Range</label>
-            </div>
-            <div class="large-4 small-6 columns">
-                <div class="row collapse">
-                    <div class="small-10 columns">
-                        <input type="text" id="from" data-bind="enable : intervalType() === 'static', value:minDate" placeholder="Start Date"></input>
-                    </div>
-                    <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'start')">
-                        <span class="postfix"><i class="general foundicon-calendar"></i></span>
-                    </div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns">
+            <div class="row">
+                <div class="small-12 columns">
+                    <label>Date Property
+                        <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.properties,optionsCaption:'choose Property',allowCustom:false}">
+                        </div>
+                    </label>
+                    <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
+                    <input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /><label for="rbRange">Specify Date Range</label>
                 </div>
             </div>
-            <div class="large-4 small-6 columns">
-                <div class="row collapse">
-                    <div class="small-10 columns">
-                        <input type="text" id="to" data-bind="enable : intervalType() === 'static', value:maxDate" placeholder="End Date"></input>
-                    </div>
-                    <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'end')">
-                        <span class="postfix"><i class="general foundicon-calendar"></i></span>
+            <div class="row" data-bind="visible:intervalType() === 'dynamic'">
+                <div class="medium-6 small-12 columns">
+                    <select data-bind="options: drata.global.timeframes,optionsCaption: 'Interval',value: intervalKind">
+                    </select>
+                </div>
+                <div class="medium-6 small-12 columns" data-bind="enabled: false">
+                    <div style="margin:.7rem" id="myslider"></div>
+                </div>
+            </div>
+            <div class="row" data-bind="visible:intervalType() === 'static'">
+                <div class="small-6 columns">
+                    <div class="row collapse">
+                        <div class="small-10 columns">
+                            <input type="text" id="from" data-bind="value:minDate" placeholder="Start Date"></input>
+                        </div>
+                        <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'start')">
+                            <span class="postfix"><i class="general foundicon-calendar"></i></span>
+                        </div>
                     </div>
                 </div>
-                
+                <div class="small-6 columns">
+                    <div class="row collapse">
+                        <div class="small-10 columns">
+                            <input type="text" id="to" data-bind=", value:maxDate" placeholder="End Date"></input>
+                        </div>
+                        <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'end')">
+                            <span class="postfix"><i class="general foundicon-calendar"></i></span>
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
         </div>
-    </fieldset>
+    </div>
 </script>
 <script type="text/html" id="selection-template">
 <div class="row">
@@ -137,8 +133,7 @@
         <div class="columns" data-bind="css: {'small-6' : groupByIntervalType() !== 'string','small-9' : groupByIntervalType() === 'string' || groupByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
         </div>
         <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string' && groupByIntervalType() !== 'unknown'  -->
-        <div class="small-3 columns">
-             <input type="text" data-bind="value:groupByIntervalRaw" placeholder="Interval"></input>
+        <div class="small-3 columns" data-bind="comboBox:{selectedValue: groupByInterval, options: groupByIntervalOptions, optionsCaption: 'Interval'}">
         </div>
         <!-- /ko -->
     </div>
@@ -152,9 +147,8 @@
         <div class="columns" data-bind="css: {'small-6' : divideByIntervalType() !== 'string','small-9' : divideByIntervalType() === 'string' || divideByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
         </div>
         <!-- ko if: hasDivideBy() && divideByIntervalType() !== 'string' && divideByIntervalType() !== 'unknown'  -->
-        <div class="small-3 columns">
-             <input type="text" data-bind="value:divideByIntervalRaw" placeholder="Interval"></input>
-        </div>
+            <div class="small-3 columns" data-bind="comboBox:{selectedValue: divideByInterval, options: divideByIntervalOptions, optionsCaption: 'Interval'}">
+            </div>
         <!-- /ko -->                            
     </div>
 
@@ -162,12 +156,12 @@
 </script>
 <script type="text/html" id="track-datagroup-template">
     <div class="row">
-        <div class="small-3 columns">
+        <div class="small-4 columns">
             <label class="right inline">
                 <input type="checkbox" data-bind="checked:hasGrouping" />
-                &nbsp;Groupby</label>
+                &nbsp;Split results by</label>
         </div>
-        <div class="small-9 columns">
+        <div class="small-8 columns">
             <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
             </select>
         </div>
@@ -175,27 +169,21 @@
     </div>
 
     <div class="row">
-        <div class="small-3 columns">
-            <label class="right inline">x Axis</label>
+        <div class="small-4 columns">
+            <label class="right inline">Aggregate with</label>
         </div>
             
-        <div class="small-9 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
+        <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
         </div>
     </div>
      
     <div class="row">
-        <div class="small-3 columns">
+        <div class="small-4 columns">
             <label class="right inline">
                 <input type="checkbox" data-bind="checked:timeseries" />
-                TimeSeries</label>
+                Interval</label>
         </div>
-        <div class="small-9 columns">
-            <select data-bind="enable:timeseries,value:timeseriesInterval, optionsCaption: 'Interval'">
-                <option value='300000'>5 nin</option>
-                <option value='3600000'>1 hour</option>
-                <option value='21600000'>6 hours</option>
-                <option value='86400000'>1 day</option>
-            </select>
+        <div class="small-8 columns" data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
         </div>
     </div>
 </script>
@@ -239,7 +227,7 @@
                     <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
                 </div>
                 <!-- ko if: !isComplex() -->
-                cs <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-8 columns" data-bind="css:{'small-offset-2': $index() === 0},comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
                 </i>

@@ -47,17 +47,16 @@ app.get('/tcup', function(req, res){
 app.get('/api/dashboardpop', drataRepository.pop);
 
 //get dashboard
-app.get('/api/dashboard/:id', drataRepository.findDashboard);
+app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
 
 //get widgets of dashboard
-app.get('/api/dashboard/:id/widgets', drataRepository.findWidgetsOfDashboard);
+app.get('/api/dashboard/:dashboardId/widgets', drataRepository.findWidgetsOfDashboard);
+
+app.delete('/api/dashboard/:dashboardId/widgets', drataRepository.deleteAllWidgetsDashboard);
 
 //find all dashboards. dont include widgets
 app.get('/api/dashboards', drataRepository.getAllDashboards);
-
-// //find a widget
-// app.get('/api/widget/:id', drataRepository.findWidget);
-
+app.post('/api/widgets', drataRepository.getWidgets);
 //update dashboard
 app.post('/api/dashboard', drataRepository.upsertDashboard);
 
@@ -70,7 +69,7 @@ app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);
 //update widget
 app.put('/api/widget', drataRepository.upsertWidget);
 //create widget
-app.post('/api/widget', drataRepository.upsertWidget);
+app.post('/api/widget', drataRepository.updateWidget);
 //delete widget
 app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
 
@@ -82,26 +81,17 @@ app.get('/api/tags', drataRepository.getAllTags);
 
 app.get('/api/dashboard/:dashboardId/tags', drataRepository.getAllTagsOfDashboard);
 
+app.delete('/api/dashboard/:dashboardId/tags', drataRepository.deleteAllTagsDashboard);
+
 app.put('/api/tags', drataRepository.addTag);
 
 app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
+app.get('/api/external/pop', mongoRepository.pop);
 app.get('/api/external/datasources', mongoRepository.getDataSourceNames);
 app.get('/api/external/:dbname/collectionNames', mongoRepository.getCollectionNames);
 app.get('/api/external/:dbname/:collectionName/properties', mongoRepository.findProperties);
 app.post('/api/external/:dbname/:collectionName', mongoRepository.findCollection);
-
-// app.get('/shopperstop/keys', shopperstop.findAllKeys);
-// app.get('/shopperstop/pop', shopperstop.pop);
-
-// app.post('/shopperstop/:collectionName', shopperstop.findCollection);
-// app.get('/shopperstop/:collectionName/properties', shopperstop.findProperties);
-// //app.get('/shopperstop/:collectionName/:id', shopperstop.findEventByCollectionAndId);
-// // app.post('/shopperstop', shopperstop.addShopperCheckoutEvent);
-// app.get('/ushipdev/keys', ushipdev.findAllKeys);
-
-// app.post('/ushipdev/:collectionName', ushipdev.findCollection);
-// app.get('/ushipdev/:collectionName/properties', ushipdev.findProperties);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

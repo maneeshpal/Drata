@@ -8,23 +8,87 @@
     <link rel="stylesheet" type="text/css" href="/style/app.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
+    <link rel="stylesheet" type="text/css" href="/style/numeric-chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.css" />
     <style>
-        .graph {
-            height:200px;
+        svg {
+            opacity:.5;
+        }
+        .numeric-chart {
+            height:300px;
         }
     </style>
 </head>
 <body>
 <div id="segmentProcessor">
     
-    <div class="row">
-        <div class="small-8 small-offset-2 columns text-center">
-            <div id="graph" class="graph">
-                <svg></svg>
+    <div class="row" style="margin-top:2rem;">
+        <div class="small-12 columns">
+            <div class="row collapse numeric-chart">
+                <div class="small-9 columns" style="position:relative;border-right:1px dashed #ccc">
+                    <div class="overlay-content">
+                        <div class="row">
+                            <div class="small-12 columns">
+                                <ul class="small-block-grid-2">
+                                    <li>
+                                        <div data-bind="if: totalPerChange() !== 0" class="sub-heading text-center">
+                                            <!-- ko text: initialDp().xLabel -->
+                                            <!-- /ko -->
+                                            -
+                                            <!-- ko text: latestDp().xLabel -->
+                                            <!-- /ko -->
+                                            <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
+                                                <!-- ko text: totalPerChange --><!-- /ko -->%
+                                                <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
+                                            </label>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading text-center">
+                                            <!-- ko text: lastButOneDp().xLabel -->
+                                            <!-- /ko --> -
+                                            <!-- ko text: latestDp().xLabel -->
+                                            <!-- /ko -->
+                                            <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
+                                                <!-- ko text: latestDp().perc --><!-- /ko -->%
+                                                <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
+                                            </label>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                                <div class="main-heading text-center" style="height:100px" data-bind="resizeText: mainHeading">
+                                </div>
+                            
+                                <div class="sub-heading text-center" data-bind="text: subHeading">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="graph" class="graph">
+                        <svg></svg>
+                    </div>
+                </div>
+                <div class="small-3 columns">
+                <select data-bind="options:dataKeys, value: selectedDataKey, optionsText:'key', optionsCaption: 'Select'">
+                </select>
+                    <ul class="no-bullet stacked-heading" data-bind="foreach: remainingDataPoints">
+                        <li>
+                            <div data-bind="text: xLabel"></div>
+                            <label data-bind="css: { 'success': perc > 0, 'alert': perc < 0}">
+                                <!-- ko text: yLabel -->
+                                <!-- /ko -->:
+                                <!-- ko text: perc -->
+                                 <!-- /ko -->%
+                                <i class="general" data-bind="css: { 'foundicon-up-arrow': perc > 0, 'foundicon-down-arrow': perc < 0}"></i>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
             </div>
+            
         </div>
     </div>
 
@@ -45,13 +109,13 @@
 
     <script type="text/javascript" src="/js/lib/knockout-3.0.0.js"></script>
      <script type="text/javascript" src="/js/lib/knockout.validation.min.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.extensions.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.custombindinghandlers.js"></script>
 
-    <script type="text/javascript" src="/js/lib/helpers/ko.validation.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.validation.extensions.js"></script>
 
     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
-    <script type="text/javascript" src="/js/foundation/foundation.js"></script>
+    <script type="text/javascript" src="/js/foundation.js"></script>
     <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
         <script type="text/javascript" src="/js/apiClient.js"></script>
 

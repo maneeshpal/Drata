@@ -2,55 +2,77 @@
 
 var DashboardManager = function(){
     this.dashboards = ko.observableArray();
-    this.tagsList = ko.observableArray();
-    this.closeDashboardManager = function(){
-        $('#dashboardManager').removeClass('showme');
-    };
+    
     this.chosenTags = ko.observableArray();
 
     this.dashboardHolder = ko.observable();
 
     this.addingDashboard = ko.observable(false);
     
+    this.closeDashboardManager = function(){
+        $('#dashboardManager').removeClass('showme');
+    };
+
     this.showAddDashboard = function(){
-        this.dashboardHolder(new DashboardItem({}, this.tagsList, true));
+        var di = new DashboardItem({}, {isNew:true});
+        this.dashboardHolder(di);
+        this.addingDashboard(true);
+    };
+    
+    this.cloneDashboard = function(dashboardItem){
+        dashboardItem.isNew = true;
+        dashboardItem.toggleExtendedDetails(false);
+        dashboardItem.chosenWidgets(dashboardItem.widgetList());
+        this.dashboardHolder(dashboardItem);
         this.addingDashboard(true);
     };
 
     this.closePopup = function(){
+        var di = this.dashboardHolder();
+        di.isNew = false;
+        di.chosenWidgets([]);
         this.addingDashboard(false);
     };
-    
-    this.availableTags = ko.computed(function(){
-        var allAvailableTags = this.tagsList().map(function(y){
-            return y.tagName;
-        });
-        return _.uniq(allAvailableTags);
-    }, this);
 
     this.filteredDashboards = ko.computed(function(){
         var chosenTags = this.chosenTags();
         var tags = [];
+        var includeUntagged = chosenTags.indexOf('untagged') > -1;
         if(chosenTags.length === 0) return this.dashboards();
         return this.dashboards().filter(function(d){
             tags = d.tagList().map(function(i){return i.tagName});
-            return _.intersection(tags, chosenTags).length > 0;
+            return (tags.length === 0 && includeUntagged) || _.intersection(tags, chosenTags).length > 0;
         });
     }, this).extend({ rateLimit: 500 });
 
-    this.populateDashboards = function(){
-        drata.apiClient.getAllTags(function(tags){
-            this.tagsList(tags);
-            drata.apiClient.getAllDashboards(function(dashs){
-                this.dashboards(ko.utils.arrayMap(
-                    dashs,
-                    function(model) {
-                        return new DashboardItem(model, this.tagsList); 
-                    }.bind(this)
-                ));
+    this.deleteDashboard = function(dashboardItem){
+        if(confirm("Deleting Dashboard will delete all the widgets and tags associated. Do you wish to Continue?")){
+            drata.apiClient.deleteDashboard(dashboardItem._id,function(resp){
+                this.dashboards.remove(dashboardItem);
             }.bind(this));
+
+            drata.apiClient.deleteAllTagsDashboard(dashboardItem._id,function(resp){
+                console.log('tags deleted');
+            }.bind(this));
+
+            drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id,function(resp){
+                console.log('widgets deleted');
+            }.bind(this));
+        }
+        
+    };
+
+    this.populateDashboards = function(){
+        drata.apiClient.getAllDashboards(function(dashs){
+            this.dashboards(ko.utils.arrayMap(
+                dashs,
+                function(model) {
+                    return new DashboardItem(model, {bindWidgets: true, bindTags: true});
+                }.bind(this)
+            ));
         }.bind(this));
     };
+
     var selectAll = false;
     this.toggleAllTags = function(){
         selectAll = !selectAll;
@@ -58,24 +80,29 @@ var DashboardManager = function(){
             this.chosenTags([]);  
         }
         else{
-            this.chosenTags(this.availableTags());   
+            this.chosenTags(this.tagsList());   
         }
         return true;
-    }
-    this.populateDashboards();
+    };
 
-    // this.widgetList = ko.computed(function(){
-    //    var l = [];
-    //    _.each(this.dashboards(), function(d){
-    //      l = l.concat(d.widgetList());
-    //    });
-    //    return l;
-    // }.bind(this));
-    //this.chosenWidgets = ko.observableArray();
+    this.tagsList = ko.computed(function(){
+        var a = [];
+        _.each(this.dashboards(),function(d){
+            _.each(d.tagList(),function(t){
+                a.indexOf(t.tagName) === -1 && a.push(t.tagName);
+            });
+        });
+        return a;
+    }, this);
+    
+    //this.populateDashboards();
 };
 
-var DashboardItem = function(model, allTags, isNew){
+var DashboardItem = function(model, options){
+    options = options || {};
     this.name = ko.observable(model.name);
+    this.cloneName = ko.observable();
+    this.isNew = options.isNew;
     this._id = model._id;
     this.dateCreated = drata.utils.formatDate(new Date(model.dateCreated));
     this.dateUpdated = drata.utils.formatDate(new Date(model.dateUpdated));
@@ -84,23 +111,22 @@ var DashboardItem = function(model, allTags, isNew){
     this.tagList = ko.observableArray();
     this.newTag = ko.observable();
     this.addingTag = ko.observable(false);
-    this.pendingTags = ko.observableArray();
     this.addTag = function(){
         if(!this.newTag()) return;
-        if(!this._id){
+        if(this.isNew){
             //since the dashboard does not have id, just save it.
-            this.pendingTags.push(this.newTag());
+            this.tagList.push({tagName: this.newTag()});
             this.newTag(undefined);
             this.addingTag(false);
             return;
         }
-        var newTagModel ={
+        var newTagModel = {
             tagName: this.newTag(), 
             dashboardId: this._id
         };
         drata.apiClient.addTag(newTagModel, function(resp){
             this.tagList.push(newTagModel);
-            allTags().indexOf(newTagModel.tagName) < 0 && allTags.push(newTagModel);
+            //allTags().indexOf(newTagModel.tagName) < 0 && allTags.push(newTagModel);
             this.newTag(undefined);
             this.addingTag(false);
         }.bind(this));
@@ -108,18 +134,34 @@ var DashboardItem = function(model, allTags, isNew){
 
     this.upsertDashboard = function(){
         var dashboardModel = {
-            name: this.name()
+            name: this.cloneName()
         };
-        if(!isNew){
+
+        if(!this.isNew){
             dashboardModel._id = this._id;
         }
+
         drata.apiClient.upsertDashboard(dashboardModel, function(response){
             this._id = response._id;
-            var tagList = this.pendingTags().map(function(t){
-                return {tagName: t, dashboardId: response._id}
+            var tagList = this.tagList(), chosenWidgets = this.chosenWidgets();
+            var i = 0, c = tagList.length + chosenWidgets.length;
+            var respCounter = function(){
+                i++;
+                if(i === c) window.location.href = '/dashboard/'+ this._id;
+            }.bind(this);
+
+            _.each(tagList, function(t){
+                t.dashboardId = response._id;
+                delete t.dateCreated;
+                drata.apiClient.addTag(t, respCounter);
             });
-            tagList.length > 0 && _.each(tagList, function(t){
-                drata.apiClient.addTag(t);
+            _.each(chosenWidgets, function(w){
+                var widgetModel = w.getModel();
+                widgetModel.dashboardId = response._id;
+                delete widgetModel.dateCreated;
+                delete widgetModel.dateUpdated;
+                delete widgetModel._id;
+                drata.apiClient.upsertWidget(widgetModel, respCounter);
             });
         }.bind(this));
     };
@@ -129,9 +171,15 @@ var DashboardItem = function(model, allTags, isNew){
             this.widgetList(ko.utils.arrayMap(
                 widgets,
                 function(widgetModel) {
-                    return new WidgetItem(widgetModel, 'dash'); 
+                    return new WidgetItem(widgetModel); 
                 }
             ));
+        }.bind(this));
+    };
+
+    this.bindTags = function(){
+        drata.apiClient.getAllTagsOfDashboard(this._id, function(tags){
+            this.tagList(tags); 
         }.bind(this));
     };
 
@@ -141,22 +189,15 @@ var DashboardItem = function(model, allTags, isNew){
 
     this.availableTags = ko.computed(function(){
         var tags = this.tagList();
-        var tempTags = this.pendingTags();
-        var allAvailableTags = allTags().filter(function(item){
+        var allAvailableTags = dashboardManager.tagsList().filter(function(item){
             return !tags.some(function(x){
-                return x.tagName === item.tagName;
+                return x.tagName === item;
             })
-        }).map(function(y){
-            return y.tagName;
         });
-
-        allAvailableTags = allAvailableTags.filter(function(item){
-                return tempTags.indexOf(item) === -1;
-        });
-        
-        return _.uniq(allAvailableTags, function(item){
-            return item;
-        });
+        return allAvailableTags;
+        // return _.uniq(allAvailableTags, function(item){
+        //     return item;
+        // });
     }, this);
 
     this.toggleExtendedDetails = ko.observable(false);
@@ -167,37 +208,94 @@ var DashboardItem = function(model, allTags, isNew){
     };
 
     this.removeTag = function(tag){
+        if(!tag._id){
+            this.tagList.remove(tag);
+            return;
+        }
         drata.apiClient.removeTag(tag._id, function(){
             this.tagList.remove(tag); 
         }.bind(this));
     }.bind(this);
+    
+    this.name.subscribe(function(newValue){
+        model.name = newValue;
+        drata.apiClient.upsertDashboard(model);
+    });
 
-    this.removePendingTag = function(tag){
-        this.pendingTags.remove(tag);
-    }.bind(this);
-
-    if(!isNew){
-        drata.apiClient.getAllTagsOfDashboard(this._id, function(tags){
-            this.tagList(tags); 
-        }.bind(this));
-
-        this.bindWidgets();
-    }else{
-        model && delete model._id;
-    }
-    //just prepop the tags
+    this.chosenWidgets = ko.observableArray();
+    options.bindTags && this.bindTags();
+    options.bindWidgets && this.bindWidgets();
 };
 
-var WidgetItem = function(model, renderType){
-    this.renderType = 
+
+var WidgetManager = function(model, options){
+    this.widgetList = ko.observableArray();
+    this.bindWidgets = function(model){
+        drata.apiClient.getWidgets(model, function(widgets){
+            this.widgetList(ko.utils.arrayMap(
+                widgets,
+                function(widgetModel) {
+                    return new WidgetItem(widgetModel, {chooseWidgets: true}); 
+                }
+            ));
+        }.bind(this));
+    };
+    
+    this.chosenChartTypes = ko.observableArray();
+    
+    this.chosenWidgets = ko.observableArray();
+
+    this.closeWidgetManager = function(){
+        $('#widgetManager').removeClass('showme');
+    };
+
+    this.addWidgets= function(){
+        this.closeWidgetManager();
+        _.each(this.chosenWidgets(), function(w){
+            var model = w.getModel();
+            dashboard.addWidget(model);
+        }, this);
+    };
+
+    var chooseAllWidgets = false;
+    this.toggleAllChosenWidgets = function(){
+        chooseAllWidgets = !chooseAllWidgets;
+        if(!chooseAllWidgets){
+            this.chosenWidgets([]);  
+        }
+        else{
+            this.chosenWidgets(this.widgetList());   
+        }
+        return true;
+    };
+
+    var filterModel = ko.computed(function(){
+        var cw = this.chosenChartTypes();
+        if(!cw || cw.length === 0) return;
+        var model = [{
+            property: 'segmentModel.chartType',
+            operator: '$in',
+            value: cw
+        }];
+        return model;
+    },this).extend({throttle: 500});
+
+    filterModel.subscribe(this.bindWidgets.bind(this), this);
+    this.bindWidgets();
+};
+
+var WidgetItem = function(model, options){
+    options = options || {};
+    this.chooseWidgets = options.chooseWidgets;
     this.name = ko.observable(model.name);
+    this._id = model._id;
     this.chartType = model.segmentModel.chartType;
     this.selectedDataKey = model.selectedDataKey;
     this.dateUpdated = drata.utils.formatDate(new Date(model.dateUpdated));
     this.viewDetails = ko.observable(false);
     this.toggleExtendedDetails = function(){
         this.viewDetails(!this.viewDetails());
-    }
+    };
     this.selectionsExpression = drata.utils.selectionsExpression(model.segmentModel.selection, true);
     this.conditionsExpression = drata.utils.conditionsExpression(model.segmentModel.group) || 'none';
     this.dataFilterExpression = '';
@@ -208,16 +306,8 @@ var WidgetItem = function(model, renderType){
     else{
         this.dataFilterExpression = drata.utils.format('{0} to {1}', model.segmentModel.dataFilter.min, model.segmentModel.dataFilter.max)
     }
-    this.model = model;
-};
 
-var TopBar = function(){
-    var self = this;
-    self.addWidget = function(){
-        $('#graphBuilder').toggleClass('showme');
-    };
-    self.manageDashboards = function(){
-        $('#dashboardManager').toggleClass('showme');
+    this.getModel = function(){
+        return model;
     }
-
-}
+};

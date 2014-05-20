@@ -9,10 +9,13 @@
     <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
 
     <link rel="stylesheet" type="text/css" href="/style/dashboard.css" />
+     <link rel="stylesheet" type="text/css" href="/style/dashboardmanager.css" />
     <link rel="stylesheet" type="text/css" href="/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
+    <link rel="stylesheet" type="text/css" href="/style/numeric-chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
     <link rel="stylesheet" type="text/css" href="/style/custombindinghandlers/editlabel.css" />
 
     <style>
@@ -35,8 +38,18 @@
             <!-- Right Nav Section -->
             <ul class="right">
                 <li class="divider"></li>
-                <li class="has-form">
-                    <a data-bind="click:addWidget" class="button success"><i class="general foundicon-plus"></i>&nbsp;Add Widget</a>
+                
+                <li class="has-dropdown">
+                    <a><span class="icon-grid"></span> Widgets</a>
+                    <ul class="dropdown">
+                        <li class="has-form">
+                        <a data-bind="click:addWidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
+                        </li>
+                        <li class="has-form">
+                        <a data-bind="click:manageWidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
+                        </li>
+                    </ul>
+
                 </li>
             </ul>
 
@@ -44,25 +57,34 @@
             <ul class="left">
                 <li class="divider"></li>
                 <li class="has-dropdown">
-                    <a href="#">Dashboards</a>
+                    <a><span class="icon-grid-alt"></span> Dashboards</a>
                     <ul class="dropdown">
-                    <li><label>Tags</label></li>
+                    <li class="has-form">
+                        <a class="button" data-bind="click:manageDashboards"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
+                    </li>
+                    <li><label><span class="icon-folder-open"></span> Tags</label></li>
                     <!-- ko foreach: tagList -->
                       <li class="has-dropdown not-click">
-                        <a data-bind="text: $data.tagName"></a>
+                        <a>
+                            <span class="icon-folder-open"></span>
+                             <!-- ko text: tagName -->
+                                    <!-- /ko --> 
+                        </a>
                         <ul class="dropdown">
                             <li><label>Dashboards</label></li>
                             <!-- ko foreach: dashboards -->
                             <li>
-                                <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId },text: $data.dashboardName"></a>
+                                <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
+                                    <span class="icon-grid-alt"></span> 
+                                    <!-- ko text: dashboardName -->
+                                    <!-- /ko --> 
+                                </a>
                             </li>
                             <!-- /ko -->
                         </ul>
                       </li>
                       <!-- /ko -->
-                      <li class="has-form">
-                        <a href="/dashboard/manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
-                        </li>
+                      
                     </ul>
 
                 </li>
@@ -70,8 +92,18 @@
             </ul>
         </section>
     </nav>
-    <div id="dashboard" class="row js-sortable" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }">
+
+    <div id="dashboard">
+        <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
+        </div>
+        <div class="row" style="display:none" data-bind="visible:noWidgets">
+            <div class="large-12 columns">
+                <h1>Welcome</h1>
+                <h1><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h1>
+            </div>
+        </div>
     </div>
+
     <div id="graphBuilder" class="mymodal-wrapper">
         <div class="mymodal-inner">
         <div class="mymodal-inner-temp">
@@ -161,127 +193,37 @@
                         </ul>
                     </section>
                 </nav>
-                <div class="row">
-                    <div class="large-12 columns">
-                    <fieldset>
-                        <legend>
-                            Add new Dashboard
-                        </legend>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Name :</label>
-                            </div>
-                            <div class="small-8 columns">
-                                <input type="text" data-bind="value: newName" />
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="large-8 large-offset-4 columns">
-                                <button class="button left tiny success" data-bind="click:addNewDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Existing Dashboards</legend>
-                        <!-- ko foreach: dashboards -->
-                        <div class="row">
-                            <div class="large-4 columns">
-                                <a data-bind="text:name,attr: {href: url}"></a>
-                            </div>
-                            
-                        </div>
-                        <!-- /ko -->
-                    </fieldset>
-                    </div>
+                <div style="padding:0.9375rem 0" data-bind="template: {name: 'dashboardmanager-template'}">
                 </div>
-
-                
             </div>
         </div>
     </div>
 
-    <script type="text/html" id="widget-template">
-    <div class="widget-outer" data-bind="css: widgetClass">
-        <div class="widget-wrapper">
-            <div class="row collapse widget-nav handle">
-                <div class="left title" data-bind="editLabel: {title: name}">
-                    
-                </div>
-                <div class="right">
-                    <ul class="widget-nav-list right">
-                        <li class="action-icon">
-                            <i data-bind="click:editSettings" class="general foundicon-settings"></i>
-                        </li>
-                        <li class="action-icon">
-                            <i data-bind="click:$parent.deleteWidget" class="general foundicon-remove"></i>
-                        </li>
-                        <li class="action-icon">
-                            <i data-bind="click:editWidget" class="general foundicon-edit"></i>
+    <div id="widgetManager" class="mymodal-wrapper">
+        <div class="mymodal-inner">
+            <div class="mymodal-inner-temp">
+                <nav class="top-bar" data-topbar>
+                    <ul class="title-area">
+                        <li class="name">
+                            <h1><a>Widget Manager</a></h1>
                         </li>
                     </ul>
-                </div>
-            </div>
-            
-             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
-            </div>
-            <div class="widget-content-wrapper" data-bind="visible: !parseError(), css: {widgetcontentedit:editing}">
-                <!-- ko template: contentTemplate() -->
-                <!-- /ko -->
-            
-                <div class="widget-settings">
-                    <div class="row">
-                        <div class="large-12 columns">
-                            <h6><strong>Settings</strong></h6>
-                        </div>
-                    </div>
-                    
-                    <div class="row" data-bind="visible: pieKeys().length > 1">
-                        <div class="small-4 columns">
-                            <label class="right inline">Show :</label>
-                        </div>
-                        <div class="small-8 columns">
-                            <select data-bind="value:selectedPieKey,options: pieKeys"/>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="small-4 columns">
-                            <label class="right inline">Width</label>
-                        </div>
-                        <div class="small-8 columns">
-                            <select data-bind="value:sizex">
-                                <option value="1">25%</option>
-                                <option value="5">33.3%</option>
-                                <option value="2">50%</option>
-                                <option value="6">66.6%</option>
-                                <option value="3">75%</option>
-                                <option value="4">100%</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-4 columns">
-                            <label class="right inline">Height</label>
-                        </div>
-                        <div class="small-8 columns">
-                            <select data-bind="value:sizey">
-                                <option value="1">50%</option>
-                                <option value="2">100%</option>
-                            </select>
-                        </div>
-                    </div>
+                    <section class="top-bar-section">
+                        <!-- Right Nav Section -->
+                        <ul class="right">
+                            <li class="divider"></li>
+                            <li class="has-form">
+                                <a data-bind="click:closeWidgetManager" class="button alert"><i class="general foundicon-remove"></i></a>
+                            </li>
+                        </ul>
+                    </section>
+                </nav>
+                <div style="padding:0.9375rem 0" data-bind="template: {name: 'widgetmanager-template'}">
                 </div>
             </div>
         </div>
-
     </div>
-    </script>
-    <script type="text/html" id="content-template">
-        <div data-bind="attr :{id: widgetContentId}, css : $parent.widgetYClass" >
-            <svg></svg>
-        </div>
-    </script>
     
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
@@ -299,9 +241,12 @@
     <script type="text/javascript" src="/js/helpers/ko.custombindinghandlers.js"></script>
     <script type="text/javascript" src="/js/helpers/ko.validation.extensions.js"></script>
 
-    
+     <script type="text/javascript" src="/js/lib/modernizr-2.6.2.min.js"></script>
+
     <script type="text/javascript" src="/js/foundation.js"></script>
+
     <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
+    <script type="text/javascript" src="/js/foundation/foundation.dropdown.js"></script>
 
     <script type="text/javascript" src="/js/models/axis.js"></script>
     <script type="text/javascript" src="/js/models/dots.js"></script>
@@ -316,17 +261,17 @@
     <script type="text/javascript" src="/js/segment2.js"></script>
     <script type="text/javascript" src="/js/dashboardmodel.js"></script>
     <script type="text/javascript" src="/js/dashboard.js"></script>
+     <script type="text/javascript" src="/js/dashboardmanager.js"></script>
     <script type="text/javascript" src="/js/charts/pie.js"></script>
 
     <script type="text/javascript" src="/js/charts/barchart.js"></script>
     <script type="text/javascript" src="/js/charts/scatterplot.js"></script>
    
     <script type="text/javascript" src="/js/tempdata.js"></script>
-    <div id="templates"></div>
 
     <script type="text/javascript">
         (function (root, $) {
-            $('#templates').load('/templates/segment_template2.html', function(){
+            drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template'], function(){
                 window.dashboard = new Dashboard();
                 ko.applyBindings(dashboard, document.getElementById('dashboard'));
                 window.topBar = new TopBar();
@@ -337,9 +282,14 @@
 
                 window.dashboardManager = new DashboardManager();
                 ko.applyBindings(dashboardManager, document.getElementById('dashboardManager'));
+                
+                window.widgetManager = new WidgetManager();
+                ko.applyBindings(widgetManager, document.getElementById('widgetManager'));
+
 
                 $(document).foundation();
             });
+            
         })(this, jQuery);
     </script>
 </body>

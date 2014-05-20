@@ -1,7 +1,7 @@
 
  ;(function(root) {
     var AreaChart = function(){
-        var _xAxisType = 'numeric', _dataMarkers = false;
+        var _xAxisType = 'numeric',_yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
             .axisType('x')
@@ -12,9 +12,7 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {
-                    m: {l:30, r:10, t:30, b:30}
-                }
+        var dims = {m: {l:30, r:10, t:30, b:30}};
         function chart(selection) {
             selection.each(function(data) {
                 console.log('area chart drawn');
@@ -29,7 +27,8 @@
                 }
 
                 z.domain(data.map(function(d){return d.key}));
-                chart.resize = function() { 
+                chart.resize = function() {
+                    dims = {m: {l:30, r:10, t:30, b:30}};
                     container
                     .transition().duration(500)
                     .call(chart);
@@ -60,14 +59,13 @@
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
                 
-                xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
-                yAxis.axisTicType('numeric').dims(dims).includeGridLines(true);
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
+                yAxis.ticks(_yticks).axisTicType('numeric').dims(dims).includeGridLines(true);
                                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
                 dispatch.on("togglePath", function(d){
                     d.disabled = !d.disabled;
-                    if(drata.js.logmsg) console.log(d);
                     chart.resize();
                 });
 
@@ -90,28 +88,26 @@
                 gWrapperEnter.append("g").attr("class", "line-group");
                 
                 //labels
+                if(_drawLabels){
                 gWrapperEnter.append("g").attr("class", "labels-group");
                 
-                var labels = drata.models.labels().color(z).dispatch(dispatch).dims(dims);
-                
-                var labelContainer = gWrapper.select('g.labels-group');
-                
-                labelContainer.datum(data).call(labels);
+                    var labels = drata.models.labels().color(z).dispatch(dispatch).dims(dims);
+                    
+                    var labelContainer = gWrapper.select('g.labels-group');
+                    
+                    labelContainer.datum(data).call(labels);
+                }
 
                 var xAxisContainer = gWrapper.select('g.x.axis');
  
-                console.log('before x axis');
-                console.log(dims.m);
-                
                 xAxisContainer.call(xAxis);
-                
-                console.log('after x axis');
-                console.log(dims.m);
-                
+            
                 xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
                 
-                labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
-                 
+                if(_drawLabels){
+                    labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
+                }
+                
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     //.transition().duration(500)
@@ -163,6 +159,25 @@
             _xAxisType = value;
             return chart;
         };
+
+        chart.yticks = function(value){
+            if (!arguments.length) return _yticks;
+            _yticks = value;
+            return chart;
+        };
+
+        chart.dateInterval = function(value){
+            if (!arguments.length) return _dateInterval;
+            _dateInterval = value;
+            return chart;
+        };
+
+        chart.drawLabels = function(value){
+            if (!arguments.length) return _drawLabels;
+            _drawLabels = value;
+            return chart;
+        };
+
         chart.includeDataMarkers = function(value){
             if (!arguments.length) return _dataMarkers;
             _dataMarkers = value;

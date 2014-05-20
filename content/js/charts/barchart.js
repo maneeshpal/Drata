@@ -4,7 +4,7 @@
  ;(function(root) {
     var BarChart = function(){
         var z = d3.scale.category10();
-        var dims = {m: {t:20, r:20, b:40, l:30}};
+        var dims = {m: {t:20, r:10, b:30, l:40}};
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
         var _showBarLabels = false;
@@ -21,13 +21,13 @@
             .scale(x0)
             .orient("bottom");
 
-        var getMin = function(data, prop){
-            return d3.min(data, function(d) { 
-                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
-                    return v[prop]; 
-                }); 
-            });
-        };
+        // var getMin = function(data, prop){
+        //     return d3.min(data, function(d) { 
+        //         return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
+        //             return v[prop]; 
+        //         }); 
+        //     });
+        // };
 
         var getMax = function(data, prop){
             return d3.max(data, function(d) { 
@@ -36,12 +36,14 @@
                 }); 
             });
         };
-        
+        var disabledKeys = [];
+
         function chart(selection){
             selection.each(function(data) {
                 console.log('bar chart drawn');
                 var container = d3.select(this);
-                chart.resize = function() { 
+                chart.resize = function() {
+                    dims = {m: {t:20, r:20, b:40, l:30}};
                     container
                     .transition()
                     .duration(1000)
@@ -49,6 +51,7 @@
                 };
 
                 chart.change = function(newData) { 
+                    disabledKeys = [];
                     container
                     .datum(newData)
                     .transition()
@@ -58,16 +61,18 @@
 
                 
                 var duplKeys = [];
-                var disabledKeys = [];
+                
 
                 _.each(data, function(item){
                      _.each(item.values, function(val){
+                        val.disabled = disabledKeys.indexOf(val.key) > -1;
                         if(duplKeys.indexOf(val.key) === -1){
-                            if(val.disabled) disabledKeys.push(val.key);
                             duplKeys.push(val.key);   
                         }
                     });
                 });
+
+                z.domain(duplKeys);
 
                 var labelKeys = duplKeys.map(function(key){
                     return {key: key, disabled : disabledKeys.indexOf(key) > -1};
@@ -75,21 +80,29 @@
 
                 dispatch.on("togglePath", function(d, i){
                     var toggle;
-                    if(disabledItems === labelKeys.length-1){
-                        _.each(data, function(item){
-                            _.each(item.values, function(iv){
-                                if(iv) iv.disabled = false;
-                            });
-                        });
-                        disabledItems = 0;
+                    
+                    if(labelKeys.length - 1 === disabledKeys.length && disabledKeys.indexOf(d.key) === -1) return;
+                    var keyIndex = disabledKeys.indexOf(d.key);
+                    if(keyIndex === -1){
+                        disabledKeys.push(d.key);
+                    }else{
+                        disabledKeys.splice(keyIndex,1);
                     }
-                    else{
-                        _.each(data, function(item){
-                            toggle = item.values[i] ? item.values[i].disabled : true;
-                            if(item.values[i]) item.values[i].disabled = !toggle;
-                        });    
-                        disabledItems = toggle ? disabledItems - 1 : disabledItems + 1;
-                    }
+                    // if(disabledItems === labelKeys.length-1){
+                    //     _.each(data, function(item){
+                    //         _.each(item.values, function(iv){
+                    //             if(iv) iv.disabled = false;
+                    //         });
+                    //     });
+                    //     disabledItems = 0;
+                    // }
+                    // else{
+                    // _.each(data, function(item){
+                    //     toggle = item.values[i] ? item.values[i].disabled : true;
+                    //     if(item.values[i]) item.values[i].disabled = !toggle;
+                    // });    
+                        //disabledItems = toggle ? disabledItems - 1 : disabledItems + 1;
+                    //}
                     console.log(data);
                     chart.resize();
                 });
@@ -115,8 +128,8 @@
                 var yrange;
                 function setYaxis(){
                     y.range([dims.h - dims.m.t - dims.m.b, 0]);
-                    var min = getMin(data, 'value'), max = getMax(data, 'value');
-                    yrange = [min - (min * 1/5),max + (max * 1/5)];
+                    var min = 0, max = getMax(data, 'value');
+                    yrange = [min ,max + (max * 1/4)];
                     y.domain(yrange);
 
                     gWrapper.select('g.y.axis')
@@ -125,8 +138,10 @@
                 }
 
                 function setXaxis(){
-                    x0.rangeRoundBands([0, dims.w - dims.m.l - dims.m.r], .2);
-                    x0.domain(data.map(function(d) { return d.key; }));
+                    x0.rangeRoundBands([0, dims.w - dims.m.l - dims.m.r], .1);
+                    x0.domain(data.map(function(d) { 
+                        return d.key; 
+                    }));
                     x1.domain(duplKeys).rangeRoundBands([0, x0.rangeBand()]);
                     gWrapper.select('g.x.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")")
@@ -134,7 +149,9 @@
                 }
 
                 function setLabels(){
-                    var labels = drata.models.labels().color(function(d,i){return z(i);}).dims(dims).align('topcenter').dispatch(dispatch);
+                    var labels = drata.models.labels().color(function(d,i){
+                        return z(d);
+                    }).dims(dims).align('topcenter').dispatch(dispatch);
                     gWrapper.select('g.labels-group')
                     .datum(labelKeys)
                     .call(labels);
@@ -168,7 +185,8 @@
 
                     rects
                         .style("fill", function(d, i) { 
-                            return z(i); 
+                            console.log('key: '+ d.key + '; index: '+ i);
+                            return z(d.key); 
                         })
                         .attr("stroke", '#fff')
                         .attr("stroke-width", 1)

@@ -35,10 +35,26 @@
         _perform('GET', url,undefined, callback);
     };
 
+    var getWidgets = function(model, callback){
+        var url = apiRoot + 'widgets';
+        _perform('POST', url,model, callback);
+    };
+
+    var deleteAllWidgetsDashboard = function(dashboardId, callback){
+        var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
+        _perform('DELETE', url,undefined, callback);
+    };
+
     var upsertWidget = function(model, callback){
         _perform('PUT', apiRoot + 'widget',model, callback);
         //console.log(JSON.stringify(model, null, '\t'));
     };
+
+    var updateWidget = function(model, callback){
+        _perform('POST', apiRoot + 'widget',model, callback);
+        //console.log(JSON.stringify(model, null, '\t'));
+    };
+
     var deleteWidget = function(widgetId, callback){
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
         _perform('DELETE',url, undefined, callback);
@@ -88,6 +104,11 @@
         _perform('GET',url, undefined, callback);
     };
 
+    var deleteAllTagsDashboard = function(dashboardId, callback){
+        var url = apiRoot + drata.utils.format('dashboard/{0}/tags', dashboardId);
+        _perform('DELETE',url, undefined, callback);
+    };
+
     var addTag = function(model, callback){
         _perform('PUT', apiRoot + 'tags',model, callback);
     };
@@ -118,7 +139,9 @@
     root.drata.ns('apiClient').extend({
         getDashboard: getDashboard,
         getWidgetsOfDashboard: getWidgetsOfDashboard,
+        getWidgets: getWidgets,
         upsertWidget: upsertWidget,
+        updateWidget: updateWidget,
         deleteWidget:deleteWidget,
         upsertDashboard: upsertDashboard,
         deleteDashboard: deleteDashboard,
@@ -129,7 +152,9 @@
         removeTag: removeTag,
         getDataKeys: getDataKeys,
         getUniqueProperties: getUniqueProperties,
-        getData: getData
+        getData: getData,
+        deleteAllTagsDashboard:deleteAllTagsDashboard,
+        deleteAllWidgetsDashboard:deleteAllWidgetsDashboard
     });
 })(this);
 

@@ -67,7 +67,7 @@ exports.pop = function(req, res){
 };
 
 exports.getDataSourceNames = function(req, res){
-    dbInstance('shopperstop')(function(db){
+    dbInstance('local')(function(db){
         db.admin().listDatabases(function(err, resp){
             if(err) res.send(404);
 
@@ -122,7 +122,7 @@ exports.findCollection = function(req, res) {
         //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
         db.collection(collectionName, function(err, collection) {
             if(!err){
-                collection.find(query, selectOnly).toArray(function(err, items) {
+                collection.find(query, selectOnly, {sort:'timestamp'}).toArray(function(err, items) {
                     res.send(items);
                     //db.close();
                 });
@@ -138,7 +138,7 @@ exports.findCollection = function(req, res) {
 // Populate database with sample data -- Only used once: the first time the application is started.
 // You'd typically not find this code in a real-life app, since the database would already exist.
 var populateDB = function(req, res) {
-    var maxProps = 20;
+    var maxProps = 300;
     var data= [];
     var y = [0,0,0,0,0,0,0];
     var ordernumber = 1;
@@ -146,14 +146,14 @@ var populateDB = function(req, res) {
     var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
     var colors = ['blue', 'gray', 'black', 'white', 'purple'];
     var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
-    var startDate = new Date('3/10/2014');
+    var startDate = new Date('6/10/2009');
     for(var j = 0; j <= maxProps; j++){
         for(var yy = 0; yy < y.length; yy++){
             y[yy] += Math.floor((Math.random() * 10 - j%10));
         }
         //y += (Math.random() * 10 - j%10);
         ordernumber = 10 + (Math.floor(j/ 3) * (3)); // 3 items per order
-        data.push({
+        var dd = {
             //ordernumber : ordernumber,
             item : items[Math.floor(Math.random() * items.length)],
             price : Math.abs(y[0]) * 100,
@@ -175,7 +175,9 @@ var populateDB = function(req, res) {
                 tax : Math.abs(y[0]) * 8,
                 shippingPrice: Math.abs(y[0]) * 12
             }
-        });
+        };
+        console.log(dd.timestamp);
+        data.push(dd);
     }
     dbInstance('shopperstop')(function(db){
         db.collection('shoppercheckout', function(err, collection) {
@@ -183,12 +185,9 @@ var populateDB = function(req, res) {
                 res.send('somethig went wrong');
             }
             else{
-                collection.remove();
                 collection.insert(data, {safe:true}, function(err, result) {});
                 res.send('done');    
             }
         });    
     });
-    
- 
 };

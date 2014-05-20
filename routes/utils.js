@@ -118,6 +118,19 @@ var getMongoConditions = function(conditions){
     return result;
 };
 
+var getwidgetListMongoQuery = function(model){
+    if(!model || Object.keys(model).length === 0) return {};
+        var q = {},x = {};
+        q['$and'] = [];
+        _.each(model, function(condition){
+            x = {};
+            x[condition.property] = {};
+            x[condition.property][condition.operator] = condition.value;
+            q['$and'].push(x);
+        })
+        return q;
+};
+
 var getMongoCondition = function(c){
     if(!c.isComplex){
         var a = {}, b = {}, val;
@@ -323,4 +336,5 @@ exports.getUniqueProperties = getUniqueProperties;
 exports.getMongoQuery = getMongoQuery;
 exports.flatten = flatten;
 exports.buildReturnPoperties = buildReturnPoperties;
+exports.getwidgetListMongoQuery = getwidgetListMongoQuery;
 

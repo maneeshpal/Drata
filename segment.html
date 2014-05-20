@@ -4,9 +4,9 @@
 <head>
     <title></title>
 
-    <link rel="stylesheet" type="text/css" href="/style/core/normalize.css" />
-    <link rel="stylesheet" type="text/css" href="/style/core/foundation.css" />
-    <link rel="stylesheet" type="text/css" href="/style/core/general_foundicons.css" />
+    <link rel="stylesheet" type="text/css" href="/style/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/style/app.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/segment.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
@@ -53,20 +53,20 @@
     <div class="row">
         <div class="small-6 columns">
         <h6>Input</h6>
-            <textarea style="height:300px" data-bind="text:rawData"></textarea>
+            <textarea style="height:600px" data-bind="text:rawData"></textarea>
         </div>
         <div class="small-6 columns">
         <h6>query</h6>
-            <textarea style="height:300px" data-bind="text:query"></textarea>
+            <textarea style="height:600px" data-bind="text:query"></textarea>
         </div>
-        <div class="small-6 columns">
+        <!-- <div class="small-6 columns">
         <h6>mongo filtered</h6>
             <textarea style="height:300px" data-bind="text:outputData"></textarea>
         </div>
         <div class="small-6 columns">
         <h6>jsfiltered</h6>
             <textarea style="height:300px" data-bind="text:opjs"></textarea>
-        </div>
+        </div> -->
     </div>
     <button data-bind="click: process" class="button small">process</button>
     <!-- ko template: {name: 'segment-template', data: segment} -->
@@ -83,6 +83,7 @@
 
 
     <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/apiClient.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
     <script src="/js/lib/d3.v3.js"></script>
@@ -92,12 +93,12 @@
 
     <script type="text/javascript" src="/js/lib/knockout-3.0.0.js"></script>
      <script type="text/javascript" src="/js/lib/knockout.validation.min.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.extensions.js"></script>
-    <script type="text/javascript" src="/js/lib/helpers/ko.custombindinghandlers.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.extensions.js"></script>
+    <script type="text/javascript" src="/js/helpers/ko.custombindinghandlers.js"></script>
 
     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
-    <script type="text/javascript" src="foundation/js/foundation/foundation.js"></script>
-    <script type="text/javascript" src="foundation/js/foundation/foundation.topbar.js"></script>
+    <script type="text/javascript" src="/js/foundation.js"></script>
+    <script type="text/javascript" src="/js/foundation/foundation.topbar.js"></script>
 
     <script type="text/javascript" src="/js/models/axis.js"></script>
     <script type="text/javascript" src="/js/models/dots.js"></script>
@@ -112,17 +113,16 @@
 
     <script type="text/javascript" src="/js/charts/barchart.js"></script>
     <script type="text/javascript" src="/js/charts/scatterplot.js"></script>
-   
     <script type="text/javascript" src="/js/tempdata.js"></script>
        <script type="text/javascript" src="/js/segment2.js"></script>
      <script type="text/javascript" src="/js/segmentprocessor.js"></script>
-     <div id="templates"></div>
 
     <script type="text/javascript">
-        $('#templates').load('content/templates/segment_template2.html', function(){
+        drata.utils.onTemplateLoad(['segment_template2'], function(){
             window.segmentProcessor = new SegmentProcessor();
             ko.applyBindings(window.segmentProcessor, document.getElementById('segmentProcessor'));
         });
+        
     </script>
     <span id="lid" style="font-size:12px; font-family: arial; display:none"></span>
 </body>

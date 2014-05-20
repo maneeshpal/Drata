@@ -3,23 +3,23 @@
     var templateEngine = new ko.stringTemplateEngine();
     /********** KO TEMPLATES ******************/
     var comboTemplateStr = [
-            '<div style="position:relative">',
-            '<input type="text" id="txtInput" data-bind="enable: enabled,value:selectedValue,attr:{placeholder:optionsCaption}"></input>',
-            '<ul id="combolist" class="combolist no-bullet" style="display:none">',
-                '<!-- ko foreach: filteredOptions -->',
-                '<li data-bind="value: $data, text: $data, click: $parent.selectItem"></li>',
-                '<!-- /ko -->',
-            '</ul>',
-            '</div>'
+        '<div style="position:relative">',
+        '<input type="text" id="txtInput" data-bind="enable: enabled,value:selectedValue,attr:{placeholder:optionsCaption}"></input>',
+        '<ul id="combolist" class="combolist no-bullet" style="display:none">',
+            '<!-- ko foreach: filteredOptions -->',
+            '<li data-bind="value: $data, text: $data, click: $parent.selectItem"></li>',
+            '<!-- /ko -->',
+        '</ul>',
+        '</div>'
     ].join('');
 
     var ddComboTemplateStr = [
-            '<div class="row collapse">',
-                '<select class="combo-dd columns" data-bind="enable: enabled,value: selectedPrefix, options: prefixOptions">',
-                '</select>',
-                '<div class="combo-txt columns" data-bind="template : {name: \'comboTemplate\', data : $data}">',
-                '</div>',
-            '</div>'            
+        '<div class="row collapse">',
+            '<select class="combo-dd columns" data-bind="enable: enabled,value: selectedPrefix, options: prefixOptions">',
+            '</select>',
+            '<div class="combo-txt columns" data-bind="template : {name: \'comboTemplate\', data : $data}">',
+            '</div>',
+        '</div>'            
     ].join('');
 
     var editLabelTemplateStr = [
@@ -27,7 +27,7 @@
             '<div class="title-display">',
                 '<a data-bind="visible: href(), text:title, attr: {\'href\': href}"></a>',
                 '<span data-bind="visible: !href(), text:title, click: editTitle"></span>',
-                '<i class="general foundicon-edit" data-bind="click: editTitle"></i>',
+                '<span class="edit-icon icon-pencil" data-bind="click: editTitle"></span>',
             '</div>',
             '<div class="row collapse title-edit">',
                 '<div class="small-8 columns">',
@@ -47,10 +47,23 @@
         '</div>'
     ].join('');
 
+    var checkboxDropdownTemplateStr = [
+        '<div class="chk-dd" style="position:relative">',
+            '<div id="lblSelectedValues" class="chk-dd-label" data-bind="text: displayValuesList"></div>',
+            '<ul id="combolist" class="combolist no-bullet" style="display:none; margin-top:0" data-bind="foreach: options">',
+                '<li>',
+                    '<input type="checkbox" data-bind="attr:{\'id\': \'chkdd\' + $index()}, checkedValue: $parent.optionsValue ? $data[$parent.optionsValue] : $data, checked: $parent.selectedOptions" />',
+                    '<label data-bind="attr:{\'for\': \'chkdd\'+ $index()}, text: $parent.optionsText ? $data[$parent.optionsText] : $data"></label>',
+                '</li>',
+            '</ul>',
+            '<span class="chk-dd-arrow icon-arrow-down5"></span>',
+        '</div>'
+    ].join('');
 
     templateEngine.addTemplate('comboTemplateStr', comboTemplateStr);
     templateEngine.addTemplate('ddComboTemplateStr', ddComboTemplateStr);
     templateEngine.addTemplate('editLabelTemplateStr', editLabelTemplateStr);
+    templateEngine.addTemplate('checkboxDropdownTemplateStr', checkboxDropdownTemplateStr);
 
     /********** KO TEMPLATES ******************/
 
@@ -189,6 +202,80 @@
         }
     };
 
+    var CheckboxDropdownVM = function(config){
+        var self = this;
+        self.selectedOptions = ko.isObservable(config.selectedOptions) ? config.selectedOptions : ko.observableArray(config.selectedOptions);
+        self.options = ko.isObservable(config.options) ? config.options : ko.observableArray(config.options);
+        self.optionsText = config.optionsText;
+        self.optionsValue = config.optionsValue;
+        self.optionsCaption = ko.isObservable(config.optionsCaption) ? config.optionsCaption : ko.observable(config.optionsCaption);
+        
+        self.options.subscribe(function(){
+            self.selectedOptions([]);
+        });
+
+        self.enabled = ko.isObservable(config.enabled) ? config.enabled : ko.observable(config.enabled);
+        var $elem, $combolist, $wrapper = $(config.element);
+        
+        self.displayValuesList = ko.computed(function(){
+            if(self.selectedOptions().length === 0) return self.optionsCaption();
+            var selectedOptions = self.selectedOptions();
+            var s = self.options().filter(function(i){
+                if(self.optionsValue){
+                    return selectedOptions.indexOf(i[self.optionsValue]) > -1;
+                }
+                else{
+                    return selectedOptions.indexOf(i) > -1;
+                }
+            })
+
+            if(self.optionsText){
+                return s.map(function(item){return item[self.optionsText]}).join(', ');
+            }
+            return a.join(', ');
+        });
+
+        self.accessComboElements = function(nodes){
+            //var toplevelNode = nodes[0];
+            $elem = $(nodes).find('#lblSelectedValues');
+            $combolist =  $(nodes).find('#combolist');
+            
+            $elem.click(function(){
+                $combolist.show();
+                $elem.addClass('glow');
+                $(document).on('click.comboSelections', function(){
+                    if(!$.contains($wrapper[0], arguments[0].target)){
+                        $combolist.hide();
+                        $(document).off('.comboSelections');
+                        $elem.removeClass('glow');
+                    }
+                });
+            });
+        };
+    };
+
+    var checkboxDropdownBindingHandler = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var template = 'checkboxDropdownTemplateStr';
+            var config = {
+                selectedOptions : value.selectedOptions,
+                element: element,
+                options: value.options,
+                optionsValue: value.optionsValue,
+                optionsText: value.optionsText,
+                optionsCaption: value.optionsCaption,
+                enabled: value.enabled === undefined ? true: value.enabled
+            };
+            
+            var chkdd = new CheckboxDropdownVM(config);
+
+            ko.renderTemplate(template, chkdd, { templateEngine: templateEngine, afterRender : chkdd.accessComboElements.bind(chkdd) }, element, 'replaceChildren');
+
+            return { controlsDescendantBindings: true };
+        }
+    };
+
     var EditLabelVM = function(config){
         this.title = config.title;
         this.editingTitle = ko.observable(false);
@@ -226,7 +313,75 @@
         }
     };
 
+    var sortableList = {
+        init: function(element, valueAccessor) {
+            var list = valueAccessor();
+            $(element).sortable({
+                cursor: 'move',
+                handle: '.handle',
+                forcePlaceholderSize: true,
+                update: function(event, ui) {
+                      //retrieve our actual data item
+                      var oldPos = ui.item.data('index');
+                      //figure out its new position
+                      var newPos = ko.utils.arrayIndexOf(ui.item.parent().children(), ui.item[0]);
+                      //remove the item and add it back in the right spot
+                      if (newPos >= 0) {
+                            var widgetList = list().sort(function(x, y){
+                                return x.displayIndex() - y.displayIndex();
+                            });
+                          var item = widgetList[oldPos];
+                          var len = widgetList.length;
+                          
+                          if(newPos < oldPos){
+                            for(var i=newPos;i<oldPos;i++){
+                                widgetList[i].displayIndex(i+1);
+                            };
+                          }
+                          if(newPos > oldPos){
+                            for(var i=oldPos+1;i<=newPos;i++){
+                                widgetList[i].displayIndex(i-1);
+                            };
+                          }
+                          item.displayIndex(newPos);
+                    }
+                }
+          });
+        }
+    };
+
+    var resizeText = {
+        update: function(element, valueAccessor){
+            var txt = ko.utils.unwrapObservable(valueAccessor());
+            $(element).html(txt);
+            var w = $(element).width();
+            var h = $(element).height();
+            var maxFontSize = 0;
+            function resize(){
+                var x = {width:0, height: 0}, f = 40, l = 0;
+                do{
+                    x = drata.utils.textToPixel(txt, 'font-size:' + f + 'px;');
+                    
+                    f = f+2;
+                    l++;
+                }
+                while(w - 20 > x.width && h > x.height && l < 30);
+                $(element).css('font-size', f + 'px');
+            }
+            resize();
+            // drata.utils.windowResize(function(){
+            //     setTimeout(resize, 200);
+            // });
+        }
+    }
+
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;
     ko.bindingHandlers.editLabel = editLabelBindingHandler;
+    ko.bindingHandlers.sortableList = sortableList;
+    ko.bindingHandlers.resizeText = resizeText;
+    ko.bindingHandlers.checkboxDropdown = checkboxDropdownBindingHandler;
+
+    ko.virtualElements.allowedBindings.editLabel = true;
+    ko.virtualElements.allowedBindings.sortableList = true;
 })(ko, jQuery);

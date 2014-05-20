@@ -22,9 +22,9 @@
                 var dot = dotLineGroup
                     .selectAll('circle.circle-each')
                     .data(function(d){
-                        d.values.map(function(item){
+                        _.each(d.values, function(item){
                             item.key = d.key;
-                        })
+                        });
                         return d.values;
                     });
 

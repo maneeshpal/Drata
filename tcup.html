@@ -17,32 +17,13 @@
     </style>
 </head>
 <body style="max-width:600px; margin:0 auto; padding-top:200px">
-<div id="cbt" class="row">
-    <div class="small-4 columns">
-        <div class="edit-label" data-bind="css: {'edit': editingTitle}">
-            <div class="title-display">
-                <span data-bind="text:title"></span>
-                <i class="general foundicon-edit" data-bind="click: editTitle"></i>
-            </div>
-            <div class="row collapse title-edit">
-                <div class="small-8 columns">
-                    <input type="text" data-bind="value: title"></input>
-                </div>
-                <div class="small-2 columns" data-bind="click: acceptEdit">
-                    <span class="postfix">
-                        <i class="general foundicon-checkmark"></i>
-                    </span>
-                </div>
-                <div class="small-2 columns" data-bind="click: cancelEdit">
-                    <span class="postfix">
-                        <i class="general foundicon-remove"></i>
-                    </span>
-                </div>
-            </div>
+    <div id="cbt" class="row">
+        <div class="small-6 columns" data-bind="checkboxDropdown:{options:optionss, selectedOptions: selectedValues,optionsCaption: 'Select ddd', optionsText:'key'}">
+        </div>
+        <div class="small-6 columns">
+        
         </div>
     </div>
-    <div class="small-4 columns" data-bind="editLabel: {title: title, href:'xc'}"></div>
-</div>
 
 
 
@@ -61,26 +42,22 @@
      <div id="templates"></div>
 
     <script type="text/javascript">
+    
+    var Cbt = function(){
+        this.optionss = ko.observableArray([
+            {key: 'maneeshis', value: 'great'}, 
+            {key: 'ladduissssssss', value:'warasttttt'},
+            {key: 'beautyis', value: 'abeastttttt'},
+            {key: 'maneeshis2', value: 'agreat'}, 
+            {key: 'ladduissssssss2', value:'awarasttttt'},
+            {key: 'beautyis2', value: 'abeastttttt'}
+        ]);
+        this.selectedValues = ko.observableArray();
+    }
 
-        var Cbt = function(){
-            this.title = ko.observable('chammak');
-            this.editingTitle = ko.observable(false);
-            var temp = this.title();
-            this.editTitle = function(){
-                temp = this.title();
-                this.editingTitle(true);
-            }
-            this.cancelEdit = function(){
-                this.title(temp);
-                this.editingTitle(false);
-            }
-            this.acceptEdit = function(){
-                this.editingTitle(false);
-                temp = this.title();
-            }
-        };
-        window.a = new Cbt();
-            ko.applyBindings(window.a, document.getElementById('cbt'));
+    window.a = new Cbt();
+    ko.applyBindings(window.a, document.getElementById('cbt'));
+
     </script>
     <span id="lid" style="font-size:12px; font-family: arial; display:none"></span>
 </body>

@@ -21,14 +21,11 @@
                 container
                     .selectAll('g.label-group')
                     .attr('transform', function(d, i){
-                        var len = drata.utils.textToPixel(d.key) + 20;
+                        var len = drata.utils.textToPixel(d.key).width + 20;
                         totalLen += len;
                         if(prev + len >= wm) {
                             prev = 0;
                             cols ++;
-                        }
-                        else{
-                            
                         }
                         var ret = 'translate('+ prev +', ' + (cols * 24) + ')';
                         prev = prev + len;
@@ -36,12 +33,15 @@
                         //return 'translate('+ exl[i] +')';
                     });
 
-                    _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * 24)+5);
+                _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * 24)+20);
+                
+                var l = cols > 0 ? _dims.m.l : (_dims.w - (totalLen/(cols + 1)))/2;
                 
                 if(_align === 'center') {
-                    container.attr('transform', 'translate('+ (_dims.w - (totalLen/(cols + 1)))/2 + ',' + (_dims.h - _dims.m.b) +')');
-                } else if(_align === 'topcenter'){
-                    container.attr('transform', 'translate('+ (_dims.w - (totalLen/(cols + 1)))/2 + ')');
+                    container.attr('transform', 'translate('+ l + ',' + (_dims.h - _dims.m.b) +')');
+                } 
+                else if(_align === 'topcenter'){
+                    container.attr('transform', 'translate('+ l + ')');
                 }
 
                 labelWrapper.append('text').attr('class', 'label-text');

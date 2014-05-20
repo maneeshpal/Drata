@@ -4,7 +4,7 @@
         //var x = d3.scale.linear();
         var y = d3.scale.ordinal();
         var rs = d3.scale.linear();
-        var _xAxisType = 'date';
+        var _xAxisType = 'date', _dateInterval;
         var xAxis = drata.models.axis()
             .axisType('x')
             .orient("bottom")
@@ -15,9 +15,7 @@
                     .orient("left");
 
         var z = d3.scale.category10();
-        var dims = {
-                    m: {l:0, r:30, t:30, b:30}
-                };
+        var dims = {m: {l:0, r:30, t:30, b:30}};
         
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
@@ -47,7 +45,6 @@
                         });
                     });
                 }
-
                 
                 var enabledData = data.filter(function(d){
                     return !d.disabled;
@@ -56,7 +53,7 @@
                 var textLength = 0, maxlength = 0;
                 var keys = enabledData.map(function(d) {
                     textLength = drata.utils.textToPixel(d.key);
-                    maxlength = Math.max(maxlength, textLength);
+                    maxlength = Math.max(maxlength, textLength.width);
                     return d.key;
                 });
                 
@@ -65,7 +62,8 @@
                 console.log('m left' + dims.m.l);
                 z.domain(data.map(function(d){return d.key}));
                 
-                chart.resize = function() { 
+                chart.resize = function() {
+                    dims = {m: {l:0, r:30, t:30, b:30}};
                     container
                     .transition().duration(500)
                     .call(chart);
@@ -89,7 +87,7 @@
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
                 
-                xAxis.axisTicType(_xAxisType).dims(dims).includeGridLines(false);
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
                 
                 
                 //var xrange = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
@@ -174,6 +172,12 @@
         chart.xAxisType = function(value){
             if (!arguments.length) return _xAxisType;
             _xAxisType = value;
+            return chart;
+        };
+
+        chart.dateInterval = function(value){
+            if (!arguments.length) return _dateInterval;
+            _dateInterval = value;
             return chart;
         };
 

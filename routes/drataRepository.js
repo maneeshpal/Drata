@@ -36,14 +36,13 @@ exports.pop = function(req, res){
 };
 
 exports.findDashboard = function(req, res) {
-    var dashboardId = req.params.id;
+    var dashboardId = mongo.ObjectID(req.params.dashboardId);
     db.collection('dashboard',function(err, collection) {
         if(err){
             res.send(404);
         }
         else{
-            //console.log('dashboardid:  ' + dashboardId);
-            collection.findOne({"_id" : mongo.ObjectID(dashboardId)}, function(err, result) {
+            collection.findOne({'_id' : dashboardId}, function(err, result) {
                 res.send(result);
             });
         }
@@ -51,7 +50,7 @@ exports.findDashboard = function(req, res) {
 };
 
 exports.findWidgetsOfDashboard = function(req, res) {
-    var dashboardId = req.params.id;
+    var dashboardId = req.params.dashboardId;
     db.collection('widget',function(err, collection) {
         if(err){
             res.send(404);
@@ -63,22 +62,6 @@ exports.findWidgetsOfDashboard = function(req, res) {
         }
     });
 };
-
-// exports.createWidget = function(req, res){
-//     db.collection('widget',function(err, collection) {
-//         if(err){
-//             console.log(JSON.stringify(err, null, '\t'));
-//             res.send(404);
-//         }
-//         else{
-//             collection.insert(req.body, {safe:true}, function(err, result) {
-//                 //console.log(JSON.stringify(werr));
-                
-//                 res.send(result[0]._id);
-//             });
-//         }
-//     });
-// };
 
 exports.upsertWidget = function(req, res){
     console.log(JSON.stringify(req.body, null, '\t'));
@@ -100,6 +83,32 @@ exports.upsertWidget = function(req, res){
             
             //delete widgetModel._id;
             collection.save(widgetModel, {safe:true}, function(err, result) {
+                console.log(JSON.stringify(err));
+                if(err) res.send(404);
+                console.log(JSON.stringify(result));
+                
+                res.send(result);
+            });
+        }
+    });
+};
+
+exports.updateWidget = function(req, res){
+    console.log(JSON.stringify(req.body, null, '\t'));
+    db.collection('widget',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            var widgetModel = req.body;
+            if(!widgetModel._id) res.send(404);
+            
+            var widgetId = mongo.ObjectID(widgetModel._id);
+            delete widgetModel._id;
+            widgetModel.dateUpdated = new Date().toISOString();
+            
+            collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
                 console.log(JSON.stringify(err));
                 if(err) res.send(404);
                 console.log(JSON.stringify(result));
@@ -162,8 +171,6 @@ exports.deleteDashboard = function(req, res){
         }
         else{
             collection.remove({_id : dashboardId}, {safe:true,justOne:true}, function(err, result) {
-                //console.log(JSON.stringify(werr));
-                //console.log('deleted ' + req.params.widgetId);
                 res.send(200);
             });
         }
@@ -177,6 +184,22 @@ exports.getAllDashboards = function(req, res) {
         }
         else{
             collection.find().toArray(function(err, result) {
+                res.send(result);
+            });
+        }
+    });
+};
+
+exports.getWidgets = function(req, res) {
+    db.collection('widget',function(err, collection) {
+        if(err){
+            res.send(404);
+        }
+        else{
+            console.log('before query' + JSON.stringify(req.body));
+            var q = utils.getwidgetListMongoQuery(req.body);
+            console.log(JSON.stringify(q));
+            collection.find(q).toArray(function(err, result) {
                 res.send(result);
             });
         }
@@ -247,6 +270,39 @@ exports.removeTag = function(req, res){
             collection.remove({_id : tagId}, {safe:true,justOne:true}, function(err, result) {
                 //console.log(JSON.stringify(werr));
                 //console.log('deleted ' + req.params.widgetId);
+                res.send(200);
+            });
+        }
+    });
+};
+
+exports.deleteAllTagsDashboard = function(req, res){
+    var dashboardId = req.params.dashboardId;
+    db.collection('tags',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
+                console.log(JSON.stringify(result));
+                res.send(200);
+            });
+        }
+    });
+};
+
+
+exports.deleteAllWidgetsDashboard = function(req, res){
+    var dashboardId = req.params.dashboardId;
+    db.collection('widget',function(err, collection) {
+        if(err){
+            console.log(JSON.stringify(err, null, '\t'));
+            res.send(404);
+        }
+        else{
+            collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
+                console.log(JSON.stringify(result));
                 res.send(200);
             });
         }

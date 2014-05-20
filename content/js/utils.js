@@ -52,6 +52,18 @@
         }
         return format;
     };
+
+    var onTemplateLoad = function(templates, callback){
+        var c = 0;
+        function loaded(tmpl){
+            $('body').append(tmpl);
+            c++;
+            if(c === templates.length) callback && callback();
+        }
+        _.each(templates, function(t){
+            $.get('/templates/' + t + '.html', loaded);
+        });
+    };
     
     var formatDate = function(dt){
         return (dt instanceof Date) ? format('{0}/{1}/{2} {3}:{4}', dt.getMonth() + 1, dt.getDate(), dt.getFullYear(), dt.getHours(), dt.getMinutes()): '__';
@@ -133,8 +145,9 @@
         style  = style || 'font-size: 12px; font-family: arial;';
         txt.attr('style', style + ' display:none');
         txt.html(text);
-        return txt.width();
+        return {height: txt.height(), width: txt.width() };
     };
+    
     var head = document.getElementsByTagName('head')[0];
         
     var createTemplate = function (templateName, templateString, overrideExisting) {
@@ -152,7 +165,8 @@
     };
 
     var parseTime = function(input){
-        if(!input) return input;
+        if(!input || !isNaN(+input)) return input;
+
         var hmsConv = {
             h: 60 * 60 * 1000,
             m: 60 * 1000,
@@ -244,7 +258,7 @@
 
         return result;
     };
-
+    
     var divideDataByInterval = function(params){
         var val, groupBy;
         var intervalGroup = _.groupBy(params.data, function(item){
@@ -252,7 +266,22 @@
             //TODO: Clean this 
             switch(params.intervalType){
                 case 'date':
-                    groupBy = Math.floor(+(new Date(val))/ +params.interval) * (+params.interval);
+                    var dateVal = new Date(val);
+                    switch(params.interval){
+                        case 'month':
+                            groupBy = new Date(dateVal.getFullYear(), dateVal.getMonth(), 1);
+                            break;
+                        case 'quarter':
+                            groupBy = new Date(dateVal.getFullYear(), Math.floor(dateVal.getMonth()/ 3) * 3, 1);
+                            break;
+                        case 'year':
+                            groupBy = new Date(dateVal.getFullYear(), 0, 1);
+                            break;
+                        default :
+                            var parsedInterval = parseTime(params.interval);
+                            groupBy = Math.floor(+dateVal/ parsedInterval) * parsedInterval;
+                    }
+                    groupBy = +groupBy;
                 break;
                 case 'numeric':
                 case 'currency':
@@ -370,6 +399,66 @@
         };
     };
 
+    var intervalFormats = {
+        month : {format: '%b %Y', mb: 55, ml: 55},
+        year: {format: '%Y', mb: 30, ml: 30},
+        day: {format: '%Y %b %d', mb: 60, ml: 60},
+        hours: {format: '%Y %b %d %H:%M', mb: 70, ml: 60},
+        get: function(range){
+            if(!range) return this.day;
+            var msDay = 172800000, msMonth = 7776000000, msYear = 31536000000;
+            var interval = range[1] - range[0];
+            if(interval <= msDay){
+                // 3 days
+                return this.hours;
+            }
+            if(interval <= msMonth){
+                //3 months
+                return this.day;
+            }
+            if(interval <= msYear){
+                //1 year
+                return this.month;
+            }
+            return this.year;
+        }
+    };
+
+    var getTextFormat = function(type){
+        var tickFormat;
+        switch(type.formatType){
+            case 'numeric':
+                tickFormat = d3.format('.3s');
+                break;
+            case 'currency':
+                tickFormat = function(d) {
+                    var f = d3.format('.2s');
+                    return '$' + f(d);
+                };
+                break;
+            case 'date':
+                switch(type.formatSubType){
+                    case 'month':
+                        tickFormat = d3.time.format(intervalFormats.month.format);
+                        break;
+                    case 'quarter':
+                        tickFormat = function(d){
+                            return d.getFullYear() + ' Q ' + (Math.floor(d.getMonth() / 3) + 1);
+                        }
+                        break;
+                    case 'year':
+                        tickFormat = d3.time.format(intervalFormats.year.format);
+                        break;
+                    default:
+                        intFormat = intervalFormats.get(type.domain);
+                        
+                        tickFormat = d3.time.format(intFormat.format);
+                }
+                break;
+        }
+        return tickFormat;
+    };
+
     var getUniqueProperties = function(data){
         var flattened = data.map(function(d){
             return flatten(d);  
@@ -462,13 +551,25 @@
     };
 
     window.debug = {};
+    window.widgetmongo = function(model){
+        if(!model || model.length === 0) return {};
+        var q = {},x = {};
+        q['$and'] = [];
+        _.each(model, function(condition){
+            x = {};
+            x[condition.property] = {};
+            x[condition.property][condition.operator] = condition.value;
+            q['$and'].push(x);
+        })
+        return q;
+    };
 
     drata.ns('global').extend({
         conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like'],
         arithmeticOperations : ['+', '-', '*','/'],
         groupingOptions : ['value','count', 'sum', 'avg'],
         xAxisTypes : ['date','numeric','currency'],
-        chartTypes : ['line', 'area', 'scatter', 'pie','bar'],
+        chartTypes : ['line', 'area', 'scatter', 'pie','bar', 'numeric'],
         logics : ['and', 'or'],
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
@@ -494,7 +595,10 @@
         getDateRange: getDateRange,
         formatDate: formatDate,
         selectionsExpression: selectionsExpression,
-        conditionsExpression: conditionsExpression
+        conditionsExpression: conditionsExpression,
+        onTemplateLoad: onTemplateLoad,
+        intervalFormats: intervalFormats,
+        getTextFormat: getTextFormat
     });
 })(this);
 

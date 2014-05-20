@@ -41,6 +41,7 @@ var Segmentor = function(model){
             case 'line':
             case 'area':
             case 'scatter':
+            case 'numeric':
                 self.dataGroup =  compDataGroup || new TrackDataGroup({propertyTypes: self.propertyTypes});
                 currentDataGroupTemplate = 'track-datagroup-template';
                 break;
@@ -123,10 +124,12 @@ var TrackDataGroup = function(){
     self.groupByProp = ko.observable();
 
     self.xAxisType = ko.observable();
-    //self.chartType = ko.observable();
     self.timeseries = ko.observable();
     self.xAxisProp = ko.observable();
     self.timeseriesInterval = ko.observable();
+    self.intervalOptions = ko.computed(function(){
+        return self.xAxisType() !== 'date' ? []: ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
+    });
 
     self.hasGrouping.subscribe(function(newValue){
         if(!newValue){
@@ -145,8 +148,6 @@ var TrackDataGroup = function(){
         self.xAxisType(model.xAxisType);
         self.hasGrouping(model.groupByProp !== undefined);
         self.timeseriesInterval(model.timeseriesInterval);
-        
-        //self.chartType(model.chartType);
     };
     self.getModel = function(){
         var dataGroupModel = ko.toJS(self);
@@ -188,7 +189,8 @@ var ComparisonDataGroup = function(options){
 
     self.hasGrouping = ko.observable(false);
     self.groupByProp = ko.observable();
-    self.groupByIntervalRaw = ko.observable();
+    self.groupByInterval = ko.observable();
+    self.divideByInterval = ko.observable();
     self._giType = ko.observable();
     
     self.groupByIntervalType = ko.computed({
@@ -198,7 +200,7 @@ var ComparisonDataGroup = function(options){
         },
         write: function(newValue){
             if(newValue === 'string' || newValue === 'unknown'){
-                self.groupByIntervalRaw(undefined);
+                self.groupByInterval(undefined);
             }
             newValue && options.propertyTypes[self.groupByProp()](newValue);
         }
@@ -206,7 +208,6 @@ var ComparisonDataGroup = function(options){
 
     self.hasDivideBy = ko.observable(false);
     self.divideByProp = ko.observable();
-    self.divideByIntervalRaw = ko.observable();
     self.divideByIntervalType = ko.computed({
         read: function(){
             var newType = options.propertyTypes[self.divideByProp()];
@@ -214,18 +215,20 @@ var ComparisonDataGroup = function(options){
         },
         write: function(newValue){
             if(newValue === 'string' || newValue === 'unknown'){
-                self.divideByIntervalRaw(undefined);
+                self.divideByInterval(undefined);
             }
             newValue && options.propertyTypes[self.divideByProp()](newValue);
         }
     });
 
-    self.groupByInterval = ko.computed(function(){
-        return self.groupByIntervalType() !== 'date' ? +self.groupByIntervalRaw() : drata.utils.parseTime(self.groupByIntervalRaw());
+    self.groupByIntervalOptions = ko.computed(function(){
+        if(self.groupByIntervalType() !== 'date') return [];
+        return ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
     });
 
-    self.divideByInterval = ko.computed(function(){
-        return self.divideByIntervalType() !== 'date' ? +self.divideByIntervalRaw() : drata.utils.parseTime(self.divideByIntervalRaw());
+    self.divideByIntervalOptions = ko.computed(function(){
+        if(self.divideByIntervalType() !== 'date') return [];
+        return ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
     });
 
     self.hasGrouping.subscribe(function(newValue){
@@ -242,11 +245,10 @@ var ComparisonDataGroup = function(options){
     });
 
     self.setProps = function(model){
-        self.groupByIntervalRaw(model.groupByIntervalRaw);
-        self.divideByIntervalRaw(model.divideByIntervalRaw);
+        self.groupByInterval(model.groupByIntervalRaw || model.groupByInterval);
+        self.divideByInterval(model.divideByIntervalRaw || model.divideByInterval);
         self.groupByProp(model.groupByProp);
         self.hasGrouping(model.groupByProp !== undefined);
-        
         self.divideByProp(model.divideByProp);
         self.hasDivideBy(model.divideByProp !== undefined);        
     };
@@ -326,8 +328,8 @@ var DataFilter = function(){
             model.min && self.minDate(model.min);
             model.max && self.maxDate(model.max);
         } else if(model.intervalType === 'dynamic'){
-            model.min && self.min(model.min);
-            model.max && self.max(model.max);
+            model.min !== undefined && self.min(model.min);
+            model.max !== undefined && self.max(model.max);
             if(model.min && model.max && slider){
                 slider.slider( "option", "values", [model.min, model.max]); 
             }
@@ -337,14 +339,11 @@ var DataFilter = function(){
 
     self.expression = ko.computed(function(){
         var range = drata.utils.getDateRange(self.getModel());
-        return drata.utils.format('{0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'));
+        return drata.utils.format('{2} from : {0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'), self.dateProp() || '* Date Property');
         
     }).extend({ throttle: 500 });
 
     var setupSlider = function(){
-        //if(slider) return;
-        console.log('set slider');
-        //if(!self.intervalKind()) self.intervalKind('day');
         var bounds = drata.utils.getBounds('day');
         var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
         self.min(pre[0]);
@@ -454,12 +453,11 @@ var Condition = function(options){
 
     self.addCondition = function(){
         self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, propertyTypes: options.propertyTypes }));
-        console.log('added simple condition');
+        
     };
     
     self.addComplexCondition = function(){
         self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true, propertyTypes: options.propertyTypes }));
-        console.log('added complex condition');
     };
     
     
@@ -908,7 +906,6 @@ var DataRetriever = {
                 result.push(drata.utils.flatten(response[i]));
             }
             
-            console.log('total records :' + result.length);
             //Apply filters client side if the response isnt already filtered.
             if(model.applyClientfilters){
                 result = Conditioner.filterData(result, model.segment);
@@ -1036,7 +1033,7 @@ var Conditioner = {
             
             _.each(intervalGroup, function(gi, time){
                 ret.push({
-                    x: +time, 
+                    x:  +time, //fix numeric. This can be month/quarter etc, not just numeric
                     y:  Conditioner.reduceData(gi,selection)
                 });
             });
@@ -1074,6 +1071,7 @@ var Conditioner = {
             case 'line':
             case 'area':
             case 'scatter':
+            case 'numeric':
                 returnData = this.getLineCharData(segmentModel, inputData);
                 break;
             case 'pie':
@@ -1099,6 +1097,12 @@ var Conditioner = {
             }
             else{
                 values = Conditioner.groupByInterval(inputData, segmentModel.dataGroup, sel);
+            }
+            //here sort the values by x
+            if(segmentModel.dataGroup.xAxisType === 'currency' || segmentModel.dataGroup.xAxisType === 'numeric'){
+                values.sort(function(x,y){
+                    return x.x - y.x;
+                });
             }
             result.push({
                 key: sel.isComplex ? sel.aliasName || 'selection' : sel.selectedProp,
@@ -1150,10 +1154,26 @@ var Conditioner = {
         var groupCounter = 0;
         var result = [];
         var topLevelResponse = [];
-        var timeFormat = d3.time.format("%d.%b.%y %H:%M");
         var numFormat = d3.format('.3s');
+        
         var formattingTypes = {
-            date: function(name){
+            date: function(name, interval){
+                var timeFormat;
+                switch(interval){
+                    case 'month':
+                        timeFormat = d3.time.format('%b %Y');
+                        break;
+                    case 'quarter':
+                        timeFormat = function(d){
+                            return d.getFullYear() + ' Q ' + (Math.floor(d.getMonth() / 3) + 1);
+                        }
+                        break;
+                    case 'year':
+                        timeFormat = d3.time.format('%Y');
+                        break;
+                    default:
+                        timeFormat = d3.time.format('%d.%b.%y %H:%M');
+                }
                 return timeFormat(new Date(+name));
             },
             numeric: function(name){
@@ -1172,14 +1192,13 @@ var Conditioner = {
                 intervalType: segmentModel.dataGroup.groupByIntervalType
             });
             
-            
             if(!segmentModel.dataGroup.hasDivideBy){
                 response = [];
                 _.each(segmentModel.selection, function(sel){
                     result = [];
                     _.each(groupedData, function(groupedDataItem, groupName){
                         var val = Conditioner.reduceData(groupedDataItem,sel);
-                        groupName = formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName);
+                        groupName = formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval);
                         
                         val >= 0 && result.push({
                             key: groupName,
@@ -1221,7 +1240,7 @@ var Conditioner = {
                         
 
                         _.each(divData, function(value, name){
-                            name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name);
+                            name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name, segmentModel.dataGroup.divideByInterval);
                             result.push({
                                 key: name,
                                 value: Conditioner.reduceData(value, sel)
@@ -1229,7 +1248,7 @@ var Conditioner = {
                         });
 
                         response.push({
-                            key : formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName),
+                            key : formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval),
                             groupLevel: 'B',
                             values: result
                         });

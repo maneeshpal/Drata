@@ -29,10 +29,15 @@ ul.combolist li {
     border-bottom:1px solid #ccc;
 
 } 
+
+ul.combolist input {
+    margin-bottom: 0;
+}
+
 ul.combolist li:hover {
     background:#fff;
 }
-.row .columns.combo-dd{
+.row .columns.combo-dd, .row .columns .combo-dd{
     position: absolute;
     width:65px;
     z-index: 8;
@@ -50,3 +55,67 @@ ul.combolist li:hover {
 .row .columns.combo-txt{
     padding-left:65px;
 }
+
+
+/*dd checkbox list*/
+.chk-dd{
+    position: relative;
+}
+.chk-dd .chk-dd-arrow{
+    position:absolute; 
+    top: 10px; 
+    right:6px
+}
+.chk-dd .chk-dd-label{
+    width:100%;
+    padding:.5rem;
+    border:1px solid #ccc;
+    font-size: 0.875rem;
+    /*margin-bottom: 1rem;*/
+    line-height: 1.2rem;
+}
+
+
+.glow {
+    box-shadow: 0 0 5px #999999;
+    border:1px solid #999;
+}
+
+
+/*end checkbox dropdown*/
+
+/*-------Edit Label---------*/
+.edit-label .title-display{
+    display: block;
+    height:1.5rem;
+}
+.edit-label input {
+    background: transparent;
+}
+.edit-label .title-display span, .edit-label .title-display a{
+    line-height: 1.5rem;
+    height:1.5rem;
+}
+.edit-label .title-display i{
+    line-height: 1rem;
+    height:1rem;
+}
+.edit-label.edit .title-display{
+    display: none;
+}
+ .edit-label .title-edit{
+    display: none;
+ }
+  .edit-label .title-edit input{ 
+    margin-bottom: 0;
+ }
+ .edit-label.edit .title-edit{
+    display: block;
+ }
+ .title-display .edit-icon{
+    display: none;
+ }
+ .title-display:hover .edit-icon{
+    display:inline;
+ }
+ /*-------Edit Label---------*/

@@ -1,0 +1,135 @@
+<script type="text/html" id="widget-template">
+    <div class="widget-outer" data-bind="attr: {'data-index': displayIndex()},css: widgetClass">
+        <div class="widget-wrapper">
+            <div class="row collapse widget-nav handle">
+                <span class="widget-logo" data-bind="css: logoClass"></span>
+                <div class="left title" data-bind="editLabel: {title: name}">
+                </div>
+                <div class="right">
+                    <ul class="widget-nav-list right">
+                        <li class="action-icon">
+                            <a data-bind="attr: {'data-dropdown': 'dd_'+ widgetId}" data-options="align:left"><i class="icon-cog"></i></a>
+                            <div data-dropdown-content class="f-dropdown content", data-bind="attr: {'id': 'dd_'+ widgetId}">
+                                <label data-bind="visible: pieKeys().length > 1">Show
+                                <select data-bind="value:selectedPieKey,options: pieKeys, optionsText: 'label'"/>
+                                </label>
+                                <div class="row collapse">
+                                    <div class="small-6 columns">
+                                        <label style="padding-right:5px">Width
+                                            <select data-bind="value:sizex">
+                                                <option value="1">25%</option>
+                                                <option value="5">33.3%</option>
+                                                <option value="2">50%</option>
+                                                <option value="6">66.6%</option>
+                                                <option value="3">75%</option>
+                                                <option value="4">100%</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="small-6 columns">
+                                        <label style="padding-left:5px">Height
+                                            <select data-bind="value:sizey">
+                                                <option value="3">33.3%</option>
+                                                <option value="2">50%</option>
+                                                <option value="1.5">66%</option>
+                                                <option value="1">100%</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="action-icon">
+                            <i data-bind="click:editWidget" class="icon-pencil"></i>
+                        </li>
+                        <li class="action-icon">
+                            <i data-bind="click:$parent.deleteWidget" class="icon-cancel-circle"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
+            </div>
+            <div data-bind="if: !parseError()">
+                <!-- ko template: contentTemplate() -->
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+    </script>
+    <script type="text/html" id="content-template">
+        <div data-bind="attr :{id: widgetContentId, style: 'height:'+ $parent.widgetHeight() + 'px'}" >
+            <svg></svg>
+        </div>
+    </script>
+    <script type="text/html" id="numeric-content-template">
+        <div class="row collapse numeric-chart" data-bind="attr :{style: 'height:'+ $parent.widgetHeight() + 'px'}">
+            <div class="small-9 columns" style="position:relative">
+                <div class="overlay-content">
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <ul class="small-block-grid-2">
+                                <li>
+                                    <div data-bind="if: totalPerChange() !== 0" class="sub-heading text-center">
+                                        <!-- ko text: initialDp().xLabel -->
+                                        <!-- /ko -->
+                                        -
+                                        <!-- ko text: latestDp().xLabel -->
+                                        <!-- /ko -->
+                                        <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
+                                            <!-- ko text: totalPerChange --><!-- /ko -->%
+                                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
+                                        </label>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading text-center">
+                                        <!-- ko text: lastButOneDp().xLabel -->
+                                        <!-- /ko --> -
+                                        <!-- ko text: latestDp().xLabel -->
+                                        <!-- /ko -->
+                                        <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
+                                            <!-- ko text: latestDp().perc --><!-- /ko -->%
+                                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
+                                        </label>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <div class="main-heading text-center" data-bind="attr :{ style: 'height:'+ ($parent.widgetHeight() * 0.3) + 'px'},resizeText: mainHeading">
+                            </div>
+                        
+                            <div class="sub-heading text-center" data-bind="text: subHeading">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div data-bind="attr :{id: widgetContentId, style: 'height:'+ $parent.widgetHeight() + 'px'}" >
+                    <svg></svg>
+                </div>
+            </div>
+            <div class="data-points small-3 columns" data-bind="attr :{style: 'height:'+ $parent.widgetHeight() + 'px'}">
+               <div style="padding:.5rem" >
+                    <span class="icon-statistics" data-bind="css: {'primary': backgroundChartType() === 'line'}, click: setChartBackground.bind($data, 'line')"></span>
+                    <span class="icon-graph" data-bind="css: {'primary': backgroundChartType() === 'area'}, click: setChartBackground.bind($data, 'area')"></span>
+                    <span class="icon-pie" data-bind="css: {'primary': backgroundChartType() === 'pie'}, click: setChartBackground.bind($data, 'pie')"></span>
+                    <span class="icon-bars2" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
+                    </div>
+                <div style="padding:.5rem" data-bind="checkboxDropdown:{options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select ddd', optionsText:'key'}">
+                </div>
+                <ul class="no-bullet stacked-heading" data-bind="foreach: remainingDataPoints">
+                    <li>
+                        <div data-bind="text: xLabel"></div>
+                        <label data-bind="css: { 'success': perc > 0, 'alert': perc < 0}">
+                            <!-- ko text: yLabel -->
+                            <!-- /ko -->:
+                            <!-- ko text: perc -->
+                             <!-- /ko -->%
+                            <i class="general" data-bind="css: { 'foundicon-up-arrow': perc > 0, 'foundicon-down-arrow': perc < 0}"></i>
+                        </label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </script>
