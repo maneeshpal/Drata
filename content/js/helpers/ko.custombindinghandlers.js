@@ -365,7 +365,7 @@
                     f = f+2;
                     l++;
                 }
-                while(w - 20 > x.width && h > x.height && l < 30);
+                while(w - 20 > x.width && h > x.height && l < 50);
                 $(element).css('font-size', f + 'px');
             }
             resize();

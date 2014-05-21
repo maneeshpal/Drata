@@ -68,42 +68,38 @@
             <div class="small-9 columns" style="position:relative">
                 <div class="overlay-content">
                     <div class="row">
-                        <div class="small-12 columns">
-                            <ul class="small-block-grid-2">
-                                <li>
-                                    <div data-bind="if: totalPerChange() !== 0" class="sub-heading text-center">
-                                        <!-- ko text: initialDp().xLabel -->
-                                        <!-- /ko -->
-                                        -
-                                        <!-- ko text: latestDp().xLabel -->
-                                        <!-- /ko -->
-                                        <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
-                                            <!-- ko text: totalPerChange --><!-- /ko -->%
-                                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
-                                        </label>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading text-center">
-                                        <!-- ko text: lastButOneDp().xLabel -->
-                                        <!-- /ko --> -
-                                        <!-- ko text: latestDp().xLabel -->
-                                        <!-- /ko -->
-                                        <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
-                                            <!-- ko text: latestDp().perc --><!-- /ko -->%
-                                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
-                                        </label>
-                                    </div>
-                                </li>
-                            </ul>
-
-                            <div class="main-heading text-center" data-bind="attr :{ style: 'height:'+ ($parent.widgetHeight() * 0.3) + 'px'},resizeText: mainHeading">
+                        <div class="small-6 columns">
+                            <div data-bind="if: totalPerChange() !== 0" class="sub-heading text-center">
+                                <!-- ko text: initialDp().xLabel -->
+                                <!-- /ko -->
+                                -
+                                <!-- ko text: latestDp().xLabel -->
+                                <!-- /ko -->
+                                <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
+                                    <!-- ko text: totalPerChange --><!-- /ko -->%
+                                    <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
+                                </label>
                             </div>
-                        
-                            <div class="sub-heading text-center" data-bind="text: subHeading">
+                        </div>
+                        <div class="small-6 columns">
+                            <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading text-center">
+                                <!-- ko text: lastButOneDp().xLabel -->
+                                <!-- /ko --> -
+                                <!-- ko text: latestDp().xLabel -->
+                                <!-- /ko -->
+                                <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
+                                    <!-- ko text: latestDp().perc --><!-- /ko -->%
+                                    <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
+                                </label>
                             </div>
                         </div>
                     </div>
+                    <div class="main-heading text-center" data-bind="attr :{ style: 'height:'+ ($parent.widgetHeight() * 0.3) + 'px'},resizeText: mainHeading">
+                    </div>
+                
+                    <div class="sub-heading text-center" data-bind="text: subHeading">
+                    </div>
+                        
                 </div>
                 <div data-bind="attr :{id: widgetContentId, style: 'height:'+ $parent.widgetHeight() + 'px'}" >
                     <svg></svg>
