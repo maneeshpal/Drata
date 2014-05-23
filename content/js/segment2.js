@@ -902,10 +902,11 @@ var DataRetriever = {
         }
         drata.apiClient.getData(postData, model.dataKey, function(response){
             var result = [];
+            console.time('flattening data. response length: ' + response.length);
             for(var i = 0; i< response.length; i++){
                 result.push(drata.utils.flatten(response[i]));
             }
-            
+            console.timeEnd('flattening data. response length: ' + response.length);
             //Apply filters client side if the response isnt already filtered.
             if(model.applyClientfilters){
                 result = Conditioner.filterData(result, model.segment);
@@ -1063,6 +1064,7 @@ var Conditioner = {
         }.bind(this));
     },
     getGraphData: function(segmentModel, inputData){
+        console.time('raw_to_chart_data:' + segmentModel.chartType);
         if(segmentModel.selection.length === 0)
             throw "Selections required";
         this.propertyTypes = segmentModel.propertyTypes;
@@ -1080,6 +1082,7 @@ var Conditioner = {
                 break;
         }
         window.debug.chartdata = returnData;
+        console.timeEnd('raw_to_chart_data:' + segmentModel.chartType);
         return returnData;
     },
     getLineCharData: function(segmentModel, inputData){
@@ -1234,10 +1237,16 @@ var Conditioner = {
                             throw '<em>Count</em> not allowed for Complex Selection : ' + sel.aliasName ;
                         }
 
-                        var divData = _.groupBy(groupedDataItem, function(val){
-                            return val[segmentModel.dataGroup.divideByProp];
-                        });
+                        // var divData = _.groupBy(groupedDataItem, function(val){
+                        //     return val[segmentModel.dataGroup.divideByProp];
+                        // });
                         
+                        var divData = drata.utils.divideDataByInterval({
+                            data: groupedDataItem,
+                            property: segmentModel.dataGroup.divideByProp,
+                            interval: segmentModel.dataGroup.divideByInterval,
+                            intervalType: segmentModel.dataGroup.divideByIntervalType
+                        });
 
                         _.each(divData, function(value, name){
                             name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name, segmentModel.dataGroup.divideByInterval);

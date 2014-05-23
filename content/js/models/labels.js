@@ -2,7 +2,7 @@
  ;(function(root) {
     var Labels = function(){
 
-        var _w, _h, _color, _align, _dispatch = d3.dispatch(), _dims;
+        var _w, _h, _color, labelHeight = 16, labelSpacing = 14, _align, _dispatch = d3.dispatch(), _dims;
         
         function chart(selection) {
             selection.each(function(data) {
@@ -21,19 +21,19 @@
                 container
                     .selectAll('g.label-group')
                     .attr('transform', function(d, i){
-                        var len = drata.utils.textToPixel(d.key).width + 20;
+                        var len = drata.utils.textToPixel(d.key).width + labelSpacing;
                         totalLen += len;
                         if(prev + len >= wm) {
                             prev = 0;
                             cols ++;
                         }
-                        var ret = 'translate('+ prev +', ' + (cols * 24) + ')';
+                        var ret = 'translate('+ prev +', ' + (cols * labelHeight) + ')';
                         prev = prev + len;
                         return ret;
                         //return 'translate('+ exl[i] +')';
                     });
 
-                _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * 24)+20);
+                _dims.m.t = Math.max(_dims.m.t, ((cols + 1) * labelHeight) + labelSpacing);
                 
                 var l = cols > 0 ? _dims.m.l : (_dims.w - (totalLen/(cols + 1)))/2;
                 
@@ -52,7 +52,7 @@
                     .attr('x', function(){
                         return 10;
                     })
-                    .attr('y', 24)
+                    .attr('y', labelHeight)
                     .attr('fill', function(d,i){
                         return _color(d.key,i);
                     })
@@ -72,7 +72,7 @@
                     })
                     .attr('stroke-width',2)
                     .attr('cy', function(){
-                        return 20;
+                        return 12;
                     })
                     .on('click', _dispatch.togglePath);
 

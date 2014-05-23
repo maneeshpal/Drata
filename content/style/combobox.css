@@ -90,8 +90,16 @@ ul.combolist li:hover {
     height:1.5rem;
 }
 .edit-label input {
+    height:1.8rem;
     background: transparent;
 }
+.edit-label .postfix {
+    height: 1.8rem;
+}
+.edit-label .postfix i {
+    top: -4px;
+}
+
 .edit-label .title-display span, .edit-label .title-display a{
     line-height: 1.5rem;
     height:1.5rem;
@@ -106,7 +114,7 @@ ul.combolist li:hover {
  .edit-label .title-edit{
     display: none;
  }
-  .edit-label .title-edit input{ 
+.edit-label .title-edit input{ 
     margin-bottom: 0;
  }
  .edit-label.edit .title-edit{

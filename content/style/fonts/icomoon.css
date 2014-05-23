@@ -17,7 +17,8 @@
 	font-variant: normal;
 	text-transform: none;
 	line-height: 1;
-
+	position:relative;
+	top:1px;
 	/* Better Font Rendering =========== */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
@@ -109,6 +110,9 @@
 }
 .icon-spam:before {
 	content: "\e61a";
+}
+.icon-close{
+	font-size: 85%;
 }
 .icon-close:before {
 	content: "\e61b";

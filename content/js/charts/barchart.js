@@ -103,7 +103,7 @@
                     // });    
                         //disabledItems = toggle ? disabledItems - 1 : disabledItems + 1;
                     //}
-                    console.log(data);
+                    
                     chart.resize();
                 });
 
@@ -184,8 +184,7 @@
                         .attr("y", y(yrange[0]));
 
                     rects
-                        .style("fill", function(d, i) { 
-                            console.log('key: '+ d.key + '; index: '+ i);
+                        .style("fill", function(d) { 
                             return z(d.key); 
                         })
                         .attr("stroke", '#fff')

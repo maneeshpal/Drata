@@ -12,17 +12,19 @@ var Dashboard = function(){
         console.log('cant find dashboard');
         return;
     }
-
     drata.apiClient.getDashboard(dashboardId, function(resp){
         self.name(resp.name);
         topBar.currentDashboardName(resp.name);
         dashboardId = resp._id;
+        console.time('gettingwidgets');
         drata.apiClient.getWidgetsOfDashboard(resp._id, function(widgets){
             var ind = 0;
+            console.timeEnd('gettingwidgets');
             if(widgets.length === 0) self.loading(false);
             widgets = widgets.sort(function(x,y){
                 return x.displayIndex - y.displayIndex;
             });
+            console.time('instantiatewidgets');
             self.widgets(ko.utils.arrayMap(
                 widgets,
                 function(model) {
@@ -33,6 +35,7 @@ var Dashboard = function(){
                 w.displayIndex(ind);
                 ind++;
             });
+             console.timeEnd('instantiatewidgets');
         });
     });
 
@@ -107,15 +110,9 @@ var Widget = function(widgetModel, index){
 
     self.widgetHeight = ko.computed(function(){
         var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
-        //wh = Math.min(800, wh);
         wh = Math.max(200, wh);
         return wh;
     });
-
-    // self.editing = ko.observable(false);
-    // self.editSettings = function(){
-    //     self.editing(!self.editing());
-    // };
 
     self.parseError = ko.observable();
     var content;
@@ -186,8 +183,10 @@ var Widget = function(widgetModel, index){
             self.pieKeys(pieKeys);
 
             self.selectedPieKey(self.pieKeys()[0]);
+            console.time(self.chartType() + ' : ' + self.widgetId);
             content.drawChart(chartData[0], widgetModel.segmentModel);
             //prevent double draw on page load
+            console.timeEnd(self.chartType() + ' : ' + self.widgetId);
             setTimeout(function(){
                 drata.utils.windowResize(self.resizeContent.bind(self));
             }, 200);
@@ -369,7 +368,6 @@ var NumericContent = function(index){
         else{
             firstArr = currentData.slice();
         }
-        console.log('numeric chart selected keys changed');
         drawSideBar();
         drawChartBackground(self.backgroundChartType());
     });
@@ -404,7 +402,6 @@ var NumericContent = function(index){
         self.selectedDataKeys(self.dataKeys());
         //self.selectedDataKey(self.dataKeys()[0]);
         _t && clearTimeout(_t);
-        console.log('numeric chart draw chart method called');
     };
     
     var drawSideBar = function(mydata, chartType){
@@ -426,7 +423,6 @@ var NumericContent = function(index){
 
         self.remainingDataPoints(rdp.reverse());
         self.lastButOneDp(rdp[0]);
-        console.log('numeric chart sidebar drawn');
     };
 
     self.setChartBackground = function(chartType){
@@ -491,7 +487,6 @@ var NumericContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(data)
             .call(chart);
-        console.log('numeric chart background drawn');
     };
 
     self.resize = function(){

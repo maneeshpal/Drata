@@ -47,6 +47,21 @@
   height:300px;
 }
 
+.action-icon.edit-widget{
+  color:#368a54;
+}
+
+.action-icon.remove-widget{
+  color:#f04124;
+}
+.widget-wrapper .action-icon{
+  opacity:.2;
+  transition:all .5s;
+}
+.widget-wrapper:hover .action-icon{
+  opacity:1;
+}
+
 /*widger nav*/
 
 .widget-nav{
@@ -55,6 +70,10 @@
 .widget-nav .title{
   line-height: 2rem;
   padding-left:1.5rem;
+}
+.widget-nav .title-edit{
+  position: relative;
+  top:2px;
 }
 .widget-nav .widget-logo {
   position:absolute;
