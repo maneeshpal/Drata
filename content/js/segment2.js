@@ -304,13 +304,14 @@ var DataFilter = function(){
             slider.slider( "option", "min", bounds[0]);
             slider.slider( "option", "max", bounds[1]);
             slider.slider( "option", "values", pre);
+            self.min(pre[0]);
+            self.max(pre[1]);
         }
     });
     self.intervalType.subscribe(function(newValue){
         slider && slider.slider(newValue === 'dynamic'? 'enable': 'disable');
     });
     
-
     self.getModel = function(){
         return {
             intervalKind: self.intervalKind(),
@@ -323,14 +324,15 @@ var DataFilter = function(){
 
     self.prefill = function(model){
         self.intervalType(model.intervalType || 'dynamic');
-        self.intervalKind(model.intervalKind);
+        self.intervalKind(model.intervalKind || 'day');
         if(model.intervalType === 'static'){
             model.min && self.minDate(model.min);
             model.max && self.maxDate(model.max);
-        } else if(model.intervalType === 'dynamic'){
+        }
+        else if(model.intervalType === 'dynamic'){
             model.min !== undefined && self.min(model.min);
             model.max !== undefined && self.max(model.max);
-            if(model.min && model.max && slider){
+            if(model.min !== undefined && model.max !== undefined && slider){
                 slider.slider( "option", "values", [model.min, model.max]); 
             }
         }
@@ -344,27 +346,35 @@ var DataFilter = function(){
     }).extend({ throttle: 500 });
 
     var setupSlider = function(){
-        var bounds = drata.utils.getBounds('day');
-        var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
-        self.min(pre[0]);
-        self.max(pre[1]);
         slider = $("#myslider").slider({
             range: true,
-            min: bounds[0],
-            max: bounds[1],
-            values: pre,
             slide: function( event, ui ) {
                 self.min(ui.values[0]);
                 self.max(ui.values[1]);
             }
         });
+        // var bounds = drata.utils.getBounds('day');
+        // var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
+        // self.min(pre[0]);
+        // self.max(pre[1]);
+        // slider = $("#myslider").slider({
+        //     range: true,
+        //     min: bounds[0],
+        //     max: bounds[1],
+        //     values: pre,
+        //     slide: function( event, ui ) {
+        //         self.min(ui.values[0]);
+        //         self.max(ui.values[1]);
+        //     }
+        // });
 
     };
     self.showDatePicker = function(val){
         if(self.intervalType() !== 'static') return;
         if(val === 'start'){
             self.startDp && self.startDp.datepicker('show');
-        }else if(val === 'end'){
+        }
+        else if(val === 'end'){
             self.endDp && self.endDp.datepicker('show');
         }
     };

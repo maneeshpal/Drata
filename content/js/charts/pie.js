@@ -48,7 +48,6 @@
                         d.disabled = !toggle;
                         disabledItems = toggle ? disabledItems - 1 : disabledItems + 1;
                     }
-                    //console.log(data);
                     chart.resize();
                 });
 
@@ -110,7 +109,7 @@
                 };
 
                 var arcs = gWrapper.select('g.arcs-group')
-                    .attr("transform", "translate(" + (dims.w/2) + "," + (r + dims.m.t) + ")")
+                    .attr('transform','translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')') 
                     .selectAll('path')
                     .data(pie(data.values));
 
@@ -148,13 +147,14 @@
                 gWrapperEnter.append("g").attr('class', 'text-group');
                 
                 var texts = gWrapper.selectAll('g.text-group')
-                    .attr("transform", "translate(" + (dims.w/2) + "," + (r + dims.m.t) + ")")
+                    .attr('transform', 'translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')')
                     .selectAll('text')
                     .data(pie(data.values));
                     
                 
                 texts.enter()
-                    .append("svg:text");
+                    .append('svg:text')
+                    .attr('transform', 'translate(0,0)');
 
                 var total = 0;
 
@@ -174,7 +174,6 @@
                     });
 
                 texts.exit().remove();
-
                 texts.transition().duration(750).attr("transform", function(d) {
                     return "translate(" + arc.centroid(d) + ")";
                 });

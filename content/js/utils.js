@@ -334,10 +334,10 @@
                 bounds = [1, 72];
                 break;
             case 'month':
-                bounds = [0,24];
+                bounds = [1,24];
                 break;
             case 'year':
-                bounds = [0,5];
+                bounds = [1,5];
                 break;
         }
         return bounds;
