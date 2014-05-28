@@ -65,7 +65,6 @@
 
                 dispatch.on("togglePath", function(d){
                     d.disabled = !d.disabled;
-                    console.log(d);
                     chart.resize();
                 });
 
