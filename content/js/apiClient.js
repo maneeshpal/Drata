@@ -7,15 +7,23 @@
 
     var apiRoot = '/api/';
     var apiExternalRoot = apiRoot + 'external/';
-    var userDataStore = 'shopperstop';
+    var database = 'shopperstop';
     var _perform = function(verb, url, body, callback){
         var options = {
             type: verb.toUpperCase(),
             url: url,
             contentType: 'application/json',
             headers: { 'Access-Control-Allow-Origin': '*' },
-            success: function(response){
-                callback && callback(response);
+            success: function(response, stats){
+                callback && callback({success: true, result:response});
+            },
+            error: function(response){
+                console.log(response);
+                callback && callback({
+                    success: false,
+                    status: response.status,
+                    message: response.responseText
+                });
             }
         };
         if(body){
@@ -84,15 +92,15 @@
         function xyz(d){
             
         }
-        _perform('GET',url, undefined, function(resp){
-            len = resp.length, tagList = [];
-            _.each(resp, function(tag){
-                getDashboard(tag.dashboardId, function(dash){
+        _perform('GET',url, undefined, function(tagResponse){
+            len = tagResponse.result.length, tagList = [];
+            _.each(tagResponse.result, function(tag){
+                getDashboard(tag.dashboardId, function(response){
                     len --;
-                    tag.dashboardName = dash.name;
+                    tag.dashboardName = response.result.name;
                     
                     if(len === 0){
-                        callback && callback(resp);
+                        callback && callback(tagResponse);
                     }
                 });
             })
@@ -118,20 +126,29 @@
         _perform('DELETE', url,undefined, callback);
     };
 
-
     //EXTERNAL API
-    var getUniqueProperties = function(dataKey, callback){
-        var url = apiExternalRoot + drata.utils.format('{0}/{1}/properties', userDataStore, dataKey);
+    var getDataSourceNames = function(callback){
+        var url = apiExternalRoot + 'datasources';
         _perform('GET', url, undefined, callback);
     };
 
-    var getDataKeys = function(callback){
-        var url = apiExternalRoot + drata.utils.format('{0}/collectionNames', userDataStore);
+    var getDatabaseNames = function(dataSource, callback){
+        var url = apiExternalRoot + drata.utils.format('{0}/database', dataSource);
+        _perform('GET', url, undefined, callback);
+    };
+
+    var getUniqueProperties = function(params, callback){
+        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}/properties',params.dataSource, params.database, params.collectionName);
+        _perform('GET', url, undefined, callback);
+    };
+
+    var getDataKeys = function(params, callback){
+        var url = apiExternalRoot + drata.utils.format('{0}/{1}/collectionNames',params.dataSource, params.database);
         _perform('GET', url, undefined, callback);
     };
     
-    var getData = function(model, dataKey, callback){
-        var url = apiExternalRoot + drata.utils.format('{0}/{1}', userDataStore, dataKey);
+    var getData = function(model, params, callback){
+        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', params.dataSource, params.database, params.collectionName);
         _perform('POST', url, model, callback);
     };
 
@@ -150,11 +167,13 @@
         getAllTagsOfDashboard: getAllTagsOfDashboard,
         addTag: addTag,
         removeTag: removeTag,
+        deleteAllTagsDashboard:deleteAllTagsDashboard,
+        deleteAllWidgetsDashboard:deleteAllWidgetsDashboard,
         getDataKeys: getDataKeys,
         getUniqueProperties: getUniqueProperties,
         getData: getData,
-        deleteAllTagsDashboard:deleteAllTagsDashboard,
-        deleteAllWidgetsDashboard:deleteAllWidgetsDashboard
+        getDataSourceNames: getDataSourceNames,
+        getDatabaseNames: getDatabaseNames
     });
 })(this);
 

@@ -63,9 +63,9 @@ var DashboardManager = function(){
     };
 
     this.populateDashboards = function(){
-        drata.apiClient.getAllDashboards(function(dashs){
+        drata.apiClient.getAllDashboards(function(response){
             this.dashboards(ko.utils.arrayMap(
-                dashs,
+                response.result,
                 function(model) {
                     return new DashboardItem(model, {bindWidgets: true, bindTags: true});
                 }.bind(this)
@@ -100,6 +100,7 @@ var DashboardManager = function(){
 
 var DashboardItem = function(model, options){
     options = options || {};
+    model = model || {};
     this.name = ko.observable(model.name);
     this.cloneName = ko.observable();
     this.isNew = options.isNew;
@@ -142,34 +143,41 @@ var DashboardItem = function(model, options){
         }
 
         drata.apiClient.upsertDashboard(dashboardModel, function(response){
-            this._id = response._id;
+            this._id = response.result._id;
             var tagList = this.tagList(), chosenWidgets = this.chosenWidgets();
             var i = 0, c = tagList.length + chosenWidgets.length;
-            var respCounter = function(){
-                i++;
-                if(i === c) window.location.href = '/dashboard/'+ this._id;
-            }.bind(this);
+            if(c === 0 && this.isNew){
+                window.location.href = '/dashboard/'+ this._id;
+            }
+            else{
+                var respCounter = function(){
+                    i++;
+                    if(i === c) window.location.href = '/dashboard/'+ this._id;
+                }.bind(this);
 
-            _.each(tagList, function(t){
-                t.dashboardId = response._id;
-                delete t.dateCreated;
-                drata.apiClient.addTag(t, respCounter);
-            });
-            _.each(chosenWidgets, function(w){
-                var widgetModel = w.getModel();
-                widgetModel.dashboardId = response._id;
-                delete widgetModel.dateCreated;
-                delete widgetModel.dateUpdated;
-                delete widgetModel._id;
-                drata.apiClient.upsertWidget(widgetModel, respCounter);
-            });
+                _.each(tagList, function(t){
+                    t.dashboardId = response.result._id;
+                    delete t.dateCreated;
+                    drata.apiClient.addTag(t, respCounter);
+                });
+                
+                _.each(chosenWidgets, function(w){
+                    var widgetModel = w.getModel();
+                    widgetModel.dashboardId = response.result._id;
+                    delete widgetModel.dateCreated;
+                    delete widgetModel.dateUpdated;
+                    delete widgetModel._id;
+                    drata.apiClient.upsertWidget(widgetModel, respCounter);
+                });    
+            }
+            
         }.bind(this));
     };
 
     this.bindWidgets = function(){
-        drata.apiClient.getWidgetsOfDashboard(this._id, function(widgets){
+        drata.apiClient.getWidgetsOfDashboard(this._id, function(response){
             this.widgetList(ko.utils.arrayMap(
-                widgets,
+                response.result,
                 function(widgetModel) {
                     return new WidgetItem(widgetModel); 
                 }
@@ -178,8 +186,8 @@ var DashboardItem = function(model, options){
     };
 
     this.bindTags = function(){
-        drata.apiClient.getAllTagsOfDashboard(this._id, function(tags){
-            this.tagList(tags); 
+        drata.apiClient.getAllTagsOfDashboard(this._id, function(response){
+            this.tagList(response.result); 
         }.bind(this));
     };
 
@@ -231,9 +239,9 @@ var DashboardItem = function(model, options){
 var WidgetManager = function(model, options){
     this.widgetList = ko.observableArray();
     this.bindWidgets = function(model){
-        drata.apiClient.getWidgets(model, function(widgets){
+        drata.apiClient.getWidgets(model, function(response){
             this.widgetList(ko.utils.arrayMap(
-                widgets,
+                response.result,
                 function(widgetModel) {
                     return new WidgetItem(widgetModel, {chooseWidgets: true}); 
                 }

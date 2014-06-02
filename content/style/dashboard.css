@@ -4,6 +4,10 @@
   height: 414px;
   width: 100%; }
 
+input.giant{
+  height: 5rem;
+  font-size: 2rem;
+}
 .ui-sortable-placeholder * {
   visibility: hidden; }
 

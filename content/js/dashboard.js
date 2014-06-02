@@ -5,40 +5,39 @@ var Dashboard = function(){
     self.index= 1;
     self.loading = ko.observable(true);
     self.widgets = ko.observableArray();
-    var dashboardId;
-    try{
-        dashboardId = window.location.pathname.split('/')[2];
-    }catch(e){
-        console.log('cant find dashboard');
-        return;
-    }
-    drata.apiClient.getDashboard(dashboardId, function(resp){
-        self.name(resp.name);
-        topBar.currentDashboardName(resp.name);
-        dashboardId = resp._id;
-        console.time('gettingwidgets');
-        drata.apiClient.getWidgetsOfDashboard(resp._id, function(widgets){
-            var ind = 0;
-            console.timeEnd('gettingwidgets');
-            if(widgets.length === 0) self.loading(false);
-            widgets = widgets.sort(function(x,y){
-                return x.displayIndex - y.displayIndex;
+    self.newDashboardItem = ko.observable();
+    var dashboardId = window.location.pathname.split('/')[2];
+    
+    var loadDashboard = function(){
+        drata.apiClient.getDashboard(dashboardId, function(response){
+            var d = response.result;
+            self.name(d.name);
+            topBar.currentDashboardName(d.name);
+            dashboardId = d._id;
+            console.time('gettingwidgets');
+            drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
+                var ind = 0;
+                var widgets = widgetResponse.result;
+                console.timeEnd('gettingwidgets');
+                self.loading(false);
+                widgets = widgets.sort(function(x,y){
+                    return x.displayIndex - y.displayIndex;
+                });
+                console.time('instantiatewidgets');
+                self.widgets(ko.utils.arrayMap(
+                    widgets,
+                    function(model) {
+                        return new Widget(model, self.index++); 
+                    }
+                ));
+                _.each(self.widgets(), function(w){
+                    w.displayIndex(ind);
+                    ind++;
+                });
+                 console.timeEnd('instantiatewidgets');
             });
-            console.time('instantiatewidgets');
-            self.widgets(ko.utils.arrayMap(
-                widgets,
-                function(model) {
-                    return new Widget(model, self.index++); 
-                }
-            ));
-            _.each(self.widgets(), function(w){
-                w.displayIndex(ind);
-                ind++;
-            });
-             console.timeEnd('instantiatewidgets');
         });
-    });
-
+    };
     self.noWidgets = ko.computed(function(){
         return self.widgets().length === 0 && !self.loading();
     });
@@ -56,7 +55,7 @@ var Dashboard = function(){
         drata.apiClient.upsertWidget(widgetModel, function(response){
            // widgetModel._id = response._id;
             //widgetModel.dateCreated = response.dateCreated;
-            widgetModel = response;
+            widgetModel = response.result;
             var widget = new Widget(widgetModel, self.index++);
             self.widgets.push(widget);
         });
@@ -68,6 +67,13 @@ var Dashboard = function(){
             self.widgets.remove(widget);    
         }
     };
+
+    if(!dashboardId || dashboardId === 'add'){
+        self.newDashboardItem(new DashboardItem({},{isNew: true}));
+    }
+    else {
+        loadDashboard();
+    }
 };
 
 var Widget = function(widgetModel, index){
@@ -161,9 +167,14 @@ var Widget = function(widgetModel, index){
     self.loadWidget = function(){
         self.parseError(undefined);
 
-        DataRetriever.getData({applyClientfilters:false, dataKey: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(inputData){
+        DataRetriever.getData({applyClientfilters:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
+            if(!response.success){
+                self.parseError(response.message);
+                return;
+            }
+
             try{
-                chartData = Conditioner.getGraphData(widgetModel.segmentModel, inputData);
+                chartData = Conditioner.getGraphData(widgetModel.segmentModel, response.result);
             }
             catch(e){
                 self.parseError(e);
@@ -615,37 +626,81 @@ var SegmentProcessor = function(){
     self.processSegment = true;
     self.previewGraph = ko.observable(false);
     self.dataKeys = ko.observableArray();
-    DataRetriever.getDataKeys(function(resp){
-        self.dataKeys(resp);
-    });
+    
     self.selectedDataKey = ko.observable();
+    self.dataSource = ko.observable();
+    self.dataSourceNames = ko.observableArray();
+    self.databaseNames = ko.observableArray();
+
+    self.database = ko.observable();
     self.parseError = ko.observable();
+    self.propertyTypes = ko.observable();
+    
     var cloneModel = {};
-    self.selectedDataKey.subscribe(function(newValue){
+    
+    self.dataSource.subscribe(function(newValue){
         if(!newValue){
-            self.segment.initialize();
+            self.databaseNames(undefined);
+            self.database(undefined);
         }
-        else {
-            DataRetriever.getUniqueProperties(newValue, function(propertyTypes){
-                if(newValue === cloneModel.selectedDataKey){
-                    //cloneModel.segmentModel.propertyTypes = properties;
-                    self.segment.initialize(cloneModel.segmentModel, propertyTypes);    
-                }
-                else{
-                    cloneModel.selectedDataKey = newValue;
-                    self.segment.initialize({}, propertyTypes);
-                }
+        else{
+            if(cloneModel.dataSource !== newValue ){
+                cloneModel.dataSource = newValue;
+                cloneModel.database = undefined;
+            }
+            drata.apiClient.getDatabaseNames(newValue, function(resp){
+                self.databaseNames(resp.result);
+                self.database(cloneModel.database);
             });
         }
     });
 
+    self.database.subscribe(function(newValue){
+        if(!newValue || !self.dataSource()){
+            self.dataKeys(undefined);
+            self.selectedDataKey(undefined);
+        }
+        else{
+            if(cloneModel.database !== newValue ){
+                cloneModel.database = newValue;
+                cloneModel.selectedDataKey = undefined;
+            }
+            drata.apiClient.getDataKeys({dataSource: self.dataSource(),database: newValue}, function(resp){
+                self.dataKeys(resp.result);
+                self.selectedDataKey(cloneModel.selectedDataKey);
+            });
+        }
+    });
+
+    self.selectedDataKey.subscribe(function(newValue){
+        if(!newValue || !self.dataSource() || !self.database()){
+            self.propertyTypes(undefined);
+        }
+        else {
+            if(cloneModel.selectedDataKey !== newValue){
+                cloneModel.segmentModel = undefined;
+                cloneModel.selectedDataKey = newValue;
+            }
+            drata.apiClient.getUniqueProperties({dataSource: self.dataSource(), database: self.database(), collectionName: newValue}, function(response){
+                self.propertyTypes(response.result);
+                self.segment.initialize(cloneModel.segmentModel, response.result);
+            });
+        }
+    });
+
+    drata.apiClient.getDataSourceNames(function(resp){
+        self.dataSourceNames(resp.result);
+    });
+
     self.segment = new Segmentor();
     self.notifyWidget = function () {
-        
         cloneModel.segmentModel = self.segment.getModel();
         
         if(!cloneModel.segmentModel)
             return;
+        cloneModel.dataSource = self.dataSource();
+        cloneModel.database = self.database();
+        cloneModel.selectedDataKey  = self.selectedDataKey();
 
         self.onWidgetUpdate && self.onWidgetUpdate(cloneModel);
         !self.onWidgetUpdate && dashboard.addWidget(cloneModel);
@@ -653,20 +708,23 @@ var SegmentProcessor = function(){
         self.onWidgetUpdate = undefined;
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add');
-        self.selectedDataKey(undefined);
+        self.dataSource(undefined);
         self.previewGraph(false);
         $('#graphBuilder').removeClass('showme');
         //self.newWidget(true);
     };
-    
+    var dbns, dks, pts;
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
         cloneModel = drata.utils.clone(model);
-        self.selectedDataKey(cloneModel.selectedDataKey);
-        //self.previewGraph(true);
+        cloneModel.dataSource = cloneModel.dataSource || 'drataDemoExternal';
+        cloneModel.database = cloneModel.database || 'shopperstop';
+        self.dataSource(cloneModel.dataSource);
+        
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
-        self.handleGraphPreview(cloneModel.segmentModel);
+        
+        self.handleGraphPreview(cloneModel.dataSource, cloneModel.database, cloneModel.selectedDataKey ,cloneModel.segmentModel);
     };
 
     self.widgetCancel = function() {
@@ -675,18 +733,24 @@ var SegmentProcessor = function(){
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add Widget');
         self.previewGraph(false);
-        self.selectedDataKey(undefined);
+
+        self.dataSource(undefined);
+        //self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
         cloneModel = {};
     };
     var chart, _t;
-    self.handleGraphPreview = function(segmentModel){
+    self.handleGraphPreview = function(dataSource, database, selectedDataKey, segmentModel){
         self.parseError(undefined);
         if(segmentModel.chartType === 'numeric') return;
-        DataRetriever.getData({applyClientfilters: false, dataKey: self.selectedDataKey(), segment: segmentModel}, function(inputData){
+        DataRetriever.getData({applyClientfilters: false, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
+            if(!response.success){
+                self.parseError(response.message);
+                return;
+            }
             var data;
             try{
-                data = Conditioner.getGraphData(segmentModel, inputData);
+                data = Conditioner.getGraphData(segmentModel, response.result);
             }
             catch(e){
                 self.parseError(e);
@@ -735,7 +799,7 @@ var SegmentProcessor = function(){
     self.preview = function(){
         var model = self.segment.getModel();
         if(!model) return;
-        self.handleGraphPreview(model);
+        self.handleGraphPreview(self.dataSource(), self.database(), self.selectedDataKey(), model);
     };
     self.previewGraph.subscribe(function(newValue){
         if(!newValue){
@@ -764,7 +828,7 @@ var TopBar = function(){
 
     self.tagList = ko.observableArray();
     drata.apiClient.getAllTags(function(resp){
-        var tagDashboardList = _.groupBy(resp, function(item){
+        var tagDashboardList = _.groupBy(resp.result, function(item){
             return item.tagName;
         });
         for(var i in tagDashboardList){

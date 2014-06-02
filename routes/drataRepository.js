@@ -4,14 +4,16 @@ var config = require('./config.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
 
-var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataMongo.serverName, config.drataMongo.port));
+var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
 var db;
 
 mongoClient.open(function(err, mongoClient) {
     if(!err){
         console.log('drataStore connection opened');
-        db = mongoClient.db('drataStore');
+        db = mongoClient.db(config.drataInternal.databaseName);
+    }else{
+        res.send(500, 'Database connection failure.');
     }
 });
 
@@ -43,7 +45,11 @@ exports.findDashboard = function(req, res) {
         }
         else{
             collection.findOne({'_id' : dashboardId}, function(err, result) {
-                res.send(result);
+                if(err){
+                    res.send(404);
+                }else{
+                    res.send(result);    
+                }
             });
         }
     });
@@ -77,9 +83,9 @@ exports.upsertWidget = function(req, res){
             }
 
             if(!widgetModel.dateCreated){
-                widgetModel.dateCreated = new Date().toISOString();
+                widgetModel.dateCreated = new Date();
             }
-            widgetModel.dateUpdated = new Date().toISOString();
+            widgetModel.dateUpdated = new Date();
             
             //delete widgetModel._id;
             collection.save(widgetModel, {safe:true}, function(err, result) {
@@ -148,9 +154,9 @@ exports.upsertDashboard = function(req, res){
                 dashboardModel._id = mongo.ObjectID(dashboardModel._id);
             }
             if(!dashboardModel.dateCreated){
-                dashboardModel.dateCreated = new Date().toISOString();
+                dashboardModel.dateCreated = new Date();
             }
-            dashboardModel.dateUpdated = new Date().toISOString();
+            dashboardModel.dateUpdated = new Date();
             collection.save(dashboardModel, {safe:true}, function(err, result) {
                 console.log(JSON.stringify(err));
                 if(err) res.send(404);
@@ -309,10 +315,60 @@ exports.deleteAllWidgetsDashboard = function(req, res){
     });
 };
 
+var populateDB = function(req, res) {
+    var maxProps = 20;
+    var data= [];
+    var y = [0,0,0,0,0,0,0];
+    var ordernumber = 1;
+    var geos = ['texas', 'Alabama', 'Misissipi', 'Arizona', 'Minnesota'];
+    var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
+    var colors = ['blue', 'gray', 'black', 'white', 'purple'];
+    var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
+    var startDate = new Date('3/10/2014');
+    for(var j = 0; j <= maxProps; j++){
+        for(var yy = 0; yy < y.length; yy++){
+            y[yy] += Math.floor((Math.random() * 10 - j%10));
+        }
+        //y += (Math.random() * 10 - j%10);
+        ordernumber = 10 + (Math.floor(j/ 3) * (3)); // 3 items per order
+        data.push({
+            //ordernumber : ordernumber,
+            item : items[Math.floor(Math.random() * items.length)],
+            price : Math.abs(y[0]) * 100,
+            geography : geos[Math.floor(Math.random() * geos.length)],
+            timestamp : new Date(startDate.setHours(startDate.getHours() + j)),
+            sex : Math.random() * 10 > 5 ? 'female': 'male',
+            itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
+            hasCoupon :  Math.random() * 10 > 7,
+            discount: Math.abs(Math.floor(y[1])),
+            color : colors[Math.abs(Math.floor(y[1]%5))],
+            errorCount: Math.abs(Math.floor(y[2]% 10)),
+            pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
+            tax : Math.abs(y[0]) * 8,
+            shippingPrice: Math.abs(y[0]) * 12,
+            itemAgeGroup : ageGroups[Math.abs(y[4] %5)],
+            totalItems : Math.floor(Math.abs(y[5]) % 10),
+            total: {
+                price : Math.abs(y[0]) * 100,
+                tax : Math.abs(y[0]) * 8,
+                shippingPrice: Math.abs(y[0]) * 12
+            }
+        });
+    }
+ 
+    db.collection('shoppercheckout', function(err, collection) {
+        if(err){
+            res.send('somethig went wrong');
+        }
+        else{
+            //collection.remove();
+            collection.insert(data, {safe:true}, function(err, result) {});
+            res.send('done');    
+        }
+    });
+};
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-// Populate database with sample data -- Only used once: the first time the application is started.
-// You'd typically not find this code in a real-life app, since the database would already exist.
 // var populateDB = function(req, res) {
 //     var widgetModel = [
 //     '{"selectedDataKey":"shoppercheckout","segmentModel":{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false}],"dataGroup":{"hasGrouping":true,"groupByProp":"itemAgeGroup","xAxisType":"date","xAxisProp":"timestamp","timeseriesInterval":"300000","errors":[]},"group":[],"dataFilter":{"intervalKind":"day","intervalType":"dynamic","min":19,"max":60,"dateProp":"timestamp"},"chartType":"scatter"},"sizex":"4","sizey":"1"}',

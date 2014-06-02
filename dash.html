@@ -96,10 +96,30 @@
     <div id="dashboard">
         <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
         </div>
-        <div class="row" style="display:none" data-bind="visible:noWidgets">
+        <!-- ko with: newDashboardItem -->
+        <div class="row text-center">
             <div class="large-12 columns">
-                <h1>Welcome</h1>
+                <h1>First, lets get your Dashboard Name. </h1>
+                <h1><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="medium-6 medium-offset-3 columns">
+                <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
+                
+                <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
+                <button class="button left primary" data-bind="enable: !!cloneName(), click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+            </div>
+        </div>
+        <!-- /ko -->
+        <div class="row text-center" style="display:none" data-bind="visible:noWidgets">
+            <div class="medium-8 medium-offset-2 columns">
+                <h1>No widgets to show</h1>
                 <h1><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h1>
+                <div class="clearfix">
+                    <a class="button right" data-bind="click:topBar.addWidget">Create new widget</a>
+                    <a class="button left" data-bind="click:topBar.manageWidgets">Clone from Existing widgets</a>
+                </div>
             </div>
         </div>
     </div>
@@ -151,16 +171,31 @@
                 </div>
                 <div class="columns" data-bind="css: {'large-5' : previewGraph, 'large-12' : !previewGraph()}">
                     <fieldset>
-                        <legend>Data Key</legend>
+                        <legend>Specify Data Source</legend>
                         <div class="row">
                             <div class="small-4 columns">
-                                <label class="right inline">Select Data Key</label>
+                                <label class="right inline">Server</label>
                             </div>
                             <div class="small-8 columns">
-                                <select data-bind="options:dataKeys, optionsCaption: 'choose key', value:selectedDataKey"></select>
+                                <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
                             </div>
                         </div>
-                        
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Database</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-4 columns">
+                                <label class="right inline">Collection Name</label>
+                            </div>
+                            <div class="small-8 columns">
+                                <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
+                            </div>
+                        </div>
                     </fieldset>
                 </div>
             </div>
@@ -272,8 +307,7 @@
     <script type="text/javascript">
         (function (root, $) {
             drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template'], function(){
-                window.dashboard = new Dashboard();
-                ko.applyBindings(dashboard, document.getElementById('dashboard'));
+                
                 window.topBar = new TopBar();
                 ko.applyBindings(topBar, document.getElementById('topbar'));
 
@@ -286,6 +320,8 @@
                 window.widgetManager = new WidgetManager();
                 ko.applyBindings(widgetManager, document.getElementById('widgetManager'));
 
+                window.dashboard = new Dashboard();
+                ko.applyBindings(dashboard, document.getElementById('dashboard'));
 
                 $(document).foundation();
             });

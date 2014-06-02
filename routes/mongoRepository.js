@@ -9,68 +9,84 @@ var BSON = mongo.BSONPure;
 //var server = new Server('localhost', 27017, {auto_reconnect: true});
 //var db = new Db(databaseName, server);
 
-var mongoClient = new mongo.MongoClient(new mongo.Server(config.mongo.serverName, config.mongo.port));
+var mongoClients = {};
 
 var dbs = {};
 
-mongoClient.open(function(err, mongoClient) {
-    if(!err){
-        console.log('mongo connection opened');
+var getServer = function(alias){
+    return config.dataSources.filter(function(s){
+        return s.alias === alias;
+    })[0];
+}
+var dbInstance = function(){
+    var _name, _serverName;
+
+    function _connect(callback){
+        if(!dbs[_serverName] || !dbs[_serverName][_name]){
+            if(!dbs[_serverName]){
+                var server = getServer(_serverName);
+                var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));    
+                instance.open(function(err, mongoClient) {
+                    if(err){
+                        console.log(_serverName + ' connection refused');
+                        callback && callback();
+                    }
+                    else{
+                        console.log('new server: ' + _serverName + ' , new database: ' + _name); 
+                        dbs[_serverName] = {};
+                        dbs[_serverName][_name] = mongoClient.db(_name);
+                        callback && callback(dbs[_serverName][_name]);
+                        mongoClients[_serverName] = instance;    
+                    }
+                });
+            }
+            else {
+                console.log('server: ' + _serverName + ' , new database: ' + _name); 
+                dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
+                callback && callback(dbs[_serverName][_name]);
+            }
+        }
+        else{
+            console.log('server: ' + _serverName + ' , database: ' + _name); 
+            callback && callback(dbs[_serverName][_name]);
+        }
     }
-});
 
-var dbInstance = function(name){
-    var _name = name;
-
-    function connecta(callback){
-        // var db = new Db(_name, server);
-        // db.open(function(err, db){
-        //     callback && callback(db);
-        //     console.log('closing my connection');
-        //     //db.close();
-        // });
-        //mongoClient.open(function(err, mongoClient) {
-            dbs[_name] = dbs[_name] || mongoClient.db(_name);
-            callback && callback(dbs[_name]);
-            //mongoClient.close();
-        //});
-    }
-
-    // connecta.name = function(val){
-    //     if (!arguments.length) return _name;
-    //     _name = val;
-    //     return connecta;
-    // };
-    return connecta;
+    _connect.dbName = function(val){
+        if(!_serverName) throw "Server not speficied";
+        if (!arguments.length) return _name;
+        _name = val;
+        return _connect;
+    };
+    _connect.serverName = function(val){
+        if (!arguments.length) return _serverName;
+        _serverName = val;
+        return _connect;
+    };
+    return _connect;
 };
-
-// var dbOpen = function(onSuccess){
-//     mongoClient.open(function(err, mongoClient) {
-//       var db1 = mongoClient.db("mydb");
-
-//       mongoClient.close();
-//     });
-
-//     db.open(function(err, db) {
-//         if(!err) {
-//             onSuccess && onSuccess
-//         }
-//         else{
-//             console.log(err);
-//         }
-//     });
-// };
-
 
 exports.pop = function(req, res){
     populateDB(req, res);
 };
 
 exports.getDataSourceNames = function(req, res){
-    dbInstance('local')(function(db){
-        db.admin().listDatabases(function(err, resp){
-            if(err) res.send(404);
+    res.json(config.dataSources.map(function(d){
+        return d.alias;   
+    }));
+};
 
+exports.getDatabaseNames = function(req, res){
+    dbInstance().serverName(req.params.datasource).dbName('local')(function(db){
+        if(!db){
+            res.send(500, 'Database connection failure.');
+            return;
+        }
+        db.admin().listDatabases(function(err, resp){
+            if(err){
+                res.send(500);
+                return;
+            }
             res.json(resp.databases.map(function(d){
                 return d.name;
             }));    
@@ -80,11 +96,15 @@ exports.getDataSourceNames = function(req, res){
 };
 
 exports.getCollectionNames = function(req, res) {
-    dbInstance(req.params.dbname)(function(db){
-        //console.log('got my db');
+    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+        if(!db){
+            res.send(500, 'Database connection failure.');
+            return;
+        }
         db.collectionNames(function(err, result) {
             if(err){
-                res.send(404);
+                res.send(500);
+                return;
             }
             //console.log('getting collections');
             //console.log(JSON.stringify(result, null, '\t'));
@@ -100,10 +120,22 @@ exports.getCollectionNames = function(req, res) {
 };
 
 exports.findProperties = function(req, res){
-    dbInstance(req.params.dbname)(function(db){
+    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+        if(!db){
+            res.send(500, 'Database connection failure.');  
+            return;
+        }
         var collectionName = req.params.collectionName;
         db.collection(collectionName, function(err, collection) {
+            if(err){
+                res.send(500);
+                return;
+            }
             collection.find({$query:{}, $orderby:{$natural:-1}, $maxScan : 100}).toArray(function(err, items) {
+                if(err){
+                    res.send(500);
+                    return;
+                }
                 res.send(utils.getUniqueProperties(items));
                 //db.close();
             });
@@ -112,24 +144,32 @@ exports.findProperties = function(req, res){
 };
 
 exports.findCollection = function(req, res) {
-    dbInstance(req.params.dbname)(function(db){
+    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+        if(!db){
+            res.send(500, 'Database connection failure.');
+            return;
+        }
         var collectionName = req.params.collectionName;
         var segment = req.body;
         console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
         var query = utils.getMongoQuery(segment);
         var selectOnly = utils.buildReturnPoperties(segment);
-        //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
-        //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
+        console.log('mongo query :' + JSON.stringify(query, null, '\t'));
+        console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
         db.collection(collectionName, function(err, collection) {
-            if(!err){
-                collection.find(query, selectOnly, {sort:'timestamp'}).toArray(function(err, items) {
-                    res.send(items);
-                    //db.close();
-                });
+            if(err){
+                res.send(500);
+                return;
             }
-            else{
-                res.send(404);
-            }
+            collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
+                if(err){
+                    res.send(500);
+                    return;
+                }
+                res.send(items);
+                //db.close();
+            });
+            
         });
     });
 };
@@ -176,13 +216,13 @@ var populateDB = function(req, res) {
                 shippingPrice: Math.abs(y[0]) * 12
             }
         };
-        console.log(dd.timestamp);
+        //console.log(dd.timestamp);
         data.push(dd);
     }
-    dbInstance('shopperstop')(function(db){
+    dbInstance().serverName('drataDemoExternal').dbName('shopperstop')(function(db){
         db.collection('shoppercheckout', function(err, collection) {
             if(err){
-                res.send('somethig went wrong');
+                res.send('something went wrong');
             }
             else{
                 collection.insert(data, {safe:true}, function(err, result) {});

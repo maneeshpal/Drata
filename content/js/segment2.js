@@ -56,7 +56,6 @@ var Segmentor = function(model){
             name: currentDataGroupTemplate,
             data: self.dataGroup
         };
-
     });
     
     self.getModel = function(){
@@ -154,6 +153,7 @@ var TrackDataGroup = function(){
         delete dataGroupModel.setProps;
         delete dataGroupModel.getModel;
         delete dataGroupModel.template;
+        delete dataGroupModel.intervalOptions;
         return dataGroupModel;
     }
 
@@ -202,7 +202,7 @@ var ComparisonDataGroup = function(options){
             if(newValue === 'string' || newValue === 'unknown'){
                 self.groupByInterval(undefined);
             }
-            newValue && options.propertyTypes[self.groupByProp()](newValue);
+            newValue && self.groupByProp() &&  options.propertyTypes && options.propertyTypes[self.groupByProp()](newValue);
         }
     });
 
@@ -217,7 +217,7 @@ var ComparisonDataGroup = function(options){
             if(newValue === 'string' || newValue === 'unknown'){
                 self.divideByInterval(undefined);
             }
-            newValue && options.propertyTypes[self.divideByProp()](newValue);
+            newValue && self.divideByProp() && options.propertyTypes && options.propertyTypes[self.divideByProp()](newValue);
         }
     });
 
@@ -250,7 +250,9 @@ var ComparisonDataGroup = function(options){
         self.groupByProp(model.groupByProp);
         self.hasGrouping(model.groupByProp !== undefined);
         self.divideByProp(model.divideByProp);
-        self.hasDivideBy(model.divideByProp !== undefined);        
+        self.hasDivideBy(model.divideByProp !== undefined);
+        self.groupByIntervalType(model.groupByIntervalType);
+        self.divideByIntervalType(model.divideByIntervalType);
     };
 
     self.getModel = function(){
@@ -876,16 +878,7 @@ var SelectionGroup = function(options){
     });
 };
 
-
-var db = 'shopperstop';
-
 var DataRetriever = {
-    getUniqueProperties : function(dataKey, callback){
-        drata.apiClient.getUniqueProperties(dataKey, callback);
-    },
-    getDataKeys : function(callback){
-        drata.apiClient.getDataKeys(callback);
-    },
     getData : function(model,callback){
         var postData = {
             selection: model.segment.selection,
@@ -895,18 +888,21 @@ var DataRetriever = {
         if(!model.applyClientfilters){
             postData.group = model.segment.group;
         }
-        drata.apiClient.getData(postData, model.dataKey, function(response){
-            var result = [];
-            console.time('flattening data. response length: ' + response.length);
-            for(var i = 0; i< response.length; i++){
-                result.push(drata.utils.flatten(response[i]));
+        drata.apiClient.getData(postData, {dataSource: model.dataSource || 'drataDemoExternal', database: model.database || 'shopperstop', collectionName: model.collectionName}, function(response){
+            if(response.success){
+                var ret = [], result = response.result;
+                console.time('flattening data. response length: ' + result.length);
+                for(var i = 0; i< result.length; i++){
+                    ret.push(drata.utils.flatten(result[i]));
+                }
+                console.timeEnd('flattening data. response length: ' + result.length);
+                //Apply filters client side if the response isnt already filtered.
+                if(model.applyClientfilters){
+                    ret = Conditioner.filterData(ret, model.segment);
+                }
+                response.result = ret;
             }
-            console.timeEnd('flattening data. response length: ' + response.length);
-            //Apply filters client side if the response isnt already filtered.
-            if(model.applyClientfilters){
-                result = Conditioner.filterData(result, model.segment);
-            }
-            callback && callback(result);
+            callback && callback(response);
         });
     }
 };

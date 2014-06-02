@@ -31,6 +31,10 @@ app.get('/dashboard/:dashboardId', function(req, res){
   res.sendfile('dash.html');
 });
 
+app.get('/dashboard', function(req, res){
+  res.sendfile('dash.html');
+});
+
 app.get('/segment', function(req, res){
   res.sendfile('segment.html');
 });
@@ -87,11 +91,13 @@ app.put('/api/tags', drataRepository.addTag);
 
 app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
-app.get('/api/external/pop', mongoRepository.pop);
+
+//app.get('/api/external/pop', mongoRepository.pop);
 app.get('/api/external/datasources', mongoRepository.getDataSourceNames);
-app.get('/api/external/:dbname/collectionNames', mongoRepository.getCollectionNames);
-app.get('/api/external/:dbname/:collectionName/properties', mongoRepository.findProperties);
-app.post('/api/external/:dbname/:collectionName', mongoRepository.findCollection);
+app.get('/api/external/:datasource/database', mongoRepository.getDatabaseNames);
+app.get('/api/external/:datasource/:dbname/collectionNames', mongoRepository.getCollectionNames);
+app.get('/api/external/:datasource/:dbname/:collectionName/properties', mongoRepository.findProperties);
+app.post('/api/external/:datasource/:dbname/:collectionName', mongoRepository.findCollection);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

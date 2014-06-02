@@ -48,9 +48,11 @@
                     </ul>
                 </div>
             </div>
-            
-             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
+
+            <div data-bind="visible: !!parseError()">
+                <div data-bind="html: parseError, attr :{style: 'height:'+ widgetHeight() + 'px; padding-top:' + (+widgetHeight()/2 -10) + 'px; text-align:center'}"></div>
             </div>
+            
             <div data-bind="if: !parseError()">
                 <!-- ko template: contentTemplate() -->
                 <!-- /ko -->
