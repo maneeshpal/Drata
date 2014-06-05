@@ -29,7 +29,7 @@
         <ul class="title-area">
             
             <li class="name">
-                <h1><a data-bind="text: currentDashboardName"></a></h1>
+                <h1><a>drata</a></h1>
             </li>
             <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
         </ul>
@@ -57,11 +57,23 @@
             <ul class="left">
                 <li class="divider"></li>
                 <li class="has-dropdown">
-                    <a><span class="icon-grid-alt"></span> Dashboards</a>
+                    <a><span class="icon-grid-alt"></span>
+                    <!-- ko text: currentDashboardName() -->
+                                <!-- /ko --> </a>
                     <ul class="dropdown">
                     <li class="has-form">
                         <a class="button" data-bind="click:manageDashboards"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
                     </li>
+                    <!-- ko foreach: untaggedList -->
+                        <li>
+                            <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
+                                <span class="icon-grid-alt"></span> 
+                                <!-- ko text: dashboardName -->
+                                <!-- /ko --> 
+                            </a>
+                        </li>
+                    <!-- /ko -->
+
                     <li><label><span class="icon-folder-open"></span> Tags</label></li>
                     <!-- ko foreach: tagList -->
                       <li class="has-dropdown not-click">
@@ -96,31 +108,38 @@
     <div id="dashboard">
         <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
         </div>
-        <!-- ko with: newDashboardItem -->
-        <div class="row text-center">
-            <div class="large-12 columns">
-                <h1>First, lets get your Dashboard Name. </h1>
-                <h1><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h1>
+        
+        <div style="display:none" data-bind="with: newDashboardItem, visible : newDashboardItem() !== undefined ">
+            <div class="row text-center">
+                <div class="medium-6 medium-offset-3 columns">
+                    <h2>Create Dashboard</h2>
+                    <h2><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 medium-offset-3 columns">
+                    <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
+                    <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="medium-6 medium-offset-3 columns">
+                    <button class="button primary" data-bind="enable: !!cloneName(), click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="medium-6 medium-offset-3 columns">
-                <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
-                
-                <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
-                <button class="button left primary" data-bind="enable: !!cloneName(), click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
-            </div>
-        </div>
-        <!-- /ko -->
         <div class="row text-center" style="display:none" data-bind="visible:noWidgets">
             <div class="medium-8 medium-offset-2 columns">
-                <h1>No widgets to show</h1>
-                <h1><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h1>
+                <h2>No widgets to show</h2>
+                <h2><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h2>
                 <div class="clearfix">
                     <a class="button right" data-bind="click:topBar.addWidget">Create new widget</a>
                     <a class="button left" data-bind="click:topBar.manageWidgets">Clone from Existing widgets</a>
                 </div>
             </div>
+        </div>
+        <div class="text-center" style="display:none" data-bind="visible: dashboardNotFound">
+            <h2>Dashboard not found</h2>
         </div>
     </div>
 

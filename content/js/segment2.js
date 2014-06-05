@@ -881,6 +881,7 @@ var SelectionGroup = function(options){
 var DataRetriever = {
     getData : function(model,callback){
         var postData = {
+            chartType: model.segment.chartType,
             selection: model.segment.selection,
             dataGroup: model.segment.dataGroup,
             dataFilter: model.segment.dataFilter
@@ -888,19 +889,20 @@ var DataRetriever = {
         if(!model.applyClientfilters){
             postData.group = model.segment.group;
         }
-        drata.apiClient.getData(postData, {dataSource: model.dataSource || 'drataDemoExternal', database: model.database || 'shopperstop', collectionName: model.collectionName}, function(response){
+        drata.apiClient.getData(postData, {dataSource: model.dataSource, database: model.database, collectionName: model.collectionName}, function(response){
             if(response.success){
                 var ret = [], result = response.result;
-                console.time('flattening data. response length: ' + result.length);
-                for(var i = 0; i< result.length; i++){
-                    ret.push(drata.utils.flatten(result[i]));
-                }
-                console.timeEnd('flattening data. response length: ' + result.length);
+                // console.time('flattening data. response length: ' + result.length);
+                // for(var i = 0; i< result.length; i++){
+                //     ret.push(drata.utils.flatten(result[i]));
+                // }
+                // console.timeEnd('flattening data. response length: ' + result.length);
+                
                 //Apply filters client side if the response isnt already filtered.
-                if(model.applyClientfilters){
-                    ret = Conditioner.filterData(ret, model.segment);
-                }
-                response.result = ret;
+                // if(model.applyClientfilters){
+                //     ret = Conditioner.filterData(ret, model.segment);
+                // }
+                //response.result = ret;
             }
             callback && callback(response);
         });
@@ -953,11 +955,6 @@ var Conditioner = {
         if(group.groupType === 'selection'){
             //perform arithmetic operation on selections
             complexValue = isNaN(+group.selectedProp) ? obj[group.selectedProp] : +group.selectedProp;
-            // if(!isNaN(+group.selectedProp)){
-            //     complexValue = +group.selectedProp;
-            // }else{
-            //     complexValue = obj[group.selectedProp];    
-            // }
         }
         else{
             if(group.selection.isComplex){
@@ -1148,7 +1145,6 @@ var Conditioner = {
         var groupCounter = 0;
         var result = [];
         var topLevelResponse = [];
-        var numFormat = d3.format('.3s');
         
         var formattingTypes = {
             date: function(name, interval){
@@ -1171,7 +1167,7 @@ var Conditioner = {
                 return timeFormat(new Date(+name));
             },
             numeric: function(name){
-                return numFormat(+name);
+                return d3.format('.3s')(+name);
             },
             string: function(name){
                 return name;
@@ -1228,10 +1224,6 @@ var Conditioner = {
                             throw '<em>Count</em> not allowed for Complex Selection : ' + sel.aliasName ;
                         }
 
-                        // var divData = _.groupBy(groupedDataItem, function(val){
-                        //     return val[segmentModel.dataGroup.divideByProp];
-                        // });
-                        
                         var divData = drata.utils.divideDataByInterval({
                             data: groupedDataItem,
                             property: segmentModel.dataGroup.divideByProp,

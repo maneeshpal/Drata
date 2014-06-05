@@ -77,6 +77,7 @@ var flatten = function(data) {
     recurse(data, "");
     return result;
  };
+
 var mongoSymbolMap = {
     '<': '$lt',
     '>': '$gt',
@@ -250,7 +251,8 @@ var getBounds = function(type){
             break;
     }
     return bounds;
-}
+};
+
 var getDateRange = function(dataFilter){
     var min, max;
         switch(dataFilter.intervalType){
@@ -332,9 +334,18 @@ var getSelectionProperties = function(selections){
     });        
     return ret;
 };
+
+var format = function(format /*, ...replacements*/) {
+    var replacements = toArray(arguments, 1);
+    for (var i = 0, j = replacements.length; i < j; i++) {
+        format = format.replace(new RegExp('\\{' + (i) + '\\}', 'g'), replacements[i]);
+    }
+    return format;
+};
 exports.getUniqueProperties = getUniqueProperties;
 exports.getMongoQuery = getMongoQuery;
 exports.flatten = flatten;
 exports.buildReturnPoperties = buildReturnPoperties;
 exports.getwidgetListMongoQuery = getwidgetListMongoQuery;
+exports.format = format;
 

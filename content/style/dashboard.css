@@ -5,9 +5,10 @@
   width: 100%; }
 
 input.giant{
-  height: 5rem;
-  font-size: 2rem;
+  height: 3.5rem;
+  font-size: 1rem;
 }
+
 .ui-sortable-placeholder * {
   visibility: hidden; }
 

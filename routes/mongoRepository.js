@@ -1,83 +1,101 @@
-var mongo = require('mongodb');
+//var mongo = require('mongodb');
 var utils = require('./utils');
+var aggregator = require('./aggregator');
 var config = require('./config.json');
-//var Server = mongo.Server;
-//var Db = mongo.Db;
-var BSON = mongo.BSONPure;
+var baseMongoRepo = require('./genericMongoRepository');
+//var BSON = mongo.BSONPure;
 
-//var databaseName = 'shopperstop';
-//var server = new Server('localhost', 27017, {auto_reconnect: true});
-//var db = new Db(databaseName, server);
+//var mongoClients = {};
+var serverNames = config.dataSources.map(function(d){
+        return d.alias;   
+    });
 
-var mongoClients = {};
+// _.each(config.dataSources, function(server){
+//     var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));   
+//     instance.open(function(err, mongoClient) {
+//         if(err){
+//             console.log(server.alias + ' connection refused');
+            
+//         }else{
+//             mongoClients[server.alias] = mongoClient;
+//             dbs[server.alias] = {}; 
+//             console.log('new server: ' + server.alias); 
+//         }
+//     });
+// })
 
-var dbs = {};
 
-var getServer = function(alias){
-    return config.dataSources.filter(function(s){
-        return s.alias === alias;
-    })[0];
-}
-var dbInstance = function(){
-    var _name, _serverName;
+// var dbs = {};
 
-    function _connect(callback){
-        if(!dbs[_serverName] || !dbs[_serverName][_name]){
-            if(!dbs[_serverName]){
-                var server = getServer(_serverName);
-                var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));    
-                instance.open(function(err, mongoClient) {
-                    if(err){
-                        console.log(_serverName + ' connection refused');
-                        callback && callback();
-                    }
-                    else{
-                        console.log('new server: ' + _serverName + ' , new database: ' + _name); 
-                        dbs[_serverName] = {};
-                        dbs[_serverName][_name] = mongoClient.db(_name);
-                        callback && callback(dbs[_serverName][_name]);
-                        mongoClients[_serverName] = instance;    
-                    }
-                });
-            }
-            else {
-                console.log('server: ' + _serverName + ' , new database: ' + _name); 
-                dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
-                callback && callback(dbs[_serverName][_name]);
-            }
-        }
-        else{
-            console.log('server: ' + _serverName + ' , database: ' + _name); 
-            callback && callback(dbs[_serverName][_name]);
-        }
-    }
+// var getServer = function(alias){
+//     return config.dataSources.filter(function(s){
+//         return s.alias === alias;
+//     })[0];
+// }
+// var connectionCount = 0;
+// var dbInstance = function(){
+//     var _name, _serverName;
 
-    _connect.dbName = function(val){
-        if(!_serverName) throw "Server not speficied";
-        if (!arguments.length) return _name;
-        _name = val;
-        return _connect;
-    };
-    _connect.serverName = function(val){
-        if (!arguments.length) return _serverName;
-        _serverName = val;
-        return _connect;
-    };
-    return _connect;
-};
+//     function _connect(callback){
+//         if(!dbs[_serverName]) {
+//             callback && callback();
+//             return;
+//         }
+
+//         if(!dbs[_serverName][_name]){
+//             // if(!dbs[_serverName]){
+//             //     var server = getServer(_serverName);
+//             //     var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));    
+//             //     instance.open(function(err, mongoClient) {
+//             //         if(err){
+//             //             console.log(_serverName + ' connection refused');
+//             //             callback && callback();
+//             //         }
+//             //         else{
+//             //             console.log('new server: ' + _serverName + ' , new database: ' + _name); 
+//             //             dbs[_serverName] = {};
+//             //             dbs[_serverName][_name] = mongoClient.db(_name);
+//             //             callback && callback(dbs[_serverName][_name]);
+//             //             mongoClients[_serverName] = instance;    
+//             //         }
+//             //     });
+//             // }
+//             // else {
+//                 dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
+//                 console.log('server: ' + _serverName + ' , new database: ' + _name); 
+//                 callback && callback(dbs[_serverName][_name]);
+//             //}
+//         }
+//         else{
+//             console.log('server: ' + _serverName + ' , database: ' + _name); 
+//             callback && callback(dbs[_serverName][_name]);
+//         }
+//     }
+
+//     _connect.dbName = function(val){
+//         if(!_serverName) throw "Server not speficied";
+//         if (!arguments.length) return _name;
+//         _name = val;
+//         return _connect;
+//     };
+//     _connect.serverName = function(val){
+//         if (!arguments.length) return _serverName;
+//         _serverName = val;
+//         return _connect;
+//     };
+//     return _connect;
+// };
 
 exports.pop = function(req, res){
     populateDB(req, res);
 };
 
 exports.getDataSourceNames = function(req, res){
-    res.json(config.dataSources.map(function(d){
-        return d.alias;   
-    }));
+    res.json(serverNames);
 };
 
 exports.getDatabaseNames = function(req, res){
-    dbInstance().serverName(req.params.datasource).dbName('local')(function(db){
+    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName('local')(function(db){
         if(!db){
             res.send(500, 'Database connection failure.');
             return;
@@ -96,7 +114,7 @@ exports.getDatabaseNames = function(req, res){
 };
 
 exports.getCollectionNames = function(req, res) {
-    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
         if(!db){
             res.send(500, 'Database connection failure.');
             return;
@@ -120,7 +138,7 @@ exports.getCollectionNames = function(req, res) {
 };
 
 exports.findProperties = function(req, res){
-    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
         if(!db){
             res.send(500, 'Database connection failure.');  
             return;
@@ -144,18 +162,19 @@ exports.findProperties = function(req, res){
 };
 
 exports.findCollection = function(req, res) {
-    dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
+    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
         if(!db){
             res.send(500, 'Database connection failure.');
             return;
         }
         var collectionName = req.params.collectionName;
         var segment = req.body;
-        console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
+        //console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
         var query = utils.getMongoQuery(segment);
         var selectOnly = utils.buildReturnPoperties(segment);
-        console.log('mongo query :' + JSON.stringify(query, null, '\t'));
-        console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
+        //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
+        //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
+        var ss = +(new Date());
         db.collection(collectionName, function(err, collection) {
             if(err){
                 res.send(500);
@@ -166,7 +185,25 @@ exports.findCollection = function(req, res) {
                     res.send(500);
                     return;
                 }
-                res.send(items);
+                console.log('got response : ' + (+(new Date()) - ss));
+                ss = +(new Date());
+                var ret = [];
+                for(var i = 0; i< items.length; i++){
+                    ret.push(utils.flatten(items[i]));
+                }
+                console.log('flattened result : ' + (+(new Date()) - ss));
+                ss = +(new Date());
+                var graphData;
+                try{
+                    graphData = aggregator.aggregator.getGraphData(segment, ret);    
+                }
+                catch(e){
+                   res.send(500, e); 
+                   return;
+                }
+                console.log('aggregator done : ' + (+(new Date()) - ss));
+                
+                res.send(graphData);
                 //db.close();
             });
             
@@ -219,7 +256,7 @@ var populateDB = function(req, res) {
         //console.log(dd.timestamp);
         data.push(dd);
     }
-    dbInstance().serverName('drataDemoExternal').dbName('shopperstop')(function(db){
+    baseMongoRepo.dbInstance().serverName('drataDemoExternal').dbName('shopperstop')(function(db){
         db.collection('shoppercheckout', function(err, collection) {
             if(err){
                 res.send('something went wrong');

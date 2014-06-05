@@ -89,20 +89,30 @@
         var url = apiRoot + 'tags';
         var len = 0, tagList = [];
         var self = this;
-        function xyz(d){
-            
-        }
-        _perform('GET',url, undefined, function(tagResponse){
-            len = tagResponse.result.length, tagList = [];
-            _.each(tagResponse.result, function(tag){
-                getDashboard(tag.dashboardId, function(response){
-                    len --;
-                    tag.dashboardName = response.result.name;
+        getAllDashboards(function(response){
+            len = response.result.length;
+            _.each(response.result, function(dash){
+                getAllTagsOfDashboard(dash._id, function(tagResponse){
+                    len--;
+                    if(tagResponse.result.length === 0){
+                        tagList.push({
+                            tagName: '__',
+                            dashboardName: dash.name,
+                            dashboardId: dash._id
+                        });
+                    }
+                    else{
+                        _.each(tagResponse.result, function(tag){
+                            tag.dashboardName = dash.name;
+                            tagList.push(tag);
+                        });
+                    }
                     
                     if(len === 0){
-                        callback && callback(tagResponse);
+                        callback && callback({result:tagList});
                     }
-                });
+
+                })
             })
         });
     };

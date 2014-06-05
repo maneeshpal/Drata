@@ -317,11 +317,11 @@
         var y = matches[3];
         var composedDate = new Date(y, m, d);
         return (composedDate.getDate() == d &&
-                composedDate.getMonth() == m &&
-                composedDate.getFullYear() == y) ? composedDate : undefined;
+            composedDate.getMonth() == m &&
+            composedDate.getFullYear() == y) ? composedDate : undefined;
     };
 
-    var getBounds = function(type){
+    var getBounds = function(type) {
         var bounds = [];
         switch(type){
             case 'day' :

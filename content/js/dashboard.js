@@ -6,11 +6,16 @@ var Dashboard = function(){
     self.loading = ko.observable(true);
     self.widgets = ko.observableArray();
     self.newDashboardItem = ko.observable();
+    self.dashboardNotFound = ko.observable(false);
     var dashboardId = window.location.pathname.split('/')[2];
     
     var loadDashboard = function(){
         drata.apiClient.getDashboard(dashboardId, function(response){
             var d = response.result;
+            if(!d || !response.success){
+                self.dashboardNotFound(true);
+                return;
+            }
             self.name(d.name);
             topBar.currentDashboardName(d.name);
             dashboardId = d._id;
@@ -172,14 +177,14 @@ var Widget = function(widgetModel, index){
                 self.parseError(response.message);
                 return;
             }
-
-            try{
-                chartData = Conditioner.getGraphData(widgetModel.segmentModel, response.result);
-            }
-            catch(e){
-                self.parseError(e);
-                return;
-            }
+            chartData = response.result;
+            // try{
+            //     chartData = Conditioner.getGraphData(widgetModel.segmentModel, response.result);
+            // }
+            // catch(e){
+            //     self.parseError(e);
+            //     return;
+            // }
             var dataToMap;
 
             if(widgetModel.segmentModel.chartType === 'pie'){
@@ -748,14 +753,14 @@ var SegmentProcessor = function(){
                 self.parseError(response.message);
                 return;
             }
-            var data;
-            try{
-                data = Conditioner.getGraphData(segmentModel, response.result);
-            }
-            catch(e){
-                self.parseError(e);
-                throw e;
-            }
+            var data = response.result;
+            //try{
+                //data = Conditioner.getGraphData(segmentModel, response.result);
+            //}
+            // catch(e){
+            //     self.parseError(e);
+            //     throw e;
+            // }
             if(!data) return;         
 
             self.previewGraph(true);
@@ -827,6 +832,8 @@ var TopBar = function(){
     };
 
     self.tagList = ko.observableArray();
+    self.untaggedList = ko.observableArray();
+
     drata.apiClient.getAllTags(function(resp){
         var tagDashboardList = _.groupBy(resp.result, function(item){
             return item.tagName;
@@ -834,9 +841,14 @@ var TopBar = function(){
         for(var i in tagDashboardList){
             if(tagDashboardList.hasOwnProperty(i)){
                 var a = tagDashboardList[i];
-                self.tagList.push({tagName: i, dashboards: a});
+                if(i === '__'){
+                    self.untaggedList(a);
+                }else{
+                    self.tagList.push({tagName: i, dashboards: a});    
+                }
+                
             }
         }
     });
-    self.currentDashboardName = ko.observable();
+    self.currentDashboardName = ko.observable('Dashboards');
 }
