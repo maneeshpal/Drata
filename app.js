@@ -92,7 +92,7 @@ app.put('/api/tags', drataRepository.addTag);
 app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
 
-app.get('/api/external/pop2539', mongoRepository.pop);
+//app.get('/api/external/pop2539', mongoRepository.pop);
 app.get('/api/external/datasources', mongoRepository.getDataSourceNames);
 app.get('/api/external/:datasource/database', mongoRepository.getDatabaseNames);
 app.get('/api/external/:datasource/:dbname/collectionNames', mongoRepository.getCollectionNames);
