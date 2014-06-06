@@ -9,6 +9,13 @@ input.giant{
   font-size: 1rem;
 }
 
+.loading{
+  background-image: url('/images/loading.gif');
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  width:100%;
+}
+
 .ui-sortable-placeholder * {
   visibility: hidden; }
 

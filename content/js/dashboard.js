@@ -94,6 +94,10 @@ var Widget = function(widgetModel, index){
     self.widgetClass= ko.computed(function(){
         return 'widget-size-' + self.sizex();
     });
+
+    self.parseError = ko.observable();
+    self.widgetLoading = ko.observable(true);
+
     self.chartType = ko.observable(widgetModel.segmentModel.chartType);
     
     self.logoClass = ko.computed(function(){
@@ -125,7 +129,6 @@ var Widget = function(widgetModel, index){
         return wh;
     });
 
-    self.parseError = ko.observable();
     var content;
     self.contentTemplate = ko.computed(function(){
         switch(self.chartType()){
@@ -201,6 +204,7 @@ var Widget = function(widgetModel, index){
             self.selectedPieKey(self.pieKeys()[0]);
             console.time(self.chartType() + ' : ' + self.widgetId);
             content.drawChart(chartData[0], widgetModel.segmentModel);
+            self.widgetLoading(false);
             //prevent double draw on page load
             console.timeEnd(self.chartType() + ' : ' + self.widgetId);
             setTimeout(function(){
@@ -289,7 +293,7 @@ var LineContent = function(index){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
             .call(chart);
-        return chart;
+        //return chart;
     };
 
     self.resize = function(){

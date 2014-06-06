@@ -202,7 +202,7 @@ exports.getWidgets = function(req, res) {
             res.send(404);
         }
         else{
-            console.log('before query' + JSON.stringify(req.body));
+            //console.log('before query' + JSON.stringify(req.body));
             var q = utils.getwidgetListMongoQuery(req.body);
             console.log(JSON.stringify(q));
             collection.find(q).toArray(function(err, result) {

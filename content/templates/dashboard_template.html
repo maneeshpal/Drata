@@ -52,8 +52,8 @@
             <div data-bind="visible: !!parseError()">
                 <div data-bind="html: parseError, attr :{style: 'height:'+ widgetHeight() + 'px; padding-top:' + (+widgetHeight()/2 -10) + 'px; text-align:center'}"></div>
             </div>
-            
-            <div data-bind="if: !parseError()">
+
+            <div data-bind="if: !parseError(), css : {'loading': widgetLoading}">
                 <!-- ko template: contentTemplate() -->
                 <!-- /ko -->
             </div>
