@@ -239,7 +239,7 @@ var Aggregator = {
 
                 if(item.hasOwnProperty(selection.selectedProp) || selection.isComplex) {
                     ret.push({
-                        x: item[dataGroup.xAxisProp],
+                        x: (dataGroup.xAxisType === 'date') ? +new Date(item[dataGroup.xAxisProp]) : item[dataGroup.xAxisProp],
                         y: yValue
                     });
                 }

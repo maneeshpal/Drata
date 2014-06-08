@@ -93,6 +93,16 @@ select.error{
     border:1px solid #f04124;
 }
 
+.form-error{
+    background-color: #EDC4BD;
+    border:1px solid #f04124;
+    padding:0 1.125rem;
+}
+
+.form-error .heading{
+    margin-top:.5rem;
+}
+
 @media only screen and (max-width: 350px) {
     .ui-datepicker-div{
         width:100%;

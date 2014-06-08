@@ -528,6 +528,20 @@
         
     };
 
+    var getSelectionProperties = function(selections){
+        var ret = [];
+        _.each(selections, function(sel){
+            if(!sel.isComplex){
+                ret.push(sel.selectedProp.split('.')[0]);
+            }
+            else {
+                innerSel = getSelectionProperties(sel.groups);
+                ret = ret.concat(innerSel);
+            }
+        });        
+        return _.uniq(ret);
+    };
+
     var selectionsExpression = function(selections, isTopLevel){
         var expression='';
         if(isTopLevel){
@@ -598,7 +612,8 @@
         conditionsExpression: conditionsExpression,
         onTemplateLoad: onTemplateLoad,
         intervalFormats: intervalFormats,
-        getTextFormat: getTextFormat
+        getTextFormat: getTextFormat,
+        getSelectionProperties: getSelectionProperties
     });
 })(this);
 

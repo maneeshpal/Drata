@@ -9,7 +9,8 @@ var Segmentor = function(model){
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition', propertyTypes: self.propertyTypes });
     self.selectionGroup = new SelectionGroup({ level: self.level, propertyTypes: self.propertyTypes });
-
+    self.formErrors = ko.observableArray();
+    
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
     self.chartType = ko.observable();
@@ -60,13 +61,7 @@ var Segmentor = function(model){
     
     self.getModel = function(){
         if(!self.isValidSegment()) return;
-        return {
-            selection: self.selectionGroup.getModel(),
-            dataGroup: self.dataGroup.getModel(),
-            group: self.conditionGroup.getModel(),
-            dataFilter: self.dataFilter.getModel(),
-            chartType: self.chartType()
-        };
+        return self.getM();
     };
     self.getM = function(){
         return {
@@ -77,37 +72,107 @@ var Segmentor = function(model){
             chartType: self.chartType()
         };
     };
+
+    self.getQueryErrors = function(){
+        var errors = [];
+        var segmentModel = self.getM();
+
+        //logic validation 1
+        var complexSelections = segmentModel.selection.filter(function(s){
+            return s.isComplex;
+        });
+
+        var complexProps = drata.utils.getSelectionProperties(complexSelections);
+        
+        var nonNumericSelections = [];
+        if(complexProps.length > 0){
+            nonNumericSelections = complexProps.filter(function(s){
+                return self.propertyTypes[s]() !== 'numeric';
+            });
+            if(nonNumericSelections.length > 0){
+                errors.push('Error is selections: cannot perform arithmetic operations on non-numeric properties <em style="font-weight:bold">'+ nonNumericSelections.join(', ') +'</em>');
+            }
+        }
+
+        //Logic validation 2
+
+        var trackChartTypes = ['line', 'area','scatter','numeric'];
+        var hasGrouping, naBonda = [];
+
+        if(trackChartTypes.indexOf(segmentModel.chartType) > -1){
+            hasGrouping = segmentModel.dataGroup.timeseries;
+        }else{
+            hasGrouping = segmentModel.dataGroup.hasGrouping;
+        }
+        if(hasGrouping){
+            naBonda  = segmentModel.selection.filter(function(s){
+                return s.groupBy === 'value';
+            }).map(function(s2){
+                return s2.selectedProp;
+            });
+            if(naBonda.length > 0){
+                errors.push('Error in Selections and Grouping: When aggregations exist, <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + naBonda.join(', ') + '</em>');
+            }
+        }
+
+        //logic validation 3
+        //when complex selections, count is not allowed
+        if(complexSelections.length>0){
+            var selWithCounts = complexSelections.filter(function(s){
+                return s.groupBy === 'count';
+            }).map(function(s2){
+                return s2.aliasName;
+            });
+            if(selWithCounts.length > 0){
+                errors.push('Error in Selections: <em>count</em> is not allowed when selections are derived by from more than 1 property <em style="font-weight:bold">(' + selWithCounts.join(', ') + ')</em>');
+            }
+        }
+        return errors;
+    };
+
     self.isValidSegment = function(){
+        self.formErrors([]);
         var selerrors = ko.validation.group(self.selectionGroup, {deep:true});
         var conditions = self.conditionGroup.conditions();
         var dataFilterErrors = ko.validation.group(self.dataFilter, {deep:true});
         var topLevelErrors = ko.validation.group(self, {deep:false});
         var isValid = true;
+
         for(var c= 0; c< conditions.length; c++){
             if(!conditions[c].isValidCondition()) {
                 isValid = false;
             }
         }
+        if(!isValid) sef.formErrors.push('Conditions have errors.');
         if(selerrors().length > 0 ){
             isValid = false;
             selerrors.showAllMessages();
+            self.formErrors.push('Selections have errors.');
         }
         if(topLevelErrors().length > 0){
             isValid = false;
             topLevelErrors.showAllMessages();
+            self.formErrors(self.formErrors().concat(topLevelErrors()));
         }
         if(dataFilterErrors().length > 0){
             isValid = false;
             dataFilterErrors.showAllMessages();
+            self.formErrors.push('Errors with date range');
         }
         if(self.dataGroup){
             var dataGroupErrors = ko.validation.group(self.dataGroup, {deep:true});
             if(dataGroupErrors().length > 0) {
                 isValid = false;
                 dataGroupErrors.showAllMessages();
+                self.formErrors(self.formErrors().concat(dataGroupErrors()));
             }
         }
-        
+        var logicErrors = self.getQueryErrors();
+        if(logicErrors.length > 0){
+            isValid  = false;
+            self.formErrors(self.formErrors().concat(logicErrors));
+        }
+
         return isValid;
     };
     self.chartType.extend({
@@ -159,7 +224,7 @@ var TrackDataGroup = function(){
 
     self.groupByProp.extend({
         required: { 
-            message : 'Enter Value',
+            message : 'Enter GroupBy value',
             onlyIf : function(){
                 return self.hasGrouping();
             }
@@ -264,7 +329,7 @@ var ComparisonDataGroup = function(options){
 
     self.groupByProp.extend({
         required: { 
-            message : 'Enter Value',
+            message : 'Enter GroupBy value',
             onlyIf : function(){
                 return self.hasGrouping();
             }
@@ -273,7 +338,7 @@ var ComparisonDataGroup = function(options){
 
     self.divideByProp.extend({
         required: { 
-            message : 'Enter Value',
+            message : 'Enter SliceBy value',
             onlyIf : function(){
                 return self.hasDivideBy();
             }
@@ -1033,7 +1098,7 @@ var Conditioner = {
 
                 if(item.hasOwnProperty(selection.selectedProp) || selection.isComplex) {
                     ret.push({
-                        x: item[dataGroup.xAxisProp],
+                        x: (dataGroup.xAxisType === 'date') ? +new Date(item[dataGroup.xAxisProp]) : item[dataGroup.xAxisProp],
                         y: yValue
                     });
                 }

@@ -366,28 +366,39 @@ var NumericContent = function(index){
         }
 
         var currentData = [];
-        _.each(combinedObj, function(item, x){
-            currentData.push({
-                x: +x,
-                y: item
+        if(segmentModel.dataGroup.xAxisType === 'date'){
+            _.each(combinedObj, function(item, x){
+                currentData.push({
+                    x: new Date(+x),
+                    y: item
+                });
             });
-        });
 
+        }
+        else{
+            _.each(combinedObj, function(item, x){
+                currentData.push({
+                    x: +x,
+                    y: item
+                });
+            });            
+        }
+        
         currentData.sort(function(x, y){
             return x.x - y.x;
         });
 
-        if(segmentModel.dataGroup.xAxisType === 'date'){
-           firstArr = currentData.map(function(dp){
-                return {
-                    x: new Date(dp.x), 
-                    y: dp.y
-                }
-            });
-        }
-        else{
+        // if(segmentModel.dataGroup.xAxisType === 'date'){
+        //    firstArr = currentData.map(function(dp){
+        //         return {
+        //             x: new Date(dp.x), 
+        //             y: dp.y
+        //         }
+        //     });
+        // }
+        // else{
             firstArr = currentData.slice();
-        }
+        //}
         drawSideBar();
         drawChartBackground(self.backgroundChartType());
     });
@@ -640,7 +651,6 @@ var SegmentProcessor = function(){
     self.dataSource = ko.observable();
     self.dataSourceNames = ko.observableArray();
     self.databaseNames = ko.observableArray();
-
     self.database = ko.observable();
     self.parseError = ko.observable();
     self.propertyTypes = ko.observable();
@@ -758,9 +768,10 @@ var SegmentProcessor = function(){
                 return;
             }
             var data = response.result;
-            //try{
-                //data = Conditioner.getGraphData(segmentModel, response.result);
-            //}
+            // var data;
+            // try{
+            //     data = Conditioner.getGraphData(segmentModel, response.result);
+            // }
             // catch(e){
             //     self.parseError(e);
             //     throw e;

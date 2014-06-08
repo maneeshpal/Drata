@@ -7,84 +7,8 @@ var baseMongoRepo = require('./genericMongoRepository');
 
 //var mongoClients = {};
 var serverNames = config.dataSources.map(function(d){
-        return d.alias;   
-    });
-
-// _.each(config.dataSources, function(server){
-//     var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));   
-//     instance.open(function(err, mongoClient) {
-//         if(err){
-//             console.log(server.alias + ' connection refused');
-            
-//         }else{
-//             mongoClients[server.alias] = mongoClient;
-//             dbs[server.alias] = {}; 
-//             console.log('new server: ' + server.alias); 
-//         }
-//     });
-// })
-
-
-// var dbs = {};
-
-// var getServer = function(alias){
-//     return config.dataSources.filter(function(s){
-//         return s.alias === alias;
-//     })[0];
-// }
-// var connectionCount = 0;
-// var dbInstance = function(){
-//     var _name, _serverName;
-
-//     function _connect(callback){
-//         if(!dbs[_serverName]) {
-//             callback && callback();
-//             return;
-//         }
-
-//         if(!dbs[_serverName][_name]){
-//             // if(!dbs[_serverName]){
-//             //     var server = getServer(_serverName);
-//             //     var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));    
-//             //     instance.open(function(err, mongoClient) {
-//             //         if(err){
-//             //             console.log(_serverName + ' connection refused');
-//             //             callback && callback();
-//             //         }
-//             //         else{
-//             //             console.log('new server: ' + _serverName + ' , new database: ' + _name); 
-//             //             dbs[_serverName] = {};
-//             //             dbs[_serverName][_name] = mongoClient.db(_name);
-//             //             callback && callback(dbs[_serverName][_name]);
-//             //             mongoClients[_serverName] = instance;    
-//             //         }
-//             //     });
-//             // }
-//             // else {
-//                 dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
-//                 console.log('server: ' + _serverName + ' , new database: ' + _name); 
-//                 callback && callback(dbs[_serverName][_name]);
-//             //}
-//         }
-//         else{
-//             console.log('server: ' + _serverName + ' , database: ' + _name); 
-//             callback && callback(dbs[_serverName][_name]);
-//         }
-//     }
-
-//     _connect.dbName = function(val){
-//         if(!_serverName) throw "Server not speficied";
-//         if (!arguments.length) return _name;
-//         _name = val;
-//         return _connect;
-//     };
-//     _connect.serverName = function(val){
-//         if (!arguments.length) return _serverName;
-//         _serverName = val;
-//         return _connect;
-//     };
-//     return _connect;
-// };
+    return d.alias;   
+});
 
 exports.pop = function(req, res){
     populateDB(req, res);
@@ -110,7 +34,6 @@ exports.getDatabaseNames = function(req, res){
             }));    
         });
     });
-    //res.json(['shopperstop']);
 };
 
 exports.getCollectionNames = function(req, res) {
@@ -177,7 +100,7 @@ exports.findCollection = function(req, res) {
         var ss = +(new Date());
         db.collection(collectionName, function(err, collection) {
             if(err){
-                res.send(500);
+                res.send(500, 'Cannot access collection '+ collectionName);
                 return;
             }
             collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
@@ -193,6 +116,7 @@ exports.findCollection = function(req, res) {
                 }
                 console.log('flattened result : ' + (+(new Date()) - ss));
                 ss = +(new Date());
+                
                 var graphData;
                 try{
                     graphData = aggregator.aggregator.getGraphData(segment, ret);    
