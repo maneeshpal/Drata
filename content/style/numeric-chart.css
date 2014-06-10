@@ -43,7 +43,7 @@ ul.stacked-heading li:first-child{
     z-index: 9;
     padding: 0.9375rem;
     width:100%;
-    bottom:0;
+    bottom:20%;
     left:0;
 }
 .numeric-chart select {
