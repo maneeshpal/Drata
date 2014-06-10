@@ -4,7 +4,7 @@
     <div class="large-12 columns">
     <div class="form-error">
         <h6 class="heading"><span style="color:#f04124" class="icon-spam"> </span>Form Errors</h6>
-        <ul class="no-bullet" data-bind="foreach:formErrors">
+        <ul class="square" data-bind="foreach:formErrors">
             <li data-bind="html: $data"></li>
         </ul>
         </div>
@@ -69,7 +69,7 @@
             <div class="row">
                 <div class="small-12 columns">
                     <label>Date Property
-                        <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.properties,optionsCaption:'choose Property',allowCustom:false}">
+                        <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
                         </div>
                     </label>
                     <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
@@ -81,7 +81,7 @@
                     <select data-bind="options: drata.global.timeframes,optionsCaption: 'Interval',value: intervalKind">
                     </select>
                 </div>
-                <div class="medium-6 small-12 columns" data-bind="enabled: false">
+                <div class="medium-6 small-12 columns">
                     <div style="margin:.7rem" id="myslider"></div>
                 </div>
             </div>
@@ -169,7 +169,7 @@
         <div class="small-4 columns">
             <label class="right inline">
                 <input type="checkbox" data-bind="checked:hasGrouping" />
-                &nbsp;Split results by</label>
+                &nbsp;Split by</label>
         </div>
         <div class="small-8 columns">
             <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
@@ -183,7 +183,7 @@
             <label class="right inline">Aggregate with</label>
         </div>
             
-        <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:$parent.properties,optionsCaption:'x Axis', allowCustom:false}">
+        <div class="small-8 columns" data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:properties,optionsCaption:'x Axis', allowCustom:false}">
         </div>
     </div>
      

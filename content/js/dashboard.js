@@ -659,7 +659,7 @@ var SegmentProcessor = function(){
     
     self.dataSource.subscribe(function(newValue){
         if(!newValue){
-            self.databaseNames(undefined);
+            self.databaseNames([]);
             self.database(undefined);
         }
         else{
@@ -676,7 +676,7 @@ var SegmentProcessor = function(){
 
     self.database.subscribe(function(newValue){
         if(!newValue || !self.dataSource()){
-            self.dataKeys(undefined);
+            self.dataKeys([]);
             self.selectedDataKey(undefined);
         }
         else{
@@ -693,7 +693,7 @@ var SegmentProcessor = function(){
 
     self.selectedDataKey.subscribe(function(newValue){
         if(!newValue || !self.dataSource() || !self.database()){
-            self.propertyTypes(undefined);
+            self.propertyTypes([]);
         }
         else {
             if(cloneModel.selectedDataKey !== newValue){

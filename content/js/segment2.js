@@ -4,6 +4,7 @@ var Segmentor = function(model){
     var self = this;
     self.propertyTypes = {};
     self.properties = ko.observableArray();
+
     self.level = 0;
     self.temp = ko.observable();
     self.outputData = ko.observable();
@@ -27,6 +28,23 @@ var Segmentor = function(model){
         }
         self.properties(propList);
     };
+    
+    self.dateProperties = ko.computed(function(){
+        var ptypes = ko.toJS(self.propertyTypes);
+        var props = self.properties();
+        return props.filter(function(p){
+            return ptypes[p] === 'date';
+        })
+    });
+
+    self.nonDateProperties = ko.computed(function(){
+        var ptypes = ko.toJS(self.propertyTypes);
+        var props = self.properties();
+        return props.filter(function(p){
+            return ptypes[p] !== 'date';
+        })
+    });
+
     self.initialize = function(model, propertyTypes){
         model = model || {};
         self.setPropertyTypes(propertyTypes);
@@ -35,6 +53,7 @@ var Segmentor = function(model){
         self.dataFilter.prefill(model.dataFilter || {});
         self.chartType(model.chartType);
         self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
+        self.chartType.isModified(false);
     };
     
     self.dataGroupTemplate = ko.computed(function(){
@@ -66,7 +85,7 @@ var Segmentor = function(model){
     self.getM = function(){
         return {
             selection: self.selectionGroup.getModel(),
-            dataGroup: self.dataGroup.getModel(),
+            dataGroup: self.dataGroup ? self.dataGroup.getModel(): undefined,
             group: self.conditionGroup.getModel(),
             dataFilter: self.dataFilter.getModel(),
             chartType: self.chartType()
@@ -77,7 +96,11 @@ var Segmentor = function(model){
         var errors = [];
         var segmentModel = self.getM();
 
+        if(segmentModel.selection.length === 0){
+            errors.push('No selections exist, please select the property you wish to visualize');
+        }
         //logic validation 1
+        // should not perform arithmetic operations on non numeric properties
         var complexSelections = segmentModel.selection.filter(function(s){
             return s.isComplex;
         });
@@ -95,15 +118,22 @@ var Segmentor = function(model){
         }
 
         //Logic validation 2
-
+        //if groupby exists, selections should be sum count or avg
         var trackChartTypes = ['line', 'area','scatter','numeric'];
         var hasGrouping, naBonda = [];
 
-        if(trackChartTypes.indexOf(segmentModel.chartType) > -1){
-            hasGrouping = segmentModel.dataGroup.timeseries;
+        if(segmentModel.dataGroup){
+            if(trackChartTypes.indexOf(segmentModel.chartType) > -1){
+                hasGrouping = segmentModel.dataGroup.timeseries;
+            }else{
+                hasGrouping = segmentModel.dataGroup.hasGrouping;
+            }   
         }else{
-            hasGrouping = segmentModel.dataGroup.hasGrouping;
+            //dont do anything. this happened because user did not select
+            //chart type. we already show error for that.
+            //errors.push('');
         }
+
         if(hasGrouping){
             naBonda  = segmentModel.selection.filter(function(s){
                 return s.groupBy === 'value';
@@ -201,15 +231,24 @@ var TrackDataGroup = function(){
         }
     });
 
+    self.properties = ko.computed(function(){
+        return self.xAxisType() === 'date' ? segmentProcessor.segment.dateProperties() : segmentProcessor.segment.nonDateProperties();
+    });
+
+    self.xAxisType.subscribe(function(){
+        self.xAxisProp(undefined);
+        self.xAxisProp.isModified(false);
+    });
+
     self.timeseries.subscribe(function(newValue) {
         if(!newValue) self.timeseriesInterval(undefined);
     });
 
     self.setProps = function(model){
-        self.xAxisProp(model.xAxisProp);
         self.groupByProp(model.groupByProp);
         self.timeseries(model.timeseries);
         self.xAxisType(model.xAxisType);
+        self.xAxisProp(model.xAxisProp);
         self.hasGrouping(model.groupByProp !== undefined);
         self.timeseriesInterval(model.timeseriesInterval);
     };
@@ -219,6 +258,7 @@ var TrackDataGroup = function(){
         delete dataGroupModel.getModel;
         delete dataGroupModel.template;
         delete dataGroupModel.intervalOptions;
+        delete dataGroupModel.properties;
         return dataGroupModel;
     }
 
@@ -245,8 +285,6 @@ var TrackDataGroup = function(){
             message : 'Select x axis'
         }
     });
-
-    //model && self.setProps(model);
 };
 
 var ComparisonDataGroup = function(options){
@@ -356,7 +394,7 @@ var DataFilter = function(){
     
     var slider;
 
-    self.intervalType = ko.observable();
+    self.intervalType = ko.observable('static');
 
     self.intervalKind = ko.observable();
     
@@ -390,7 +428,7 @@ var DataFilter = function(){
     };
 
     self.prefill = function(model){
-        self.intervalType(model.intervalType || 'dynamic');
+        self.intervalType(model.intervalType || 'static');
         self.intervalKind(model.intervalKind);
         if(model.intervalType === 'static'){
             model.min && self.minDate(model.min);
@@ -403,7 +441,8 @@ var DataFilter = function(){
                 slider.slider( "option", "values", [model.min, model.max]); 
             }
         }
-        model.dateProp && self.dateProp(model.dateProp);
+        self.dateProp(model.dateProp);
+        self.dateProp.isModified(false);
     };
 
     self.expression = ko.computed(function(){
@@ -462,6 +501,15 @@ var DataFilter = function(){
             message: 'Invalid Date',
             onlyIf: function(){
                 return self.intervalType() == 'static';
+            }
+        }
+    });
+
+    self.intervalKind.extend({
+        required : {
+            message: 'Please select Interval',
+            onlyIf: function(){
+                return self.intervalType() == 'dynamic';
             }
         }
     });
