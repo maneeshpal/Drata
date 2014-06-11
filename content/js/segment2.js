@@ -44,7 +44,13 @@ var Segmentor = function(model){
             return ptypes[p] !== 'date';
         })
     });
-
+    self.numericProperties = ko.computed(function(){
+        var ptypes = ko.toJS(self.propertyTypes);
+        var props = self.properties();
+        return props.filter(function(p){
+            return ptypes[p] === 'numeric';
+        })
+    });
     self.initialize = function(model, propertyTypes){
         model = model || {};
         self.setPropertyTypes(propertyTypes);
@@ -99,21 +105,38 @@ var Segmentor = function(model){
         if(segmentModel.selection.length === 0){
             errors.push('No selections exist, please select the property you wish to visualize');
         }
-        //logic validation 1
-        // should not perform arithmetic operations on non numeric properties
-        var complexSelections = segmentModel.selection.filter(function(s){
-            return s.isComplex;
+        var selections = _.groupBy(segmentModel.selection, function(s){
+            return s.isComplex ? 'complex': 'simple';
         });
 
-        var complexProps = drata.utils.getSelectionProperties(complexSelections);
+        selections.simple = selections.simple || [];
+        selections.complex = selections.complex || [];
+        //Logic validation 7
+        //selections should not have sum, avg, min, max for non numeric properties
+        //var simpleProps = drata.utils.getSelectionProperties(selections.simple);
+
+        if(selections.simple.length > 0){
+            var nonNumericSimpleSelections = selections.simple.filter(function(s){
+                return self.propertyTypes[s.selectedProp]() !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
+            }).map(function(s2){
+                return s2.selectedProp;
+            });
+            if(nonNumericSimpleSelections.length > 0){
+                errors.push('Error is selections: cannot perform <em>sum, avg, min, max </em> on non-numeric properties <em style="font-weight:bold">'+ nonNumericSimpleSelections.join(', ') +'</em>');
+            }
+        }
+
+        //logic validation 1
+        // should not perform arithmetic operations on non numeric properties
+        var complexProps = drata.utils.getSelectionProperties(selections.complex);
         
-        var nonNumericSelections = [];
+        var nonNumericComplexSelections = [];
         if(complexProps.length > 0){
-            nonNumericSelections = complexProps.filter(function(s){
+            nonNumericComplexSelections = complexProps.filter(function(s){
                 return self.propertyTypes[s]() !== 'numeric';
             });
-            if(nonNumericSelections.length > 0){
-                errors.push('Error is selections: cannot perform arithmetic operations on non-numeric properties <em style="font-weight:bold">'+ nonNumericSelections.join(', ') +'</em>');
+            if(nonNumericComplexSelections.length > 0){
+                errors.push('Error is selections: cannot perform arithmetic operations on non-numeric properties <em style="font-weight:bold">'+ nonNumericComplexSelections.join(', ') +'</em>');
             }
         }
 
@@ -147,8 +170,8 @@ var Segmentor = function(model){
 
         //logic validation 3
         //when complex selections, count is not allowed
-        if(complexSelections.length>0){
-            var selWithCounts = complexSelections.filter(function(s){
+        if(selections.complex.length>0){
+            var selWithCounts = selections.complex.filter(function(s){
                 return s.groupBy === 'count';
             }).map(function(s2){
                 return s2.aliasName;
@@ -232,7 +255,7 @@ var TrackDataGroup = function(){
     });
 
     self.properties = ko.computed(function(){
-        return self.xAxisType() === 'date' ? segmentProcessor.segment.dateProperties() : segmentProcessor.segment.nonDateProperties();
+        return self.xAxisType() === 'date' ? segmentProcessor.segment.dateProperties() : segmentProcessor.segment.numericProperties();
     });
 
     self.xAxisType.subscribe(function(){
@@ -272,10 +295,12 @@ var TrackDataGroup = function(){
     });
 
     self.timeseriesInterval.extend({
-        required: { 
-            message : 'Interval required',
-            onlyIf : function(){
+        timeseriesInterval: {
+            isTimeSeries : function(){
                 return self.timeseries();
+            },
+            xAxisType : function(){
+                return self.xAxisType();
             }
         }
     });
@@ -561,9 +586,21 @@ var Condition = function(options){
         return [];
     });
 
+    self.availableOperations = ko.computed(function(){
+        if(self.valType() === 'string'){
+           return _.difference(drata.global.conditionalOperations, drata.global.numericOperations);
+        }
+        else if(self.valType() === 'bool'){
+            return ['=', 'exists'];
+        }
+        else if(self.valType() === 'date'){
+           return _.difference(drata.global.conditionalOperations, ['like', 'not like']);
+        }
+        return drata.global.conditionalOperations;
+    });
+
     self.addCondition = function(){
         self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, propertyTypes: options.propertyTypes }));
-        
     };
     
     self.addComplexCondition = function(){
@@ -982,7 +1019,7 @@ var SelectionGroup = function(options){
         _.each(innerGroups, function(gr,index){
             exp = gr.expression();
             if(gr.groupBy() !== 'value'){
-                exp = '<em>' + gr.groupBy() + '</em>(' + exp + ')';
+                exp = drata.utils.format(gr.isComplex() ? '<em>{0}</em>{1}' : '<em>{0}</em>({1})', gr.groupBy(), exp); 
             }
             expressions.push(exp);
         });
@@ -997,25 +1034,15 @@ var DataRetriever = {
             chartType: model.segment.chartType,
             selection: model.segment.selection,
             dataGroup: model.segment.dataGroup,
-            dataFilter: model.segment.dataFilter
+            dataFilter: model.segment.dataFilter,
+            group: model.segment.group,
+            applyClientAggregation: model.applyClientAggregation
         };
-        if(!model.applyClientfilters){
-            postData.group = model.segment.group;
-        }
+
         drata.apiClient.getData(postData, {dataSource: model.dataSource, database: model.database, collectionName: model.collectionName}, function(response){
-            if(response.success){
-                var ret = [], result = response.result;
-                // console.time('flattening data. response length: ' + result.length);
-                // for(var i = 0; i< result.length; i++){
-                //     ret.push(drata.utils.flatten(result[i]));
-                // }
-                // console.timeEnd('flattening data. response length: ' + result.length);
-                
-                //Apply filters client side if the response isnt already filtered.
-                // if(model.applyClientfilters){
-                //     ret = Conditioner.filterData(ret, model.segment);
-                // }
-                //response.result = ret;
+            if(response.success && model.applyClientAggregation){
+                var result = response.result;
+                response.result = Conditioner.getGraphData(model.segment, response.result);
             }
             callback && callback(response);
         });
@@ -1231,25 +1258,31 @@ var Conditioner = {
         if(selection.isComplex && selection.groupBy === 'count')
             throw "Count Not allowed for complex selections.";
 
-        var ret = _.reduce(objArray, function(memo, num){ 
+        var ret = _.reduce(objArray, function(previous, current){ 
             var numval;
             if(selection.isComplex){ //complex selection. so we need to process it.
-                var temp = Conditioner.processGroup(num,selection);
+                var temp = Conditioner.processGroup(current,selection);
                 numval = temp.value;
             }
+            else if(selection.groupBy === 'min'){
+                return previous < current[selection.selectedProp] ? previous : current[selection.selectedProp];
+            }
+            else if(selection.groupBy === 'max'){
+                return previous < current[selection.selectedProp] ? current[selection.selectedProp] : previous;
+            }
             else if(selection.groupBy === 'count'){
-                numval = num[selection.selectedProp]? 1 : 0;
+                numval = current[selection.selectedProp]? 1 : 0;
             }
             else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
-                if(isNaN(+num[selection.selectedProp]))
-                    throw 'Attempt to calculate <em>' +selection.groupBy+ '</em> of property: <strong>' + selection.selectedProp + '</strong> with non-numeric value "' + num[selection.selectedProp] + '" detected';
-                numval = +num[selection.selectedProp] || 0;
+                if(isNaN(+current[selection.selectedProp]))
+                    throw 'Attempt to calculate <em>' +selection.groupBy+ '</em> of property: <strong>' + selection.selectedProp + '</strong> with non-numeric value "' + current[selection.selectedProp] + '" detected';
+                numval = +current[selection.selectedProp] || 0;
             }
             else{
                 throw 'For this visualization, you need Your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>';
             }
-            return memo + numval; 
-        }, 0);
+            return previous + numval; 
+        }, (!selection.isComplex && objArray.length > 0 && (selection.groupBy === 'min' || selection.groupBy === 'max'))? +objArray[0][selection.selectedProp] : 0);
 
         return selection.groupBy === 'avg' ? ret/objArray.length : ret;
     },
@@ -1310,7 +1343,7 @@ var Conditioner = {
                     });
                     
                     response.push({
-                        key : sel.isComplex? sel.aliasName : sel.selectedProp|| 'Selection',
+                        key : sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp|| 'Selection',
                         groupLevel: 'B',
                         values: result
                     });
@@ -1374,7 +1407,7 @@ var Conditioner = {
             _.each(segmentModel.selection, function(sel){
                 var val = Conditioner.reduceData(inputData, sel);
                 result.push({
-                    key: sel.isComplex? sel.aliasName : sel.selectedProp || 'selection',
+                    key: sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp || 'selection',
                     value: val
                 });
             });

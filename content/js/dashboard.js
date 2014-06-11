@@ -175,19 +175,12 @@ var Widget = function(widgetModel, index){
     self.loadWidget = function(){
         self.parseError(undefined);
 
-        DataRetriever.getData({applyClientfilters:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
+        DataRetriever.getData({applyClientAggregation:true, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
                 return;
             }
             chartData = response.result;
-            // try{
-            //     chartData = Conditioner.getGraphData(widgetModel.segmentModel, response.result);
-            // }
-            // catch(e){
-            //     self.parseError(e);
-            //     return;
-            // }
             var dataToMap;
 
             if(widgetModel.segmentModel.chartType === 'pie'){
@@ -762,20 +755,12 @@ var SegmentProcessor = function(){
     self.handleGraphPreview = function(dataSource, database, selectedDataKey, segmentModel){
         self.parseError(undefined);
         if(segmentModel.chartType === 'numeric') return;
-        DataRetriever.getData({applyClientfilters: false, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
+        DataRetriever.getData({applyClientAggregation: true, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
                 return;
             }
             var data = response.result;
-            // var data;
-            // try{
-            //     data = Conditioner.getGraphData(segmentModel, response.result);
-            // }
-            // catch(e){
-            //     self.parseError(e);
-            //     throw e;
-            // }
             if(!data) return;         
 
             self.previewGraph(true);

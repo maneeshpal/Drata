@@ -8,7 +8,7 @@ var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oc
 /*copy from utils frontend*/
 /*end copy from utils frontend*/
 var parseTime = function(input){
-    if(!input || !isNaN(+input)) return input;
+    if(!input || !isNaN(+input)) return null;
 
     var hmsConv = {
         h: 60 * 60 * 1000,
@@ -71,6 +71,9 @@ var calc = function(left, operation, right){
         case 'like':
             result = left.indexOf(right) > -1;
             break;
+        case 'not like':
+                result = left.indexOf(right) === -1;
+                break;
         case '/':
             result = (+left) / (+right);
     }
@@ -327,6 +330,12 @@ var Aggregator = {
             if(selection.isComplex){ //complex selection. so we need to process it.
                 var temp = Aggregator.processGroup(num,selection);
                 numval = temp.value;
+            }
+            else if(selection.groupBy === 'min'){
+                return previous[selection.selectedProp] < current[selection.selectedProp] ? previous[selection.selectedProp] : current[selection.selectedProp];
+            }
+            else if(selection.groupBy === 'max'){
+                return previous[selection.selectedProp] < current[selection.selectedProp] ? current[selection.selectedProp] : previous[selection.selectedProp];
             }
             else if(selection.groupBy === 'count'){
                 numval = num[selection.selectedProp]? 1 : 0;

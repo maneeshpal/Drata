@@ -165,7 +165,7 @@
     };
 
     var parseTime = function(input){
-        if(!input || !isNaN(+input)) return input;
+        if(!input || !isNaN(+input)) return null;
 
         var hmsConv = {
             h: 60 * 60 * 1000,
@@ -251,6 +251,9 @@
                 break;
             case 'like':
                 result = left.indexOf(right) > -1;
+                break;
+            case 'not like':
+                result = left.indexOf(right) === -1;
                 break;
             case '/':
                 result = (+left) / (+right);
@@ -579,9 +582,9 @@
     };
 
     drata.ns('global').extend({
-        conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like'],
+        conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like', 'not like'],
         arithmeticOperations : ['+', '-', '*','/'],
-        groupingOptions : ['value','count', 'sum', 'avg'],
+        groupingOptions : ['value','count', 'sum', 'avg', 'min', 'max'],
         xAxisTypes : ['date','numeric','currency'],
         chartTypes : ['line', 'area', 'scatter', 'pie','bar', 'numeric'],
         logics : ['and', 'or'],

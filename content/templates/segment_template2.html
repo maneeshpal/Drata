@@ -172,10 +172,9 @@
                 &nbsp;Split by</label>
         </div>
         <div class="small-8 columns">
-            <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.properties, optionsCaption : 'Select GroupBy'">
+            <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.nonDateProperties, optionsCaption : 'Select GroupBy'">
             </select>
         </div>
-        
     </div>
 
     <div class="row">
@@ -323,7 +322,7 @@
         <div class="small-3 columns"  data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
         </div>
         <div class="small-2 columns">
-            <select data-bind="options:drata.global.conditionalOperations, value:operation"></select>
+            <select data-bind="options:availableOperations, value:operation"></select>
         </div>
         <div class="small-3 columns" data-bind="visible: operation() !== 'exists'">
             <div data-bind=" ddComboBox :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, options:availableValues,optionsCaption:'value'}">

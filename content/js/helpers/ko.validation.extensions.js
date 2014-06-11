@@ -9,6 +9,22 @@
                 return true;
             }
         };
+        ko.validation.rules['timeseriesInterval'] = {
+            validator: function (val, options) {
+                if(!val)
+                    return false;
+
+                if(!options.isTimeSeries() || ['month', 'year', 'quarter'].indexOf(val) > -1)
+                    return true;
+                if(options.xAxisType() === 'date'){
+                    return !!drata.utils.parseTime(val);    
+                }else{
+                    return !isNaN(+val) && +val > 0;
+                }
+                
+            },
+            message : 'Interval invalid'
+        };
         
     ko.validation.configure({
         registerExtenders: true,
