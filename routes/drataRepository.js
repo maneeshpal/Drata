@@ -70,7 +70,7 @@ exports.findWidgetsOfDashboard = function(req, res) {
 };
 
 exports.upsertWidget = function(req, res){
-    console.log(JSON.stringify(req.body, null, '\t'));
+    //console.log(JSON.stringify(req.body, null, '\t'));
     db.collection('widget',function(err, collection) {
         if(err){
             console.log(JSON.stringify(err, null, '\t'));
@@ -89,9 +89,9 @@ exports.upsertWidget = function(req, res){
             
             //delete widgetModel._id;
             collection.save(widgetModel, {safe:true}, function(err, result) {
-                console.log(JSON.stringify(err));
+                //console.log(JSON.stringify(err));
                 if(err) res.send(404);
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 res.send(result);
             });
@@ -100,10 +100,10 @@ exports.upsertWidget = function(req, res){
 };
 
 exports.updateWidget = function(req, res){
-    console.log(JSON.stringify(req.body, null, '\t'));
+    //console.log(JSON.stringify(req.body, null, '\t'));
     db.collection('widget',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
@@ -115,9 +115,9 @@ exports.updateWidget = function(req, res){
             widgetModel.dateUpdated = new Date().toISOString();
             
             collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
-                console.log(JSON.stringify(err));
+                //console.log(JSON.stringify(err));
                 if(err) res.send(404);
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 res.send(result);
             });
@@ -129,13 +129,13 @@ exports.deleteWidget = function(req, res){
     var widgetId = mongo.ObjectID(req.params.widgetId);
     db.collection('widget',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
             collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
                 //console.log(JSON.stringify(werr));
-                console.log('deleted ' + req.params.widgetId);
+                //console.log('deleted ' + req.params.widgetId);
                 res.send(200);
             });
         }
@@ -145,7 +145,7 @@ exports.deleteWidget = function(req, res){
 exports.upsertDashboard = function(req, res){
     db.collection('dashboard',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
@@ -158,9 +158,9 @@ exports.upsertDashboard = function(req, res){
             }
             dashboardModel.dateUpdated = new Date();
             collection.save(dashboardModel, {safe:true}, function(err, result) {
-                console.log(JSON.stringify(err));
+                //console.log(JSON.stringify(err));
                 if(err) res.send(404);
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 res.send(result);
             });
@@ -172,7 +172,7 @@ exports.deleteDashboard = function(req, res){
     var dashboardId = mongo.ObjectID(req.params.dashboardId);
     db.collection('dashboard',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
@@ -204,7 +204,7 @@ exports.getWidgets = function(req, res) {
         else{
             //console.log('before query' + JSON.stringify(req.body));
             var q = utils.getwidgetListMongoQuery(req.body);
-            console.log(JSON.stringify(q));
+            //console.log(JSON.stringify(q));
             collection.find(q).toArray(function(err, result) {
                 res.send(result);
             });
@@ -258,7 +258,7 @@ exports.addTag = function(req, res){
             function(err, result){
                 //console.log(JSON.stringify(err));
                 if(err) res.send(404);
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 res.send(200);
             });
         }
@@ -269,7 +269,7 @@ exports.removeTag = function(req, res){
     var tagId = mongo.ObjectID(req.params.tagId);
     db.collection('tags',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
@@ -286,12 +286,12 @@ exports.deleteAllTagsDashboard = function(req, res){
     var dashboardId = req.params.dashboardId;
     db.collection('tags',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
             collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 res.send(200);
             });
         }
@@ -303,12 +303,12 @@ exports.deleteAllWidgetsDashboard = function(req, res){
     var dashboardId = req.params.dashboardId;
     db.collection('widget',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
             collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 res.send(200);
             });
         }

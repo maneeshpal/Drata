@@ -303,7 +303,7 @@ var Aggregator = {
                 });
             }
             result.push({
-                key: sel.isComplex ? sel.aliasName || 'selection' : sel.selectedProp,
+                key: sel.isComplex ? sel.aliasName : sel.groupBy + '_' + sel.selectedProp,
                 values: values
             });
         }.bind(this));
@@ -325,31 +325,31 @@ var Aggregator = {
         if(selection.isComplex && selection.groupBy === 'count')
             throw "Count Not allowed for complex selections.";
 
-        var ret = _.reduce(objArray, function(memo, num){ 
+        var ret = _.reduce(objArray, function(previous, current){ 
             var numval;
             if(selection.isComplex){ //complex selection. so we need to process it.
-                var temp = Aggregator.processGroup(num,selection);
+                var temp = Conditioner.processGroup(current,selection);
                 numval = temp.value;
             }
             else if(selection.groupBy === 'min'){
-                return previous[selection.selectedProp] < current[selection.selectedProp] ? previous[selection.selectedProp] : current[selection.selectedProp];
+                return previous < current[selection.selectedProp] ? previous : current[selection.selectedProp];
             }
             else if(selection.groupBy === 'max'){
-                return previous[selection.selectedProp] < current[selection.selectedProp] ? current[selection.selectedProp] : previous[selection.selectedProp];
+                return previous < current[selection.selectedProp] ? current[selection.selectedProp] : previous;
             }
             else if(selection.groupBy === 'count'){
-                numval = num[selection.selectedProp]? 1 : 0;
+                numval = current[selection.selectedProp]? 1 : 0;
             }
             else if(selection.groupBy === 'sum' || selection.groupBy === 'avg'){ // sumby
-                if(isNaN(+num[selection.selectedProp]))
-                    throw 'Attempt to calculate <em>' +selection.groupBy+ '</em> of property: <strong>' + selection.selectedProp + '</strong> with non-numeric value "' + num[selection.selectedProp] + '" detected';
-                numval = +num[selection.selectedProp] || 0;
+                if(isNaN(+current[selection.selectedProp]))
+                    throw 'Attempt to calculate <em>' +selection.groupBy+ '</em> of property: <strong>' + selection.selectedProp + '</strong> with non-numeric value "' + current[selection.selectedProp] + '" detected';
+                numval = +current[selection.selectedProp] || 0;
             }
             else{
                 throw 'For this visualization, you need Your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>';
             }
-            return memo + numval; 
-        }, 0);
+            return previous + numval; 
+        }, (!selection.isComplex && objArray.length > 0 && (selection.groupBy === 'min' || selection.groupBy === 'max'))? +objArray[0][selection.selectedProp] : 0);
 
         return selection.groupBy === 'avg' ? ret/objArray.length : ret;
     },
@@ -421,7 +421,7 @@ var Aggregator = {
                     }.bind(this));
                     
                     response.push({
-                        key : sel.isComplex? sel.aliasName : sel.selectedProp|| 'Selection',
+                        key : sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp|| 'Selection',
                         groupLevel: 'B',
                         values: result
                     });
@@ -485,7 +485,7 @@ var Aggregator = {
             _.each(segmentModel.selection, function(sel){
                 var val = this.reduceData(inputData, sel);
                 result.push({
-                    key: sel.isComplex? sel.aliasName : sel.selectedProp || 'selection',
+                    key: sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp || 'selection',
                     value: val
                 });
             }.bind(this));

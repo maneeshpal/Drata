@@ -175,7 +175,7 @@ var Widget = function(widgetModel, index){
     self.loadWidget = function(){
         self.parseError(undefined);
 
-        DataRetriever.getData({applyClientAggregation:true, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
+        DataRetriever.getData({applyClientAggregation:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
                 return;
@@ -755,7 +755,7 @@ var SegmentProcessor = function(){
     self.handleGraphPreview = function(dataSource, database, selectedDataKey, segmentModel){
         self.parseError(undefined);
         if(segmentModel.chartType === 'numeric') return;
-        DataRetriever.getData({applyClientAggregation: true, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
+        DataRetriever.getData({applyClientAggregation: false, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
                 return;

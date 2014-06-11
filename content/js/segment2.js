@@ -1236,7 +1236,7 @@ var Conditioner = {
                 });
             }
             result.push({
-                key: sel.isComplex ? sel.aliasName || 'selection' : sel.selectedProp,
+                key: sel.isComplex ? sel.aliasName : sel.groupBy + '_' + sel.selectedProp,
                 values: values
             });
         });
