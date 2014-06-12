@@ -11,11 +11,14 @@
         };
         ko.validation.rules['timeseriesInterval'] = {
             validator: function (val, options) {
+                if(!options.isTimeSeries())
+                    return true;
                 if(!val)
                     return false;
 
-                if(!options.isTimeSeries() || ['month', 'year', 'quarter'].indexOf(val) > -1)
+                if(['month', 'year', 'quarter'].indexOf(val) > -1)
                     return true;
+                
                 if(options.xAxisType() === 'date'){
                     return !!drata.utils.parseTime(val);    
                 }else{

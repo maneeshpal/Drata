@@ -23,7 +23,10 @@ ul.combolist {
     margin-top:-1rem;
     z-index:9;
 } 
-
+ul.combolist.showtop {
+    bottom:1rem;
+    margin-top:0;
+}
 ul.combolist li {
     padding:.5rem;
     border-bottom:1px solid #ccc;

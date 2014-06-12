@@ -81,6 +81,8 @@
         var $combolist;
         var hideCombo = function(){
             $combolist.hide();
+            $combolist.removeClass('showtop');
+
             if(!config.allowCustom){
                 var sel = self.selectedValue();
                 var selExists;
@@ -98,6 +100,15 @@
                 }
             }
         };
+        var showCombo = function(){
+            $combolist.show();
+            if($combolist.height() + $combolist.offset().top - $(window).scrollTop() > $(window).height()){
+                $combolist.addClass('showtop');
+            }else{
+                $combolist.removeClass('showtop');
+            }
+        };
+
         var filterOptions = function(){
             var inputval = $elem.val();
             var filteredList = self.availableOptions().filter(function(opt){
@@ -107,16 +118,17 @@
                 if(filteredList.length === 0){
                     $elem.addClass('combo-error');
                     $combolist.hide();
+                    $combolist.removeClass('showtop');
                     self.filteredOptions(self.availableOptions());
                 }
                 else{
                     $elem.removeClass('combo-error');
-                    $combolist.show();
+                    showCombo();
                     self.filteredOptions(filteredList);
                 }
             }
             else{
-                $combolist.show();
+                showCombo();
                 self.filteredOptions(filteredList);
             }            
         };
@@ -138,7 +150,7 @@
                 });
             });
             $elem.click(function(ele){
-                $combolist.show();
+                showCombo();
                 $(document).on('click.comboSelections', function(){
                     arguments[0].target !== $elem[0] && hideCombo();
                 });
