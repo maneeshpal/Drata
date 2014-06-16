@@ -36,6 +36,7 @@
     .area-group .line{
         stroke-width:2;
         stroke-opacity:.6;
+        fill-opacity:.5;
     }
 
 
