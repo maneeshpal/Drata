@@ -63,19 +63,12 @@ var Segmentor = function(model){
     };
     
     self.dataGroupTemplate = ko.computed(function(){
-        switch(self.chartType()){
-            case 'line':
-            case 'area':
-            case 'scatter':
-            case 'numeric':
-                self.dataGroup =  compDataGroup || new TrackDataGroup({propertyTypes: self.propertyTypes});
-                currentDataGroupTemplate = 'track-datagroup-template';
-                break;
-            case 'pie':
-            case 'bar':
-                self.dataGroup =  trackDataGroup || new ComparisonDataGroup({propertyTypes: self.propertyTypes});
-                currentDataGroupTemplate = 'comp-datagroup-template';
-                break;
+        if(drata.global.trackingChartTypes.indexOf(self.chartType()) > -1){
+            self.dataGroup =  compDataGroup || new TrackDataGroup({propertyTypes: self.propertyTypes});
+            currentDataGroupTemplate = 'track-datagroup-template';
+        }else{
+            self.dataGroup =  trackDataGroup || new ComparisonDataGroup({propertyTypes: self.propertyTypes});
+            currentDataGroupTemplate = 'comp-datagroup-template';
         }
 
         return {
@@ -116,13 +109,26 @@ var Segmentor = function(model){
         //var simpleProps = drata.utils.getSelectionProperties(selections.simple);
 
         if(selections.simple.length > 0){
-            var nonNumericSimpleSelections = selections.simple.filter(function(s){
+            var l7 = selections.simple.filter(function(s){
                 return self.propertyTypes[s.selectedProp]() !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
             }).map(function(s2){
                 return s2.selectedProp;
             });
-            if(nonNumericSimpleSelections.length > 0){
-                errors.push('Error is selections: cannot perform <em>sum, avg, min, max </em> on non-numeric properties <em style="font-weight:bold">'+ nonNumericSimpleSelections.join(', ') +'</em>');
+            if(l7.length > 0){
+                errors.push('Error is selections: cannot perform <em>sum, avg, min, max </em> on non-numeric properties <em style="font-weight:bold">'+ l7.join(', ') +'</em>');
+            }
+        }
+
+        //logic validation 8
+        //any non numeric selection by value is invalid 
+        if(selections.simple.length > 0){
+            var l8 = selections.simple.filter(function(s){
+                return self.propertyTypes[s.selectedProp]() !== 'numeric' && s.groupBy === 'value';
+            }).map(function(s2){
+                return s2.selectedProp;
+            });
+            if(l8.length > 0){
+                errors.push('Error is selections: cannot select <em>value</em> of non-numeric properties <em style="font-weight:bold">'+ l8.join(', ') +'</em>');
             }
         }
 
@@ -142,11 +148,11 @@ var Segmentor = function(model){
 
         //Logic validation 2
         //if groupby exists, selections should be sum count or avg
-        var trackChartTypes = ['line', 'area','scatter','numeric'];
-        var hasGrouping, naBonda = [];
+        //if groupby doesnt exist, only value is permitted.
+        var hasGrouping;
 
         if(segmentModel.dataGroup){
-            if(trackChartTypes.indexOf(segmentModel.chartType) > -1){
+            if(drata.global.trackingChartTypes.indexOf(segmentModel.chartType) > -1){
                 hasGrouping = segmentModel.dataGroup.timeseries;
             }else{
                 hasGrouping = segmentModel.dataGroup.hasGrouping;
@@ -154,18 +160,27 @@ var Segmentor = function(model){
         }else{
             //dont do anything. this happened because user did not select
             //chart type. we already show error for that.
-            //errors.push('');
         }
 
         if(hasGrouping){
-            naBonda  = segmentModel.selection.filter(function(s){
+            var l2a  = segmentModel.selection.filter(function(s){
                 return s.groupBy === 'value';
             }).map(function(s2){
                 return s2.selectedProp;
             });
-            if(naBonda.length > 0){
-                errors.push('Error in Selections and Grouping: When aggregations exist, <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + naBonda.join(', ') + '</em>');
+            if(l2a.length > 0){
+                errors.push('Error in Selections and Grouping: When aggregations exist, <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + l2a.join(', ') + '</em>');
             }
+        }else{
+            var l2b  = segmentModel.selection.filter(function(s){
+                return s.groupBy !== 'value';
+            }).map(function(s2){
+                return s2.selectedProp;
+            });
+            if(l2b.length > 0){
+                errors.push('Error in Selections and Grouping: When aggregations don\'t exist, <em>sum, avg, count </em> are not allowed in <em style="font-weight:bold">' + l2b.join(', ') + '</em>');
+            }
+
         }
 
         //logic validation 3
@@ -196,7 +211,7 @@ var Segmentor = function(model){
                 isValid = false;
             }
         }
-        if(!isValid) sef.formErrors.push('Conditions have errors.');
+        if(!isValid) self.formErrors.push('Conditions have errors.');
         if(selerrors().length > 0 ){
             isValid = false;
             selerrors.showAllMessages();
@@ -387,6 +402,9 @@ var ComparisonDataGroup = function(options){
         var dataGroupModel = ko.toJS(self);
         delete dataGroupModel.setProps;
         delete dataGroupModel.getModel;
+        delete dataGroupModel.groupByIntervalOptions;
+        delete dataGroupModel.divideByIntervalOptions;
+        delete dataGroupModel.errors;
         return dataGroupModel;
     };
 
@@ -426,17 +444,24 @@ var DataFilter = function(){
     self.dateProp = ko.observable().extend({
         required: {message: 'Enter your Date Property'}
     });
-    
-    self.intervalKind.subscribe(function(newValue){
+
+    var setSliderValues = function(options){
         if(slider){
-            var bounds = drata.utils.getBounds(newValue);
-            var pre = [ Math.floor((bounds[1] - bounds[0])/3),bounds[1] ];
+            var bounds = drata.utils.getBounds(options.intervalKind);
+            options.minMax = options.minMax || [];
+            options.minMax[0] = options.minMax[0] === undefined ? Math.floor((bounds[1] - bounds[0])/3) : options.minMax[0];
+            options.minMax[1] = options.minMax[1] === undefined ? bounds[1] : options.minMax[1];
+            
             slider.slider( "option", "min", bounds[0]);
             slider.slider( "option", "max", bounds[1]);
-            slider.slider( "option", "values", pre);
-            self.min(pre[0]);
-            self.max(pre[1]);
+            slider.slider( "option", "values", options.minMax);
+            self.min(options.minMax[0]);
+            self.max(options.minMax[1]);
         }
+    };
+    
+    self.intervalKind.subscribe(function(newValue){
+        setSliderValues({intervalKind: newValue});
     });
     self.intervalType.subscribe(function(newValue){
         slider && slider.slider(newValue === 'dynamic'? 'enable': 'disable');
@@ -460,11 +485,15 @@ var DataFilter = function(){
             model.max && self.maxDate(model.max);
         }
         else if(model.intervalType === 'dynamic'){
-            model.min !== undefined && self.min(model.min);
-            model.max !== undefined && self.max(model.max);
-            if(model.min !== undefined && model.max !== undefined && slider){
-                slider.slider( "option", "values", [model.min, model.max]); 
-            }
+            setSliderValues({
+                intervalKind: model.intervalKind,
+                minMax: [model.min, model.max]
+            })
+            //model.min !== undefined && self.min(model.min);
+            //model.max !== undefined && self.max(model.max);
+            // if(model.min !== undefined && model.max !== undefined){
+            //     slider.slider( "option", "values", [model.min, model.max]); 
+            // }
         }
         self.dateProp(model.dateProp);
         self.dateProp.isModified(false);
@@ -845,6 +874,7 @@ var Selection = function(options){
     self.selections = ko.observableArray();
     self.aliasName = ko.observable();
     self.groupBy = ko.observable();
+    self.perc = ko.observable();
     self.selectedProp = ko.observable();
     self.addSelection = function(){
         self.selections.push(new Selection({level:options.level+1, renderType: 'childSelection'}));
@@ -853,6 +883,16 @@ var Selection = function(options){
     self.removeSelection = function(selection){
        self.selections.remove(selection);
     };
+
+    self.showPercentChange = ko.computed(function(){
+        if(drata.global.trackingChartTypes.indexOf(segmentProcessor.segment.chartType()) > -1){
+            return true;
+        }
+        else{
+            self.perc(false);
+            return false;
+        }
+    });
 
     self.isComplex = ko.computed(function(){
         return self.selections().length > 0;
@@ -912,6 +952,7 @@ var Selection = function(options){
         self.aliasName(m.aliasName);
         self.logic(m.logic || '+');
         self.groupBy(m.groupBy);
+        self.perc(m.perc);
         self.selectedProp(m.selectedProp);
         self.selections(ko.utils.arrayMap(
             m.groups,
@@ -932,8 +973,8 @@ var Selection = function(options){
             aliasName: self.aliasName(),
             groupBy: self.groupBy(),
             selectedProp: self.selectedProp(),
-            isComplex : self.isComplex() //,
-            //propertyType: self.propertyType()
+            isComplex : self.isComplex(),
+            perc: self.perc()
         }
     };
     self.expression = ko.computed(function(){
@@ -972,9 +1013,7 @@ var Selection = function(options){
 
 var SelectionGroup = function(options){
     var self = this;
-    //self.level =level;
     self.items = ko.observableArray();
-    //var itemFunc = (renderType === 'Condition') ? ;
     self.addItem = function(){
         self.items.push(new Selection({ level: options.level+1, model: undefined, renderType: 'topSelection' }));
     };
@@ -984,6 +1023,11 @@ var SelectionGroup = function(options){
     };
     
     self.prefill = function(model){
+        if(model.length === 0){
+            self.items([]);
+            self.addItem();
+            return;
+        }
         self.items(ko.utils.arrayMap(
             model,
             function(sel) {
@@ -1003,8 +1047,6 @@ var SelectionGroup = function(options){
         $(elem).remove();
       });
     };
-
-    //model && self.prefill(model);
 
     self.getModel = function(){
         var returnGroups = [];
@@ -1026,6 +1068,7 @@ var SelectionGroup = function(options){
         
         return 'Select ' + expressions.join(', ');
     });
+
 };
 
 var DataRetriever = {
@@ -1163,13 +1206,13 @@ var Conditioner = {
             _.each(intervalGroup, function(gi, time){
                 ret.push({
                     x:  +time, //fix numeric. This can be month/quarter etc, not just numeric
-                    y:  Conditioner.reduceData(gi,selection)
+                    y:  this.reduceData(gi,selection)
                 });
-            });
+            }.bind(this));
         }
         else {
             _.each(data, function(item){
-                yValue = Conditioner.processGroup(item,selection).value;
+                yValue = this.processGroup(item,selection).value;
 
                 if(item.hasOwnProperty(selection.selectedProp) || selection.isComplex) {
                     ret.push({
@@ -1177,7 +1220,7 @@ var Conditioner = {
                         y: yValue
                     });
                 }
-            });
+            }.bind(this));
         }
         return ret;
     },
@@ -1197,19 +1240,12 @@ var Conditioner = {
             throw "Selections required";
         this.propertyTypes = segmentModel.propertyTypes;
         var returnData;
-        switch (segmentModel.chartType){
-            case 'line':
-            case 'area':
-            case 'scatter':
-            case 'numeric':
-                returnData = this.getLineCharData(segmentModel, inputData);
-                break;
-            case 'pie':
-            case 'bar':
-                returnData = this.getPieData(segmentModel, inputData);
-                break;
+        if(drata.global.trackingChartTypes.indexOf(segmentModel.chartType) > -1){
+            returnData = this.getLineCharData(segmentModel, inputData);
+        }else{
+            returnData = this.getPieData(segmentModel, inputData);
         }
-        window.debug.chartdata = returnData;
+        //window.debug.chartdata = returnData;
         console.timeEnd('raw_to_chart_data:' + segmentModel.chartType);
         return returnData;
     },
@@ -1224,10 +1260,10 @@ var Conditioner = {
         _.each(segmentModel.selection, function(sel){
            var values;
             if(segmentModel.dataGroup.hasGrouping){
-                values = Conditioner.processDataGroups(groupedData, segmentModel.dataGroup, sel);
+                values = this.processDataGroups(groupedData, segmentModel.dataGroup, sel);
             }
             else{
-                values = Conditioner.groupByInterval(inputData, segmentModel.dataGroup, sel);
+                values = this.groupByInterval(inputData, segmentModel.dataGroup, sel);
             }
             //here sort the values by x
             if(segmentModel.dataGroup.xAxisType === 'currency' || segmentModel.dataGroup.xAxisType === 'numeric'){
@@ -1235,12 +1271,20 @@ var Conditioner = {
                     return x.x - y.x;
                 });
             }
+            if(sel.perc){
+                var prev = values[0].y, temp;
+                values = values.map(function(v){
+                    temp = v.y;
+                    v.y = drata.utils.percChange(v.y, prev);
+                    prev = temp;
+                    return v;
+                })
+            }
             result.push({
-                key: sel.isComplex ? sel.aliasName : sel.groupBy + '_' + sel.selectedProp,
+                key: this.getSelectionKeyName(sel),
                 values: values
             });
-        });
-        
+        }.bind(this));
 
         if(!segmentModel.dataGroup.hasGrouping){
             return [{
@@ -1285,6 +1329,9 @@ var Conditioner = {
         }, (!selection.isComplex && objArray.length > 0 && (selection.groupBy === 'min' || selection.groupBy === 'max'))? +objArray[0][selection.selectedProp] : 0);
 
         return selection.groupBy === 'avg' ? ret/objArray.length : ret;
+    },
+    getSelectionKeyName: function(sel){
+        return drata.utils.format('{0}{1}_{2}', sel.perc ? '%_' : '', sel.groupBy, sel.isComplex ? sel.aliasName : sel.selectedProp);
     },
     getPieData: function(segmentModel, inputData){
         var response = [];
@@ -1333,21 +1380,21 @@ var Conditioner = {
                 _.each(segmentModel.selection, function(sel){
                     result = [];
                     _.each(groupedData, function(groupedDataItem, groupName){
-                        var val = Conditioner.reduceData(groupedDataItem,sel);
+                        var val = this.reduceData(groupedDataItem,sel);
                         groupName = formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval);
                         
                         val >= 0 && result.push({
                             key: groupName,
                             value: val
                         });
-                    });
+                    }.bind(this));
                     
                     response.push({
-                        key : sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp|| 'Selection',
+                        key : this.getSelectionKeyName(sel),
                         groupLevel: 'B',
                         values: result
                     });
-                });
+                }.bind(this));
 
                 topLevelResponse.push({
                     key : 'xxx',
@@ -1381,23 +1428,23 @@ var Conditioner = {
                             name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name, segmentModel.dataGroup.divideByInterval);
                             result.push({
                                 key: name,
-                                value: Conditioner.reduceData(value, sel)
+                                value: this.reduceData(value, sel)
                             });
-                        });
+                        }.bind(this));
 
                         response.push({
                             key : formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval),
                             groupLevel: 'B',
                             values: result
                         });
-                    });
+                    }.bind(this));
 
                     topLevelResponse.push({
-                        key : (sel.isComplex ? sel.aliasName : sel.selectedProp || 'selection') + '-' + sel.groupBy + ' -Group',
+                        key : this.getSelectionKeyName(sel),
                         groupLevel : 'A',
                         values: response
                     });
-                });
+                }.bind(this));
             }
         }
         else{
@@ -1405,12 +1452,12 @@ var Conditioner = {
             result = [];
             
             _.each(segmentModel.selection, function(sel){
-                var val = Conditioner.reduceData(inputData, sel);
+                var val = this.reduceData(inputData, sel);
                 result.push({
-                    key: sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp || 'selection',
+                    key: this.getSelectionKeyName(sel),
                     value: val
                 });
-            });
+            }.bind(this));
 
             response.push({
                 key : toplevelkey,

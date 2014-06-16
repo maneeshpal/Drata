@@ -21,13 +21,13 @@
             .scale(x0)
             .orient("bottom");
 
-        // var getMin = function(data, prop){
-        //     return d3.min(data, function(d) { 
-        //         return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
-        //             return v[prop]; 
-        //         }); 
-        //     });
-        // };
+        var getMin = function(data, prop){
+            return d3.min(data, function(d) { 
+                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
+                    return v[prop]; 
+                }); 
+            });
+        };
 
         var getMax = function(data, prop){
             return d3.max(data, function(d) { 
@@ -88,21 +88,6 @@
                     }else{
                         disabledKeys.splice(keyIndex,1);
                     }
-                    // if(disabledItems === labelKeys.length-1){
-                    //     _.each(data, function(item){
-                    //         _.each(item.values, function(iv){
-                    //             if(iv) iv.disabled = false;
-                    //         });
-                    //     });
-                    //     disabledItems = 0;
-                    // }
-                    // else{
-                    // _.each(data, function(item){
-                    //     toggle = item.values[i] ? item.values[i].disabled : true;
-                    //     if(item.values[i]) item.values[i].disabled = !toggle;
-                    // });    
-                        //disabledItems = toggle ? disabledItems - 1 : disabledItems + 1;
-                    //}
                     
                     chart.resize();
                 });
@@ -128,7 +113,8 @@
                 var yrange;
                 function setYaxis(){
                     y.range([dims.h - dims.m.t - dims.m.b, 0]);
-                    var min = 0, max = getMax(data, 'value');
+                    var minDataVal = getMin(data, 'value');
+                    var min = Math.min(minDataVal, 0), max = getMax(data, 'value');
                     yrange = [min ,max + (max * 1/4)];
                     y.domain(yrange);
 
@@ -195,7 +181,10 @@
                             return d.disabled ?  y(yrange[0]) : y(d.value); 
                         })
                         .attr("width", x1.rangeBand())
-                        .attr("height", function(d) {  return d.disabled ? 0 : (dims.h - dims.m.t - dims.m.b) - y(d.value); });
+                        .attr("height", function(d) {  
+                            console.log('bar value: ' + d.value + '; y: ' + ((dims.h - dims.m.t - dims.m.b) - y(d.value)));
+                            return d.disabled ? 0 : (dims.h - dims.m.t - dims.m.b) - y(d.value); 
+                        });
                         
 
                     rects.exit().transition().duration(300).attr("height", 0)

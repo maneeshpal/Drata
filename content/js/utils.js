@@ -567,6 +567,11 @@
         }
     };
 
+    var percChange = function(curr, prev){
+        if(prev === 0) return 100;
+        return +(((curr * 100)/prev - 100).toFixed(2));
+    };
+
     window.debug = {};
     window.widgetmongo = function(model){
         if(!model || model.length === 0) return {};
@@ -587,6 +592,8 @@
         groupingOptions : ['value','count', 'sum', 'avg', 'min', 'max'],
         xAxisTypes : ['date','numeric','currency'],
         chartTypes : ['line', 'area', 'scatter', 'pie','bar', 'numeric'],
+        trackingChartTypes: ['line', 'area', 'scatter','numeric'],
+        comparisonChartTypes: ['bar', 'pie'],
         logics : ['and', 'or'],
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
@@ -616,7 +623,8 @@
         onTemplateLoad: onTemplateLoad,
         intervalFormats: intervalFormats,
         getTextFormat: getTextFormat,
-        getSelectionProperties: getSelectionProperties
+        getSelectionProperties: getSelectionProperties,
+        percChange: percChange
     });
 })(this);
 

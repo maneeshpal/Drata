@@ -335,6 +335,10 @@ var getSelectionProperties = function(selections){
     return ret;
 };
 
+var toArray = function(args,ix){
+    return Array.prototype.slice.call(args,ix || 0); 
+};
+
 var format = function(format /*, ...replacements*/) {
     var replacements = toArray(arguments, 1);
     for (var i = 0, j = replacements.length; i < j; i++) {
@@ -342,10 +346,29 @@ var format = function(format /*, ...replacements*/) {
     }
     return format;
 };
+
+var percChange = function(curr, prev){
+    if(prev === 0) return 100;
+    return +(((curr * 100)/prev - 100).toFixed(2));
+};
+
+var getPercentageChange = function(arr, prop){
+    if(!arr || arr.length === 0) return arr;
+
+    var prev = arr[0][prop], temp;
+    return arr.map(function(v){
+        temp = v[prop];
+        v[prop] = percChange(v[prop], prev);
+        prev = temp;
+        return v;
+    });
+}
+
 exports.getUniqueProperties = getUniqueProperties;
 exports.getMongoQuery = getMongoQuery;
 exports.flatten = flatten;
 exports.buildReturnPoperties = buildReturnPoperties;
 exports.getwidgetListMongoQuery = getwidgetListMongoQuery;
 exports.format = format;
-
+exports.percChange = percChange;
+exports.getPercentageChange = getPercentageChange;

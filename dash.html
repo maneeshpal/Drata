@@ -185,37 +185,30 @@
             </nav>
             
             <div class="row">
-                <div id="previewgraph" class="large-7 columns" data-bind="visible:previewGraph">
-                    <svg></svg>
-                </div>
-                <div class="columns" data-bind="css: {'large-5' : previewGraph, 'large-12' : !previewGraph()}">
+                <div class="large-4 medium-6 small-12 columns" data-bind="">
                     <fieldset>
                         <legend>Specify Data Source</legend>
                         <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Server</label>
-                            </div>
-                            <div class="small-8 columns">
+                        <div class="small-12 columns">
+                            <label>Server
                                 <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
-                            </div>
+                                </label>
                         </div>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Database</label>
-                            </div>
-                            <div class="small-8 columns">
+                        <div class="small-12 columns">
+                            <label>Database
                                 <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
-                            </div>
+                                </label>
                         </div>
-                        <div class="row">
-                            <div class="small-4 columns">
-                                <label class="right inline">Collection Name</label>
-                            </div>
-                            <div class="small-8 columns">
+                        <div class="small-12 columns">
+                            <label>Collection Name
                                 <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
-                            </div>
+                                </label>
+                        </div>
                         </div>
                     </fieldset>
+                </div>
+                <div id="previewgraph" class="large-8 medium-6 small-12 columns" style="height:274px" data-bind="visible:previewGraph">
+                    <svg></svg>
                 </div>
             </div>
             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">

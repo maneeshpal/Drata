@@ -3,7 +3,7 @@
     var PieChart = function(){
         var arc = d3.svg.arc();
         var z = d3.scale.category20();
-        var dims = {m: {l:10, r:10, t:10, b:10}};
+        var dims = {m: {l:10, r:10, t:10, b:30}};
         var pie = d3.layout.pie();
 
         var enterAntiClockwise = {
@@ -20,9 +20,10 @@
             console.log('pie chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
+                console.log(data.key);
                 var itemCount = data.values.length;
                 chart.resize = function() { 
-                    dims = {m: {l:10, r:10, t:10, b:10}};
+                    dims = {m: {l:10, r:10, t:10, b:30}};
                     container
                     .transition()
                     .duration(1000)
@@ -67,7 +68,7 @@
 
                 gWrapperEnter.append("g").attr('class', 'arcs-group');
                 gWrapperEnter.append("g").attr("class", 'labels-group');
-
+                
                 var labels = drata.models.labels().color(z).dims(dims).align('topcenter').dispatch(dispatch);
                 gWrapper
                     .select('g.labels-group')
@@ -177,6 +178,16 @@
                 texts.transition().duration(750).attr("transform", function(d) {
                     return "translate(" + arc.centroid(d) + ")";
                 });
+
+                gWrapperEnter
+                    .append('svg:text')
+                    .attr('class', 'pie-label')
+                    .attr('fill', '#1f77b4')
+                    .style('text-anchor', 'middle');
+
+                var pieLabel = gWrapper.select('text.pie-label')
+                    .text(data.key)
+                    .attr('transform', 'translate(' +(dims.w/2)+ ',' + (r + r + dims.m.t + 15) + ')');
                 
             });
             

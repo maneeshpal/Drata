@@ -59,6 +59,7 @@ input.giant{
   height:300px;
 }
 
+/*widget topbar*/
 .action-icon.edit-widget{
   color:#368a54;
 }
@@ -73,7 +74,7 @@ input.giant{
 .widget-wrapper:hover .action-icon{
   opacity:1;
 }
-
+/*widget topbar*/
 /*widger nav*/
 
 .widget-nav{
@@ -180,6 +181,7 @@ ul.widget-nav-list li.action-icon{
 }
 
 /******/
+
 span.error{
   padding:0.375rem 0;
   font-size:.7rem;

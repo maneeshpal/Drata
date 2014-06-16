@@ -122,13 +122,13 @@ exports.findCollection = function(req, res) {
                    return;
                 }
                 var graphData;
-                try{
+                //try{
                     graphData = aggregator.aggregator.getGraphData(segment, ret);    
-                }
-                catch(e){
-                   res.send(500, e); 
-                   return;
-                }
+                //}
+                // catch(e){
+                //    res.send(500, e); 
+                //    return;
+                // }
                 console.log('aggregator done : ' + (+(new Date()) - ss));
                 
                 res.send(graphData);

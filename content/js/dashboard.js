@@ -310,6 +310,7 @@ var NumericContent = function(index){
     self.latestDp = ko.observable();
     self.lastButOneDp = ko.observable();
     self.initialDp = ko.observable();
+    self.currentDataKey = ko.observable('');
     
     self.backgroundChartType = ko.observable('area');
     
@@ -328,16 +329,15 @@ var NumericContent = function(index){
         });
     };
 
-    var perc = function(curr, prev){
-        if(prev === 0) return 100;
-        return +(((curr * 100)/prev - 100).toFixed(2));
-    };
-
-    
     self.selectedDataKeys.subscribe(function(newValue){
         var indexes = newValue.map(function(i){
             return i.value;
         });
+
+        self.currentDataKey(newValue.map(function(i){
+            return i.key;
+        }).join(' + '));
+
         if(indexes.length === 0) return;
         var outgoing = _.difference(currentIndexes, indexes);
         var incoming = _.difference(indexes, currentIndexes);
@@ -381,17 +381,7 @@ var NumericContent = function(index){
             return x.x - y.x;
         });
 
-        // if(segmentModel.dataGroup.xAxisType === 'date'){
-        //    firstArr = currentData.map(function(dp){
-        //         return {
-        //             x: new Date(dp.x), 
-        //             y: dp.y
-        //         }
-        //     });
-        // }
-        // else{
-            firstArr = currentData.slice();
-        //}
+        firstArr = currentData.slice();
         drawSideBar();
         drawChartBackground(self.backgroundChartType());
     });
@@ -400,7 +390,6 @@ var NumericContent = function(index){
         return self.latestDp() ? self.latestDp().yLabel : '';
     });
 
-    self.currentDataKey = ko.observable();
     
     self.subHeading = ko.computed(function(){
         return self.currentDataKey() && self.latestDp() ? drata.utils.format('{0} for {1}',self.currentDataKey(), self.latestDp().xLabel) : '';
@@ -408,14 +397,14 @@ var NumericContent = function(index){
 
     self.totalPerChange = ko.computed(function(){
         if(!self.latestDp()) return 0;
-        return perc(self.latestDp().y, self.initialDp().y);
+        return drata.utils.percChange(self.latestDp().y, self.initialDp().y);
     });
 
     var _t, uniqueXvalues;
     self.drawChart = function(_data, _segmentModel){
         chartData = _data.values;
         segmentModel = _segmentModel;
-        self.currentDataKey(_data.key);
+        // self.currentDataKey(_data.key);
         self.dataKeys(chartData.map(function(item, index){
             return {
                 key: item.key,
@@ -436,7 +425,7 @@ var NumericContent = function(index){
                 y: dp.y,
                 yLabel: yFormat(dp.y),
                 xLabel: xFormat(dp.x),
-                perc : perc(dp.y, prev)
+                perc : drata.utils.percChange(dp.y, prev)
             }
             prev = dp.y;
             return ret;
@@ -469,20 +458,20 @@ var NumericContent = function(index){
             case 'line':
                 chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
                 data = [{
-                    key: 'xxxx',
+                    key: self.currentDataKey(),
                     values: firstArr.slice()
                 }];
             break;
             case 'area':
                 chart = drata.charts.areaChart().drawLabels(false).includeDataMarkers(true).yticks(2).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
                 data = [{
-                    key: 'xxxx',
+                    key: self.currentDataKey(),
                     values: firstArr.slice()
                 }];
             break;
             case 'bar':
                 data = [{
-                    key: 'xxxx' + (Math.random() * 100),
+                    key: self.currentDataKey(),
                     values: firstArr.map(function(dp){
                         return {
                             key: xFormat(dp.x),
@@ -494,7 +483,7 @@ var NumericContent = function(index){
                 break; 
             case 'pie':
                 data = {
-                    key: 'xxxx',
+                    key: self.currentDataKey(),
                     values: firstArr.map(function(dp){
                         return {
                             key: xFormat(dp.x),

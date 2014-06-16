@@ -131,7 +131,7 @@ var Aggregator = {
         var result;
         
         if(!hasError){
-            result = utils.calc(left, operation, right);
+            result = calc(left, operation, right);
         }
 
         if(hasError || isNaN(result)){
@@ -302,13 +302,15 @@ var Aggregator = {
                     return x.x - y.x;
                 });
             }
+            if(sel.perc){
+                values = utils.getPercentageChange(values, 'y');
+            }
             result.push({
-                key: sel.isComplex ? sel.aliasName : sel.groupBy + '_' + sel.selectedProp,
+                key: this.getSelectionKeyName(sel),
                 values: values
             });
         }.bind(this));
         
-
         if(!segmentModel.dataGroup.hasGrouping){
             return [{
                 key : 'xxx',
@@ -328,7 +330,7 @@ var Aggregator = {
         var ret = _.reduce(objArray, function(previous, current){ 
             var numval;
             if(selection.isComplex){ //complex selection. so we need to process it.
-                var temp = Conditioner.processGroup(current,selection);
+                var temp = Aggregator.processGroup(current,selection);
                 numval = temp.value;
             }
             else if(selection.groupBy === 'min'){
@@ -352,6 +354,9 @@ var Aggregator = {
         }, (!selection.isComplex && objArray.length > 0 && (selection.groupBy === 'min' || selection.groupBy === 'max'))? +objArray[0][selection.selectedProp] : 0);
 
         return selection.groupBy === 'avg' ? ret/objArray.length : ret;
+    },
+    getSelectionKeyName: function(sel){
+        return utils.format('{0}{1}_{2}', sel.perc ? '%_' : '', sel.groupBy, sel.isComplex ? sel.aliasName : sel.selectedProp);
     },
     getPieData: function(segmentModel, inputData){
         var response = [];
@@ -420,8 +425,12 @@ var Aggregator = {
                         });
                     }.bind(this));
                     
+                    if(sel.perc){
+                        result = utils.getPercentageChange(result, 'value');
+                    }
+
                     response.push({
-                        key : sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp|| 'Selection',
+                        key : this.getSelectionKeyName(sel),
                         groupLevel: 'B',
                         values: result
                     });
@@ -463,6 +472,9 @@ var Aggregator = {
                             });
                         }.bind(this));
 
+                        if(sel.perc){
+                            result = utils.getPercentageChange(result, 'value');
+                        }
                         response.push({
                             key : formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval),
                             groupLevel: 'B',
@@ -471,7 +483,7 @@ var Aggregator = {
                     }.bind(this));
 
                     topLevelResponse.push({
-                        key : (sel.isComplex ? sel.aliasName : sel.selectedProp || 'selection') + '-' + sel.groupBy + ' -Group',
+                        key : this.getSelectionKeyName(sel),
                         groupLevel : 'A',
                         values: response
                     });
@@ -485,9 +497,12 @@ var Aggregator = {
             _.each(segmentModel.selection, function(sel){
                 var val = this.reduceData(inputData, sel);
                 result.push({
-                    key: sel.isComplex? sel.aliasName : sel.groupBy + '_' + sel.selectedProp || 'selection',
+                    key: this.getSelectionKeyName(sel),
                     value: val
                 });
+                if(sel.perc){
+                    result = utils.getPercentageChange(result, 'value');
+                }
             }.bind(this));
 
             response.push({
