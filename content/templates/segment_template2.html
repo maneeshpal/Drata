@@ -54,56 +54,58 @@
 </div>
 </script>
 <script type="text/html" id="datafilter-template">
-    
     <div class="row">
         <div class="small-12 columns">
+            <label>Date Property
+                <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
+                </div>
+            </label>
             <div class="row">
-                <div class="small-12 columns">
-                    <label>Date Property
-                        <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
-                        </div>
-                    </label>
-                    <input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" /><label for="rbInterval">Dynamic Interval</label>
-                    <input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /><label for="rbRange">Specify Date Range</label>
-                </div>
-            </div>
-            <div class="row" data-bind="visible:intervalType() === 'dynamic'">
-                <div class="medium-6 small-12 columns">
-                    <select data-bind="options: drata.global.timeframes,optionsCaption: 'Interval',value: intervalKind">
-                    </select>
-                </div>
-                <div class="medium-6 small-12 columns">
-                    <div style="margin:.7rem" id="myslider"></div>
-                </div>
-            </div>
-            <div class="row" data-bind="visible:intervalType() === 'static'">
                 <div class="small-6 columns">
-                    <div class="row collapse">
-                        <div class="small-10 columns">
-                            <input type="text" id="from" data-bind="value:minDate" placeholder="Start Date"></input>
-                        </div>
-                        <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'start')">
-                            <span class="postfix"><i class="general foundicon-calendar"></i></span>
-                        </div>
-                    </div>
+                    <label><input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" />
+            Dynamic Interval</label>
                 </div>
                 <div class="small-6 columns">
-                    <div class="row collapse">
-                        <div class="small-10 columns">
-                            <input type="text" id="to" data-bind=", value:maxDate" placeholder="End Date"></input>
-                        </div>
-                        <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'end')">
-                            <span class="postfix"><i class="general foundicon-calendar"></i></span>
-                        </div>
-                    </div>
-                    
+                    <label><input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /> Specify Date Range</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" data-bind="visible:intervalType() === 'dynamic'">
+        <div class="medium-6 small-12 columns">
+            <select data-bind="options: drata.global.timeframes,optionsCaption: 'Interval',value: intervalKind">
+            </select>
+        </div>
+        <div class="medium-6 small-12 columns">
+            <div style="margin:.7rem" id="myslider"></div>
+        </div>
+    </div>
+    <div class="row" data-bind="visible:intervalType() === 'static'">
+        <div class="small-6 columns">
+            <div class="row collapse">
+                <div class="small-10 columns">
+                    <input type="text" id="from" data-bind="value:minDate" placeholder="Start Date"></input>
+                </div>
+                <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'start')">
+                    <span class="postfix"><i class="general foundicon-calendar"></i></span>
+                </div>
+            </div>
+        </div>
+        <div class="small-6 columns">
+            <div class="row collapse">
+                <div class="small-10 columns">
+                    <input type="text" id="to" data-bind=", value:maxDate" placeholder="End Date"></input>
+                </div>
+                <div class="small-2 columns" data-bind="click: showDatePicker.bind($data, 'end')">
+                    <span class="postfix"><i class="general foundicon-calendar"></i></span>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
         <div class="small-12 columns">
-            <div class="keystroke expression" data-bind="html:expression"></div>
+            <div class="keystroke expression" data-bind="html:expression">
+            </div>
         </div>
     </div>
 </script>
