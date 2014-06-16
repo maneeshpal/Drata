@@ -248,6 +248,16 @@ var Aggregator = {
                 }
             }.bind(this));
         }
+        //here sort the values by x
+        if(dataGroup.xAxisType === 'currency' || dataGroup.xAxisType === 'numeric'){
+            ret.sort(function(x,y){
+                return x.x - y.x;
+            });
+        }
+        if(selection.perc){
+            ret = utils.getPercentageChange(ret, 'y');
+        }
+
         return ret;
     },
     filterData : function(data, segment){
@@ -295,15 +305,6 @@ var Aggregator = {
             }
             else{
                 values = this.groupByInterval(inputData, segmentModel.dataGroup, sel);
-            }
-            //here sort the values by x
-            if(segmentModel.dataGroup.xAxisType === 'currency' || segmentModel.dataGroup.xAxisType === 'numeric'){
-                values.sort(function(x,y){
-                    return x.x - y.x;
-                });
-            }
-            if(sel.perc){
-                values = utils.getPercentageChange(values, 'y');
             }
             result.push({
                 key: this.getSelectionKeyName(sel),
