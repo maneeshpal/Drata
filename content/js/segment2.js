@@ -106,11 +106,10 @@ var Segmentor = function(model){
         selections.complex = selections.complex || [];
         //Logic validation 7
         //selections should not have sum, avg, min, max for non numeric properties
-        //var simpleProps = drata.utils.getSelectionProperties(selections.simple);
 
         if(selections.simple.length > 0){
             var l7 = selections.simple.filter(function(s){
-                return self.propertyTypes[s.selectedProp]() !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
+                return isNaN(+s.selectedProp) && self.propertyTypes[s.selectedProp]() !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
             }).map(function(s2){
                 return s2.selectedProp;
             });
@@ -123,6 +122,10 @@ var Segmentor = function(model){
         //any non numeric selection by value is invalid 
         if(selections.simple.length > 0){
             var l8 = selections.simple.filter(function(s){
+                if(!isNaN(+s.selectedProp) && !self.propertyTypes[s.selectedProp]){
+                    errors.push('Error is selections: numeric value cannot be used in a simple selection <em style="font-weight:bold">'+ s.selectedProp +'</em>');
+                    return false;
+                }
                 return self.propertyTypes[s.selectedProp]() !== 'numeric' && s.groupBy === 'value';
             }).map(function(s2){
                 return s2.selectedProp;
@@ -139,7 +142,7 @@ var Segmentor = function(model){
         var nonNumericComplexSelections = [];
         if(complexProps.length > 0){
             nonNumericComplexSelections = complexProps.filter(function(s){
-                return self.propertyTypes[s]() !== 'numeric';
+                return isNaN(+s) && self.propertyTypes[s]() !== 'numeric';
             });
             if(nonNumericComplexSelections.length > 0){
                 errors.push('Error is selections: cannot perform arithmetic operations on non-numeric properties <em style="font-weight:bold">'+ nonNumericComplexSelections.join(', ') +'</em>');
@@ -885,7 +888,7 @@ var Selection = function(options){
     };
 
     self.showPercentChange = ko.computed(function(){
-        if(drata.global.trackingChartTypes.indexOf(segmentProcessor.segment.chartType()) > -1){
+        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(segmentProcessor.segment.chartType()) > -1){
             return true;
         }
         else{
