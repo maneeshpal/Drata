@@ -139,51 +139,51 @@
     <label>
                 <input type="checkbox" data-bind="checked:hasGrouping" />
                 &nbsp;Groupby
+    </label>
     <div class="row">
-        <div class="columns" data-bind="css: {'small-9' : groupByIntervalType() !== 'string','small-12' : groupByIntervalType() === 'string' || groupByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
+        <div class="columns" data-bind="css: {'small-9' : needsGroupByInterval(),'small-12' : !needsGroupByInterval()}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
         </div>
-        <!-- ko if: hasGrouping() && groupByIntervalType() !== 'string' && groupByIntervalType() !== 'unknown'  -->
+        <!-- ko if: needsGroupByInterval()  -->
         <div class="small-3 columns" data-bind="comboBox:{selectedValue: groupByInterval, options: groupByIntervalOptions, optionsCaption: 'Interval'}">
         </div>
         <!-- /ko -->
     </div>
-    </label>
     <!-- ko if:hasGrouping -->
     <label>
         <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by
+    </label>
         <div class="row">
-            <div class="columns" data-bind="css: {'small-9' : divideByIntervalType() !== 'string','small-12' : divideByIntervalType() === 'string' || divideByIntervalType() === 'unknown'}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
+            <div class="columns" data-bind="css: {'small-9' : needsDivideByInterval(),'small-12' : !needsDivideByInterval()}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
             </div>
-            <!-- ko if: hasDivideBy() && divideByIntervalType() !== 'string' && divideByIntervalType() !== 'unknown'  -->
+            <!-- ko if: needsDivideByInterval()  -->
                 <div class="small-3 columns" data-bind="comboBox:{selectedValue: divideByInterval, options: divideByIntervalOptions, optionsCaption: 'Interval'}">
                 </div>
             <!-- /ko -->                            
         </div>
-    </label>
     <!-- /ko -->
 </script>
 <script type="text/html" id="track-datagroup-template">
-    <label>Aggregate with
+    <label>Aggregate with</label>
             <div data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:properties,optionsCaption:'x Axis', allowCustom:false}">
             </div>
-    </label>
+    
     <div class="row">
         <div class="small-6 columns">
             <label>
                 <input type="checkbox" data-bind="checked:hasGrouping" />
-                &nbsp;Split by
+                &nbsp;Split by</label>
                 <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.nonDateProperties, optionsCaption : 'Select GroupBy'">
                 </select>
-            </label>
+            
         </div>
         <div class="small-6 columns">
             <label>
                 <input type="checkbox" data-bind="checked:timeseries" />
                         Interval
+            </label>
                 <div data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
                     
                 </div>
-            </label>
         </div>
     </div>
     

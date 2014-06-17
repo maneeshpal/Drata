@@ -313,11 +313,11 @@ var TrackDataGroup = function(){
     });
 
     self.timeseriesInterval.extend({
-        timeseriesInterval: {
-            isTimeSeries : function(){
+        groupingInterval: {
+            _required : function(){
                 return self.timeseries();
             },
-            xAxisType : function(){
+            intervalType : function(){
                 return self.xAxisType();
             }
         }
@@ -337,34 +337,25 @@ var ComparisonDataGroup = function(options){
     self.groupByProp = ko.observable();
     self.groupByInterval = ko.observable();
     self.divideByInterval = ko.observable();
-    self._giType = ko.observable();
-    
-    self.groupByIntervalType = ko.computed({
-        read: function(){
-            var newType = options.propertyTypes[self.groupByProp()];
-            return newType? newType() : 'unknown';
-        },
-        write: function(newValue){
-            if(newValue === 'string' || newValue === 'unknown'){
-                self.groupByInterval(undefined);
-            }
-            newValue && self.groupByProp() &&  options.propertyTypes && options.propertyTypes[self.groupByProp()](newValue);
-        }
+    self.groupByIntervalType = ko.observable();
+
+    self.groupByProp.subscribe(function(newValue){
+        var newType = options.propertyTypes[newValue];
+        self.groupByIntervalType(newType? newType() : 'unknown');
+        self.groupByInterval(undefined);
+        self.groupByInterval.isModified(false);
     });
 
     self.hasDivideBy = ko.observable(false);
     self.divideByProp = ko.observable();
-    self.divideByIntervalType = ko.computed({
-        read: function(){
-            var newType = options.propertyTypes[self.divideByProp()];
-            return newType? newType() : 'unknown';
-        },
-        write: function(newValue){
-            if(newValue === 'string' || newValue === 'unknown'){
-                self.divideByInterval(undefined);
-            }
-            newValue && self.divideByProp() && options.propertyTypes && options.propertyTypes[self.divideByProp()](newValue);
-        }
+    
+    self.divideByIntervalType = ko.observable();
+
+    self.divideByProp.subscribe(function(newValue){
+        var newType = options.propertyTypes[newValue];
+        self.divideByIntervalType(newType? newType() : 'unknown');
+        self.divideByInterval(undefined);
+        self.divideByInterval.isModified(false);
     });
 
     self.groupByIntervalOptions = ko.computed(function(){
@@ -391,14 +382,16 @@ var ComparisonDataGroup = function(options){
     });
 
     self.setProps = function(model){
-        self.groupByInterval(model.groupByIntervalRaw || model.groupByInterval);
-        self.divideByInterval(model.divideByIntervalRaw || model.divideByInterval);
         self.groupByProp(model.groupByProp);
         self.hasGrouping(model.groupByProp !== undefined);
         self.divideByProp(model.divideByProp);
         self.hasDivideBy(model.divideByProp !== undefined);
         self.groupByIntervalType(model.groupByIntervalType);
         self.divideByIntervalType(model.divideByIntervalType);
+        //last
+        self.groupByInterval(model.groupByInterval);
+        //last
+        self.divideByInterval(model.divideByInterval);
     };
 
     self.getModel = function(){
@@ -410,6 +403,13 @@ var ComparisonDataGroup = function(options){
         delete dataGroupModel.errors;
         return dataGroupModel;
     };
+
+    self.needsGroupByInterval = ko.computed(function(){
+        return self.hasGrouping() && ['date', 'numeric'].indexOf(self.groupByIntervalType()) > -1;
+    });
+    self.needsDivideByInterval = ko.computed(function(){
+        return self.hasDivideBy() && ['date', 'numeric'].indexOf(self.divideByIntervalType()) > -1;
+    });
 
     self.groupByProp.extend({
         required: { 
@@ -429,8 +429,29 @@ var ComparisonDataGroup = function(options){
         }
     });
 
-    //model && self.setProps(model);
+    self.groupByInterval.extend({
+        groupingInterval: {
+            _required : function(){
+                return self.needsGroupByInterval();
+            },
+            intervalType : function(){
+                return self.groupByIntervalType();
+            }
+        }
+    });
+
+    self.divideByInterval.extend({
+        groupingInterval: {
+            _required : function(){
+                return self.needsDivideByInterval();
+            },
+            intervalType : function(){
+                return self.divideByIntervalType();
+            }
+        }
+    });
 };
+
 var DataFilter = function(){
     var self = this;
     self.min = ko.observable();
