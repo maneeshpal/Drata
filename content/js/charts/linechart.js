@@ -4,10 +4,12 @@
         var _xAxisType = 'numeric', _drawXAxis = true, _drawYAxis = true, _yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
-            .axisType('x');
+            .axisType('x')
+            .ticks(8);
         var yAxis = drata.models.axis()
             .orient("left")
-            .axisType('y');
+            .axisType('y')
+            .ticks(5);
      
         var z = d3.scale.category20();
         var dims = {m: {l:30, r:10, t:10, b:30}};
