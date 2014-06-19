@@ -18,11 +18,6 @@
     <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
     <link rel="stylesheet" type="text/css" href="/style/custombindinghandlers/editlabel.css" />
 
-    <style>
-        #previewgraph {
-            height: 200px;
-        }
-    </style>
 </head>
 <body>
     <nav class="top-bar dashboard" id="topbar" data-topbar>
@@ -207,8 +202,9 @@
                         </div>
                     </fieldset>
                 </div>
-                <div id="previewgraph" class="large-8 medium-6 small-12 columns" style="height:274px" data-bind="visible:previewGraph">
-                    <svg></svg>
+                <div class="large-8 medium-6 small-12 columns" data-bind="if: previewWidget()">
+                    <!-- ko template:{ name: 'widget-template',data:previewWidget(), afterRender:loadWidget } -->
+                    <!-- /ko -->
                 </div>
             </div>
             <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">

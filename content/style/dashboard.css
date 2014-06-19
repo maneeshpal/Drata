@@ -93,6 +93,14 @@ input.giant{
   left:5px;
   top:7px;
 }
+.widget-nav .widget-select-option {
+  margin-bottom: 0;
+  max-width: 120px;
+  border:none;
+  padding-right:10px;
+  background:transparent;
+  position: relative;
+}
 ul.widget-nav-list{
   list-style: none;
 }

@@ -94,7 +94,7 @@ var Segmentor = function(model){
     self.getQueryErrors = function(){
         var errors = [];
         var segmentModel = self.getM();
-
+        var isTrackChart = drata.global.trackingChartTypes.indexOf(self.chartType()) > -1;
         if(segmentModel.selection.length === 0){
             errors.push('No selections exist, please select the property you wish to visualize');
         }
@@ -174,7 +174,7 @@ var Segmentor = function(model){
             if(l2a.length > 0){
                 errors.push('Error in Selections and Grouping: When aggregations exist, <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + l2a.join(', ') + '</em>');
             }
-        }else{
+        }else if(isTrackChart){
             var l2b  = segmentModel.selection.filter(function(s){
                 return s.groupBy !== 'value';
             }).map(function(s2){
@@ -182,6 +182,17 @@ var Segmentor = function(model){
             });
             if(l2b.length > 0){
                 errors.push('Error in Selections and Grouping: When aggregations don\'t exist, <em>sum, avg, count </em> are not allowed in <em style="font-weight:bold">' + l2b.join(', ') + '</em>');
+            }
+
+        }else{
+
+            var l2c  = segmentModel.selection.filter(function(s){
+                return s.groupBy === 'value';
+            }).map(function(s2){
+                return s2.selectedProp;
+            });
+            if(l2c.length > 0){
+                errors.push('For this visualization, if no aggregation is specified, Selections cannot be of type <em style="font-weight:bold">value</em>');
             }
 
         }
@@ -1259,7 +1270,7 @@ var Conditioner = {
         }.bind(this));
     },
     getGraphData: function(segmentModel, inputData){
-        console.time('raw_to_chart_data:' + segmentModel.chartType);
+        //console.time('raw_to_chart_data:' + segmentModel.chartType);
         if(segmentModel.selection.length === 0)
             throw "Selections required";
         this.propertyTypes = segmentModel.propertyTypes;
@@ -1270,7 +1281,7 @@ var Conditioner = {
             returnData = this.getPieData(segmentModel, inputData);
         }
         //window.debug.chartdata = returnData;
-        console.timeEnd('raw_to_chart_data:' + segmentModel.chartType);
+        //console.timeEnd('raw_to_chart_data:' + segmentModel.chartType);
         return returnData;
     },
     getLineCharData: function(segmentModel, inputData){

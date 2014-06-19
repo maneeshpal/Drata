@@ -19,16 +19,16 @@ var Dashboard = function(){
             self.name(d.name);
             topBar.currentDashboardName(d.name);
             dashboardId = d._id;
-            console.time('gettingwidgets');
+            //console.time('gettingwidgets');
             drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
                 var ind = 0;
                 var widgets = widgetResponse.result;
-                console.timeEnd('gettingwidgets');
+                //console.timeEnd('gettingwidgets');
                 self.loading(false);
                 widgets = widgets.sort(function(x,y){
                     return x.displayIndex - y.displayIndex;
                 });
-                console.time('instantiatewidgets');
+                //console.time('instantiatewidgets');
                 self.widgets(ko.utils.arrayMap(
                     widgets,
                     function(model) {
@@ -39,7 +39,7 @@ var Dashboard = function(){
                     w.displayIndex(ind);
                     ind++;
                 });
-                 console.timeEnd('instantiatewidgets');
+                //console.timeEnd('instantiatewidgets');
             });
         });
     };
@@ -81,17 +81,19 @@ var Dashboard = function(){
     }
 };
 
-var Widget = function(widgetModel, index){
+var Widget = function(widgetModel, index, previewMode){
     var self = this;
     var chartData;
+    self.previewMode = previewMode;
     self.widgetId = 'widget'+index;
     self.displayIndex = ko.observable(widgetModel.displayIndex);
     self.pieKeys = ko.observableArray([]);
     self.selectedPieKey = ko.observable();
-    self.name = ko.observable(widgetModel.name || 'widget x');
-    self.sizex = ko.observable(widgetModel.sizex || 1);
-    self.sizey = ko.observable(widgetModel.sizey || 1);
+    self.name = ko.observable(previewMode ? 'Preview' : (widgetModel.name || 'widget x'));
+    self.sizex = ko.observable(widgetModel.sizex || 4);
+    self.sizey = ko.observable(widgetModel.sizey || 2);
     self.widgetClass= ko.computed(function(){
+        if(previewMode) return 'widget-size-4';
         return 'widget-size-' + self.sizex();
     });
 
@@ -124,6 +126,7 @@ var Widget = function(widgetModel, index){
     });
 
     self.widgetHeight = ko.computed(function(){
+        if(previewMode) return 250;
         var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
         wh = Math.max(200, wh);
         return wh;
@@ -195,11 +198,11 @@ var Widget = function(widgetModel, index){
             self.pieKeys(pieKeys);
 
             self.selectedPieKey(self.pieKeys()[0]);
-            console.time(self.chartType() + ' : ' + self.widgetId);
+            //console.time(self.chartType() + ' : ' + self.widgetId);
             content.drawChart(chartData[0], widgetModel.segmentModel);
             self.widgetLoading(false);
             //prevent double draw on page load
-            console.timeEnd(self.chartType() + ' : ' + self.widgetId);
+            //console.timeEnd(self.chartType() + ' : ' + self.widgetId);
             setTimeout(function(){
                 drata.utils.windowResize(self.resizeContent.bind(self));
             }, 200);
@@ -234,6 +237,7 @@ var Widget = function(widgetModel, index){
     });
     
     self.update = function(){
+        if(previewMode) return;
         var m = self.getModel();
         if(!m._id) return;
         drata.apiClient.upsertWidget(m);
@@ -626,7 +630,6 @@ var SegmentProcessor = function(){
     self.widgetName = ko.observable();
     self.addUpdateBtnText = ko.observable('Add Widget');
     self.processSegment = true;
-    self.previewGraph = ko.observable(false);
     self.dataKeys = ko.observableArray();
     
     self.selectedDataKey = ko.observable();
@@ -636,7 +639,8 @@ var SegmentProcessor = function(){
     self.database = ko.observable();
     self.parseError = ko.observable();
     self.propertyTypes = ko.observable();
-    
+    self.previewWidget = ko.observable();
+
     var cloneModel = {};
     
     self.dataSource.subscribe(function(newValue){
@@ -702,7 +706,8 @@ var SegmentProcessor = function(){
         cloneModel.dataSource = self.dataSource();
         cloneModel.database = self.database();
         cloneModel.selectedDataKey  = self.selectedDataKey();
-
+        cloneModel.sizex = cloneModel.sizex || 4;
+        cloneModel.sizey = cloneModel.sizey || 2;
         self.onWidgetUpdate && self.onWidgetUpdate(cloneModel);
         !self.onWidgetUpdate && dashboard.addWidget(cloneModel);
         cloneModel = {};
@@ -710,22 +715,19 @@ var SegmentProcessor = function(){
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add');
         self.dataSource(undefined);
-        self.previewGraph(false);
+        self.previewWidget(undefined);
         $('#graphBuilder').removeClass('showme');
-        //self.newWidget(true);
     };
-    var dbns, dks, pts;
+
     self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
         cloneModel = drata.utils.clone(model);
-        cloneModel.dataSource = cloneModel.dataSource || 'drataDemoExternal';
-        cloneModel.database = cloneModel.database || 'shopperstop';
         self.dataSource(cloneModel.dataSource);
         
         self.addUpdateBtnText('Update Widget');
         self.onWidgetUpdate = onWidgetUpdate;
         self.onWidgetCancel = onWidgetCancel;
         
-        self.handleGraphPreview(cloneModel.dataSource, cloneModel.database, cloneModel.selectedDataKey ,cloneModel.segmentModel);
+        self.previewWidget(new Widget(cloneModel, 100, true));
     };
 
     self.widgetCancel = function() {
@@ -733,76 +735,28 @@ var SegmentProcessor = function(){
         self.onWidgetUpdate = undefined;
         self.onWidgetCancel = undefined;
         self.addUpdateBtnText('Add Widget');
-        self.previewGraph(false);
 
         self.dataSource(undefined);
-        //self.selectedDataKey(undefined);
         $('#graphBuilder').removeClass('showme');
+        self.previewWidget(undefined);
         cloneModel = {};
     };
-    var chart, _t;
-    self.handleGraphPreview = function(dataSource, database, selectedDataKey, segmentModel){
-        self.parseError(undefined);
-        if(segmentModel.chartType === 'numeric') return;
-        DataRetriever.getData({applyClientAggregation: false, dataSource: dataSource, database:database, collectionName: selectedDataKey, segment: segmentModel}, function(response){
-            if(!response.success){
-                self.parseError(response.message);
-                return;
-            }
-            var data = response.result;
-            if(!data) return;         
 
-            self.previewGraph(true);
-            
-            var mydata = data[0].values;
-
-            switch(segmentModel.chartType)
-            {
-                case 'line':
-                    chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
-                break;
-                case 'area':
-                    chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType);
-                break;
-                case 'bar':
-                    chart = drata.charts.barChart();
-                    break; 
-                case 'pie':
-                    chart = drata.charts.pieChart();
-                    mydata = mydata[0];
-                break;
-                case 'scatter':
-                    chart = drata.charts.scatterPlot();
-                break;
-            }
-            d3.select('#previewgraph').selectAll('svg').remove();
-            d3.select('#previewgraph').append('svg');
-
-            d3.select('#previewgraph svg')
-                .datum(mydata)
-                .call(chart);
-
-            drata.utils.windowResize(function(){
-                if(!chart) return;
-                _t && clearTimeout(_t);
-                _t = setTimeout(chart.resize, 500);
-            });
-        });
-    };
-    
     self.preview = function(){
         var model = self.segment.getModel();
         if(!model) return;
-        self.handleGraphPreview(self.dataSource(), self.database(), self.selectedDataKey(), model);
+        self.previewWidget(new Widget({
+            dataSource: self.dataSource(),
+            database: self.database(),
+            segmentModel: model,
+            selectedDataKey: self.selectedDataKey()
+        }, 100, true));
     };
-    self.previewGraph.subscribe(function(newValue){
-        if(!newValue){
-            d3.select('#previewgraph').selectAll('svg').remove();
-            d3.select('#previewgraph').append('svg');
-            _t && clearTimeout(_t);
-            chart = undefined;   
-        }
-    });
+    
+    self.loadWidget = function(elem,widget){
+        widget && widget.loadWidget();
+        $(document).foundation();
+    };
 };
 
 

@@ -7,12 +7,15 @@
                 </div>
                 <div class="right">
                     <ul class="widget-nav-list right">
-                        <li class="action-icon">
+                        <li class="action-icon" data-bind="visible:pieKeys().length > 1">
+                         
+                            <select class="widget-select-option" data-bind="value:selectedPieKey,options: pieKeys, optionsText: 'label'"/>
+
+                        </li>
+                        <li data-bind="visible: !previewMode" class="action-icon" >
                             <a data-bind="attr: {'data-dropdown': 'dd_'+ widgetId}" data-options="align:left"><i class="icon-cog"></i></a>
                             <div data-dropdown-content class="f-dropdown content", data-bind="attr: {'id': 'dd_'+ widgetId}">
-                                <label data-bind="visible: pieKeys().length > 1">Show
-                                <select data-bind="value:selectedPieKey,options: pieKeys, optionsText: 'label'"/>
-                                </label>
+                                
                                 <div class="row collapse">
                                     <div class="small-6 columns">
                                         <label style="padding-right:5px">Width
@@ -39,10 +42,10 @@
                                 </div>
                             </div>
                         </li>
-                        <li class="action-icon edit-widget">
+                        <li data-bind="visible: !previewMode" class="action-icon edit-widget">
                             <i data-bind="click:editWidget" class="icon-pencil"></i>
                         </li>
-                        <li class="action-icon remove-widget">
+                        <li data-bind="visible: !previewMode" class="action-icon remove-widget">
                             <i data-bind="click:$parent.deleteWidget" class="icon-cancel-circle"></i>
                         </li>
                     </ul>
