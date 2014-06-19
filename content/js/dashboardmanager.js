@@ -210,7 +210,7 @@ var DashboardItem = function(model, options){
 
     this.toggleExtendedDetails = ko.observable(false);
 
-    this.viewDetails = function(){
+    this.viewDetails = function(item, event){
         if(event.target.href) return true;
         this.toggleExtendedDetails(!this.toggleExtendedDetails());
     };
