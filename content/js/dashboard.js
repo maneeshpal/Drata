@@ -78,6 +78,7 @@ var Dashboard = function(){
     }
     else {
         loadDashboard();
+        topBar.showWidgetNav(true);
     }
 };
 
@@ -773,7 +774,7 @@ var TopBar = function(){
         widgetManager.bindWidgets(widgetManager.chosenChartTypes());
         $('#widgetManager').toggleClass('showme');
     };
-
+    self.showWidgetNav = ko.observable();
     self.tagList = ko.observableArray();
     self.untaggedList = ko.observableArray();
 

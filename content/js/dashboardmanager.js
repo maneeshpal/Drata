@@ -203,9 +203,6 @@ var DashboardItem = function(model, options){
             })
         });
         return allAvailableTags;
-        // return _.uniq(allAvailableTags, function(item){
-        //     return item;
-        // });
     }, this);
 
     this.toggleExtendedDetails = ko.observable(false);

@@ -32,6 +32,7 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
+                <!-- ko if: showWidgetNav() -->
                 <li class="divider"></li>
                 
                 <li class="has-dropdown">
@@ -46,6 +47,7 @@
                     </ul>
 
                 </li>
+                <!-- /ko -->
             </ul>
 
             <!-- Left Nav Section -->
@@ -105,21 +107,28 @@
         </div>
         
         <div style="display:none" data-bind="with: newDashboardItem, visible : newDashboardItem() !== undefined ">
-            <div class="row text-center">
-                <div class="medium-6 medium-offset-3 columns">
-                    <h2>Create Dashboard</h2>
-                    <h2><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h2>
-                </div>
-            </div>
             <div class="row">
-                <div class="medium-6 medium-offset-3 columns">
-                    <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
-                    <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
-                </div>
-            </div>
-            <div class="row">
-                <div class="medium-6 medium-offset-3 columns">
-                    <button class="button primary" data-bind="enable: !!cloneName(), click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</button>
+                <div class="medium-6 medium-offset-3 small-12 columns">
+                    
+                    <div class="row">
+                        <div class="small-12 columns text-center">
+                            <h2>Create Dashboard</h2>
+                            <h2><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h2>
+                        </div>
+                    </div>
+                    <div class="row collapse">
+                        <div class="small-8 columns">
+                            <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
+                        </div>
+                        <div class="small-4 columns">
+                            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="small-12 columns">
+                            <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
