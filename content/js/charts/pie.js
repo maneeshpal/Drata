@@ -20,7 +20,7 @@
             console.log('pie chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
-                console.log(data.key);
+                //console.log(data.key);
                 var itemCount = data.values.length;
                 chart.resize = function() { 
                     dims = {m: {l:10, r:10, t:10, b:30}};

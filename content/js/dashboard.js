@@ -133,26 +133,37 @@ var Widget = function(widgetModel, index, previewMode){
         return wh;
     });
 
+    self.update = function(){
+        if(previewMode) return;
+        var m = self.getModel();
+        if(!m._id) return;
+        drata.apiClient.upsertWidget(m);
+    };
+
     var content;
     self.contentTemplate = ko.computed(function(){
+        var contentOptions = {
+            index : index,
+            widgetUpdate : self.update.bind(self)
+        }
         switch(self.chartType()){
             case 'line':
-                content = new LineContent(index);
+                content = new LineContent(contentOptions);
                 break;
             case 'area':
-                content = new AreaContent(index);
+                content = new AreaContent(contentOptions);
                 break;
             case 'pie':
-                content = new PieContent(index);
+                content = new PieContent(contentOptions);
                 break;
             case 'bar':
-                content = new BarContent(index);
+                content = new BarContent(contentOptions);
                 break;
             case 'scatter':
-                content = new ScatterContent(index);
+                content = new ScatterContent(contentOptions);
                 break;
             case 'numeric':
-                content = new NumericContent(index);
+                content = new NumericContent(contentOptions);
                 break;
         }
 
@@ -196,11 +207,12 @@ var Widget = function(widgetModel, index, previewMode){
                 return {label: dataItem.key, value: index};
             });
 
+            //self.selectedPieKey(undefined);
             self.pieKeys(pieKeys);
 
-            self.selectedPieKey(self.pieKeys()[0]);
+            //self.selectedPieKey(pieKeys[0]);
             //console.time(self.chartType() + ' : ' + self.widgetId);
-            content.drawChart(chartData[0], widgetModel.segmentModel);
+            //content.drawChart(chartData[0], widgetModel.segmentModel, widgetModel.contentModel || {});
             self.widgetLoading(false);
             //prevent double draw on page load
             //console.timeEnd(self.chartType() + ' : ' + self.widgetId);
@@ -223,27 +235,23 @@ var Widget = function(widgetModel, index, previewMode){
         widgetModel.sizey = self.sizey();
         widgetModel.displayIndex = self.displayIndex();
         widgetModel.name = self.name();
+        if(content && content.getModel){
+            widgetModel.contentModel = content.getModel();
+        }
+        
         return widgetModel;
     };
     
     self.selectedPieKey.subscribe(function(newValue){
         if(!newValue) return;
-        var dataToMap = chartData;
         if(widgetModel.segmentModel.chartType === 'pie'){
-                dataToMap = chartData[0].values;
+            content && content.change && content.change(chartData[0], widgetModel.segmentModel, widgetModel.contentModel, newValue);
         }else{
-            dataToMap = chartData;
+            content && content.change && content.change(chartData[newValue.value], widgetModel.segmentModel, widgetModel.contentModel);
         }
-        content && content.change && content.change(dataToMap[newValue.value]);
+        
     });
     
-    self.update = function(){
-        if(previewMode) return;
-        var m = self.getModel();
-        if(!m._id) return;
-        drata.apiClient.upsertWidget(m);
-    };
-
     // self.updatePosition = function(){
     //     var model = {
     //         sizex : self.sizex(),
@@ -276,9 +284,9 @@ var Widget = function(widgetModel, index, previewMode){
     });
 };
 
-var LineContent = function(index){
+var LineContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+ contentOptions.index;
     self.template = 'content-template';
     var chart, chartData;
     
@@ -298,14 +306,19 @@ var LineContent = function(index){
         chart && chart.resize && chart.resize();
     };
     
-    self.change = function(_data){
-        chart && chart.change && chart.change(_data.values);
+    self.change = function(_data, _segmentModel){
+        if(chart){
+            chart.change && chart.change(_data.values);
+        }else{
+            self.drawChart(_data, _segmentModel);
+        }
+        //chart && 
     };
 };
 
-var NumericContent = function(index){
+var NumericContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+ contentOptions.index;
     self.template = 'numeric-content-template';
     var chart, chartData, segmentModel;
     
@@ -317,7 +330,7 @@ var NumericContent = function(index){
     self.initialDp = ko.observable();
     self.currentDataKey = ko.observable('');
     
-    self.backgroundChartType = ko.observable('area');
+    self.backgroundChartType = ko.observable();
     
     var combinedObj = {}, currentIndexes = [];
     var firstArr = [];
@@ -389,27 +402,27 @@ var NumericContent = function(index){
         firstArr = currentData.slice();
         drawSideBar();
         drawChartBackground(self.backgroundChartType());
+        //self.setChartBackground('area');
     });
 
     self.mainHeading = ko.computed(function(){
         return self.latestDp() ? self.latestDp().yLabel : '';
     });
-
     
     self.subHeading = ko.computed(function(){
         return self.currentDataKey() && self.latestDp() ? drata.utils.format('{0} for {1}',self.currentDataKey(), self.latestDp().xLabel) : '';
     });
 
     self.totalPerChange = ko.computed(function(){
-        if(!self.latestDp()) return 0;
+        if(!self.latestDp()) return undefined;
         return drata.utils.percChange(self.latestDp().y, self.initialDp().y);
     });
 
     var _t, uniqueXvalues;
-    self.drawChart = function(_data, _segmentModel){
+    self.drawChart = function(_data, _segmentModel, _contentModel){
         chartData = _data.values;
         segmentModel = _segmentModel;
-        // self.currentDataKey(_data.key);
+        self.backgroundChartType(_contentModel && _contentModel.backgroundChartType ?  _contentModel.backgroundChartType : 'area');
         self.dataKeys(chartData.map(function(item, index){
             return {
                 key: item.key,
@@ -418,7 +431,6 @@ var NumericContent = function(index){
         }));
         combinedObj = {}, currentIndexes = [];
         self.selectedDataKeys(self.dataKeys());
-        //self.selectedDataKey(self.dataKeys()[0]);
         _t && clearTimeout(_t);
     };
     
@@ -445,20 +457,22 @@ var NumericContent = function(index){
 
     self.setChartBackground = function(chartType){
         self.backgroundChartType(chartType);
+        drawChartBackground();
+        contentOptions.widgetUpdate && contentOptions.widgetUpdate();
     };
 
-    self.backgroundChartType.subscribe(function(newValue){
-        drawChartBackground(newValue);
-    });
+    // self.backgroundChartType.subscribe(function(newValue){
+        
+    // });
 
-    var drawChartBackground = function(chartType){
+    var drawChartBackground = function(){
         var data, xFormat = xtextFormat();
         firstArr = firstArr.map(function(i){
             delete i.key;
             return i;
         });
 
-        switch(chartType)
+        switch(self.backgroundChartType())
         {
             case 'line':
                 chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
@@ -515,18 +529,21 @@ var NumericContent = function(index){
         self.latestDp(a);
     };
     
-    self.change = function(_data){
-        if(!segmentModel) return;
-        //chartData = _data.values;
-        self.drawChart(_data, segmentModel);
-        var a = 0;
-        //chart && chart.change && chart.change(_data.values);
+    self.change = function(_data, _segmentModel, _contentModel){
+        if(!_segmentModel) return;
+        self.drawChart(_data, _segmentModel, _contentModel);
     };
+
+    self.getModel = function(){
+        return {
+            backgroundChartType : self.backgroundChartType()
+        }
+    }
 };
 
-var ScatterContent = function(index){
+var ScatterContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+ contentOptions.index;
     self.template = 'content-template';
     var chart;
     var _t;
@@ -544,14 +561,19 @@ var ScatterContent = function(index){
     self.resize = function(){
         chart && chart.resize && chart.resize();
     };
-    self.change = function(_data){
-        chart && chart.change && chart.change(_data.values);
+    self.change = function(_data, _segmentModel){
+        if(chart){
+            chart.change && chart.change(_data.values);
+        }else{
+            self.drawChart(_data, _segmentModel);
+        }
+        //chart && 
     };
 };
 
-var BarContent = function(index){
+var BarContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.template = 'content-template';
     self.contentType = 'bar';
     var chart, _t;
@@ -569,14 +591,18 @@ var BarContent = function(index){
     self.resize = function(){
         chart && chart.resize && chart.resize();
     };
-    self.change = function(_data){
-        chart && chart.change && chart.change(_data.values);
+    self.change = function(_data, _segmentModel){
+        if(chart){
+            chart.change && chart.change(_data.values);
+        }else{
+            self.drawChart(_data, _segmentModel);
+        }
     };
 };
 
-var AreaContent = function(index){
+var AreaContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.template = 'content-template';
     var chart;
     var _t;
@@ -594,14 +620,18 @@ var AreaContent = function(index){
     self.resize = function(){
         chart && chart.resize && chart.resize();
     };
-    self.change = function(_data){
-        chart && chart.change && chart.change(_data.values);
+    self.change = function(_data, _segmentModel){
+        if(chart){
+            chart.change && chart.change(_data.values);
+        }else{
+            self.drawChart(_data, _segmentModel);
+        }
     };
 };
 
-var PieContent = function(index){
+var PieContent = function(contentOptions){
     var self = this;
-    self.widgetContentId = 'widgetContent'+index;
+    self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.contentType = 'pie';
     self.template = 'content-template';
     var _t = undefined;
@@ -621,8 +651,13 @@ var PieContent = function(index){
     self.resize = function(){
         chart && chart.resize && chart.resize();
     };
-    self.change = function(_data){
-        chart && chart.change && chart.change(_data);
+    
+    self.change = function(_data, _segmentModel, _contentModel, pieKey){
+        if(chart){
+            chart.change && chart.change(_data.values[pieKey.value]);
+        }else{
+            self.drawChart(_data, _segmentModel);
+        }
     };
 };
 
@@ -709,6 +744,15 @@ var SegmentProcessor = function(){
         cloneModel.selectedDataKey  = self.selectedDataKey();
         cloneModel.sizex = cloneModel.sizex || 4;
         cloneModel.sizey = cloneModel.sizey || 2;
+        
+        var previewW = self.previewWidget();
+        if(previewW){
+            var x = previewW.getModel();
+            if(x.contentModel){
+                cloneModel.contentModel = x.contentModel;
+            }
+        }
+
         self.onWidgetUpdate && self.onWidgetUpdate(cloneModel);
         !self.onWidgetUpdate && dashboard.addWidget(cloneModel);
         cloneModel = {};

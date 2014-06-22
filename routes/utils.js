@@ -348,6 +348,7 @@ var format = function(format /*, ...replacements*/) {
 };
 
 var percChange = function(curr, prev){
+    if(prev === 0 && curr === 0) return 0;
     if(prev === 0) return 100;
     return +(((curr * 100)/prev - 100).toFixed(2));
 };

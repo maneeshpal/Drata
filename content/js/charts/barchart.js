@@ -182,7 +182,7 @@
                         })
                         .attr("width", x1.rangeBand())
                         .attr("height", function(d) {  
-                            console.log('bar value: ' + d.value + '; y: ' + ((dims.h - dims.m.t - dims.m.b) - y(d.value)));
+                            //console.log('bar value: ' + d.value + '; y: ' + ((dims.h - dims.m.t - dims.m.b) - y(d.value)));
                             return d.disabled ? 0 : (dims.h - dims.m.t - dims.m.b) - y(d.value); 
                         });
                         
