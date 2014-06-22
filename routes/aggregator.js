@@ -371,7 +371,7 @@ var Aggregator = {
                 switch(interval){
                     case 'month':
                         timeFormat = function(d){
-                            return utils.fomat('{0} {1}', months[d.getMonth()], d.getFullYear());
+                            return utils.format('{0} {1}', months[d.getMonth()], d.getFullYear());
                         } //d3.time.format('%b %Y');
                         break;
                     case 'quarter':
@@ -387,7 +387,7 @@ var Aggregator = {
                         break;
                     default:
                         timeFormat = function(d){
-                            return utils.fomat('{0}.{1}.{2} {3}:{4}', d.getDate(), months[d.getMonth()], d.getFullYear(), d.getHours(), d.getMinutes());
+                            return utils.format('{0}.{1}.{2} {3}:{4}', d.getDate(), months[d.getMonth()], d.getFullYear(), d.getHours(), d.getMinutes());
                         }
                         // d3.time.format('%d.%b.%y %H:%M');
                 }

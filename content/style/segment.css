@@ -123,6 +123,13 @@ select.error{
     color:#368a54;
 }
 
+/* Date picker */
+.ui-datepicker .ui-datepicker-title{
+    font-weight:normal;
+    line-height: 1rem;
+}
+/* End Date picker */
+
 
 /*End selections*/
 
