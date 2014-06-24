@@ -19,9 +19,11 @@
     .axis text{
         fill: #1f77b4;
     }
+    
     /*.label-group text{
         font:10px arial;
     }*/
+
     .line-group .line{
         fill:none;
         stroke-width:2;
@@ -39,12 +41,7 @@
         fill-opacity:.5;
     }
 
-
-    /**PIE**/
-    svg.pie {
-            width:auto;
-            height:auto;
-            display:inline;
-        }
-
-    /****/
+    .arcs-group .arc {
+        stroke: #fff;
+        stroke-width: 1;
+    }

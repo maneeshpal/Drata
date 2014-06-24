@@ -116,11 +116,10 @@
 
                 arcs.enter()
                     .append('path')
+                    .attr('class', 'arc')
                     .attr("fill", function (d, i) {
                         return z(d.data.key);
                     })
-                    .attr('stroke', '#fff')
-                    .attr('stroke-width', 1)
                     .each(function (d) {
                         this._current = {
                             data: d.data,

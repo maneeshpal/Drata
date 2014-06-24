@@ -1,3 +1,4 @@
+//@include exports("dashboard") {
 .ui-sortable-placeholder {
   background-color: #E5E0E0;
   visibility: visible !important;
@@ -101,6 +102,7 @@
   padding: 0 10px 0 0;
   background:transparent;
   position: relative;
+  height: 1.8rem;
 }
 ul.widget-nav-list{
   list-style: none;
@@ -207,3 +209,4 @@ input.error {
 [class^="icon-"].primary, [class*=" icon-"].primary{
   color:#008cba;
 }
+//}

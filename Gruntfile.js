@@ -4,7 +4,7 @@ module.exports = function(grunt) {
 
     sass: {
       options: {
-        includePaths: ['content/foundation/scss']
+        includePaths: ['content/foundation/scss', 'content/style']
       },
       dist: {
         options: {
@@ -13,7 +13,7 @@ module.exports = function(grunt) {
         files: {
           'content/style/app.css': 'content/foundation/scss/foundation.scss',
           'content/style/normalize.css': 'content/foundation/scss/normalize.scss',
-          'content/style/dashboard.css': 'content/style/scss/dashboard.scss'
+          'content/style/drata.css': 'content/style/drata.scss'
         }
       }
     },

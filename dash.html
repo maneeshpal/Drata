@@ -8,9 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/style/app.css" />
     <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
 
-    <link rel="stylesheet" type="text/css" href="/style/dashboard.css" />
-     <link rel="stylesheet" type="text/css" href="/style/dashboardmanager.css" />
-    <link rel="stylesheet" type="text/css" href="/style/segment.css" />
+    <link rel="stylesheet" type="text/css" href="/style/drata.css" />
     <link rel="stylesheet" type="text/css" href="/style/chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/numeric-chart.css" />
     <link rel="stylesheet" type="text/css" href="/style/combobox.css" />
@@ -189,10 +187,8 @@
             </nav>
             
             <div class="row">
-                <div class="large-4 medium-6 small-12 columns" data-bind="">
-                    <fieldset>
-                        <legend>Specify Data Source</legend>
-                        <div class="row">
+                <div class="medium-4 small-12 columns" data-bind="">
+                        <div class="row" style="margin-top:1.5rem">
                         <div class="small-12 columns">
                             <label>Server
                                 <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
@@ -209,9 +205,8 @@
                                 </label>
                         </div>
                         </div>
-                    </fieldset>
                 </div>
-                <div class="large-8 medium-6 small-12 columns" data-bind="if: previewWidget()">
+                <div class="medium-8 small-12 columns" data-bind="if: previewWidget()">
                     <!-- ko template:{ name: 'widget-template',data:previewWidget(), afterRender:loadWidget } -->
                     <!-- /ko -->
                 </div>

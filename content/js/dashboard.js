@@ -127,7 +127,7 @@ var Widget = function(widgetModel, index, previewMode){
     });
 
     self.widgetHeight = ko.computed(function(){
-        if(previewMode) return 250;
+        if(previewMode) return 200;
         var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
         wh = Math.max(200, wh);
         return wh;
