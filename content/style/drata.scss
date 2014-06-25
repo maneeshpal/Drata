@@ -5,7 +5,10 @@
 @import "components/settings";
 // Behold, here are all the Foundation components.
 @import
+  "components/combobox",
+  "components/chart",
   "components/dashboard",
   "components/dashboardmanager",
   "components/segment",
-  "components/campfire";
+  "components/campfire",
+  "components/numericchart";

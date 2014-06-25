@@ -1,4 +1,4 @@
-
+@import "scrollbar";
 $superdark: #222 !default;
 $dark : #333 !default;
 $kindadark : #303030 !default;
@@ -132,6 +132,7 @@ body.campfire {
 		}
 
 	}
+	@include fancyscrollbar($superdark, $dark);
 }
 
 
