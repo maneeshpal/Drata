@@ -43,7 +43,7 @@
                 console.log('bar chart drawn');
                 var container = d3.select(this);
                 chart.resize = function() {
-                    dims = {m: {t:20, r:20, b:40, l:30}};
+                    dims = {m: {t:20, r:10, b:30, l:40}};
                     container
                     .transition()
                     .duration(1000)

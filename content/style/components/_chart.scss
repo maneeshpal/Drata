@@ -1,28 +1,25 @@
     text{
         font: 10px arial;
     }
-    .axis path{
-      stroke:#ccc;
-      fill:none;
-      shape-rendering: crispEdges;
-
+    .axis {
+        path{
+            stroke:#ccc;
+            fill:none;
+            shape-rendering: crispEdges;
+        }
+        line {
+            stroke:#ccc;
+            stroke-opacity: .2;
+            fill:none;
+            shape-rendering: crispEdges;
+        }
+        path.domain{
+            display: none;
+        } 
+        text{
+            fill: #1f77b4;
+        }  
     }
-    .axis line {
-      stroke:#ccc;
-      stroke-opacity: .2;
-      fill:none;
-      shape-rendering: crispEdges;
-    }
-    .tick.major .domain{
-        display: none;
-    }
-    .axis text{
-        fill: #1f77b4;
-    }
-    
-    /*.label-group text{
-        font:10px arial;
-    }*/
 
     .line-group .line{
         fill:none;
