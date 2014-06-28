@@ -179,12 +179,18 @@ var Widget = function(widgetModel, index, previewMode){
         segmentProcessor.attach(widgetModel, self.updateWidget.bind(self));
     };
 
-    var _t = undefined;
+    var _t = undefined, resize = true;
 
     self.resizeContent = function(){
         _t && clearTimeout(_t);
+        if(!resize) return;
         if(!content || !content.resize || !!self.parseError()) return;
         _t = setTimeout(content.resize, 500);
+    };
+
+    self.clearTimeouts = function(){
+        resize = false;
+        _t && clearTimeout(_t);
     };
 
     self.loadWidget = function(){
@@ -264,7 +270,8 @@ var Widget = function(widgetModel, index, previewMode){
     // };
 
     self.remove = function(){
-      drata.apiClient.deleteWidget(widgetModel._id);
+        self.clearTimeouts();
+        drata.apiClient.deleteWidget(widgetModel._id);
     };
 
     self.sizex.subscribe(function(){
@@ -290,16 +297,11 @@ var LineContent = function(contentOptions){
     self.template = 'content-template';
     var chart, chartData;
     
-    var _t;
     self.drawChart = function(_data, segmentModel){
-        //chartData = _data;
-        _t && clearTimeout(_t);
-        
         chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(false);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
             .call(chart);
-        //return chart;
     };
 
     self.resize = function(){
@@ -418,7 +420,7 @@ var NumericContent = function(contentOptions){
         return drata.utils.percChange(self.latestDp().y, self.initialDp().y);
     });
 
-    var _t, uniqueXvalues;
+    var uniqueXvalues;
     self.drawChart = function(_data, _segmentModel, _contentModel){
         chartData = _data.values;
         segmentModel = _segmentModel;
@@ -431,7 +433,6 @@ var NumericContent = function(contentOptions){
         }));
         combinedObj = {}, currentIndexes = [];
         self.selectedDataKeys(self.dataKeys());
-        _t && clearTimeout(_t);
     };
     
     var drawSideBar = function(mydata, chartType){
@@ -546,11 +547,7 @@ var ScatterContent = function(contentOptions){
     self.widgetContentId = 'widgetContent'+ contentOptions.index;
     self.template = 'content-template';
     var chart;
-    var _t;
     self.drawChart = function(_data, segmentModel){
-        //chartData = _data;
-        _t && clearTimeout(_t);
-
         chart = drata.charts.scatterPlot().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
         
         d3.select('#'+self.widgetContentId +' svg')
@@ -567,7 +564,6 @@ var ScatterContent = function(contentOptions){
         }else{
             self.drawChart(_data, _segmentModel);
         }
-        //chart && 
     };
 };
 
@@ -576,12 +572,9 @@ var BarContent = function(contentOptions){
     self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.template = 'content-template';
     self.contentType = 'bar';
-    var chart, _t;
+    var chart;
 
     self.drawChart = function(_data){
-        //chartData = _data;
-        _t && clearTimeout(_t);
-        
         chart = drata.charts.barChart().showBarLabels(true);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
@@ -605,17 +598,11 @@ var AreaContent = function(contentOptions){
     self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.template = 'content-template';
     var chart;
-    var _t;
     self.drawChart = function(_data, segmentModel){
-        //chartData = _data;
-        _t && clearTimeout(_t);
-
         chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false).dateInterval(segmentModel.dataGroup.timeseriesInterval);
-        
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
             .call(chart);
-        return chart;
     };
     self.resize = function(){
         chart && chart.resize && chart.resize();
@@ -634,19 +621,13 @@ var PieContent = function(contentOptions){
     self.widgetContentId = 'widgetContent'+contentOptions.index;
     self.contentType = 'pie';
     self.template = 'content-template';
-    var _t = undefined;
-    //var chartData = [];
     var chart;
     
     self.drawChart = function(_data){
-        //chartData = _data[0].values;
-        _t && clearTimeout(_t);
         chart = drata.charts.pieChart();
-
         d3.select('#'+self.widgetContentId + ' svg')
             .datum(_data.values[0])
             .call(chart);
-        return chart;
     };
     self.resize = function(){
         chart && chart.resize && chart.resize();
@@ -751,6 +732,7 @@ var SegmentProcessor = function(){
             if(x.contentModel){
                 cloneModel.contentModel = x.contentModel;
             }
+            previewW.clearTimeouts();
         }
 
         self.onWidgetUpdate && self.onWidgetUpdate(cloneModel);
@@ -783,6 +765,8 @@ var SegmentProcessor = function(){
 
         self.dataSource(undefined);
         $('#graphBuilder').removeClass('showme');
+        var w = self.previewWidget();
+        if(w) w.clearTimeouts();
         self.previewWidget(undefined);
         cloneModel = {};
     };
