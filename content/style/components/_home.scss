@@ -1,0 +1,101 @@
+@import "variables";
+@import "dratamixins";
+
+@font-face {
+	font-family: exo;
+	src: url('../style/fonts/Exo-Regular.otf');
+}
+@font-face {
+	font-family: akashi;
+	src: url('../style/fonts/Akashi.ttf');
+}
+body {
+	position:relative;
+	overflow:hidden;
+	font-family: exo;
+}
+
+.r-corner {
+	position:relative;
+	margin-right: -100%;
+	overflow: hidden;
+	height: 353px;
+}
+.r-corner1 {
+	@include top_corner(45, 175);
+	background-color: $superdark;
+    color : $superlight;
+	padding: 9rem 0 1rem 0;
+	font-size: .8rem;
+	.take_demo {
+		color : $orange_base;
+		font-size: 2.5rem;
+	}
+	border-bottom:1px solid $orange_base;
+}
+.r-corner2 {
+	@include top_corner(45, 300);
+	background-color: $dark;
+	color : $superlight;
+	font-size: 2rem;
+	font-family: exo;
+	padding: 18.5rem 0 1rem 0;
+	float:left;
+	overflow:hidden;
+	position:relative;
+	border-bottom:2px solid $superdark;
+    ul.menu {
+		clear:left;
+		float:left;
+		list-style:none;
+		margin:0;
+		padding:0;
+		position:relative;
+		left:50%;
+		text-align:center;
+
+    	li {
+    		margin:0 1rem;
+    		display:block;
+			float:left;
+			list-style:none;
+			position:relative;
+			right:50%;
+    	}
+    }
+}
+
+.r-corner3 {
+	@include top_corner(45, 400);
+	background-color: $orange_base;
+    color : $kindadark;
+    overflow:hidden;
+    font-size: 6rem;
+    font-family: akashi;
+    padding: 363px 0 1rem 0;
+    //text-shadow:0px 3px 0px $superlight;
+}
+
+.r-corner4 {
+	@include top_corner(45, 500);
+	background-color: $orange_base;
+    color : $superdark;
+    font-size: 6rem;
+    font-family: akashi;
+	padding: 29.5rem 0 1rem 0;
+	text-shadow: 0px 3px 0px $superlight;
+}
+
+.main-header {
+	//background-image:url('/images/chart_palette_482.png');
+	background-repeat: repeat;
+	height:353px;
+	position:absolute;
+	top:0;
+	width:100%;
+	background-color: $dark;
+	svg {
+		opacity: .4;
+	}
+}
+

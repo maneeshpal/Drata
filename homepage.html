@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Drata</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/style/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/style/app.css" />
+    <link rel="stylesheet" type="text/css" href="/style/drata.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
+</head>
+<body>
+    <div class="r-corner">
+        <div class="r-corner4">drata</div>
+        <div class="r-corner3">drata</div>
+        <div class="r-corner2">
+            <ul class="menu">
+                <li>about</li>
+                <li>docs</li>
+                <li>github</li>
+            </ul>
+        </div>
+        <div class="r-corner1">
+        <span class="take_demo">demo</span></div>
+    </div>
+
+    <div id="mainheader" class="main-header">
+        <svg></svg>
+    </div>
+    
+    <script src="/js/lib/d3.v3.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
+     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/models/labels.js"></script>
+    <script type="text/javascript" src="/js/charts/barchart.js"></script>
+     <script type="text/javascript" src="/js/tempdata.js"></script>
+    <script type="text/javascript">
+        (function (root, $) {
+            var data = tempData.randomData(5,10, 17);
+            var chart = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
+            var _t, t2;
+            
+            drata.utils.windowResize(function(){
+                _t && clearTimeout(_t);
+                _t = setTimeout(chart.resize, 500);
+            });
+            
+            // setInterval(function(){
+            //     data = tempData.randomData(5,10, 17);
+            //     chart.change(data);
+            // }, 5000);
+
+            d3.select('#mainheader svg')
+                .datum(data)
+                .call(chart);
+        })(this, jQuery);
+    </script>
+</body>
+</html>

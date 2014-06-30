@@ -256,10 +256,13 @@ var WidgetManager = function(model, options){
 
     this.addWidgets= function(){
         this.closeWidgetManager();
-        _.each(this.chosenWidgets(), function(w){
+        var chosenWidgets = this.chosenWidgets();
+        _.each(chosenWidgets, function(w){
+            console.log('cloning widget');
             var model = w.getModel();
             dashboard.addWidget(model);
         }, this);
+        this.chosenWidgets([]);
     };
 
     var chooseAllWidgets = false;

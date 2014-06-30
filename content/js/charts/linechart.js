@@ -4,8 +4,8 @@
         var _xAxisType = 'numeric', _drawXAxis = true, _drawYAxis = true, _yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
-            .axisType('x')
-            .ticks(8);
+            .axisType('x');
+            //.ticks(8);
         var yAxis = drata.models.axis()
             .orient("left")
             .axisType('y')

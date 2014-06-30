@@ -13,6 +13,7 @@ module.exports = function(grunt) {
         files: {
           'content/style/app.css': 'content/foundation/scss/foundation.scss',
           'content/style/normalize.css': 'content/foundation/scss/normalize.scss',
+          'content/style/dashboard.css': 'content/style/dashboard.scss',
           'content/style/drata.css': 'content/style/drata.scss'
         }
       }
@@ -22,7 +23,8 @@ module.exports = function(grunt) {
       grunt: { files: ['Gruntfile.js'] },
 
       sass: {
-        files: 'scss/**/*.scss',
+        files: ['content/style/*.scss',
+        'content/style/components/*.scss'],
         tasks: ['sass']
       }
     }

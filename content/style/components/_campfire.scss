@@ -1,11 +1,6 @@
-@import "scrollbar";
-$superdark: #0d0d0d;
-$dark : #262626;
-$kindadark : #404040;
-$medium : #595959;
-$house : #959595;
-$light : #737373;
-$superlight: #a6a6a6;
+
+@import "variables";
+@import "dratamixins";
 
 body.campfire {
 	background:$superdark;
@@ -40,8 +35,14 @@ body.campfire {
 	ul.stacked-heading li {
 		border-color: $medium;
 	}
-	.axis text {
-		fill: $light;
+	.axis {
+		text {
+			fill: $light;
+		}
+		line {
+			stroke: $kindadark;
+			stroke-opacity: .4;
+		}
 	}
 	//END CHARTS
 
@@ -162,6 +163,8 @@ body.campfire {
 		box-shadow: 1px 1px 1px $superdark;
 	}
 
+
+	@include txt_placeholder($medium);
 	@include fancyscrollbar($superdark, $dark);
 }
 

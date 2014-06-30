@@ -1,0 +1,67 @@
+
+@mixin fancyscrollbar($thumb, $track){
+	::-webkit-scrollbar {
+	    width: 10px;
+	}
+	 
+	::-webkit-scrollbar-track {
+	    //-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	    background: $track;
+	    border-radius: 10px;
+	}
+	 
+	::-webkit-scrollbar-thumb {
+	    border-radius: 10px;
+	    //-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+	    background: $thumb;
+	}
+}
+
+@mixin txt_placeholder($color){
+	::-webkit-input-placeholder {
+	   color: $color;
+	}
+
+	:-moz-placeholder { /* Firefox 18- */
+	   color: $color;  
+	}
+
+	::-moz-placeholder {  /* Firefox 19+ */
+	   color: $color;  
+	}
+
+	:-ms-input-placeholder {  
+	   color: $color;  
+	}
+}
+
+@mixin rotate($angle){
+	/* Safari */
+	-webkit-transform: rotate(unquote($angle + 'deg'));
+
+	/* Firefox */
+	-moz-transform: rotate(unquote($angle + 'deg'));
+
+	/* IE */
+	-ms-transform: rotate(unquote($angle + 'deg'));
+
+	/* Opera */
+	-o-transform: rotate(unquote($angle + 'deg'));
+
+	/* Internet Explorer */
+	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+@mixin top_corner($angle, $size){
+	height: unquote($size + 'px');
+    width: unquote($size + 'px');
+    @include rotate($angle);
+	top: unquote('-' + ($size/2) + 'px');
+	position: absolute;
+	text-align:center;
+	left: 50%;
+	margin-left: unquote('-' + ($size/2) + 'px');
+	z-index:10;
+}
+
+

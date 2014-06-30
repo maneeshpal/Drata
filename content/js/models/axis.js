@@ -110,11 +110,10 @@
                     .orient(_orient);
 
                 var xis = container.call(axis);
-                var turnXaxis = axisLabelLength > _dims.w - _dims.m.l - _dims.m.r;
-                //maxLabelLength = Math.sin(Math.PI/180 * 30) * (maxLabelLength);
+                //var turnXaxis = axisLabelLength > _dims.w - _dims.m.l - _dims.m.r;
                  
                 var angle = (_dims.w < 250)? -60 : -30;
-                if(turnXaxis && _axisType === 'x' && _axisTicType === 'date'){
+                if(_axisType === 'x' && _axisTicType === 'date'){
                     xis.selectAll('text')
                     .style("text-anchor", "end")
                     .attr("dx", "0")
@@ -126,6 +125,13 @@
                 _dims.m.b = mb;
 
                 }
+                // else{
+                //     xis.selectAll('text')
+                //     .style("text-anchor", "end")
+                //     .attr("dx", "0")
+                //     .attr("dy", ".50em")
+                //     .attr("transform", null);
+                // }
                 
                 
             });

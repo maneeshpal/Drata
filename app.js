@@ -47,6 +47,10 @@ app.get('/tcup', function(req, res){
   res.sendfile('tcup.html');
 });
 
+app.get('/', function(req, res){
+  res.sendfile('homepage.html');
+});
+
 
 app.get('/api/dashboardpop', drataRepository.pop);
 

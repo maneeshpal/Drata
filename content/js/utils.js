@@ -403,10 +403,10 @@
     };
 
     var intervalFormats = {
-        month : {format: '%b %Y', mb: 55, ml: 55},
+        month : {format: '%b %Y', mb: 40, ml: 60},
         year: {format: '%Y', mb: 30, ml: 30},
-        day: {format: '%Y %b %d', mb: 60, ml: 60},
-        hours: {format: '%Y %b %d %H:%M', mb: 70, ml: 60},
+        day: {format: '%Y %b %d', mb: 50, ml: 60},
+        hours: {format: '%Y %b %d %H:%M', mb: 70, ml: 70},
         get: function(range){
             if(!range) return this.day;
             var msDay = 172800000, msMonth = 7776000000, msYear = 31536000000;
@@ -415,15 +415,16 @@
                 // 3 days
                 return this.hours;
             }
-            if(interval <= msMonth){
-                //3 months
-                return this.day;
-            }
-            if(interval <= msYear){
-                //1 year
-                return this.month;
-            }
-            return this.year;
+            return this.day;
+            // if(interval <= msMonth){
+            //     //3 months
+            //     return this.day;
+            // }
+            // if(interval <= msYear){
+            //     //1 year
+            //     return this.month;
+            // }
+            // return this.year;
         }
     };
 

@@ -53,13 +53,13 @@ var Dashboard = function(){
     };
 
     self.addWidget = function(widgetModel){
+        console.log('got new widget');
         widgetModel.dashboardId = dashboardId;
         delete widgetModel.dateCreated;
         delete widgetModel._id;
         widgetModel.displayIndex = self.widgets().length + 1;
         drata.apiClient.upsertWidget(widgetModel, function(response){
-           // widgetModel._id = response._id;
-            //widgetModel.dateCreated = response.dateCreated;
+            console.log('created widget');
             widgetModel = response.result;
             var widget = new Widget(widgetModel, self.index++);
             self.widgets.push(widget);
@@ -138,6 +138,7 @@ var Widget = function(widgetModel, index, previewMode){
         var m = self.getModel();
         if(!m._id) return;
         drata.apiClient.upsertWidget(m);
+        console.log('widget updated');
     };
 
     var content;
@@ -195,7 +196,7 @@ var Widget = function(widgetModel, index, previewMode){
 
     self.loadWidget = function(){
         self.parseError(undefined);
-
+        console.log('rendered widget');
         DataRetriever.getData({applyClientAggregation:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
@@ -476,14 +477,14 @@ var NumericContent = function(contentOptions){
         switch(self.backgroundChartType())
         {
             case 'line':
-                chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
+                chart = drata.charts.lineChart().drawLabels(true).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
                 data = [{
                     key: self.currentDataKey(),
                     values: firstArr.slice()
                 }];
             break;
             case 'area':
-                chart = drata.charts.areaChart().drawLabels(false).includeDataMarkers(true).yticks(2).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
+                chart = drata.charts.areaChart().drawLabels(true).includeDataMarkers(true).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
                 data = [{
                     key: self.currentDataKey(),
                     values: firstArr.slice()
@@ -579,7 +580,7 @@ var BarContent = function(contentOptions){
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
             .call(chart);
-        return chart;
+        //return chart;
     };
     self.resize = function(){
         chart && chart.resize && chart.resize();
@@ -599,7 +600,7 @@ var AreaContent = function(contentOptions){
     self.template = 'content-template';
     var chart;
     self.drawChart = function(_data, segmentModel){
-        chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).includeDataMarkers(false).dateInterval(segmentModel.dataGroup.timeseriesInterval);
+        chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(false);
         d3.select('#'+self.widgetContentId +' svg')
             .datum(_data.values)
             .call(chart);

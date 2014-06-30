@@ -12,8 +12,8 @@ var tempData = {
             for(var j = minnumdata; j <= maxnumdata; j++){
                 y += (Math.random() * 10 - j%10);
                 d.push({
-                  x: j,
-                  y: +y.toFixed(0)
+                  key: j,
+                  value: +y.toFixed(0)
                 });
             }
             data.push({
