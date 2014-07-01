@@ -13,8 +13,6 @@ body {
 	position:relative;
 	overflow:hidden;
 	font-family: exo;
-}
-body.campfire {
 	background-image:url('/images/bg.png') !important;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -23,8 +21,10 @@ body.campfire {
 .main-content {
 	background: rgba(0,0,0, .6);
 	padding-right:30%;
+	color :#fff;
 	.heading {
 		font-size: 4rem;
+		color :#fff;
 	}
 	.subheader{
 		font-style: italic;
