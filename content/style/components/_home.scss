@@ -14,35 +14,54 @@ body {
 	overflow:hidden;
 	font-family: exo;
 }
+body.campfire {
+	background-image:url('/images/bg.png') !important;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.main-content {
+	background: rgba(0,0,0, .6);
+	padding-right:30%;
+	.heading {
+		font-size: 4rem;
+	}
+	.subheader{
+		font-style: italic;
+	}
+}
 
 .r-corner {
-	position:relative;
-	margin-right: -100%;
+	position:absolute;
 	overflow: hidden;
-	height: 353px;
+	width:100%;
+	@include rotate(45);
+	width: 550px;
+	right: -178px;
+	top: -40px;
+	z-index: 10;
 }
 .r-corner1 {
-	@include top_corner(45, 175);
+	height: 100px;
+    width: 100%;
+	text-align:center;
 	background-color: $superdark;
-    color : $superlight;
-	padding: 9rem 0 1rem 0;
-	font-size: .8rem;
 	.take_demo {
 		color : $orange_base;
 		font-size: 2.5rem;
 	}
 	border-bottom:1px solid $orange_base;
+	line-height: 100px;
+	padding-top: 10px;
 }
 .r-corner2 {
-	@include top_corner(45, 300);
+	height: 75px;
+    width: 100%;
+	text-align:center;
 	background-color: $dark;
 	color : $superlight;
 	font-size: 2rem;
-	font-family: exo;
-	padding: 18.5rem 0 1rem 0;
-	float:left;
-	overflow:hidden;
-	position:relative;
+	font-family: exo;;
 	border-bottom:2px solid $superdark;
     ul.menu {
 		clear:left;
@@ -61,41 +80,34 @@ body {
 			list-style:none;
 			position:relative;
 			right:50%;
+			line-height: 75px;
     	}
     }
 }
 
 .r-corner3 {
-	@include top_corner(45, 400);
+	height: 100px;
+    width: 100%;
+	text-align:center;
+
 	background-color: $orange_base;
-    color : $kindadark;
-    overflow:hidden;
+    color : $dark;
     font-size: 6rem;
     font-family: akashi;
-    padding: 363px 0 1rem 0;
-    //text-shadow:0px 3px 0px $superlight;
+    text-shadow:$superlight 0px 3px 0px;
+    line-height: 100px;
 }
 
-.r-corner4 {
-	@include top_corner(45, 500);
-	background-color: $orange_base;
-    color : $superdark;
-    font-size: 6rem;
-    font-family: akashi;
-	padding: 29.5rem 0 1rem 0;
-	text-shadow: 0px 3px 0px $superlight;
-}
-
-.main-header {
-	//background-image:url('/images/chart_palette_482.png');
-	background-repeat: repeat;
-	height:353px;
-	position:absolute;
-	top:0;
+.dash-bg {
+	////background-image:url('/images/chart_palette_482.png');
+	//background-repeat: repeat;
+	height:100px;
 	width:100%;
-	background-color: $dark;
+	//background-color: $dark;
 	svg {
 		opacity: .4;
 	}
+	position:relative;
+	top:200px;
 }
 

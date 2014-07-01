@@ -52,16 +52,9 @@
 	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
-@mixin top_corner($angle, $size){
-	height: unquote($size + 'px');
-    width: unquote($size + 'px');
-    @include rotate($angle);
-	top: unquote('-' + ($size/2) + 'px');
-	position: absolute;
-	text-align:center;
-	left: 50%;
-	margin-left: unquote('-' + ($size/2) + 'px');
-	z-index:10;
+@mixin inner_shadow($inset, $shadow_color){
+	-moz-box-shadow:    unquote("inset 0 0 " + $inset + " " + $shadow_color);
+	-webkit-box-shadow: unquote("inset 0 0 " + $inset + " " + $shadow_color);
+	box-shadow:         unquote("inset 0 0 " + $inset + " " + $shadow_color);
 }
-
 

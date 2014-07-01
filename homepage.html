@@ -9,10 +9,11 @@
     <link rel="stylesheet" type="text/css" href="/style/drata.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
 </head>
-<body>
+<body class="campfire">
     <div class="r-corner">
-        <div class="r-corner4">drata</div>
-        <div class="r-corner3">drata</div>
+        <div class="r-corner1">
+            <span class="take_demo">demo</span>
+        </div>
         <div class="r-corner2">
             <ul class="menu">
                 <li>about</li>
@@ -20,14 +21,20 @@
                 <li>github</li>
             </ul>
         </div>
-        <div class="r-corner1">
-        <span class="take_demo">demo</span></div>
+        <div class="r-corner3">drata</div>
     </div>
 
-    <div id="mainheader" class="main-header">
-        <svg></svg>
+    <div class="row main-content">
+        <div class="large-12 columns">
+            <h1 class="heading">Data Driven Dashboard</h1>
+            <h3 class="subheader">A simple, yet efficient business intelligence tool designed to gather analytics from your existing data.</h3>
+        </div>
+
     </div>
-    
+   <!--  <div class="header-chart" id="mainheader">
+        <svg></svg>
+    </div> -->
+
     <script src="/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
      <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
@@ -37,23 +44,23 @@
      <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript">
         (function (root, $) {
-            var data = tempData.randomData(5,10, 17);
-            var chart = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
-            var _t, t2;
+            // var data = tempData.randomData(10,1, 10);
+            // var chart = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
+            // var _t, t2;
             
-            drata.utils.windowResize(function(){
-                _t && clearTimeout(_t);
-                _t = setTimeout(chart.resize, 500);
-            });
+            // drata.utils.windowResize(function(){
+            //     _t && clearTimeout(_t);
+            //     _t = setTimeout(chart.resize, 500);
+            // });
             
-            // setInterval(function(){
-            //     data = tempData.randomData(5,10, 17);
-            //     chart.change(data);
-            // }, 5000);
+            // // setInterval(function(){
+            // //     data = tempData.randomData(5,10, 17);
+            // //     chart.change(data);
+            // // }, 5000);
 
-            d3.select('#mainheader svg')
-                .datum(data)
-                .call(chart);
+            // d3.select('#mainheader svg')
+            //     .datum(data)
+            //     .call(chart);
         })(this, jQuery);
     </script>
 </body>
