@@ -29,8 +29,26 @@
             <h1 class="heading">Data Driven Dashboard</h1>
             <h3 class="subheader">A simple, yet efficient business intelligence tool designed to gather analytics from your existing data.</h3>
         </div>
-
     </div>
+    <div class="slide-bg-wrapper">
+        <div id="slidebg" class="slide-bg"></div>
+        
+    </div>
+
+    <div class="row">
+        <div class="large-12 columns">
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+            <h1>test</h1>
+
+        </div>
+    </div>
+
    <!--  <div class="header-chart" id="mainheader">
         <svg></svg>
     </div> -->
@@ -61,6 +79,38 @@
             // d3.select('#mainheader svg')
             //     .datum(data)
             //     .call(chart);
+
+        var $slideBg = $('#slidebg');
+        var $window = $(window);
+        var _t, _top = -50, currentSlideBgWidth = $slideBg.width();
+
+        function setSlideBgWidth(){
+            currentSlideBgWidth = $window.width() + 100;
+            $slideBg.width(currentSlideBgWidth + 'px');
+        };
+        
+        drata.utils.windowResize(function(){
+            _t && clearTimeout(_t);
+            _t = setTimeout(setSlideBgWidth, 500);
+        });
+
+        d3.select($slideBg[0])
+            .attr('style', '-webkit-transform: translate(0px,-50px)')
+            .on('mouseover', function(d){
+                _top = _top === -50 ? 0 : -50;
+                d3.select(this)
+                .transition().duration(3000)
+                .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
+                console.log('in');
+            })
+            .on('mouseout', function(d){
+                console.log('out');
+                _top = _top === -50 ? 0 : -50;
+                d3.select(this)
+                .transition().duration(3000)
+                .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
+            });
+
         })(this, jQuery);
     </script>
 </body>
