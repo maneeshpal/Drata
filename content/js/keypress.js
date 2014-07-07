@@ -45,7 +45,13 @@
     tracker([91,16,39], function(){
         $('body').addClass('campfire');
     });
+    tracker([17,16,39], function(){
+        $('body').addClass('campfire');
+    });
     tracker([91,16,37], function(){
+        $('body').removeClass('campfire');
+    });
+    tracker([17,16,37], function(){
         $('body').removeClass('campfire');
     });
 })(jQuery);
