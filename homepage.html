@@ -26,28 +26,36 @@
                 <div class="r-corner3">drata</div>
             </div>
             <div class="slide-bg-wrapper">
-                <div class="main-content">
-                    <h1 class="heading">Data Driven Dashboard</h1>
-                    <h3 class="subheader">A simple, yet efficient business intelligence tool designed to gather analytics from your existing data.</h3>
+                <div class="top-content">
+
+                <div class="l1">
+                Data Driven Dashboard
+                </div>
+
+                <div class="l2">
+                    A simple, yet efficient business intelligence tool designed to gather analytics from your existing data.
+                </div>
                 </div>
                 <div id="slidebg" class="slide-bg"></div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="large-12 columns">
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-            <h1>test</h1>
-
+    <div class="row callouts">
+        <div class="small-4 columns">
+            <h3>Connect to Datasource</h3>
+            <h3><small>Drata supports Mongodb currently. Add your db server credentials to the config file, and let drata pull databases and collections.</small></h3>
+        </div>
+        <div class="small-4 columns center">
+            <h3>Slice and dice your data </h3>
+            <h3><small> Select the properties you want to visualize, apply filters. You may aggregate resulting collection for timeseries or any other reason and finally select the timeframe.</small></h3>
+        </div>
+        <div class="small-4 columns">
+            <h3>Apply Visualizations</h3>
+            <h3><small>Select the type of visualization suitable to your needs and save it as a widget on your dashboard. Currently drata supports 6 types of charts. More comming soon.</small></h3>
         </div>
     </div>
+
 
    <!--  <div class="header-chart" id="mainheader">
         <svg></svg>
@@ -95,10 +103,12 @@
         });
 
         d3.select($slideBg[0])
-            .attr('style', '-webkit-transform: translate(0px,-50px)')
+            .attr('style', '-webkit-transform: translate(0px,-50px)');
+
+        d3.select('.slide-bg-wrapper')
             .on('mouseover', function(d){
                 _top = _top === -50 ? 0 : -50;
-                d3.select(this)
+                d3.select($slideBg[0])
                 .transition().duration(3000)
                 .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
                 console.log('in');
@@ -106,7 +116,7 @@
             .on('mouseout', function(d){
                 console.log('out');
                 _top = _top === -50 ? 0 : -50;
-                d3.select(this)
+                d3.select($slideBg[0])
                 .transition().duration(3000)
                 .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
             });

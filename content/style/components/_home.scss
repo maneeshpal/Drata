@@ -12,24 +12,22 @@
 body {
 	position:relative;
 	font-family: exo;
-	overflow-x:hidden;
-	background-repeat: no-repeat;
+	//background-repeat: no-repeat;
+	//background: $superdark;
 }
 
 .main-content {
-	background: rgba(38,38,38, 0.8);
-	padding-right:400px;
+	//padding:20px 370px 0 20px;
 	width:100%;
-	height:400px;
+	height:390px;
 	position: absolute;
 	z-index: 10;
 	.heading {
-		font-size: 4rem;
 		color: #fff;
 	}
 	.subheader{
 		font-style: italic;
-		color: $superlight;
+		color: #fff;
 	}
 }
 
@@ -42,6 +40,7 @@ body {
 	right: -178px;
 	top: -40px;
 	z-index: 11;
+	box-shadow: 0px 3px 10px #000;
 }
 .r-corner1 {
 	height: 100px;
@@ -63,7 +62,7 @@ body {
 	background-color: $dark;
 	color : $superlight;
 	font-size: 2rem;
-	font-family: exo;;
+	font-family: exo;
 	border-bottom:2px solid $superdark;
     ul.menu {
 		clear:left;
@@ -100,20 +99,22 @@ body {
     line-height: 100px;
 }
 .slide-bg-wrapper {
+	color:#fff;
 	width:100%;
-	height:400px;
+	height:390px;
 	position: relative;
 	overflow: hidden;
+	background-color: $kindadark;
+
 	.slide-bg {
-		background-image: url('/images/bg_light.png');
+		background-image: url('/images/bg3.jpg');
 		background-repeat: repeat;
 		background-position: 50% 50%;
 		background-size: cover;
 		width:100%;
 		height:500px;
-		//@include inner_shadow(10px, #000);
 	}
-	&:after, &:before {
+	&:before {
 		content: "";
 		display: block;
 		width: 100%;
@@ -124,10 +125,43 @@ body {
 	}
 	&:before {
 		bottom: -16px;
-		box-shadow: 0px -8px 16px rgba(38,38,38,.9);
+		box-shadow: 0px -8px 16px rgba(0,0,0,1);
 	}
 	&:after {
 		//top: -16px;
 		//box-shadow: 0px 8px 16px rgba(38,38,38,.9);
+	}
+	.top-content {
+		position:absolute;
+		z-index: 1;
+		width:100%;
+		
+		.l1 {
+			background: rgba(13,13,13,.9);
+			//height:141.421px;
+			line-height:141.421px;
+			border-bottom:1px solid $orange_base;
+			font-size:3rem;
+			padding:0 370px 0 0.9375rem;
+		}
+		.l2 {
+			background: rgba(38,38,38,.8);
+			height:253px;
+			font-size:2rem;
+			line-height:50px;
+			padding:0 370px 0 0.9375rem;
+		}
+	}
+}
+
+.callouts{
+	text-align:center;
+	margin-top:0.9375rem;
+	h3 {
+		color: $orange_base;
+	}
+	.center{
+		border-right:1px solid $orange_base;
+		border-left:1px solid $orange_base;
 	}
 }
