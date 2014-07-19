@@ -30,10 +30,24 @@
                         <div class="small-12 columns l1">
                             Data Driven Dashboard
                         </div>
-                        <div class="small-12 columns l2">
-                            A simple, yet efficient business intelligence tool designed to gather analytics from your existing data.
+                        
+                    </div>
+                    <div class="row">
+                        <div class="left pie-menu">
+                            <div class="header-chart" id="pieMenu">
+                                        <svg></svg>
+                            </div>
+                            <div class="header-chart-inner" id="pieMenuSub">
+                                <svg></svg>
+                            </div>
+                        </div>
+                        <div class="header-content">
+                            <h1 class="heading"></h1>
+                            <h1 class="subheading"><small></small></h1>
                         </div>
                     </div>
+                    
+
                     <div class="row callouts">
                         <div class="small-4 columns text-center">
                         <div class="content">
@@ -57,27 +71,7 @@
             </div>
         </div>
     </div>
-
-    <div class="row about a1">
-        <div class="small-12 columns">
-            <h1>Demo</h1>
-            <div class="row">
-                <div class="small-6 columns text-center">
-                    <p>Create a dashboard from scratch. </p>
-                    <button class="primary large">New Dashboard</button>
-                </div>
-                <div class="small-6 columns text-center">
-                    <p>See a pre built Dashboard</p>
-                    <button class="primary large">Demo</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-
-   <!--  <div class="header-chart" id="mainheader">
-        <svg></svg>
-    </div> -->
+   
 
     <script src="/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
@@ -85,64 +79,64 @@
     <script type="text/javascript" src="/js/utils.js"></script>
     <script type="text/javascript" src="/js/models/labels.js"></script>
     <script type="text/javascript" src="/js/charts/barchart.js"></script>
-     <script type="text/javascript" src="/js/tempdata.js"></script>
+    <script type="text/javascript" src="/js/charts/pie.js"></script>
+    <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript">
         (function (root, $) {
-            var h = $(window).height();
-            var mainheader = $('#slideBgWrapper');
 
+            var h = Math.max(690, $(window).height());
+            var mainheader = $('#slideBgWrapper');
             mainheader.height(Math.max(h, mainheader.height()));
 
-            // var data = tempData.randomData(10,1, 10);
-            // var chart = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
-            // var _t, t2;
-            
-            // drata.utils.windowResize(function(){
-            //     _t && clearTimeout(_t);
-            //     _t = setTimeout(chart.resize, 500);
-            // });
-            
-            // // setInterval(function(){
-            // //     data = tempData.randomData(5,10, 17);
-            // //     chart.change(data);
-            // // }, 5000);
+            var data = {
+                key : 'homepage',
+                values : [{
+                    key: 'What is it?',
+                    value: 30,
+                    index: 1,
+                    enlarge: true,
+                    heading: 'What is Drata ?',
+                    content : 'A simple, yet efficient business intelligence tool designed to gather analytics from your existing data. mlkshk vinyl deep v. Viral next level freegan you probably haven\'t heard of them umami actually. Lomo PBR sriracha +1 stumptown, YOLO.<br /> <button style="background-color:#EA8219" class="primary large radius"> Learn more</button>'
+                },{
+                    key: 'Data Source',
+                    value: 20,
+                    index: 2,
+                    heading: 'Connecting to Data source',
+                    content: 'Select the properties you want to visualize, apply filters. You may aggregate resulting collection for timeseries or any other reason and finally select the timeframe.Occupy art party literally, food truck cornhole messenger bag locavore.<br /> <button class="primary large radius"> Read docs</button>'
+                },{
+                    key: 'Segmentation',
+                    value: 25,
+                    index: 3,
+                    heading: 'Segmentation',
+                    content: 'Select the properties you want to visualize, apply filters. You may aggregate resulting collection for timeseries or any other reason and finally select the timeframe.Locavore iPhone Neutra, Helvetica sustainable scenester umami Thundercats quinoa cray Echo Park.<br /> <button class="primary large radius"> Read docs</button>'
+                },{
+                    key: 'Visualizations',
+                    value: 25,
+                    index: 4,
+                    heading: 'Visualizations',
+                    content: 'Select the type of visualization suitable to your needs and save it as a widget on your dashboard. Currently drata supports 6 types of charts. More comming soon.Brunch mustache meh, sustainable Shoreditch salvia polaroid Godard Schlitz.<br /> <button class="primary large radius"> Live Demo</button>'
+                }]
+            }
+            var chart2  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(0).keyLabels(false).innerRadius(10);
 
-            // d3.select('#mainheader svg')
-            //     .datum(data)
-            //     .call(chart);
+            var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).onEvent('arcClick', function(d){
+                setTimeout(chart2.resize, 200);
+                //chart2.resize();
+                $('h1.heading').html(d.data.heading);
+                $('h1.subheading small').html(d.data.content);
+            });
 
-        // var $slideBg = $('#slidebg');
-        // var $window = $(window);
-        // var _t, _top = -50, currentSlideBgWidth = $slideBg.width();
+            d3.select('#pieMenu svg')
+                .datum(data)
+                .call(chart);
 
-        // function setSlideBgWidth(){
-        //     currentSlideBgWidth = $window.width() + 100;
-        //     $slideBg.width(currentSlideBgWidth + 'px');
-        // };
-        
-        // drata.utils.windowResize(function(){
-        //     _t && clearTimeout(_t);
-        //     _t = setTimeout(setSlideBgWidth, 500);
-        // });
+            d3.select('#pieMenuSub svg')
+                .datum(data)
+                .call(chart2);
 
-        // d3.select($slideBg[0])
-        //     .attr('style', '-webkit-transform: translate(0px,-50px)');
+            $('h1.heading').html(data.values[0].heading);
+            $('h1.subheading small').html(data.values[0].content);
 
-        // d3.select('.slide-bg-wrapper')
-        //     .on('mouseover', function(d){
-        //         _top = _top === -50 ? 0 : -50;
-        //         d3.select($slideBg[0])
-        //         .transition().duration(3000)
-        //         .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
-        //         console.log('in');
-        //     })
-        //     .on('mouseout', function(d){
-        //         console.log('out');
-        //         _top = _top === -50 ? 0 : -50;
-        //         d3.select($slideBg[0])
-        //         .transition().duration(3000)
-        //         .attr('style', '-webkit-transform: translate(0px, ' + (_top) + 'px)');
-        //     });
 
         })(this, jQuery);
     </script>

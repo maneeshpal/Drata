@@ -38,6 +38,7 @@ body {
 	line-height: 100px;
 	padding-top: 10px;
 }
+
 .r-corner2 {
 	height: 75px;
     width: 100%;
@@ -81,16 +82,18 @@ body {
     text-shadow:#fff 0px 3px 0px;
     line-height: 100px;
 }
+
 .slide-bg-wrapper {
 	color:$text_color;
 	width:100%;
 	position: relative;
 	overflow: hidden;
-	background-image: url('/images/connection.jpg');
+	background-image: url('/images/connection_light.jpg');
 	background-repeat: repeat;
 	//background-position: 50% 50%;
 	background-size: cover;
 	background-attachment: fixed;
+	border-top: 5px solid $orange_base;
 	&:before {
 		content: "";
 		display: block;
@@ -112,26 +115,77 @@ body {
 	.l1 {
 		background: rgba($superdark,.6);
 		height:141.421px;
-		//line-height:141.421px;
-		border-bottom:1px solid $orange_base;
 		font-size:3rem;
 		padding:50px 370px 0 0.9375rem;
 		color:#fff;
+		margin-bottom: 50px;
 	}
-	.l2 {
-		//background: rgba($superdark,.5);
-		height:253px;
-		font-size:2rem;
-		line-height:50px;
-		padding:0 370px 0 0.9375rem;
+}
+
+.pie-menu {
+	position: relative;
+	height:500px;
+	width: 400px;
+	left:-20px;
+}
+
+.header-content {
+	padding-left:400px;
+	padding-top: 40px; 
+	.heading {
+		padding-right:240px;
+		color: $orange_base;
+	}
+	.subheading {
+		padding-right:150px;
+	}
+
+}
+
+.header-chart{
+	height:100%;
+	width: 100%;
+	z-index: 12;
+	position: absolute;
+	//background: rgba($superdark,.6);
+	.arcs-group{
+		opacity: .8;
+		.arc {
+			stroke-width:2;
+		}	
+	}
+	.text-group text{
+		font:20px arial;
+		fill: $superdark;
+	}
+}
+
+.header-chart-inner{
+	z-index: 9;
+	height:60%;
+	width:60%;
+	left:80px;
+	top:80px;
+	position: absolute;
+	//background: rgba($superdark,.6);
+	/*top: 93px;
+	left: 115px;*/
+	.arcs-group{
+		opacity: .8;
+		.arc {
+			stroke-width:2;
+		}	
+	}
+	.text-group text{
+		display: none;
 	}
 }
 
 .callouts{
 	margin-top:0.9375rem;
 	//color:$text_color;
-	position: absolute;
-	bottom: 10px;
+	//position: absolute;
+	//bottom: 10px;
 	//background: rgba($superdark,.8);
 	h3 {
 		color: $orange_base;
@@ -142,19 +196,5 @@ body {
 	.center{
 		border-right:1px solid $orange_base;
 		border-left:1px solid $orange_base;
-	}
-}
-.about {
-	height:600px;
-	//background-image:url('/images/connection.jpg');
-	background-repeat: repeat;
-	&.a1 {
-		//background-color: #44727F;
-	}
-	&.a2 {
-		background-color: #D09752;
-	}
-	&.a3 {
-		background-color: #D4906B;
 	}
 }
