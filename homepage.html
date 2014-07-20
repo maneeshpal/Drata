@@ -71,7 +71,40 @@
             </div>
         </div>
     </div>
-   
+    
+<div class="row cake cake-open">
+    <div class="medium-8 small-12 medium-centered columns">
+        <h3>Open Source </h1>
+        <h3><small>Aesthetic irure hella, wolf incididunt PBR&B Portland culpa ex craft beer in butcher small batch fixie. Assumenda XOXO anim reprehenderit freegan. Skateboard Truffaut dreamcatcher you probably haven't heard of them, fixie occupy blog drinking vinegar qui sapiente velit literally craft beer butcher. Brooklyn magna laboris gentrify banh mi kitsch Thundercats nulla Kickstarter. Locavore Bushwick ea, elit hoodie vegan chambray labore tattooed asymmetrical. Aesthetic master cleanse nostrud squid. Id occupy voluptate actually bitters shabby chic, tempor nihil sed swag placeat freegan hella reprehenderit.</small></h2>
+    </div>
+</div>
+
+<div class="row cake cake-minimal">
+    <div class="medium-8 small-12 medium-centered columns">
+        <h3>Minimal setup </h1>
+        <h3><small>Semiotics pork belly eiusmod, actually occaecat bitters ad banjo authentic VHS typewriter. Irony pug freegan, vegan drinking vinegar letterpress flannel 8-bit meggings. Typewriter assumenda keffiyeh, Pitchfork id retro normcore Shoreditch cliche. Deserunt art party leggings, proident lomo distillery before they sold out. Vegan reprehenderit occupy, umami Portland exercitation Banksy qui polaroid lo-fi minim master cleanse. Lomo tofu authentic, Pitchfork flannel Intelligentsia craft beer mumblecore cray cupidatat quis Vice. Artisan McSweeney's wolf, skateboard mlkshk farm-to-table adipisicing leggings cupidatat direct trade umami sed.</small></h2>
+    </div>
+</div>
+
+<div class="row cake cake-tracking">
+    <div class="medium-8 small-12 medium-centered columns">
+        <h3>No tracking code</h1>
+        <h3><small>Aesthetic irure hella, wolf incididunt PBR&B Portland culpa ex craft beer in butcher small batch fixie. Assumenda XOXO anim reprehenderit freegan. Skateboard Truffaut dreamcatcher you probably haven't heard of them, fixie occupy blog drinking vinegar qui sapiente velit literally craft beer butcher. Brooklyn magna laboris gentrify banh mi kitsch Thundercats nulla Kickstarter. Locavore Bushwick ea, elit hoodie vegan chambray labore tattooed asymmetrical. Aesthetic master cleanse nostrud squid. Id occupy voluptate actually bitters shabby chic, tempor nihil sed swag placeat freegan hella reprehenderit.</small></h2>
+    </div>
+</div>
+
+<div class="row cake cake-structure">
+    <div class="medium-8 small-12 medium-centered columns">
+        <h3>Data structure</h1>
+        <h3><small>Vero kitsch High Life irony. IPhone mustache duis you probably haven't heard of them. Jean shorts accusamus Carles, fanny pack retro YOLO dolor plaid fashion axe seitan banjo Intelligentsia post-ironic ennui. Chambray beard small batch 90's, meh placeat ad seitan pour-over ex plaid flannel kale chips consequat. Vegan elit roof party next level. Tote bag Bushwick yr nihil synth. Pour-over fanny pack aute, irure tofu sint cornhole literally voluptate forage lomo.</small></h2>
+    </div>
+</div>
+
+<div class="row footer">
+    <div class="medium-8 small-12 medium-centered columns">
+        drata is developed out of <3 for visualizations by Maneeshpal Bandlamudi
+    </div>
+</div>
 
     <script src="/js/lib/d3.v3.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
@@ -86,7 +119,7 @@
 
             var h = Math.max(690, $(window).height());
             var mainheader = $('#slideBgWrapper');
-            mainheader.height(Math.max(h, mainheader.height()));
+            mainheader.attr('style','min-height:' + Math.max(h, mainheader.height()) + 'px');
 
             var data = {
                 key : 'homepage',

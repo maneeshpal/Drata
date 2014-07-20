@@ -248,12 +248,8 @@
                     
                 var textsEnter = texts.enter()
                     .append('svg:text')
-                    .attr('transform', 'translate(0,0)')
-                    .attr('fill', function(d, i){
-                        return "#000";
-                    });
+                    .attr('transform', 'translate(0,0)');
                     
-
                 if(_keyLabels){
                     textsEnter
                         .append('svg:textPath')
@@ -279,6 +275,10 @@
                         return "translate(" + arc.centroid(d) + ")";
                     });
                 }
+
+                texts.attr('fill', function(d){
+                    return d.data.enlarge ? '#fff' : '#0d0d0d';
+                });
 
                 if(_arcExpand){
                     arcs.on('click', dispatch.arcClick);
