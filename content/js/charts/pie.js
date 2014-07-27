@@ -6,7 +6,7 @@
         var dims = {m: {l:10, r:10, t:10, b:30}};
         var pie = d3.layout.pie();
 
-        var _drawOuterLabels = true, _drawDataKey = true, _innerRadius = 0, _keyLabels = false, _rotateArcs = false, _arcExpand = 0;
+        var _drawOuterLabels = true, _textFillColor = '#fff', _drawDataKey = true, _innerRadius = 0, _keyLabels = false, _rotateArcs = false, _arcExpand = 0;
         var enterAntiClockwise = {
                   startAngle: Math.PI * 2,
                   endAngle: Math.PI * 2
@@ -277,7 +277,7 @@
                 }
 
                 texts.attr('fill', function(d){
-                    return d.data.enlarge ? '#fff' : '#0d0d0d';
+                    return d.data.enlarge ? '#fff' : _textFillColor;
                 });
 
                 if(_arcExpand){
@@ -353,6 +353,14 @@
             events[eventName] = callback;
             return chart;
         };
+
+        chart.textFillColor = function(value){
+            if (!arguments.length) return _textFillColor;
+            _textFillColor = value;
+            return chart;
+        };
+
+        
 
         return chart;
     };

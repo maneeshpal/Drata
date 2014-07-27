@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/style/app.css" />
     <link rel="stylesheet" type="text/css" href="/style/drata.css" />
     <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
+    <link rel="stylesheet" type="text/css" href="/style/fonts/flaticon.css" />
 </head>
 <body>
     <div class="row collapse" style="overflow:hidden">
@@ -25,15 +26,14 @@
                 </div>
                 <div class="r-corner3">drata</div>
             </div>
+            <div class="row collapse">
+                <div class="small-12 columns l1">
+                    Data Driven Dashboard
+                </div>
+            </div>
             <div id="slideBgWrapper" class="slide-bg-wrapper">
-                    <div class="row">
-                        <div class="small-12 columns l1">
-                            Data Driven Dashboard
-                        </div>
-                        
-                    </div>
-                    <div class="row">
-                        <div class="left pie-menu">
+                    <div class="row" style="margin:30px 0">
+                        <div class="pie-menu">
                             <div class="header-chart" id="pieMenu">
                                         <svg></svg>
                             </div>
@@ -42,29 +42,37 @@
                             </div>
                         </div>
                         <div class="header-content">
-                            <h1 class="heading"></h1>
-                            <h1 class="subheading"><small></small></h1>
+                            <h2 class="heading"></h2>
+                            <h2 class="subheading"><small></small></h2>
                         </div>
                     </div>
-                    
-
-                    <div class="row callouts">
-                        <div class="small-4 columns text-center">
-                        <div class="content">
-                            <h3>Connect to Datasource</h3>
-                            <h3><small>Drata supports Mongodb currently. Add your db server credentials to the config file, and let drata pull databases and collections.</small></h3>
+                    <div class="row" style="position:absolute; bottom:0;left:0;right:0">
+                        <div class="small-3 columns text-center callout">
+                            <span class="flaticon-analytics5"></span> 
+                            <div class="desc">Open Source</div>
+                            <div id="openSource" class="barchi">
+                                <svg></svg>    
                             </div>
                         </div>
-                        <div class="small-4 columns center text-center">
-                        <div class="content">
-                            <h3>Slice and dice your data </h3>
-                            <h3><small> Select the properties you want to visualize, apply filters. You may aggregate resulting collection for timeseries or any other reason and finally select the timeframe.</small></h3>
+                        <div class="small-3 columns text-center callout">
+                            <span class="flaticon-wireless29"></span> 
+                            <div class="desc">Minimal setup</div>
+                            <div id="minimal" class="barchi">
+                                <svg></svg>    
                             </div>
                         </div>
-                        <div class="small-4 columns text-center">
-                            <div class="content">
-                            <h3>Apply Visualizations</h3>
-                            <h3><small>Select the type of visualization suitable to your needs and save it as a widget on your dashboard. Currently drata supports 6 types of charts. More comming soon.</small></h3>
+                        <div class="small-3 columns text-center callout">
+                            <span class="flaticon-analytics5"></span> 
+                            <div class="desc">No tracking code</div>
+                            <div id="noTracking" class="barchi">
+                                <svg></svg>    
+                            </div>
+                        </div>
+                        <div class="small-3 columns text-center callout">
+                            <span class="flaticon-database11"></span> 
+                            <div class="desc">Data structure</div>
+                            <div id="dataS" class="barchi">
+                                <svg></svg>    
                             </div>
                         </div>
                     </div>
@@ -73,35 +81,47 @@
     </div>
     
 <div class="row cake cake-open">
-    <div class="medium-8 small-12 medium-centered columns">
-        <h3>Open Source </h1>
+    <div class="cake-visual large-2 small-12 columns show-for-large-up">
+        <span class="flaticon-analytics5"></span>    
+    </div>
+    <div class="large-10 small-12 columns">
+        <h3><span class="hide-for-medium-up flaticon-analytics5"></span> Open Source </h3>
         <h3><small>Aesthetic irure hella, wolf incididunt PBR&B Portland culpa ex craft beer in butcher small batch fixie. Assumenda XOXO anim reprehenderit freegan. Skateboard Truffaut dreamcatcher you probably haven't heard of them, fixie occupy blog drinking vinegar qui sapiente velit literally craft beer butcher. Brooklyn magna laboris gentrify banh mi kitsch Thundercats nulla Kickstarter. Locavore Bushwick ea, elit hoodie vegan chambray labore tattooed asymmetrical. Aesthetic master cleanse nostrud squid. Id occupy voluptate actually bitters shabby chic, tempor nihil sed swag placeat freegan hella reprehenderit.</small></h2>
     </div>
 </div>
 
 <div class="row cake cake-minimal">
-    <div class="medium-8 small-12 medium-centered columns">
-        <h3>Minimal setup </h1>
+    <div class="cake-visual large-2 small-12 columns show-for-large-up">
+        <span class="flaticon-wireless29"></span>    
+    </div>
+    <div class="large-10 small-12 columns">
+        <h3><span class="hide-for-medium-up flaticon-wireless29"></span> Minimal setup </h3>
         <h3><small>Semiotics pork belly eiusmod, actually occaecat bitters ad banjo authentic VHS typewriter. Irony pug freegan, vegan drinking vinegar letterpress flannel 8-bit meggings. Typewriter assumenda keffiyeh, Pitchfork id retro normcore Shoreditch cliche. Deserunt art party leggings, proident lomo distillery before they sold out. Vegan reprehenderit occupy, umami Portland exercitation Banksy qui polaroid lo-fi minim master cleanse. Lomo tofu authentic, Pitchfork flannel Intelligentsia craft beer mumblecore cray cupidatat quis Vice. Artisan McSweeney's wolf, skateboard mlkshk farm-to-table adipisicing leggings cupidatat direct trade umami sed.</small></h2>
     </div>
 </div>
 
 <div class="row cake cake-tracking">
-    <div class="medium-8 small-12 medium-centered columns">
-        <h3>No tracking code</h1>
+    <div class="cake-visual large-2 small-12 columns show-for-large-up">
+        <span class="flaticon-analytics5"></span>    
+    </div>
+    <div class="large-10 small-12 columns">
+        <h3><span class="hide-for-medium-up flaticon-analytics5"></span> No tracking code </h3>
         <h3><small>Aesthetic irure hella, wolf incididunt PBR&B Portland culpa ex craft beer in butcher small batch fixie. Assumenda XOXO anim reprehenderit freegan. Skateboard Truffaut dreamcatcher you probably haven't heard of them, fixie occupy blog drinking vinegar qui sapiente velit literally craft beer butcher. Brooklyn magna laboris gentrify banh mi kitsch Thundercats nulla Kickstarter. Locavore Bushwick ea, elit hoodie vegan chambray labore tattooed asymmetrical. Aesthetic master cleanse nostrud squid. Id occupy voluptate actually bitters shabby chic, tempor nihil sed swag placeat freegan hella reprehenderit.</small></h2>
     </div>
 </div>
 
 <div class="row cake cake-structure">
-    <div class="medium-8 small-12 medium-centered columns">
-        <h3>Data structure</h1>
+    <div class="cake-visual large-2 small-12 columns show-for-large-up">
+        <span class="flaticon-database11"></span>    
+    </div>
+    <div class="large-10 small-12 columns">
+        <h3><span class="hide-for-medium-up flaticon-database11"></span> Data structure </h3>
         <h3><small>Vero kitsch High Life irony. IPhone mustache duis you probably haven't heard of them. Jean shorts accusamus Carles, fanny pack retro YOLO dolor plaid fashion axe seitan banjo Intelligentsia post-ironic ennui. Chambray beard small batch 90's, meh placeat ad seitan pour-over ex plaid flannel kale chips consequat. Vegan elit roof party next level. Tote bag Bushwick yr nihil synth. Pour-over fanny pack aute, irure tofu sint cornhole literally voluptate forage lomo.</small></h2>
     </div>
 </div>
 
 <div class="row footer">
-    <div class="medium-8 small-12 medium-centered columns">
+    <div class="medium-8 medium-centered small-12 columns">
         drata is developed out of <3 for visualizations by Maneeshpal Bandlamudi
     </div>
 </div>
@@ -116,11 +136,9 @@
     <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript">
         (function (root, $) {
-
-            var h = Math.max(690, $(window).height());
             var mainheader = $('#slideBgWrapper');
-            mainheader.attr('style','min-height:' + Math.max(h, mainheader.height()) + 'px');
-
+            var minh = Math.max(690, $(window).height() - 68, mainheader.height());
+            mainheader.attr('style', 'min-height:' + minh + 'px');
             var data = {
                 key : 'homepage',
                 values : [{
@@ -152,11 +170,11 @@
             }
             var chart2  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(0).keyLabels(false).innerRadius(10);
 
-            var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).onEvent('arcClick', function(d){
+            var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).textFillColor('#6f6f6f').onEvent('arcClick', function(d){
                 setTimeout(chart2.resize, 200);
                 //chart2.resize();
-                $('h1.heading').html(d.data.heading);
-                $('h1.subheading small').html(d.data.content);
+                $('h2.heading').html(d.data.heading);
+                $('h2.subheading small').html(d.data.content);
             });
 
             d3.select('#pieMenu svg')
@@ -167,9 +185,46 @@
                 .datum(data)
                 .call(chart2);
 
-            $('h1.heading').html(data.values[0].heading);
-            $('h1.subheading small').html(data.values[0].content);
+            $('h2.heading').html(data.values[0].heading);
+            $('h2.subheading small').html(data.values[0].content);
+            
+            function drawBarCallout(elemId){
+                var _t;
+                var bardata = tempData.randomData(10,1, 5, 20);
+                var barchi = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
+                console.log(bardata);
+                d3.select('#' + elemId + ' svg')
+                .datum(bardata)
+                .call(barchi);
+                function redraw(){
+                    _t && clearTimeout(_t);
+                    _t = setTimeout(function(){
+                        bardata = tempData.randomData(10,1, 5, 20);
+                        barchi.change(bardata);
+                    }, 100);
+                }
+                $('#' + elemId).parent().mousemove(redraw);
+                //$('#' + elemId).mouseleave(redraw);
+            }
 
+            drawBarCallout('openSource');
+            drawBarCallout('minimal');
+            drawBarCallout('noTracking');
+            drawBarCallout('dataS');
+            
+            // drata.utils.windowResize(function(){
+            //     _t && clearTimeout(_t);
+            //     _t = setTimeout(chart.resize, 500);
+            // });
+            
+            var t;
+            drata.utils.windowResize(function(){
+                t && clearTimeout(t);
+                t = setTimeout(function(){
+                    chart.resize();
+                    chart2.resize();   
+                }, 500);
+            });
 
         })(this, jQuery);
     </script>

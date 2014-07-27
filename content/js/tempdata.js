@@ -1,14 +1,14 @@
 
 var tempData = {
-    randomData : function(numgraphs, minnumdata, maxnumdata){
+    randomData : function(numgraphs, minnumdata, maxnumdata, miny){
         numgraphs = numgraphs || 1;
-
+        miny = miny || 0;
         minnumdata  = minnumdata || 1;
         maxnumdata  = maxnumdata || 1;
         var data= [];
         for(var i = 1;i<=numgraphs;i++){
             var d = [];
-            var y = 0;
+            var y = miny;
             for(var j = minnumdata; j <= maxnumdata; j++){
                 y += (Math.random() * 10 - j%10);
                 d.push({

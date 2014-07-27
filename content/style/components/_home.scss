@@ -83,17 +83,26 @@ body {
     line-height: 100px;
 }
 
+.l1 {
+	background: rgba($dark,1);
+	//min-height:141.421px;
+	font-size:2rem;
+	padding:20px 370px 20px 0.9375rem;
+	color:#fff;
+}
+
 .slide-bg-wrapper {
-	color:$text_color;
+	color:$superlight;
 	width:100%;
 	position: relative;
 	overflow: hidden;
-	background-image: url('/images/connection_light.jpg');
+	//background-image: url('/images/connection_light.jpg');
 	background-repeat: repeat;
 	//background-position: 50% 50%;
+	background:$dark;
 	background-size: cover;
 	background-attachment: fixed;
-	border-top: 5px solid $orange_base;
+	border-top: 1px solid $orange_base;
 	&:before {
 		content: "";
 		display: block;
@@ -111,15 +120,6 @@ body {
 		//top: -16px;
 		//box-shadow: 0px 8px 16px rgba($dark, .9);
 	}
-	
-	.l1 {
-		background: rgba($superdark,.6);
-		min-height:141.421px;
-		font-size:3rem;
-		padding:50px 370px 50px 0.9375rem;
-		color:#fff;
-		margin-bottom: 50px;
-	}
 }
 
 .header-content {
@@ -131,6 +131,10 @@ body {
 	}
 	.subheading {
 		padding-right:150px;
+		//color:$superlight;
+		button, .button {
+			margin-top:1.5rem;
+		}
 	}
 
 }
@@ -140,6 +144,7 @@ body {
 	width:400px;
 	height:400px;
 	left:-20px;
+	float:left;
 }
 
 .header-chart{
@@ -150,7 +155,8 @@ body {
 	.arcs-group{
 		opacity: .8;
 		.arc {
-			stroke-width:2;
+			stroke-width:3;
+			stroke: $dark;
 		}	
 		cursor:pointer;
 	}
@@ -171,13 +177,59 @@ body {
 	.arcs-group{
 		opacity: .8;
 		.arc {
-			stroke-width:2;
+			stroke-width:3;
+			stroke:$dark;
 		}	
 	}
 	.text-group text{
 		display: none;
 	}
 }
+.callout {
+	height: 200px;
+	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
+		font-size:60px;
+		display: block;
+		width: 100%;
+		margin-left: 0;
+		height:100px;
+		padding-top:50px;
+	}
+	.desc{
+		height:100px;
+		line-height: 100px;
+		transition: all .1s linear;
+		font-size: 20px;
+	}
+	.barchi {
+		visibility: hidden;
+		height:40px;
+		padding:0 20px;
+		svg {
+			opacity: .5;
+		}
+	}
+	rect{
+		stroke : $dark;
+	}
+	
+	background-color: $dark;
+	transition: all .1s linear;
+	//color:$superlight;
+	&:hover{
+		//background-color: $orange_base;
+		color:$orange_base;
+		.barchi {
+			visibility: visible;
+		}
+		.desc{
+			height:60px;
+			line-height: 60px;
+			//font-size: 14px;
+		}
+	}
+}
+
 @media screen and (max-width: 768px){
 	.pie-menu {
 		height:300px;
@@ -204,22 +256,9 @@ body {
 	}
 }
 
-.callouts{
-	margin-top:0.9375rem;
-	h3 {
-		color: $orange_base;
-		small {
-			color:$text_color;	
-		}
-	}
-	.center{
-		border-right:1px solid $orange_base;
-		border-left:1px solid $orange_base;
-	}
-}
-
 .cake {
 	background-color: $kindadark;
+	position: relative;
 	padding:20px 0;
 	border-bottom: 1px solid $dark;
 	h3 {
@@ -228,6 +267,24 @@ body {
 			color : $superlight;
 		}
 	}
+	[class^="flaticon-"], [class*=" flaticon-"]{
+		display: inline !important;
+	}
+	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
+		margin-left: 0;
+	}	
+	.cake-visual{
+		color:$superlight;
+		[class^="flaticon-"], [class*=" flaticon-"]{
+			position: relative;
+			top:60px;
+			margin-left: 20px;
+		}
+		[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
+			font-size:80px;
+		}	
+	}
+	
 }
 .footer{
 	background-color: $superdark;
