@@ -292,3 +292,34 @@ body {
 	text-align: center;
 	color:$superlight;
 }
+
+@media screen and (max-width: 1024px){
+.r-corner {
+	right: -184px;
+	top: 13px;
+}
+.r-corner1 {
+	height: 100px;
+    .take_demo {
+		font-size: 2.5rem;
+	}
+	line-height: 100px;
+	padding-top: 10px;
+}
+
+.r-corner2 {
+	height: 75px;
+    font-size: 2rem;
+    ul.menu {
+    	li {
+    		line-height: 75px;
+    	}
+    }
+}
+
+.r-corner3 {
+	height: 90px;
+    font-size: 4rem;
+    line-height: 90px;
+}
+}
