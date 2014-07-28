@@ -93,6 +93,7 @@ body {
 
 .slide-bg-wrapper {
 	color:$superlight;
+	padding-bottom:200px;
 	width:100%;
 	position: relative;
 	overflow: hidden;
@@ -186,27 +187,27 @@ body {
 	}
 }
 .callout {
-	height: 200px;
+	height: 150px;
 	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
 		font-size:60px;
 		display: block;
 		width: 100%;
 		margin-left: 0;
-		height:100px;
-		padding-top:50px;
+		//height:50px;
 	}
 	.desc{
-		height:100px;
-		line-height: 100px;
+		//height:100px;
+		//line-height: 100px;
 		transition: all .1s linear;
 		font-size: 20px;
+		padding:40px 0 20px 0;
 	}
 	.barchi {
 		visibility: hidden;
 		height:40px;
 		padding:0 20px;
 		svg {
-			opacity: .5;
+			opacity: .7;
 		}
 	}
 	rect{
@@ -215,7 +216,7 @@ body {
 	
 	background-color: $dark;
 	transition: all .1s linear;
-	//color:$superlight;
+	@media screen and (min-width: 600px){
 	&:hover{
 		//background-color: $orange_base;
 		color:$orange_base;
@@ -223,10 +224,12 @@ body {
 			visibility: visible;
 		}
 		.desc{
-			height:60px;
-			line-height: 60px;
+			//height:60px;
+			//line-height: 60px;
 			//font-size: 14px;
+			padding:20px 0 20px 0;
 		}
+	}
 	}
 }
 
@@ -318,8 +321,14 @@ body {
 }
 
 .r-corner3 {
-	height: 90px;
-    font-size: 4rem;
-    line-height: 90px;
+	height: 75px;
+    font-size: 3.6rem;
+    line-height: 75px;
+}
+}
+
+@media screen and (max-width: 768px){
+.callout .desc {
+	font-size: 14px;
 }
 }
