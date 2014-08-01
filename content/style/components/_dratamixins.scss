@@ -58,3 +58,14 @@
 	box-shadow:         unquote("inset 0 0 " + $inset + " " + $shadow_color);
 }
 
+@mixin logo($height){
+	height: $height;
+    width: 100%;
+	text-align:center;
+	//background-color: $orange_base;
+    color : $superdark;
+    //font-size: 6rem;
+    font-family: akashi;
+    text-shadow:#fff 0px 3px 0px;
+    line-height: $height;
+}

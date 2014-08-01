@@ -8,11 +8,34 @@ var express = require('express'),
     drataRepository = require('./routes/drataRepository.js'),
    	http = require('http'),
    	cors = require('cors'),
-   	path = require('path');
+   	path = require('path'),
+    config = require('./routes/config.json');
 
 var app = express();
 
- 
+var serverNames = config.dataSources.map(function(d){
+    return d.alias;
+});
+
+var callInstance = function(callback, req, res){
+    var dataSourceType = config.dataSources.filter(function(item){
+        return item.alias === req.params.datasource;
+    });
+    var instance;
+    if(dataSourceType && dataSourceType.length > 0){
+        switch (dataSourceType[0].type){
+            case 'mongodb':
+                instance = mongoRepository;
+            break;
+        }
+    }
+    if(!callback || !instance || !instance[callback]){
+      res.send(404);
+      return;
+    } 
+    instance[callback].call(this, req, res);
+};
+
 app.configure(function () {
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
     //app.use(express.bodyParser());
@@ -21,6 +44,7 @@ app.configure(function () {
     app.use(express.urlencoded());
     app.use(express.static(path.join(__dirname, 'content')));
 });
+
 
 app.set('port', process.env.PORT || 3000);
 app.get('/dashboard/manage', function(req, res){
@@ -97,11 +121,18 @@ app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
 
 //app.get('/api/external/pop2539', mongoRepository.pop);
-app.get('/api/external/datasources', mongoRepository.getDataSourceNames);
-app.get('/api/external/:datasource/database', mongoRepository.getDatabaseNames);
-app.get('/api/external/:datasource/:dbname/collectionNames', mongoRepository.getCollectionNames);
-app.get('/api/external/:datasource/:dbname/:collectionName/properties', mongoRepository.findProperties);
-app.post('/api/external/:datasource/:dbname/:collectionName', mongoRepository.findCollection);
+app.get('/api/external/datasource', function(req, res){
+  res.json(serverNames);
+});
+app.get('/api/external/:datasource/database', callInstance.bind(this, 'getDatabaseNames'));
+app.get('/api/external/:datasource/:dbname/collectionNames', callInstance.bind(this, 'getCollectionNames'));
+app.get('/api/external/:datasource/:dbname/:collectionName/properties', callInstance.bind(this, 'findProperties'));
+app.post('/api/external/:datasource/:dbname/:collectionName', callInstance.bind(this, 'findCollection'));
+
+// app.get('/api/external/:datasource/database', mongoRepository.getDatabaseNames);
+// app.get('/api/external/:datasource/:dbname/collectionNames', mongoRepository.getCollectionNames);
+// app.get('/api/external/:datasource/:dbname/:collectionName/properties', mongoRepository.findProperties);
+// app.post('/api/external/:datasource/:dbname/:collectionName', mongoRepository.findCollection);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

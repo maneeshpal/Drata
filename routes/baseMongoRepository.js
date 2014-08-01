@@ -24,8 +24,6 @@ _.each(config.dataSources, function(server){
 var connectionCount = 0;
 exports.dbInstance = function(){
     var _name, _serverName;
-
-    
     function _connect(callback){
         if(!dbs[_serverName]) {
             if(serverNames.indexOf(_serverName) > -1){

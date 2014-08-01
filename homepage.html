@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div id="slideBgWrapper" class="slide-bg-wrapper">
-                    <div class="row" style="margin-top:30px">
+                    <div class="row" style="margin:0 auto; max-width:80rem">
                         <div class="pie-menu">
                             <div class="header-chart" id="pieMenu">
                                         <svg></svg>
@@ -145,7 +145,7 @@
     <script type="text/javascript">
         (function (root, $) {
             var mainheader = $('#slideBgWrapper');
-            var minh = Math.max(690, $(window).height() - 68, mainheader.height());
+            var minh = Math.max(650, $(window).height() - 68, mainheader.height());
             mainheader.attr('style', 'min-height:' + minh + 'px');
             var data = {
                 key : 'homepage',
@@ -206,13 +206,17 @@
                 .call(barchi);
                 function redraw(){
                     _t && clearTimeout(_t);
-                    _t = setTimeout(function(){
+                    _t = setInterval(function(){
                         bardata = tempData.randomData(10,1, 5, 20);
                         barchi.change(bardata);
-                    }, 100);
+                    }, 500);
                 }
-                $('#' + elemId).parent().mousemove(redraw);
-                //$('#' + elemId).mouseleave(redraw);
+                function stopRedraw() {
+                    _t && clearInterval(_t);
+                }
+
+                $('#' + elemId).parent().mouseenter(redraw);
+                $('#' + elemId).parent().mouseleave(stopRedraw);
             }
 
             drawBarCallout('openSource');

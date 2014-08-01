@@ -138,7 +138,7 @@
 
     //EXTERNAL API
     var getDataSourceNames = function(callback){
-        var url = apiExternalRoot + 'datasources';
+        var url = apiExternalRoot + 'datasource';
         _perform('GET', url, undefined, callback);
     };
 

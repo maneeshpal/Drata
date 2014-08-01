@@ -2,20 +2,14 @@
 var utils = require('./utils');
 var aggregator = require('./aggregator');
 var config = require('./config.json');
-var baseMongoRepo = require('./genericMongoRepository');
+var baseMongoRepo = require('./baseMongoRepository');
 //var BSON = mongo.BSONPure;
 
 //var mongoClients = {};
-var serverNames = config.dataSources.map(function(d){
-    return d.alias;   
-});
+
 
 exports.pop = function(req, res){
     populateDB(req, res);
-};
-
-exports.getDataSourceNames = function(req, res){
-    res.json(serverNames);
 };
 
 exports.getDatabaseNames = function(req, res){
@@ -97,7 +91,7 @@ exports.findCollection = function(req, res) {
         var selectOnly = utils.buildReturnPoperties(segment);
         //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
         //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
-        var ss = +(new Date());
+        //var ss = +(new Date());
         db.collection(collectionName, function(err, collection) {
             if(err){
                 res.send(500, 'Cannot access collection '+ collectionName);
@@ -108,14 +102,14 @@ exports.findCollection = function(req, res) {
                     res.send(500);
                     return;
                 }
-                console.log('got response : ' + (+(new Date()) - ss));
-                ss = +(new Date());
+                //console.log('got response : ' + (+(new Date()) - ss));
+                //ss = +(new Date());
                 var ret = [];
                 for(var i = 0; i< items.length; i++){
                     ret.push(utils.flatten(items[i]));
                 }
-                console.log('flattened result : ' + (+(new Date()) - ss));
-                ss = +(new Date());
+                //console.log('flattened result : ' + (+(new Date()) - ss));
+                //ss = +(new Date());
                 
                 if(segment.applyClientAggregation){
                     res.send(ret); 
@@ -129,7 +123,7 @@ exports.findCollection = function(req, res) {
                    res.send(500, e); 
                    return;
                 }
-                console.log('aggregator done : ' + (+(new Date()) - ss));
+                //console.log('aggregator done : ' + (+(new Date()) - ss));
                 
                 res.send(graphData);
                 //db.close();
