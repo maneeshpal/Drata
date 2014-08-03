@@ -46,7 +46,9 @@ app.configure(function () {
 });
 
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', 3000);
+console.log('prcess port: ' + process.env.PORT);
+
 app.get('/dashboard/manage', function(req, res){
   res.sendfile('manage.html');
 });
