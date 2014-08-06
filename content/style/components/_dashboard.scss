@@ -134,18 +134,22 @@ ul.widget-nav-list li.action-icon{
 .mymodal-wrapper.showme {
   top:0;
   opacity: 1;
+  max-height:100%;
 }
 .mymodal-wrapper {
   position: absolute;
   z-index: 100;
   opacity: 0;
-  top:-100%;
+  top:-800px;
+  max-height:800px;
   transition: all .1s linear;
   width:100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 .mymodal-inner{
   width:100%;
-  /*background-color: rgba(0,0,0,.4);*/
+  background-color: rgba(0,0,0,.4);
 }
 .mymodal-inner-temp{
   width:60%;
