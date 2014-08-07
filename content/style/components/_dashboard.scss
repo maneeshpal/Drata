@@ -1,4 +1,17 @@
-//@include exports("dashboard") {
+@import "variables";
+@import "dratamixins";
+
+@font-face {
+  font-family: akashi;
+  src: url('../style/fonts/Akashi.ttf');
+}
+
+.logo {
+  @include logo(35px);
+  padding:0 10px;
+  background-color : $orange_base;
+}
+
 .ui-sortable-placeholder {
   background-color: #E5E0E0;
   visibility: visible !important;
@@ -144,12 +157,12 @@ ul.widget-nav-list li.action-icon{
   max-height:800px;
   transition: all .1s linear;
   width:100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  //overflow-y: scroll;
+  //overflow-x: hidden;
 }
 .mymodal-inner{
   width:100%;
-  background-color: rgba(0,0,0,.4);
+  //background-color: rgba(0,0,0,.4);
 }
 .mymodal-inner-temp{
   width:60%;
@@ -213,4 +226,3 @@ input.error {
 [class^="icon-"].primary, [class*=" icon-"].primary{
   color:#008cba;
 }
-//}

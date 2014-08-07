@@ -41,7 +41,7 @@ body.campfire {
 		}
 		line {
 			stroke: $kindadark;
-			stroke-opacity: .4;
+			stroke-opacity: .6;
 		}
 	}
 	//END CHARTS
@@ -117,15 +117,15 @@ body.campfire {
 	//svg
 	.topgroup {
 		rect{
-			stroke-opacity:.6;
-			fill-opacity:.6;
+			stroke-opacity:.8;
+			fill-opacity:.8;
 		}
 		.line-group .line {
 			stroke-width:1;
 		}
 		.arcs-group .arc {
-	        stroke-opacity:.6;
-	        fill-opacity:.6;
+	        stroke-opacity:.8;
+	        fill-opacity:.8;
 	    }
 	}
 	//end svg
