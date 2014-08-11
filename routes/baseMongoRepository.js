@@ -8,7 +8,11 @@ var serverNames = config.dataSources.map(function(d){
         return d.alias;   
     });
 
-_.each(config.dataSources, function(server){
+var mongoSources = config.dataSources.filter(function(d){
+    return d.type === 'mongodb';
+});
+
+_.each(mongoSources, function(server){
     var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));   
     instance.open(function(err, mongoClient) {
         if(err){

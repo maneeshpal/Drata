@@ -503,20 +503,20 @@
         logmsg : false
     });
 
-    var conditionExpression = function(condition){
+    var _conditionExpression = function(condition){
         var expression = '';
         if(condition.isComplex){
             return conditionsExpression(condition.groups);
         }
         else{
-            return  selectionExpression(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': (condition.value ? condition.value : '__'));
+            return  selectionExpression(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': format(['numeric', 'boolean'].indexOf(condition.valType) === -1 ? '\'{0}\'' : '{0}', (condition.value ? condition.value : '__')));
         }
     };
 
     var conditionsExpression = function(conditions){
         var expression = '';
         _.each(conditions, function(gr,index){
-            expression = expression + ((index === 0)? conditionExpression(gr) : ' ' + gr.logic + ' ' + conditionExpression(gr));
+            expression = expression + ((index === 0)? _conditionExpression(gr) : ' ' + gr.logic + ' ' + _conditionExpression(gr));
         });
         return !expression? '' : '(' + expression + ')';
     };

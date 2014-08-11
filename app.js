@@ -5,12 +5,14 @@
 
 var express = require('express'),
     mongoRepository = require('./routes/mongoRepository.js'),
+    sqlRepository = require('./routes/sqlRepository.js'),
     drataRepository = require('./routes/drataRepository.js'),
    	http = require('http'),
    	cors = require('cors'),
    	path = require('path'),
     config = require('./routes/config.json');
 
+//var sqlRepository = '';
 var app = express();
 
 var serverNames = config.dataSources.map(function(d){
@@ -26,6 +28,9 @@ var callInstance = function(callback, req, res){
         switch (dataSourceType[0].type){
             case 'mongodb':
                 instance = mongoRepository;
+            break;
+            case 'sqlserver':
+                instance = sqlRepository;
             break;
         }
     }

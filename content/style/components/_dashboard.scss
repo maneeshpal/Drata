@@ -144,32 +144,33 @@ ul.widget-nav-list li.action-icon{
 /*widget nav*/
 
 /*Modal segment*/
-.mymodal-wrapper.showme {
-  top:0;
-  opacity: 1;
-  max-height:100%;
-}
 .mymodal-wrapper {
   position: absolute;
   z-index: 100;
   opacity: 0;
-  top:-800px;
-  max-height:800px;
-  transition: all .1s linear;
+  transition: all .5s linear;
   width:100%;
-  //overflow-y: scroll;
-  //overflow-x: hidden;
+  visibility: hidden;
+  top:0;
+  &.showme {
+    opacity: 1;
+    visibility: visible;
+    .mymodal-inner {
+      //height: 100%;
+    }
+  }
 }
 .mymodal-inner{
-  width:100%;
-  //background-color: rgba(0,0,0,.4);
-}
-.mymodal-inner-temp{
   width:60%;
+  position:relative;
   background-color:#fff;
   margin:0 auto;
   box-shadow: 0px 0px 15px 3px #333;
-  overflow: hidden;
+  //overflow: hidden;
+  //height:0;
+  //-webkit-transition-delay: 2s; /* Safari */
+  //transition-delay: 2s;
+  //transition: all 1s linear;
 }
 /*End Modal Segment*/
 
@@ -198,12 +199,12 @@ ul.widget-nav-list li.action-icon{
 }
 
 @media only screen and (max-width: 1530px) {
-  .mymodal-inner-temp{
+  .mymodal-inner{
     width:80%;
   }
 }
 @media only screen and (max-width: 1024px) {
-  .mymodal-inner-temp{
+  .mymodal-inner{
     width:100%;
   }
 }

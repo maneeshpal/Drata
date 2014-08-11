@@ -142,8 +142,8 @@
     </div>
 
     <div id="graphBuilder" class="mymodal-wrapper">
+        
         <div class="mymodal-inner">
-        <div class="mymodal-inner-temp">
             
             <nav class="top-bar" data-topbar>
                 <ul class="title-area">
@@ -183,7 +183,7 @@
             </nav>
             
             <div class="row">
-                <div class="medium-4 small-12 columns" data-bind="">
+                <div class="medium-4 small-12 columns">
                         <div class="row" style="margin-top:1.5rem">
                         <div class="small-12 columns">
                             <label>Server
@@ -213,57 +213,52 @@
             <!-- ko template: {name: 'segment-template', data: segment, if : selectedDataKey() !== undefined} -->
                     <!-- /ko -->
         </div>
-        </div>
     </div>
     
     <div id="dashboardManager" class="mymodal-wrapper">
-        <div class="mymodal-inner">
-            <div class="mymodal-inner-temp" style="overflow:visible">
-                <nav class="top-bar" data-topbar>
-                    <ul class="title-area">
-                        <li class="name">
-                            <h1><a>Dashboard Manager</a></h1>
+        <div class="mymodal-inner" style="overflow:visible">
+            <nav class="top-bar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a>Dashboard Manager</a></h1>
+                    </li>
+                </ul>
+
+                <section class="top-bar-section">
+                    <!-- Right Nav Section -->
+                    <ul class="right">
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:closeDashboardManager" class="button alert"><i class="general foundicon-remove"></i></a>
                         </li>
                     </ul>
-
-                    <section class="top-bar-section">
-                        <!-- Right Nav Section -->
-                        <ul class="right">
-                            <li class="divider"></li>
-                            <li class="has-form">
-                                <a data-bind="click:closeDashboardManager" class="button alert"><i class="general foundicon-remove"></i></a>
-                            </li>
-                        </ul>
-                    </section>
-                </nav>
-                <div style="padding:0.9375rem 0" data-bind="template: {name: 'dashboardmanager-template'}">
-                </div>
+                </section>
+            </nav>
+            <div style="padding:0.9375rem 0" data-bind="template: {name: 'dashboardmanager-template'}">
             </div>
         </div>
     </div>
 
     <div id="widgetManager" class="mymodal-wrapper">
         <div class="mymodal-inner">
-            <div class="mymodal-inner-temp">
-                <nav class="top-bar" data-topbar>
-                    <ul class="title-area">
-                        <li class="name">
-                            <h1><a>Widget Manager</a></h1>
+            <nav class="top-bar" data-topbar>
+                <ul class="title-area">
+                    <li class="name">
+                        <h1><a>Widget Manager</a></h1>
+                    </li>
+                </ul>
+
+                <section class="top-bar-section">
+                    <!-- Right Nav Section -->
+                    <ul class="right">
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:closeWidgetManager" class="button alert"><i class="general foundicon-remove"></i></a>
                         </li>
                     </ul>
-
-                    <section class="top-bar-section">
-                        <!-- Right Nav Section -->
-                        <ul class="right">
-                            <li class="divider"></li>
-                            <li class="has-form">
-                                <a data-bind="click:closeWidgetManager" class="button alert"><i class="general foundicon-remove"></i></a>
-                            </li>
-                        </ul>
-                    </section>
-                </nav>
-                <div style="padding:0.9375rem 0" data-bind="template: {name: 'widgetmanager-template'}">
-                </div>
+                </section>
+            </nav>
+            <div style="padding:0.9375rem 0" data-bind="template: {name: 'widgetmanager-template'}">
             </div>
         </div>
     </div>
