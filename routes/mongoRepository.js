@@ -88,7 +88,7 @@ exports.findCollection = function(req, res) {
         var segment = req.body;
         //console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
         var query = utils.getMongoQuery(segment);
-        var selectOnly = utils.buildReturnPoperties(segment);
+        var selectOnly = utils.getMongoProperties(segment);
         //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
         //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
         //var ss = +(new Date());

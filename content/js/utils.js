@@ -532,6 +532,27 @@
         
     };
 
+    var selectionsExpression = function(selections, isTopLevel){
+        var expression='';
+        if(isTopLevel){
+            var expressions = [];
+            _.each(selections, function(gr,index){
+                expression = selectionExpression(gr);
+                if(gr.groupBy !== 'value'){
+                    expression = gr.groupBy + '(' + expression + ')';
+                }
+                expressions.push(expression);
+            });
+            return expressions.join(', ');
+        }
+        else{
+            _.each(selections, function(gr,index){
+                expression = expression + ((index === 0)? selectionExpression(gr) : ' ' + gr.logic + ' ' + selectionExpression(gr));
+            });
+            return '(' + expression + ')';
+        }
+    };
+
     var getSelectionProperties = function(selections){
         var ret = [];
         _.each(selections, function(sel){
@@ -544,28 +565,6 @@
             }
         });        
         return _.uniq(ret);
-    };
-
-    var selectionsExpression = function(selections, isTopLevel){
-        var expression='';
-        if(isTopLevel){
-            var expressions = [];
-            _.each(selections, function(gr,index){
-                expression = selectionExpression(gr);
-                if(gr.groupBy !== 'value'){
-                    expression = '<em>' + gr.groupBy + '</em>(' + expression + ')';
-                }
-                expressions.push(expression);
-            });
-            
-            return expressions.join(', ');
-        }
-        else{
-            _.each(selections, function(gr,index){
-                expression = expression + ((index === 0)? selectionExpression(gr) : ' ' + gr.logic + ' ' + selectionExpression(gr));
-            });    
-            return '(' + expression + ')';
-        }
     };
 
     var percChange = function(curr, prev){
@@ -602,6 +601,99 @@
         timeframes : ['minute', 'hour', 'day', 'month', 'year']
     });
 
+Date.prototype.format = function(f){
+    return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate());
+}
+
+/**ttest**/
+
+
+var getSqlQuery = function(segment){
+    function _ce(condition){
+        var expression = '';
+        if(condition.isComplex){
+            return cse(condition.groups);
+        }
+        else{
+            return  _se(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': format(['numeric', 'boolean'].indexOf(condition.valType) === -1 ? '\'{0}\'' : '{0}', (condition.value ? condition.value : '__')));
+        }
+    };
+
+    function cse(conditions){
+        var expression = '';
+        _.each(conditions, function(gr,index){
+            expression = expression + ((index === 0)? _ce(gr) : ' ' + gr.logic + ' ' + _ce(gr));
+        });
+        return !expression? '' : '(' + expression + ')';
+    };
+
+    function _se(selection){
+        var expression = '';
+        if(!selection.isComplex){
+            return selection.selectedProp ? selection.selectedProp : '__';
+        }
+        else{
+            return se(selection.groups);
+        }
+        
+    };
+
+    function se(selections, isTopLevel){
+        var expression='';
+        if(isTopLevel){
+            var expressions = [];
+            _.each(selections, function(gr,index){
+                expression = _se(gr);
+                if(gr.groupBy !== 'value'){
+                    expression = gr.groupBy + '(' + expression + ')';
+                }
+                expressions.push(expression);
+            });
+            return expressions.join(', ');
+        }
+        else{
+            _.each(selections, function(gr,index){
+                expression = expression + ((index === 0)? _se(gr) : ' ' + gr.logic + ' ' + _se(gr));
+            });
+            return '(' + expression + ')';
+        }
+    };
+
+
+    var gsp = function(segment){
+        var sp = _getBaseSelectionProperties(segment.selection);
+        if(segment.dataGroup.hasGrouping && sp.indexOf(segment.dataGroup.groupByProp) === -1) sp.push(segment.dataGroup.groupByProp);
+        if(segment.dataGroup.hasDivideBy && sp.indexOf(segment.dataGroup.divideByProp) === -1) sp.push(segment.dataGroup.divideByProp);
+        if(segment.dataGroup.xAxisProp && sp.indexOf(segment.dataGroup.divideByProp) === -1) sp.push(segment.dataGroup.xAxisProp); 
+        return sp;
+    };
+
+    var _getBaseSelectionProperties = function(selections){
+        var ret = [];
+        _.each(selections, function(sel){
+            if(!sel.isComplex){
+                ret.push(sel.selectedProp.split('.')[0]);
+            }
+            else {
+                innerSel = _getBaseSelectionProperties(sel.groups);
+                ret = ret.concat(innerSel);
+            }
+        });
+        return _.uniq(ret);
+    };
+
+    var selectionProperties = gsp(segment);
+    var condition = cse(segment.group);
+    var dateRange = getDateRange(segment.dataFilter);
+
+    var returnQuery = format('select {0} from {1} where {2} between \'{3}\' and \'{4}\'', selectionProperties.join(','), 'marketplace.listings', segment.dataFilter.dateProp, dateRange.min.format('{0}-{1}-{2}'), dateRange.max.format('{0}-{1}-{2}'));
+    if(condition.trim()){
+        returnQuery = format('{0} and {1}',returnQuery, condition);
+    }
+    
+    return returnQuery;
+};
+/**ttest**/
     drata.ns('utils').extend({
         format: format,
         toArray:toArray,
@@ -626,7 +718,8 @@
         intervalFormats: intervalFormats,
         getTextFormat: getTextFormat,
         getSelectionProperties: getSelectionProperties,
-        percChange: percChange
+        percChange: percChange,
+        getSqlQuery: getSqlQuery
     });
 })(this);
 

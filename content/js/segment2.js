@@ -657,7 +657,7 @@ var Condition = function(options){
         else if(self.valType() === 'bool'){
             return ['=', 'exists'];
         }
-        else if(self.valType() === 'date'){
+        else if(self.valType() === 'date' || self.valType() === 'numeric'){
            return _.difference(drata.global.conditionalOperations, ['like', 'not like']);
         }
         return drata.global.conditionalOperations;

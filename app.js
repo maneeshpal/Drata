@@ -127,7 +127,7 @@ app.put('/api/tags', drataRepository.addTag);
 app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
 
-//app.get('/api/external/pop2539', mongoRepository.pop);
+app.get('/api/external/pop2539', sqlRepository.pop);
 app.get('/api/external/datasource', function(req, res){
   res.json(serverNames);
 });

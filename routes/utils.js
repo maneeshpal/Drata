@@ -1,6 +1,10 @@
 
 var _ = require('underscore');
 
+Date.prototype.format = function(f){
+    return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate());
+}
+
 var getType = function(val){
     if(_.isNumber(val))
         return 'numeric';
@@ -152,7 +156,7 @@ var getMongoCondition = function(c){
                 val = c.value;
         }
         if(c.selection.isComplex){
-                a['$where'] = selectExpression(c.selection, false) + ' ' + c.operation + ' ' + val;
+                a['$where'] = _mongoSelectExpression(c.selection, false) + ' ' + c.operation + ' ' + val;
             }
             else{
                 switch(c.operation){
@@ -175,13 +179,13 @@ var getMongoCondition = function(c){
     }
 };
 
-var selectExpression = function(selection, includeBracket){
+var _mongoSelectExpression = function(selection, includeBracket){
     var expression = '';
     if(!selection.isComplex){
         return 'obj.' + selection.selectedProp;
     }
     _.each(selection.groups, function(sel,index){
-        expression = expression + ((index === 0)? selectExpression(sel, true) : ' ' + sel.logic + ' ' + selectExpression(sel, true));
+        expression = expression + ((index === 0)? _mongoSelectExpression(sel, true) : ' ' + sel.logic + ' ' + _mongoSelectExpression(sel, true));
     });
     if(includeBracket) expression = '(' + expression + ')';
     return expression;
@@ -309,31 +313,52 @@ var getDateRange = function(dataFilter){
         };
 };
 
-var buildReturnPoperties = function(segment){
-    var ret = getSelectionProperties(segment.selection);
-    if(segment.dataGroup.hasGrouping) ret[segment.dataGroup.groupByProp] = 1;
-    if(segment.dataGroup.hasDivideBy) ret[segment.dataGroup.divideByProp] = 1;
-    if(segment.dataGroup.xAxisProp) ret[segment.dataGroup.xAxisProp] = 1; 
+var getMongoProperties = function(segment){
+    var ret = {};
+    var selectionProperties = getSelectionProperties(segment);
+    _.each(selectionProperties, function(sel){
+        ret[sel] = 1;
+    });
     ret['_id'] = 0;
     return ret;
 };
 
-var getSelectionProperties = function(selections){
-    var ret = {};
+var getSelectionProperties = function(segment){
+    var sp = _getBaseSelectionProperties(segment.selection);
+    if(segment.dataGroup.hasGrouping && sp.indexOf(segment.dataGroup.groupByProp) === -1) sp.push(segment.dataGroup.groupByProp);
+    if(segment.dataGroup.hasDivideBy && sp.indexOf(segment.dataGroup.divideByProp) === -1) sp.push(segment.dataGroup.divideByProp);
+    if(segment.dataGroup.xAxisProp && sp.indexOf(segment.dataGroup.divideByProp) === -1) sp.push(segment.dataGroup.xAxisProp); 
+    return sp;
+};
+
+var _getBaseSelectionProperties = function(selections){
+    var ret = [];
     _.each(selections, function(sel){
         if(!sel.isComplex){
-            ret[sel.selectedProp.split('.')[0]] = 1;
+            ret.push(sel.selectedProp.split('.')[0]);
         }
         else {
-            innerSel = getSelectionProperties(sel.groups);
-            for(var inner in innerSel){
-                if(innerSel.hasOwnProperty(inner)) ret[inner] = 1;
-            }
-            //ret = _.union(ret, );    
+            innerSel = _getBaseSelectionProperties(sel.groups);
+            ret = ret.concat(innerSel);
         }
-    });        
-    return ret;
+    });
+    return _.uniq(ret);
 };
+
+//var getMongoSelectionProperties = function(selections){
+    // _.each(selections, function(sel){
+    //     if(!sel.isComplex){
+    //         ret[sel.selectedProp.split('.')[0]] = 1;
+    //     }
+    //     else {
+    //         innerSel = getMongoSelectionProperties(sel.groups);
+    //         for(var inner in innerSel){
+    //             if(innerSel.hasOwnProperty(inner)) ret[inner] = 1;
+    //         }
+    //     }
+    // });
+    // return ret;
+//};
 
 var toArray = function(args,ix){
     return Array.prototype.slice.call(args,ix || 0); 
@@ -363,13 +388,77 @@ var getPercentageChange = function(arr, prop){
         prev = temp;
         return v;
     });
-}
+};
+
+var getSqlQuery = function(dbname, tableName, segment){
+    function _conditionExpression(condition){
+        var expression = '';
+        if(condition.isComplex){
+            return conditionsExpression(condition.groups);
+        }
+        else{
+            return  selectionExpression(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': format(['numeric', 'boolean'].indexOf(condition.valType) === -1 ? '\'{0}\'' : '{0}', (condition.value ? condition.value : '__')));
+        }
+    };
+
+    function conditionsExpression(conditions){
+        var expression = '';
+        _.each(conditions, function(gr,index){
+            expression = expression + ((index === 0)? _conditionExpression(gr) : ' ' + gr.logic + ' ' + _conditionExpression(gr));
+        });
+        return !expression? '' : '(' + expression + ')';
+    };
+
+    function selectionExpression(selection){
+        var expression = '';
+        if(!selection.isComplex){
+            return selection.selectedProp ? selection.selectedProp : '__';
+        }
+        else{
+            return selectionsExpression(selection.groups);
+        }
+        
+    };
+
+    function selectionsExpression(selections, isTopLevel){
+        var expression='';
+        if(isTopLevel){
+            var expressions = [];
+            _.each(selections, function(gr,index){
+                expression = selectionExpression(gr);
+                if(gr.groupBy !== 'value'){
+                    expression = gr.groupBy + '(' + expression + ')';
+                }
+                expressions.push(expression);
+            });
+            return expressions.join(', ');
+        }
+        else{
+            _.each(selections, function(gr,index){
+                expression = expression + ((index === 0)? selectionExpression(gr) : ' ' + gr.logic + ' ' + selectionExpression(gr));
+            });
+            return '(' + expression + ')';
+        }
+    };
+
+    var selectionProperties = getSelectionProperties(segment);
+    var condition = conditionsExpression(segment.group);
+    var dateRange = getDateRange(segment.dataFilter);
+
+    var returnQuery = format('select {0} from {1}.{2} where {3} between \'{4}\' and \'{5}\'', selectionProperties.join(','), dbname, tableName, segment.dataFilter.dateProp, dateRange.min.format('{0}-{1}-{2}'), dateRange.max.format('{0}-{1}-{2}'));
+    if(condition.trim()){
+        returnQuery = format('{0} and {1}',returnQuery, condition);
+    }
+    return returnQuery;
+};
 
 exports.getUniqueProperties = getUniqueProperties;
 exports.getMongoQuery = getMongoQuery;
+exports.getSqlQuery = getSqlQuery;
 exports.flatten = flatten;
-exports.buildReturnPoperties = buildReturnPoperties;
+exports.getMongoProperties = getMongoProperties;
 exports.getwidgetListMongoQuery = getwidgetListMongoQuery;
 exports.format = format;
 exports.percChange = percChange;
 exports.getPercentageChange = getPercentageChange;
+exports.clone = clone;
