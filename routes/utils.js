@@ -392,12 +392,24 @@ var getPercentageChange = function(arr, prop){
 
 var getSqlQuery = function(dbname, tableName, segment){
     function _conditionExpression(condition){
-        var expression = '';
+        var expression = '', val;
         if(condition.isComplex){
             return conditionsExpression(condition.groups);
         }
         else{
-            return  selectionExpression(condition.selection) + ' ' + condition.operation + ' ' + ((condition.operation === 'exists')? '': format(['numeric', 'boolean'].indexOf(condition.valType) === -1 ? '\'{0}\'' : '{0}', (condition.value ? condition.value : '__')));
+            if(condition.operation === 'exists'){
+                val = '';    
+            }
+            else if(condition.valType === 'bool'){
+                val = condition.value === 'true' ? 1:0;
+            }
+            else if(condition.valType === 'numeric'){
+                val  = condition.value;
+            }
+            else{
+                val = format('\'{0}\'', condition.value || '');
+            }
+            return format('{0} {1} {2}', selectionExpression(condition.selection), condition.operation, val);
         }
     };
 
