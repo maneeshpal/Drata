@@ -19,16 +19,13 @@ var Dashboard = function(){
             self.name(d.name);
             topBar.currentDashboardName(d.name);
             dashboardId = d._id;
-            //console.time('gettingwidgets');
             drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
                 var ind = 0;
                 var widgets = widgetResponse.result;
-                //console.timeEnd('gettingwidgets');
                 self.loading(false);
                 widgets = widgets.sort(function(x,y){
                     return x.displayIndex - y.displayIndex;
                 });
-                //console.time('instantiatewidgets');
                 self.widgets(ko.utils.arrayMap(
                     widgets,
                     function(model) {
@@ -39,7 +36,6 @@ var Dashboard = function(){
                     w.displayIndex(ind);
                     ind++;
                 });
-                //console.timeEnd('instantiatewidgets');
             });
         });
     };
@@ -214,15 +210,9 @@ var Widget = function(widgetModel, index, previewMode){
                 return {label: dataItem.key, value: index};
             });
 
-            //self.selectedPieKey(undefined);
             self.pieKeys(pieKeys);
-
-            //self.selectedPieKey(pieKeys[0]);
-            //console.time(self.chartType() + ' : ' + self.widgetId);
-            //content.drawChart(chartData[0], widgetModel.segmentModel, widgetModel.contentModel || {});
             self.widgetLoading(false);
             //prevent double draw on page load
-            //console.timeEnd(self.chartType() + ' : ' + self.widgetId);
             setTimeout(function(){
                 drata.utils.windowResize(self.resizeContent.bind(self));
             }, 200);
@@ -284,7 +274,6 @@ var Widget = function(widgetModel, index, previewMode){
         self.resizeContent();
     });
     self.displayIndex.subscribe(function(){
-        //console.log('displayIndex updating..');
         self.update();
     });
     self.name.subscribe(function(){

@@ -50,7 +50,6 @@ app.configure(function () {
     app.use(express.static(path.join(__dirname, 'content')));
 });
 
-
 app.set('port', 3000);
 console.log('prcess port: ' + process.env.PORT);
 
