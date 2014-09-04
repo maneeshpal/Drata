@@ -4,8 +4,9 @@
  */
 
 ; (function(root) {
-
+    var unique_id = drata.global.uniqueClientId;
     var apiRoot = '/api/';
+    var socket = io.connect();
     var apiExternalRoot = apiRoot + 'external/';
     var database = 'shopperstop';
     var _perform = function(verb, url, body, callback){
@@ -13,7 +14,7 @@
             type: verb.toUpperCase(),
             url: url,
             contentType: 'application/json',
-            headers: { 'Access-Control-Allow-Origin': '*' },
+            headers: { 'Access-Control-Allow-Origin': '*', 'clientid': unique_id },
             success: function(response, stats){
                 callback && callback({success: true, result:response});
             },
@@ -38,6 +39,11 @@
         _perform('GET', url,undefined, callback);
     };
 
+    var getWidget = function(id, callback){
+        var url = apiRoot + drata.utils.format('widget/{0}', id);
+        _perform('GET', url,undefined, callback);
+    };
+
     var getWidgetsOfDashboard = function(dashboardId, callback){
         var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
         _perform('GET', url,undefined, callback);
@@ -54,13 +60,23 @@
     };
 
     var upsertWidget = function(model, callback){
-        _perform('PUT', apiRoot + 'widget',model, callback);
-        //console.log(JSON.stringify(model, null, '\t'));
+        _perform('PUT', apiRoot + 'widget',model, function(response){
+            callback(response);
+            socket.emit('widgetcreated', {
+                widgetId : response.result._id, 
+                dashboardId: response.result.dashboardId
+            });
+        });
     };
 
     var updateWidget = function(model, callback){
-        _perform('POST', apiRoot + 'widget',model, callback);
-        //console.log(JSON.stringify(model, null, '\t'));
+        _perform('POST', apiRoot + 'widget',model, function(response){
+            callback(response);
+            socket.emit('widgetupdated', {
+                widgetId : model._id, 
+                dashboardId: model.dashboardId
+            });
+        });
     };
 
     var deleteWidget = function(widgetId, callback){
@@ -165,6 +181,7 @@
     //END EXTERNAL API
     root.drata.ns('apiClient').extend({
         getDashboard: getDashboard,
+        getWidget: getWidget,
         getWidgetsOfDashboard: getWidgetsOfDashboard,
         getWidgets: getWidgets,
         upsertWidget: upsertWidget,

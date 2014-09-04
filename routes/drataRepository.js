@@ -1,12 +1,13 @@
 var mongo = require('mongodb');
 var utils = require('./utils');
+var socket = require('./socket');
 var config = require('./config.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
 
 var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
-var db;
+var db, io;
 
 mongoClient.open(function(err, mongoClient) {
     if(!err){
@@ -16,6 +17,39 @@ mongoClient.open(function(err, mongoClient) {
         res.send(500, 'Database connection failure.');
     }
 });
+
+var findObject = function(collectionName, id, callback){
+    db.collection(collectionName,function(err, collection) {
+        if(err){
+            callback(null);
+        }
+        else{
+            collection.findOne({'_id' : mongo.ObjectID(id)}, function(err, result) {
+                // console.log(JSON.stringify(err, null, '\t'));
+                // console.log(JSON.stringify(result, null, '\t'));
+                if(err || !result){
+                    //console.log(collectionName + ' not found :' + id);
+                    callback(null);
+                }else{
+                    //console.log(collectionName + ' found :' + id);
+                    callback(result);   
+                }
+            });
+        }
+    });
+};
+
+var getDashboard = function(dashboardId, callback){
+    findObject('dashboard', dashboardId, callback);
+};
+
+var getWidget = function(widgetId, callback){
+    findObject('widget', widgetId, callback);
+};
+
+exports.setIO = function(socketio){
+    io = socketio;
+}
 
 exports.pop = function(req, res){
     db.collection('dashboard',function(err, collection) {
@@ -38,19 +72,23 @@ exports.pop = function(req, res){
 };
 
 exports.findDashboard = function(req, res) {
-    var dashboardId = mongo.ObjectID(req.params.dashboardId);
-    db.collection('dashboard',function(err, collection) {
-        if(err){
+    getDashboard(req.params.dashboardId, function(result){
+        if(!result) {
             res.send(404);
         }
         else{
-            collection.findOne({'_id' : dashboardId}, function(err, result) {
-                if(err){
-                    res.send(404);
-                }else{
-                    res.send(result);    
-                }
-            });
+            res.send(result);
+        }
+    });
+};
+
+exports.findWidget = function(req, res) {
+    getWidget(req.params.widgetId, function(result){
+        if(!result) {
+            res.send(404);
+        }
+        else{
+            res.send(result);
         }
     });
 };
@@ -70,31 +108,64 @@ exports.findWidgetsOfDashboard = function(req, res) {
 };
 
 exports.upsertWidget = function(req, res){
-    //console.log(JSON.stringify(req.body, null, '\t'));
+    //console.log(req.headers);
     db.collection('widget',function(err, collection) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
             var widgetModel = req.body;
-            if(widgetModel._id){
-                widgetModel._id = mongo.ObjectID(widgetModel._id);
-            }
+            var isNew = !widgetModel._id;
+            function _temp(){
+                getDashboard(widgetModel.dashboardId, function(result){
+                    if(!result) {
+                        res.send(404);
+                        return;
+                    }
+                    var widgetId = widgetModel._id;
+                    if(!isNew){
+                        widgetModel._id = mongo.ObjectID(widgetId);
+                        widgetModel.dateCreated = new Date();
+                    }
 
-            if(!widgetModel.dateCreated){
-                widgetModel.dateCreated = new Date();
+                    widgetModel.dateUpdated = new Date();
+                    
+                    //delete widgetModel._id;
+                    collection.save(widgetModel, {safe:true}, function(err, result) {
+                        //console.log(JSON.stringify(err));
+                        if(err) res.send(404);
+                        //console.log(JSON.stringify(result));
+                        if(isNew){
+                            res.send(result);
+                            // socket.emitEvent('widgetcreated', {
+                            //     widgetId : result._id, 
+                            //     dashboardId: result.dashboardId, 
+                            //     clientId: req.headers.clientid
+                            // });
+                        }
+                        else{
+                            res.send(200);
+                            // socket.emitEvent('widgetupdated', {
+                            //     widgetId : widgetId, 
+                            //     dashboardId: widgetModel.dashboardId, 
+                            //     clientId: req.headers.clientid
+                            // });
+                        }
+                    });
+                });    
             }
-            widgetModel.dateUpdated = new Date();
-            
-            //delete widgetModel._id;
-            collection.save(widgetModel, {safe:true}, function(err, result) {
-                //console.log(JSON.stringify(err));
-                if(err) res.send(404);
-                //console.log(JSON.stringify(result));
-                
-                res.send(result);
-            });
+            if(!isNew){
+                getWidget(widgetModel._id, function(result){
+                    if(!result) {
+                        res.send(404);
+                        return;
+                    }
+                    _temp();
+                });
+            }else{
+                _temp();
+            }
         }
     });
 };
@@ -109,17 +180,25 @@ exports.updateWidget = function(req, res){
         else{
             var widgetModel = req.body;
             if(!widgetModel._id) res.send(404);
-            
-            var widgetId = mongo.ObjectID(widgetModel._id);
-            delete widgetModel._id;
-            widgetModel.dateUpdated = new Date().toISOString();
-            
-            collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
-                //console.log(JSON.stringify(err));
-                if(err) res.send(404);
-                //console.log(JSON.stringify(result));
+            getDashboard(widgetModel.dashboardId, function(result){
+                if(!result) {
+                    res.send(404);
+                    return;
+                }
+                var widgetId = mongo.ObjectID(widgetModel._id);
+                delete widgetModel._id;
+                widgetModel.dateUpdated = new Date();
                 
-                res.send(result);
+                collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
+                    //console.log(JSON.stringify(err));
+                    if(err) {
+                        res.send(404);
+                        return;
+                    }
+                    //console.log(JSON.stringify(result));
+                    
+                    res.send(result);
+                });
             });
         }
     });
@@ -256,9 +335,10 @@ exports.addTag = function(req, res){
             tagModel,
             { upsert: true },
             function(err, result){
-                //console.log(JSON.stringify(err));
-                if(err) res.send(404);
-                //console.log(JSON.stringify(result));
+                if(err){
+                  res.send(404);
+                  return;  
+                }
                 res.send(200);
             });
         }

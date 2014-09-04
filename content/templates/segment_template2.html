@@ -57,7 +57,7 @@
     <div class="row">
         <div class="small-12 columns">
             <label>Date Property
-                <div data-bind="comboBox :{selectedValue: dateProp, options: $parent.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
+                <div data-bind="comboBox :{selectedValue: dateProp, options: drata.dashboard.propertyManager.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
                 </div>
             </label>
             <div class="row">
@@ -141,7 +141,7 @@
                 &nbsp;Groupby
     </label>
     <div class="row">
-        <div class="columns" data-bind="css: {'small-9' : needsGroupByInterval(),'small-12' : !needsGroupByInterval()}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:$parent.properties,optionsCaption:'Select GroupBy', allowCustom:false}">
+        <div class="columns" data-bind="css: {'small-9' : needsGroupByInterval(),'small-12' : !needsGroupByInterval()}, ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:drata.dashboard.propertyManager.allProperties,optionsCaption:'Select GroupBy', allowCustom:false}">
         </div>
         <!-- ko if: needsGroupByInterval()  -->
         <div class="small-3 columns" data-bind="comboBox:{selectedValue: groupByInterval, options: groupByIntervalOptions, optionsCaption: 'Interval'}">
@@ -153,7 +153,7 @@
         <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by
     </label>
         <div class="row">
-            <div class="columns" data-bind="css: {'small-9' : needsDivideByInterval(),'small-12' : !needsDivideByInterval()}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:$parent.properties,optionsCaption:'Slice By', allowCustom:false}">
+            <div class="columns" data-bind="css: {'small-9' : needsDivideByInterval(),'small-12' : !needsDivideByInterval()}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:drata.dashboard.propertyManager.allProperties,optionsCaption:'Slice By', allowCustom:false}">
             </div>
             <!-- ko if: needsDivideByInterval()  -->
                 <div class="small-3 columns" data-bind="comboBox:{selectedValue: divideByInterval, options: divideByIntervalOptions, optionsCaption: 'Interval'}">
@@ -172,7 +172,7 @@
             <label>
                 <input type="checkbox" data-bind="checked:hasGrouping" />
                 &nbsp;Split by</label>
-                <select data-bind="enable: hasGrouping, value:groupByProp, options:$parent.nonDateProperties, optionsCaption : 'Select GroupBy'">
+                <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
                 </select>
             
         </div>
@@ -194,7 +194,7 @@
         <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:270px'}">
             <!-- ko if: renderType === 'topSelection' -->
                 <div class="small-12 columns">
-                   <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions ,selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                   <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions, selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                     </div>
                     
                     <!-- ko if: isComplex() -->
@@ -210,7 +210,7 @@
             <!-- ko if: renderType === 'topCondition' -->
                 <!-- ko if: !isComplex() -->
                 
-                 <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                 <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
                 </i>
@@ -229,7 +229,7 @@
                     <select data-bind="options:drata.global.arithmeticOperations, value:logic"></select>
                 </div>
                 <!-- ko if: !isComplex() -->
-                <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options: segmentProcessor.segment.properties,optionsCaption:'choose Property',enabled: hideComplex}">
+                <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
                 <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
                 </i>

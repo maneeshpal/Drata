@@ -10,10 +10,11 @@ var express = require('express'),
    	http = require('http'),
    	cors = require('cors'),
    	path = require('path'),
-    config = require('./routes/config.json');
+    config = require('./routes/config.json'),
+    skt = require('./routes/socket.js');
 
-//var sqlRepository = '';
 var app = express();
+
 
 var serverNames = config.dataSources.map(function(d){
     return d.alias;
@@ -87,6 +88,9 @@ app.get('/api/dashboardpop', drataRepository.pop);
 //get dashboard
 app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
 
+//get dashboard
+app.get('/api/widget/:widgetId', drataRepository.findWidget);
+
 //get widgets of dashboard
 app.get('/api/dashboard/:dashboardId/widgets', drataRepository.findWidgetsOfDashboard);
 
@@ -107,7 +111,7 @@ app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);
 //update widget
 app.put('/api/widget', drataRepository.upsertWidget);
 //create widget
-app.post('/api/widget', drataRepository.updateWidget);
+app.post('/api/widget', drataRepository.upsertWidget);
 //delete widget
 app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
 
@@ -140,9 +144,11 @@ app.post('/api/external/:datasource/:dbname/:collectionName', callInstance.bind(
 // app.get('/api/external/:datasource/:dbname/:collectionName/properties', mongoRepository.findProperties);
 // app.post('/api/external/:datasource/:dbname/:collectionName', mongoRepository.findCollection);
 
-http.createServer(app).listen(app.get('port'), function(){
+var server = http.createServer(app);
+//drataRepository.setIO(io);
+server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
-
+skt.initialize(server);
 
 

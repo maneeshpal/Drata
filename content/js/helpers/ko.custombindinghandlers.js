@@ -381,9 +381,6 @@
                 $(element).css('font-size', f + 'px');
             }
             resize();
-            // drata.utils.windowResize(function(){
-            //     setTimeout(resize, 200);
-            // });
         }
     }
 

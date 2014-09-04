@@ -1,15 +1,15 @@
 
-
 var Segmentor = function(model){
     var self = this;
-    self.propertyTypes = {};
+    //self.propertyTypes = {};
+
     self.properties = ko.observableArray();
 
     self.level = 0;
     self.temp = ko.observable();
     self.outputData = ko.observable();
-    self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition', propertyTypes: self.propertyTypes });
-    self.selectionGroup = new SelectionGroup({ level: self.level, propertyTypes: self.propertyTypes });
+    self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition'});
+    self.selectionGroup = new SelectionGroup({ level: self.level});
     self.formErrors = ko.observableArray();
     
     self.groupData = ko.observable();
@@ -18,42 +18,10 @@ var Segmentor = function(model){
 
     var compDataGroup, trackDataGroup, currentDataGroupTemplate;
     self.dataGroup = undefined;
-    self.setPropertyTypes = function(propertyTypes){
-        var propList = [];
-        for(var prop in propertyTypes){
-            if(propertyTypes.hasOwnProperty(prop)){
-                propList.push(prop);
-                self.propertyTypes[prop] = ko.observable(propertyTypes[prop]);  
-            }
-        }
-        self.properties(propList);
-    };
     
-    self.dateProperties = ko.computed(function(){
-        var ptypes = ko.toJS(self.propertyTypes);
-        var props = self.properties();
-        return props.filter(function(p){
-            return ptypes[p] === 'date';
-        })
-    });
-
-    self.nonDateProperties = ko.computed(function(){
-        var ptypes = ko.toJS(self.propertyTypes);
-        var props = self.properties();
-        return props.filter(function(p){
-            return ptypes[p] !== 'date';
-        })
-    });
-    self.numericProperties = ko.computed(function(){
-        var ptypes = ko.toJS(self.propertyTypes);
-        var props = self.properties();
-        return props.filter(function(p){
-            return ptypes[p] === 'numeric';
-        })
-    });
-    self.initialize = function(model, propertyTypes){
+    self.initialize = function(model){
         model = model || {};
-        self.setPropertyTypes(propertyTypes);
+        //self.setPropertyTypes(propertyTypes);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataFilter.prefill(model.dataFilter || {});
@@ -64,10 +32,10 @@ var Segmentor = function(model){
     
     self.dataGroupTemplate = ko.computed(function(){
         if(drata.global.trackingChartTypes.indexOf(self.chartType()) > -1){
-            self.dataGroup =  compDataGroup || new TrackDataGroup({propertyTypes: self.propertyTypes});
+            self.dataGroup =  compDataGroup || new TrackDataGroup({});
             currentDataGroupTemplate = 'track-datagroup-template';
         }else{
-            self.dataGroup =  trackDataGroup || new ComparisonDataGroup({propertyTypes: self.propertyTypes});
+            self.dataGroup =  trackDataGroup || new ComparisonDataGroup({});
             currentDataGroupTemplate = 'comp-datagroup-template';
         }
 
@@ -109,7 +77,7 @@ var Segmentor = function(model){
 
         if(selections.simple.length > 0){
             var l7 = selections.simple.filter(function(s){
-                return isNaN(+s.selectedProp) && self.propertyTypes[s.selectedProp]() !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
+                return isNaN(+s.selectedProp) && drata.dashboard.propertyManager.getPropertyType(s.selectedProp) !== 'numeric' && ['sum', 'avg', 'min', 'max'].indexOf(s.groupBy) > -1 ;
             }).map(function(s2){
                 return s2.selectedProp;
             });
@@ -122,11 +90,11 @@ var Segmentor = function(model){
         //any non numeric selection by value is invalid 
         if(selections.simple.length > 0){
             var l8 = selections.simple.filter(function(s){
-                if(!isNaN(+s.selectedProp) && !self.propertyTypes[s.selectedProp]){
+                if(!isNaN(+s.selectedProp) && !drata.dashboard.propertyManager.getPropertyType(s.selectedProp)){
                     errors.push('Error is selections: numeric value cannot be used in a simple selection <em style="font-weight:bold">'+ s.selectedProp +'</em>');
                     return false;
                 }
-                return self.propertyTypes[s.selectedProp]() !== 'numeric' && s.groupBy === 'value';
+                return drata.dashboard.propertyManager.getPropertyType(s.selectedProp) !== 'numeric' && s.groupBy === 'value';
             }).map(function(s2){
                 return s2.selectedProp;
             });
@@ -142,7 +110,7 @@ var Segmentor = function(model){
         var nonNumericComplexSelections = [];
         if(complexProps.length > 0){
             nonNumericComplexSelections = complexProps.filter(function(s){
-                return isNaN(+s) && self.propertyTypes[s]() !== 'numeric';
+                return isNaN(+s) && drata.dashboard.propertyManager.getPropertyType(s) !== 'numeric';
             });
             if(nonNumericComplexSelections.length > 0){
                 errors.push('Error is selections: cannot perform arithmetic operations on non-numeric properties <em style="font-weight:bold">'+ nonNumericComplexSelections.join(', ') +'</em>');
@@ -284,7 +252,7 @@ var TrackDataGroup = function(){
     });
 
     self.properties = ko.computed(function(){
-        return self.xAxisType() === 'date' ? segmentProcessor.segment.dateProperties() : segmentProcessor.segment.numericProperties();
+        return self.xAxisType() === 'date' ? drata.dashboard.propertyManager.dateProperties() : drata.dashboard.propertyManager.numericProperties();
     });
 
     self.xAxisType.subscribe(function(){
@@ -351,8 +319,8 @@ var ComparisonDataGroup = function(options){
     self.groupByIntervalType = ko.observable();
 
     self.groupByProp.subscribe(function(newValue){
-        var newType = options.propertyTypes[newValue];
-        self.groupByIntervalType(newType? newType() : 'unknown');
+        var newType = drata.dashboard.propertyManager.getPropertyType(newValue);
+        self.groupByIntervalType(newType? newType : 'unknown');
         self.groupByInterval(undefined);
         self.groupByInterval.isModified(false);
     });
@@ -363,8 +331,8 @@ var ComparisonDataGroup = function(options){
     self.divideByIntervalType = ko.observable();
 
     self.divideByProp.subscribe(function(newValue){
-        var newType = options.propertyTypes[newValue];
-        self.divideByIntervalType(newType? newType() : 'unknown');
+        var newType = drata.dashboard.propertyManager.getPropertyType(newValue);
+        self.divideByIntervalType(newType? newType : 'unknown');
         self.divideByInterval(undefined);
         self.divideByInterval.isModified(false);
     });
@@ -617,29 +585,26 @@ var Condition = function(options){
     var self = this;
     self.level = options.level;
     self.logic = ko.observable('and');
-    self.selection = new Selection({ level: options.level, renderType: 'topCondition', propertyTypes: options.propertyTypes });
+    self.selection = new Selection({ level: options.level, renderType: 'topCondition'});
     self.operation = ko.observable('=');
     self.value = ko.observable();
     self.conditions = ko.observableArray();
 
     var _valType = ko.observable('unknown');
-    //propertytype
     self.valType = ko.computed({
         read: function(){
             if(self.selection.isComplex())
                 return;
 
-            var newType = options.propertyTypes[self.selection.selectedProp()];
-            return newType? newType() : _valType();
+            var newType = drata.dashboard.propertyManager.getPropertyType(self.selection.selectedProp());
+            return newType? newType : _valType();
         },
         write: function(newValue){
             _valType(newValue);
             
             if(self.selection.isComplex())
                 return;
-
-            var propExists = options.propertyTypes[self.selection.selectedProp()] !== undefined;
-            if(propExists) options.propertyTypes[self.selection.selectedProp()](newValue);
+            drata.dashboard.propertyManager.setPropertyType(self.selection.selectedProp(), newValue);
         }
     });
     
@@ -664,11 +629,11 @@ var Condition = function(options){
     });
 
     self.addCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, propertyTypes: options.propertyTypes }));
+        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand }));
     };
     
     self.addComplexCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true, propertyTypes: options.propertyTypes }));
+        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true }));
     };
     
     
@@ -699,7 +664,7 @@ var Condition = function(options){
         self.conditions(ko.utils.arrayMap(
             m,
             function(groupModel) {
-                return new Condition({ level:options.level+1, model:groupModel, onExpand: options.onExpand, propertyTypes: options.propertyTypes }); 
+                return new Condition({ level:options.level+1, model:groupModel, onExpand: options.onExpand }); 
             }
         )); 
     }
@@ -822,15 +787,15 @@ var ConditionGroup = function(options){
         self.conditions(ko.utils.arrayMap(
             model,
             function(cond) {
-              return new Condition({ level:options.level+1,model: cond, onExpand:self.onExpand.bind(self), propertyTypes: options.propertyTypes });
+              return new Condition({ level:options.level+1,model: cond, onExpand:self.onExpand.bind(self) });
             }
         ));
     };
     self.addCondition = function(){
-        self.conditions.push(new Condition({ level: options.level+1, onExpand: self.onExpand.bind(self), propertyTypes: options.propertyTypes }));
+        self.conditions.push(new Condition({ level: options.level+1, onExpand: self.onExpand.bind(self) }));
     };
     self.addComplexCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), expand:true, propertyTypes: options.propertyTypes }));
+        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), expand:true }));
     };
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
@@ -920,7 +885,7 @@ var Selection = function(options){
     };
 
     self.showPercentChange = ko.computed(function(){
-        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(segmentProcessor.segment.chartType()) > -1){
+        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.cPanel.widgetEditor.segment.chartType()) > -1){
             return true;
         }
         else{

@@ -57,9 +57,9 @@ exports.dbInstance = function(){
 
             if(!dbs[_serverName][_name]){
                 dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
-                console.log('new');
+                //console.log('new');
             }
-            console.log('server: ' + _serverName + ' , database: ' + _name); 
+            //console.log('server: ' + _serverName + ' , database: ' + _name); 
             callback && callback(dbs[_serverName][_name]);    
         }
         

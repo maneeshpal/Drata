@@ -14,7 +14,7 @@
 
 </head>
 <body>
-    <nav class="top-bar dashboard" id="topbar" data-topbar>
+    <nav class="top-bar dashboard" data-bind="with: topBar" data-topbar>
         <ul class="title-area">
             
             <li class="name logo">
@@ -26,21 +26,48 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
-                <!-- ko if: showWidgetNav() -->
+                <!-- ko if: !drata.nsx.views.isDashboardView() && !drata.nsx.views.isWidgetEditorView() -->
+                <li class="divider"></li>
+                <li class="has-form">
+                            <a href="#" class="button">
+                                <i class="general foundicon-graph"></i>&nbsp;back</a>
+                        </li>
+                <!-- /ko -->
+                <!-- ko if: drata.nsx.views.isWidgetNavVisible -->
                 <li class="divider"></li>
                 
-                <li class="has-dropdown">
+                <li class="has-dropdown not-click">
                     <a><span class="icon-grid"></span> Widgets</a>
                     <ul class="dropdown">
                         <li class="has-form">
-                        <a data-bind="click:addWidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
+                        <a href="#editwidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
                         </li>
                         <li class="has-form">
-                        <a data-bind="click:manageWidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
+                        <a href="#managewidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
                         </li>
                     </ul>
 
                 </li>
+                <!-- /ko -->
+                <!-- ko if: drata.nsx.views.isWidgetEditorView -->
+                <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:drata.cPanel.widgetEditor.preview" class="button">
+                                <i class="general foundicon-graph"></i>&nbsp;Preview</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:drata.cPanel.widgetEditor.notifyWidget" class="button success">
+                                <i class="general foundicon-plus"></i>
+                                <!-- ko text:drata.cPanel.widgetEditor.addUpdateBtnText -->
+                                <!-- /ko -->
+                            </a>
+                        </li>
+
+                        <li class="divider"></li>
+                        <li class="has-form">
+                            <a data-bind="click:drata.cPanel.widgetEditor.widgetCancel" class="button alert"><i class="general foundicon-remove"></i></a>
+                        </li>
                 <!-- /ko -->
             </ul>
 
@@ -53,7 +80,7 @@
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
                     <li class="has-form">
-                        <a class="button" data-bind="click:manageDashboards"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
+                        <a href="#manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
                     </li>
                     <!-- ko foreach: untaggedList -->
                         <li>
@@ -66,7 +93,7 @@
                     <!-- /ko -->
 
                     <li><label><span class="icon-folder-open"></span> Tags</label></li>
-                    <!-- ko foreach: tagList -->
+                    <!-- ko foreach: taggedList -->
                       <li class="has-dropdown not-click">
                         <a>
                             <span class="icon-folder-open"></span>
@@ -96,90 +123,31 @@
         </section>
     </nav>
 
-    <div id="dashboard">
+    <div data-bind="with: currentDashboard, visible: drata.nsx.views.isDashboardView">
         <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
         </div>
-        
-        <div style="display:none" data-bind="with: newDashboardItem, visible : newDashboardItem() !== undefined ">
-            <div class="row">
-                <div class="medium-6 medium-offset-3 small-12 columns">
-                    <div class="row">
-                        <div class="small-12 columns text-center">
-                            <h2>Create Dashboard</h2>
-                            <h2><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h2>
-                        </div>
-                    </div>
-                    <div class="row collapse">
-                        <div class="small-8 columns">
-                            <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:cloneName" />
-                        </div>
-                        <div class="small-4 columns">
-                            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</a>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-12 columns">
-                            <!-- ko template : {name: 'tags-template'} --><!-- /ko -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         <div class="row text-center" style="display:none" data-bind="visible:noWidgets">
             <div class="medium-8 medium-offset-2 columns">
                 <h2>No widgets to show</h2>
                 <h2><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h2>
                 <div class="clearfix">
-                    <a class="button right" data-bind="click:topBar.addWidget">Create new widget</a>
-                    <a class="button left" data-bind="click:topBar.manageWidgets">Clone Existing widgets</a>
+                    <a href="#editwidget" class="button right">Create new widget</a>
+                    <a class="button left" href="#managewidgets">Clone Existing widgets</a>
                 </div>
             </div>
         </div>
-        <div class="text-center" style="display:none" data-bind="visible: dashboardNotFound">
+        <div class="text-center" style="display:none" data-bind="visible: drata.nsx.views.dashboardNotFound">
             <h2>Dashboard not found</h2>
         </div>
     </div>
 
-    <div id="graphBuilder" class="mymodal-wrapper">
-        
-        <div class="mymodal-inner">
-            
-            <nav class="top-bar" data-topbar>
-                <ul class="title-area">
-                    <li class="name">
-                        <h1><a href="#">Widget Processor</a></h1>
-                    </li>
-                    <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-                </ul>
-
-                <section class="top-bar-section">
-                    <!-- Right Nav Section -->
-                    <ul class="right">
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:preview" class="button">
-                                <i class="general foundicon-graph"></i>&nbsp;Preview</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:notifyWidget" class="button success">
-                                <i class="general foundicon-plus"></i>
-                                <!-- ko text:addUpdateBtnText -->
-                                <!-- /ko -->
-                            </a>
-                        </li>
-
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:widgetCancel" class="button alert"><i class="general foundicon-remove"></i></a>
-                        </li>
-                    </ul>
-
-                    <!-- Left Nav Section -->
-                    <ul class="left">
-                    </ul>
-                </section>
-            </nav>
+    <div data-bind="with: widgetEditor, visible: drata.nsx.views.isWidgetEditorView" style="display:none">
+            <div class="row">
+                <div class="small-12 columns">
+                    <h4>Edit Widget</h4>
+                </div>
+            </div>
             
             <div class="row">
                 <div class="medium-4 small-12 columns">
@@ -211,57 +179,33 @@
             </div>
             <!-- ko template: {name: 'segment-template', data: segment, if : selectedDataKey() !== undefined} -->
                     <!-- /ko -->
-        </div>
     </div>
     
-    <div id="dashboardManager" class="mymodal-wrapper">
-        <div class="mymodal-inner" style="overflow:visible">
-            <nav class="top-bar" data-topbar>
-                <ul class="title-area">
-                    <li class="name">
-                        <h1><a>Dashboard Manager</a></h1>
-                    </li>
-                </ul>
-
-                <section class="top-bar-section">
-                    <!-- Right Nav Section -->
-                    <ul class="right">
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:closeDashboardManager" class="button alert"><i class="general foundicon-remove"></i></a>
-                        </li>
-                    </ul>
-                </section>
-            </nav>
-            <div style="padding:0.9375rem 0" data-bind="template: {name: 'dashboardmanager-template'}">
+    <div data-bind="with: dashboardManager, visible: drata.nsx.views.isDashboardManagerView" style="display:none">
+        <div class="row">
+            <div class="small-12 columns">
+                <h4>Dashboard Manager</h4>
             </div>
         </div>
+        <!-- ko template: {name: 'dashboardmanager-template'} -->
+        <!-- /ko -->
     </div>
 
-    <div id="widgetManager" class="mymodal-wrapper">
-        <div class="mymodal-inner">
-            <nav class="top-bar" data-topbar>
-                <ul class="title-area">
-                    <li class="name">
-                        <h1><a>Widget Manager</a></h1>
-                    </li>
-                </ul>
+    <div data-bind="with: dashboardCreator, visible: drata.nsx.views.isDashboardCreatorView" style="display:none">
+        <!-- ko template: {name: 'dashboard-create-template'} -->
+        <!-- /ko -->
+    </div>
 
-                <section class="top-bar-section">
-                    <!-- Right Nav Section -->
-                    <ul class="right">
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:closeWidgetManager" class="button alert"><i class="general foundicon-remove"></i></a>
-                        </li>
-                    </ul>
-                </section>
-            </nav>
-            <div style="padding:0.9375rem 0" data-bind="template: {name: 'widgetmanager-template'}">
+    <div data-bind="with: widgetManager, visible: drata.nsx.views.isWidgetManagerView" style="display:none">
+        <div class="row">
+            <div class="small-12 columns">
+                <h4>Widget Manager</h4>
             </div>
         </div>
+        <!-- ko template: {name: 'widgetmanager-template'} -->
+        <!-- /ko -->
     </div>
-    
+    <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
@@ -293,40 +237,36 @@
     <script type="text/javascript" src="/js/models/tooltip.js"></script>
     <script type="text/javascript" src="/js/charts/linechart.js"></script>
     <script type="text/javascript" src="/js/charts/areachart.js"></script>
+
     <script type="text/javascript" src="/js/segment2.js"></script>
     <script type="text/javascript" src="/js/dashboardmodel.js"></script>
+
     <script type="text/javascript" src="/js/dashboard.js"></script>
-     <script type="text/javascript" src="/js/dashboardmanager.js"></script>
     <script type="text/javascript" src="/js/charts/pie.js"></script>
 
     <script type="text/javascript" src="/js/charts/barchart.js"></script>
     <script type="text/javascript" src="/js/charts/scatterplot.js"></script>
    
     <script type="text/javascript" src="/js/tempdata.js"></script>
+    <script type="text/javascript" src="/js/pubsub.js"></script>
 
-<script type="text/javascript" src="/js/keypress.js"></script>
+    <script type="text/javascript" src="/js/keypress.js"></script>
+    <script type="text/javascript" src="/js/controlpanel.js"></script>
+    
     <script type="text/javascript">
         (function (root, $) {
+            // var socket = io();
+            // socket.on('finddashboard', function (data) {
+            //     console.log(data);
+            //     // socket.emit('my other event', { my: 'data' });
+            // });
             drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template'], function(){
-                
-                window.topBar = new TopBar();
-                ko.applyBindings(topBar, document.getElementById('topbar'));
-
-                window.segmentProcessor = new SegmentProcessor();
-                ko.applyBindings(segmentProcessor, document.getElementById('graphBuilder'));
-
-                window.dashboardManager = new DashboardManager();
-                ko.applyBindings(dashboardManager, document.getElementById('dashboardManager'));
-                
-                window.widgetManager = new WidgetManager();
-                ko.applyBindings(widgetManager, document.getElementById('widgetManager'));
-
-                window.dashboard = new Dashboard();
-                ko.applyBindings(dashboard, document.getElementById('dashboard'));
+                root.drata.cPanel = new drata.dashboard.controlPanel();
+                ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
 
                 $(document).foundation();
             });
-            
+        
         })(this, jQuery);
     </script>
 </body>

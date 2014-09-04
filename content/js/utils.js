@@ -598,13 +598,14 @@
         logics : ['and', 'or'],
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
-        timeframes : ['minute', 'hour', 'day', 'month', 'year']
+        timeframes : ['minute', 'hour', 'day', 'month', 'year'],
+        uniqueClientId: parseInt(Math.random() * 100000000)
     });
 
-Date.prototype.format = function(f){
-    return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate());
-}
-
+    Date.prototype.format = function(f){
+        return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate());
+    };
+    
 /**ttest**/
 
 
@@ -693,6 +694,7 @@ var getSqlQuery = function(segment){
     
     return returnQuery;
 };
+
 /**ttest**/
     drata.ns('utils').extend({
         format: format,

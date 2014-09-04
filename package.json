@@ -8,7 +8,8 @@
   "dependencies": {
     "express": "3.4.8",
     "node-gyp": "^1.0.1",
-    "mssql": "^1.1.1"
+    "mssql": "^1.1.1",
+    "socket.io": "^1.0.6"
   },
   "devDependencies": {
     "cors": "^2.2.0",

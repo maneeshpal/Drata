@@ -1,24 +1,25 @@
 "use strict";
-var Dashboard = function(){
+
+var Dashboard = function(dashboardId){
     var self = this;
     self.name = ko.observable();
     self.index= 1;
     self.loading = ko.observable(true);
     self.widgets = ko.observableArray();
-    self.newDashboardItem = ko.observable();
-    self.dashboardNotFound = ko.observable(false);
-    var dashboardId = window.location.pathname.split('/')[2];
+    //self.newDashboardItem = ko.observable();
+    //self.dashboardNotFound = ko.observable(false);
     
-    var loadDashboard = function(){
+    self.loadDashboard = function(d_id){
+        dashboardId = d_id;
         drata.apiClient.getDashboard(dashboardId, function(response){
             var d = response.result;
             if(!d || !response.success){
-                self.dashboardNotFound(true);
+                drata.nsx.views.dashboardNotFound(true);
                 return;
             }
             self.name(d.name);
-            topBar.currentDashboardName(d.name);
-            dashboardId = d._id;
+            drata.cPanel.topBar.currentDashboardName(d.name);
+            //dashboardId = d._id;
             drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
                 var ind = 0;
                 var widgets = widgetResponse.result;
@@ -38,7 +39,10 @@ var Dashboard = function(){
                 });
             });
         });
+        
+        drata.nsx.dashboardSyncService.listenSocket('xxx');
     };
+    
     self.noWidgets = ko.computed(function(){
         return self.widgets().length === 0 && !self.loading();
     });
@@ -49,17 +53,9 @@ var Dashboard = function(){
     };
 
     self.addWidget = function(widgetModel){
-        console.log('got new widget');
-        widgetModel.dashboardId = dashboardId;
-        delete widgetModel.dateCreated;
-        delete widgetModel._id;
-        widgetModel.displayIndex = self.widgets().length + 1;
-        drata.apiClient.upsertWidget(widgetModel, function(response){
-            console.log('created widget');
-            widgetModel = response.result;
-            var widget = new Widget(widgetModel, self.index++);
-            self.widgets.push(widget);
-        });
+        var widget = new Widget(widgetModel, self.index++);
+        self.widgets.push(widget);
+        console.log('widget added to dashboard');
     };
 
     self.deleteWidget = function(widget){
@@ -68,14 +64,11 @@ var Dashboard = function(){
             self.widgets.remove(widget);    
         }
     };
+    self.getId = function(){
+        return dashboardId;
+    };
 
-    if(!dashboardId || dashboardId === 'add'){
-        self.newDashboardItem(new DashboardItem({},{isNew: true}));
-    }
-    else {
-        loadDashboard();
-        topBar.showWidgetNav(true);
-    }
+    self.loadDashboard(dashboardId);
 };
 
 var Widget = function(widgetModel, index, previewMode){
@@ -93,6 +86,10 @@ var Widget = function(widgetModel, index, previewMode){
         if(previewMode) return 'widget-size-4';
         return 'widget-size-' + self.sizex();
     });
+
+    self.getId = function(){
+        return widgetModel._id;
+    };
 
     self.parseError = ko.observable();
     self.widgetLoading = ko.observable(true);
@@ -133,8 +130,9 @@ var Widget = function(widgetModel, index, previewMode){
         if(previewMode) return;
         var m = self.getModel();
         if(!m._id) return;
-        drata.apiClient.upsertWidget(m);
-        console.log('widget updated');
+        drata.apiClient.updateWidget(m, function(resp){
+            console.log('widget updated');    
+        });
     };
 
     var content;
@@ -163,17 +161,17 @@ var Widget = function(widgetModel, index, previewMode){
                 content = new NumericContent(contentOptions);
                 break;
         }
-
         return {
             name: content.template, 
             data: content
         };
-
     });
 
     self.editWidget = function () {
-        $('#graphBuilder').addClass('showme');
-        segmentProcessor.attach(widgetModel, self.updateWidget.bind(self));
+        drata.pubsub.publish('widgetedit', {
+            widgetModel: widgetModel
+        });
+        location.hash = '#editwidget';
     };
 
     var _t = undefined, resize = true;
@@ -190,9 +188,11 @@ var Widget = function(widgetModel, index, previewMode){
         _t && clearTimeout(_t);
     };
 
-    self.loadWidget = function(){
+    self.loadWidget = function(wm){
+        if(wm) widgetModel = wm;
         self.parseError(undefined);
-        console.log('rendered widget');
+        self.chartType(widgetModel.segmentModel.chartType);
+        console.log('loadWidget');
         DataRetriever.getData({applyClientAggregation:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
             if(!response.success){
                 self.parseError(response.message);
@@ -203,28 +203,20 @@ var Widget = function(widgetModel, index, previewMode){
 
             if(widgetModel.segmentModel.chartType === 'pie'){
                 dataToMap = chartData[0].values;
-            }else{
+            }
+            else
+            {
                 dataToMap = chartData;
             }
+            
             var pieKeys = dataToMap.map(function(dataItem, index){
                 return {label: dataItem.key, value: index};
             });
 
             self.pieKeys(pieKeys);
             self.widgetLoading(false);
-            //prevent double draw on page load
-            setTimeout(function(){
-                drata.utils.windowResize(self.resizeContent.bind(self));
-            }, 200);
+            drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
         });
-        
-    };
-
-    self.updateWidget = function (newModel) {
-        widgetModel = newModel;
-        self.chartType(widgetModel.segmentModel.chartType);
-        self.loadWidget();
-        self.update();
     };
 
     self.getModel = function (argument) {
@@ -631,186 +623,3 @@ var PieContent = function(contentOptions){
         }
     };
 };
-
-var SegmentProcessor = function(){
-    var self = this;
-    self.widgetName = ko.observable();
-    self.addUpdateBtnText = ko.observable('Add Widget');
-    self.processSegment = true;
-    self.dataKeys = ko.observableArray();
-    
-    self.selectedDataKey = ko.observable();
-    self.dataSource = ko.observable();
-    self.dataSourceNames = ko.observableArray();
-    self.databaseNames = ko.observableArray();
-    self.database = ko.observable();
-    self.parseError = ko.observable();
-    self.propertyTypes = ko.observable();
-    self.previewWidget = ko.observable();
-
-    var cloneModel = {};
-    
-    self.dataSource.subscribe(function(newValue){
-        if(!newValue){
-            self.databaseNames([]);
-            self.database(undefined);
-        }
-        else{
-            if(cloneModel.dataSource !== newValue ){
-                cloneModel.dataSource = newValue;
-                cloneModel.database = undefined;
-            }
-            drata.apiClient.getDatabaseNames(newValue, function(resp){
-                self.databaseNames(resp.result);
-                self.database(cloneModel.database);
-            });
-        }
-    });
-
-    self.database.subscribe(function(newValue){
-        if(!newValue || !self.dataSource()){
-            self.dataKeys([]);
-            self.selectedDataKey(undefined);
-        }
-        else{
-            if(cloneModel.database !== newValue ){
-                cloneModel.database = newValue;
-                cloneModel.selectedDataKey = undefined;
-            }
-            drata.apiClient.getDataKeys({dataSource: self.dataSource(),database: newValue}, function(resp){
-                self.dataKeys(resp.result);
-                self.selectedDataKey(cloneModel.selectedDataKey);
-            });
-        }
-    });
-
-    self.selectedDataKey.subscribe(function(newValue){
-        if(!newValue || !self.dataSource() || !self.database()){
-            self.propertyTypes([]);
-        }
-        else {
-            if(cloneModel.selectedDataKey !== newValue){
-                cloneModel.segmentModel = undefined;
-                cloneModel.selectedDataKey = newValue;
-            }
-            drata.apiClient.getUniqueProperties({dataSource: self.dataSource(), database: self.database(), collectionName: newValue}, function(response){
-                self.propertyTypes(response.result);
-                self.segment.initialize(cloneModel.segmentModel, response.result);
-            });
-        }
-    });
-
-    drata.apiClient.getDataSourceNames(function(resp){
-        self.dataSourceNames(resp.result);
-    });
-
-    self.segment = new Segmentor();
-    self.notifyWidget = function () {
-        cloneModel.segmentModel = self.segment.getModel();
-        
-        if(!cloneModel.segmentModel)
-            return;
-        cloneModel.dataSource = self.dataSource();
-        cloneModel.database = self.database();
-        cloneModel.selectedDataKey  = self.selectedDataKey();
-        cloneModel.sizex = cloneModel.sizex || 4;
-        cloneModel.sizey = cloneModel.sizey || 2;
-        
-        var previewW = self.previewWidget();
-        if(previewW){
-            var x = previewW.getModel();
-            if(x.contentModel){
-                cloneModel.contentModel = x.contentModel;
-            }
-            previewW.clearTimeouts();
-        }
-
-        self.onWidgetUpdate && self.onWidgetUpdate(cloneModel);
-        !self.onWidgetUpdate && dashboard.addWidget(cloneModel);
-        cloneModel = {};
-        self.onWidgetUpdate = undefined;
-        self.onWidgetCancel = undefined;
-        self.addUpdateBtnText('Add');
-        self.dataSource(undefined);
-        self.previewWidget(undefined);
-        $('#graphBuilder').removeClass('showme');
-    };
-
-    self.attach = function (model,onWidgetUpdate, onWidgetCancel) {
-        cloneModel = drata.utils.clone(model);
-        self.dataSource(cloneModel.dataSource);
-        
-        self.addUpdateBtnText('Update Widget');
-        self.onWidgetUpdate = onWidgetUpdate;
-        self.onWidgetCancel = onWidgetCancel;
-        
-        self.previewWidget(new Widget(cloneModel, 100, true));
-    };
-
-    self.widgetCancel = function() {
-        self.parseError(undefined);
-        self.onWidgetUpdate = undefined;
-        self.onWidgetCancel = undefined;
-        self.addUpdateBtnText('Add Widget');
-
-        self.dataSource(undefined);
-        $('#graphBuilder').removeClass('showme');
-        var w = self.previewWidget();
-        if(w) w.clearTimeouts();
-        self.previewWidget(undefined);
-        cloneModel = {};
-    };
-
-    self.preview = function(){
-        var model = self.segment.getModel();
-        if(!model) return;
-        self.previewWidget(new Widget({
-            dataSource: self.dataSource(),
-            database: self.database(),
-            segmentModel: model,
-            selectedDataKey: self.selectedDataKey()
-        }, 100, true));
-    };
-    
-    self.loadWidget = function(elem,widget){
-        widget && widget.loadWidget();
-        $(document).foundation();
-    };
-};
-
-
-var TopBar = function(){
-    var self = this;
-    self.addWidget = function(){
-        $('#graphBuilder').toggleClass('showme');
-    };
-    self.manageDashboards = function(){
-        dashboardManager.populateDashboards();
-        $('#dashboardManager').toggleClass('showme');
-    };
-    self.manageWidgets = function(){
-        widgetManager.bindWidgets(widgetManager.chosenChartTypes());
-        $('#widgetManager').toggleClass('showme');
-    };
-    self.showWidgetNav = ko.observable();
-    self.tagList = ko.observableArray();
-    self.untaggedList = ko.observableArray();
-
-    drata.apiClient.getAllTags(function(resp){
-        var tagDashboardList = _.groupBy(resp.result, function(item){
-            return item.tagName;
-        });
-        for(var i in tagDashboardList){
-            if(tagDashboardList.hasOwnProperty(i)){
-                var a = tagDashboardList[i];
-                if(i === '__'){
-                    self.untaggedList(a);
-                }else{
-                    self.tagList.push({tagName: i, dashboards: a});    
-                }
-                
-            }
-        }
-    });
-    self.currentDashboardName = ko.observable('Dashboards');
-}
