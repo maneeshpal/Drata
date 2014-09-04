@@ -164,6 +164,11 @@
 	        drata.apiClient.updateWidget(widgetModel, function(response){
             	var widget = getWidgetFromDashboard(widgetModel._id, widgetModel.dashboardId);
             	widget && widget.loadWidget(widgetModel);
+            	drata.nsx.notifier.addNotification({
+        			message: 'widget: ' + widget.name()  + ' updated successfully',
+        			type: 'success',
+        			displayTimeout: 3000
+        		});
 	        });
 		});
 

@@ -15,8 +15,12 @@
         });
 
         self.addNotification = function(options){
-            if(_notifications().length > 4) _notifications.shift(); 
-            _notifications.push(new Notification(options));
+            if(_notifications().length > 4) _notifications.shift();
+            var notif = new Notification(options);
+            _notifications.push(notif);
+            if(options.displayTimeout > 0){
+                setTimeout(self.removeNotification.bind(self,notif), options.displayTimeout);
+            }
         };
 
         self.removeNotification = function(notification){
@@ -36,11 +40,9 @@
         self.title = options.title;
         self.message = options.message;
         self.confirmText = options.confirmText || 'confirm';
-        self.onConfirm = function(){
-            options.onConfirm && options.onConfirm();
-        };
-        //self.type = options.type;
+        self.onConfirm = options.onConfirm;
         self.removeOnConfirm = options.removeOnConfirm;
+
         self.getClass= function(){
             return options.type;
         }
