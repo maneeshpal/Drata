@@ -205,6 +205,10 @@
         <!-- ko template: {name: 'widgetmanager-template'} -->
         <!-- /ko -->
     </div>
+
+    <!-- ko template: {name: 'notifications-template', data: drata.nsx.notifier} -->
+    <!-- /ko -->
+
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/js/lib/jquery-ui-1.10.4.custom.min.js"></script>
@@ -251,16 +255,12 @@
     <script type="text/javascript" src="/js/pubsub.js"></script>
 
     <script type="text/javascript" src="/js/keypress.js"></script>
+    <script type="text/javascript" src="/js/notifier.js"></script>
     <script type="text/javascript" src="/js/controlpanel.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {
-            // var socket = io();
-            // socket.on('finddashboard', function (data) {
-            //     console.log(data);
-            //     // socket.emit('my other event', { my: 'data' });
-            // });
-            drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template'], function(){
+            drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template', 'utility_template'], function(){
                 root.drata.cPanel = new drata.dashboard.controlPanel();
                 ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
 

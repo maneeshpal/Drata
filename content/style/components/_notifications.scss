@@ -1,0 +1,48 @@
+
+@import "dratamixins";
+
+.notifications {
+    width:200px;
+    position:fixed;
+    bottom:0;
+    left:10px;
+    font-size:.8rem;
+    .notification {
+        position:relative;
+        width:100%;
+        margin-bottom:10px;
+        padding:10px;
+        border-radius: 4px;
+        border:1px solid #e3e3e3;
+        &.alert {
+            background: #f04124;
+            color:#fff;
+        }
+        &.success {
+            background: #368a54;
+            color:#fff;
+        }
+        &.info {
+            background: #e7e7e7;
+        }
+        .title {
+            border-bottom:1px dashed #e3e3e3;
+            padding-bottom:5px;
+            margin-bottom:5px;
+            font-weight:bold;
+        }
+        .confirmbtn{
+            margin-bottom:0;
+            margin-top:10px;
+        }
+        .remove-notification {
+            position: absolute;
+            right: 7px;
+            top: 7px;
+            opacity:.5;
+        }
+        &:hover .remove-notification {
+            opacity:1;
+        }
+    }
+}

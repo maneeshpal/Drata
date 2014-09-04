@@ -1,0 +1,20 @@
+<script type="text/html" id="notifications-template">
+    <div class="notifications" data-bind="template: {
+        foreach: notifications, 
+        beforeRemove: befor,
+        afterAdd: notifRendered }">
+        
+        <div class="notification" data-bind="css:getClass()">
+            <div class="title" data-bind="visible: !!title, html: title"></div>
+            <div data-bind="html: message"></div>
+            <button data-bind="visible: !!onConfirm, click: function(notif){
+                removeOnConfirm && $parent.removeNotification(notif);
+                onConfirm();
+            } " class="primary tiny radius confirmbtn">
+                <!-- ko text: confirmText-->
+                <!-- /ko -->
+            </button>
+            <i class="remove-notification icon-cancel-circle" data-bind="click: $parent.removeNotification"></i>
+        </div>
+    </div>
+</script>

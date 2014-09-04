@@ -139,7 +139,17 @@
 	            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
 	            widget && drata.apiClient.getWidget(data.widgetId, function(response){
             		if(!response.success) return;
-            		widget.loadWidget(response.result);
+
+            		drata.nsx.notifier.addNotification({
+            			title: 'widget updated',
+            			message: 'widget: ' + response.result.name  + 'has been updated. Please update your view.',
+            			type: 'info',
+            			onConfirm: function(){
+            				widget.loadWidget(response.result);		
+            			},
+            			removeOnConfirm: true
+            		});
+            		
             	});
 	        });
 
