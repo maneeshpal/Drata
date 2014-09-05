@@ -121,7 +121,7 @@
 		var self = this;
 		function getWidgetFromDashboard(widgetId, dashboardId){
 			var currentDashboard = drata.cPanel.currentDashboard();
-		    if(!currentDashboard || currentDashboard.getId() !== dashboardId){
+		    if(!currentDashboard || (dashboardId && currentDashboard.getId() !== dashboardId)){
             	return;
         	}
         	var widget = currentDashboard.widgets().filter(function(w){
@@ -134,30 +134,47 @@
 		self.listenSocket = function(){
 			var socket = io.connect();
 			socket.on('widgetupdated', function (data) {
-	            console.log('widgetupdated');
-	            console.log(data);
 	            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
-	            widget && drata.apiClient.getWidget(data.widgetId, function(response){
-            		if(!response.success) return;
-
-            		drata.nsx.notifier.addNotification({
-            			title: 'widget updated',
-            			message: 'widget: ' + response.result.name  + 'has been updated. Please update your view.',
-            			type: 'info',
-            			onConfirm: function(){
-            				widget.loadWidget(response.result);		
-            			},
-            			removeOnConfirm: true
-            		});
-            		
-            	});
+	            if(widget){
+	            	drata.nsx.notifier.notifyWidgetUpdated({
+	            		name:response.result.name,
+	            		onConfirm : function(){
+	            			drata.apiClient.getWidget(data.widgetId, function(response){
+			            		if(!response.success) return;
+		            			widget.loadWidget(response.result);
+			            	});
+	            		}
+	            	});
+	            }
 	        });
 
 	        socket.on('widgetcreated', function (data) {
-	            console.log('widgetcreated');
-	            console.log(data);
+	            var currentDashboard = drata.cPanel.currentDashboard();
+	            if(currentDashboard.getId() === data.dashboardId){
+	            	drata.nsx.notifier.notifyWidgetAdded({
+	            		onConfirm : function(){
+	            			drata.apiClient.getWidget(data.widgetId, function(response){
+			            		if(!response.success) return;
+		            			currentDashboard.addWidget(response.result);
+			            	});
+	            		}
+	            	});
+	            }
 	        });
-		}
+	        socket.on('widgetremoved', function (data) {
+	            var widget = getWidgetFromDashboard(data.widgetId);
+	            if(widget){
+	            	drata.nsx.notifier.notifyWidgetRemoved({
+	            		name: widget.name(),
+	            		onConfirm : function(){
+	            			widget.clearTimeouts();
+	            			drata.cPanel.currentDashboard().widgets.remove(widget);
+	            			widget = undefined;
+	            		}
+	            	});
+	            }
+	        });
+		};
 		
 		drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
 			if(!widgetModel._id) return;
@@ -180,7 +197,6 @@
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
-			unique_id = drata.utils.randomUniqueId();
 			drata.apiClient.upsertWidget(widgetModel, function(response){
                 if(!response.success){
                 	return;
@@ -222,12 +238,12 @@
 
 		var curr_dash_id = window.location.pathname.split('/')[2];
 
-		if(!curr_dash_id){
-        	location.hash = 'create';
-	    }
-	    else {
-	    	var d = new Dashboard(curr_dash_id);
+		if(curr_dash_id){
+			var d = new Dashboard(curr_dash_id);
 	    	self.currentDashboard(d);
+	    }
+	    else if(location.hash === ''){
+	    	location.hash = 'manage';
 	    }
 	};
 

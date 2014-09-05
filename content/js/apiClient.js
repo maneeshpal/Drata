@@ -81,7 +81,13 @@
 
     var deleteWidget = function(widgetId, callback){
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
-        _perform('DELETE',url, undefined, callback);
+        _perform('DELETE',url, undefined, function(response){
+            callback && callback(response);
+            console.log('emiting widge removed');
+            socket.emit('widgetremoved', {
+                widgetId : widgetId
+            });
+        });
         //console.log(JSON.stringify(model, null, '\t'));
     };
 

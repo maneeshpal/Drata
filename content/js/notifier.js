@@ -33,6 +33,38 @@
         self.befor = function(elem){
             if (elem.nodeType === 1) $(elem).slideUp(function() { $(elem).remove()});
         };
+
+        //helper methods
+        self.notifyWidgetAdded = function(options){
+            self.addNotification({
+                title: 'widget added',
+                message: 'A new widget has been added. Please update your view.',
+                type: 'info',
+                onConfirm: options.onConfirm,
+                removeOnConfirm: true
+            });
+        };
+
+        self.notifyWidgetUpdated = function(options){
+            self.addNotification({
+                title: 'widget updated',
+                message: 'widget: <strong> <em>' + options.name  + '</em></strong> has been updated. Please update your view.',
+                type: 'info',
+                onConfirm: options.onConfirm,
+                removeOnConfirm: true
+            });
+        };
+
+        self.notifyWidgetRemoved = function(options){
+            self.addNotification({
+                title: 'widget removed',
+                message: 'widget: <strong> <em>' + options.name  + '</em></strong> has been removed. None of your changes to that widget will be saved.',
+                type: 'info',
+                confirmText: 'remove',
+                onConfirm: options.onConfirm,
+                removeOnConfirm: true
+            });
+        };
     };
 
     var Notification = function(options){
@@ -43,7 +75,7 @@
         self.onConfirm = options.onConfirm;
         self.removeOnConfirm = options.removeOnConfirm;
 
-        self.getClass= function(){
+        self.getClass = function(){
             return options.type;
         }
     };
