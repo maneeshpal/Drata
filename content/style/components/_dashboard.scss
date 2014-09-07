@@ -227,3 +227,21 @@ input.error {
 [class^="icon-"].primary, [class*=" icon-"].primary{
   color:#008cba;
 }
+/*topbar*/
+.top-bar-text {
+  padding:0 12px;
+  line-height: 35px;
+  background-color: #f5f5f5;
+
+  font-size: .9rem;
+}
+
+.top-bar {
+  .right > .has-form{
+        background-color: #f5f5f5;
+  }
+  .right > .divider {
+      border-right: 1px solid #cccccc;
+  }
+}
+/*end topbar */

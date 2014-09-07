@@ -40,81 +40,84 @@
 	});
 
 	var viewManager = function(){
-		var _c = ko.observable();
+		// var _c = ko.observable();
 
-		var currentView = ko.computed({
-			read: function(){
-				return _c();
-			},
-			write: function(newValue){
-				_c(newValue.replace('#', ''));
-			}
-		});
-		var self = this, _t, resized = false;
-		self.dashboardNotFound = ko.observable();
-		var hashes = {
-			manage : 'manage',
-			editwidget: 'editwidget',
-			manageWidgets: 'managewidgets',
-			create: 'create'
-		};
+		// var currentView = ko.computed({
+		// 	read: function(){
+		// 		return _c();
+		// 	},
+		// 	write: function(newValue){
+		// 		_c(newValue.replace('#', ''));
+		// 	}
+		// });
 
-		self.isDashboardManagerView = ko.computed(function(){
-	    	return currentView() === hashes.manage;
-	    });
-
-	    self.isWidgetEditorView = ko.computed(function(){
-	    	return currentView() === hashes.editwidget;
-	    });
-
-	    self.isWidgetManagerView = ko.computed(function(){
-	    	return currentView() === hashes.manageWidgets;
-	    });
+		// var self = this, _t, resized = false;
+		// self.dashboardNotFound = ko.observable();
 		
-		self.isDashboardCreatorView = ko.computed(function(){
-	    	return currentView() === hashes.create;
-	    });
+		
+		// self.isDashboardManagerView = ko.computed(function(){
+	 //    	return currentView() === hashes.manage || (!self.currentDashboardId && currentView() === '');
+	 //    });
 
-	    var a = [];
-	    self.isDashboardView = ko.computed(function(){
-	    	var temp = !self.isDashboardManagerView()
-	    		&& !self.isWidgetEditorView()
-	    		&& !self.isWidgetManagerView()
-	    		&& !self.isDashboardCreatorView();
-	    	return temp;
-	    });
+	 //    self.isWidgetEditorView = ko.computed(function(){
+	 //    	return currentView() === hashes.editwidget;
+	 //    });
+
+	 //    self.isWidgetManagerView = ko.computed(function(){
+	 //    	return currentView() === hashes.manageWidgets;
+	 //    });
+		
+		// self.isDashboardCreatorView = ko.computed(function(){
+	 //    	return currentView() === hashes.create;
+	 //    });
+
+
+
+	    // var a = [];
+	    // self.isDashboardView = ko.computed(function(){
+	    // 	var temp = !self.isDashboardManagerView()
+	    // 		&& !self.isWidgetEditorView()
+	    // 		&& !self.isWidgetManagerView()
+	    // 		&& !self.isDashboardCreatorView();
+	    // 	return temp;
+	    // });
 	    
-	    self.isDashboardView.subscribe(function(newValue){
-	    	if(a.length < 3) a.push(newValue);
-	    	if(a.length == 3) a.shift();
-	    	if(!a[0] && a[1] && resized){
-	    		resizeWidgets();
-	    		resized = false;
-	    	}
-	    });
+	    // self.isDashboardView.subscribe(function(newValue){
+	    // 	if(a.length < 3) a.push(newValue);
+	    // 	if(a.length == 3) a.shift();
+	    // 	if(!a[0] && a[1] && resized){
+	    // 		resizeWidgets();
+	    // 		resized = false;
+	    // 	}
+	    // });
 
-	    self.isWidgetNavVisible = ko.computed(function(){
-	    	return !self.dashboardNotFound() && self.isDashboardView();
-	    });
+	    // self.isWidgetNavVisible = ko.computed(function(){
+	    // 	return !self.dashboardNotFound() && self.isDashboardView();
+	    // });
 
-	    window.onhashchange = function(){
-    		currentView(location.hash);
-    	}
+		
+	 //    if(!self.currentDashboardId && location.hash === ''){
+	 //    	location.hash = 'manage';
+		// }
 
-    	currentView(location.hash);
+		// currentView(location.hash);
 
-    	var resizeWidgets  = function(){
-    		_t && clearTimeout(_t);
-        	_t = setTimeout(drata.pubsub.publish('resizewidgets'), 200);
-        	resized = true;
-    	}
+		// window.onhashchange = function(){
+  //   		currentView(location.hash);
+  //   	}
 
-        drata.utils.windowResize(function(){
-        	resizeWidgets();
-        	if(self.isDashboardView()) resized = false;
-        });
+    	// var resizeWidgets  = function(){
+    	// 	_t && clearTimeout(_t);
+     //    	_t = setTimeout(drata.pubsub.publish('resizewidgets'), 200);
+     //    	resized = true;
+    	// }
 
-    	return self;
+     //    drata.utils.windowResize(function(){
+     //    	resizeWidgets();
+     //    	if(self.isDashboardView()) resized = false;
+     //    });
+
+    	//return self;
 	}
 
 	var DashboardSyncService = function(){
@@ -207,14 +210,18 @@
 	        });
 		});
 
-		return self;
+		//return self;
 	};
 	
 	var ControlPanel = function(){
-		var self = this;
-		self.dashboardNotFound = ko.observable(false);
+		var self = this, _t, resized = false;
 		self.currentDashboard = ko.observable();
-		
+		self.topBar = new TopBar();
+		self.dashboardManager = new DashboardManager();
+		self.widgetEditor = new WidgetEditor();
+		self.widgetManager = new WidgetManager();
+		self.dashboardCreator = new DashboardCreator();
+
         self.removeTag = function(tag){
         	var tagToRemove = drata.models.tagList().filter(function(t){
         		return t.tagName === tag.tagName && t.dashboardId === tag.dashboardId;
@@ -230,21 +237,161 @@
         	}
         };
 
-        self.topBar = new TopBar();
-		self.dashboardManager = new DashboardManager();
-		self.widgetEditor = new WidgetEditor();
-		self.widgetManager = new WidgetManager();
-		self.dashboardCreator = new DashboardCreator();
+        
+		var _c = ko.observable();
 
-		var curr_dash_id = window.location.pathname.split('/')[2];
+		var currentView = ko.computed({
+			read: function(){
+				return _c();
+			},
+			write: function(newValue){
+				_c(newValue.replace('#', ''));
+			}
+		});
 
-		if(curr_dash_id){
-			var d = new Dashboard(curr_dash_id);
-	    	self.currentDashboard(d);
-	    }
-	    else if(location.hash === ''){
-	    	location.hash = 'manage';
-	    }
+		var displayModes = {
+			manage: {name: 'manage', hash: 'manage', displayText: 'Manage Dashboard'},
+			editwidget: {name: 'editwidget', hash: 'editwidget', displayText: 'Widget Editor'},
+			managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
+			create: {name: 'create', hash: 'create', displayText: 'Create Dashboard'},
+			dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
+			defaultview: {name: 'defaultview', hash: '', displayText: 'Create or Manage Dashboards'}
+		};
+
+    	var currentDashboardId = window.location.pathname.split('/')[2];
+		
+		if(currentDashboardId){
+			var d = new Dashboard(currentDashboardId);
+			self.currentDashboard(d);
+		}
+		self.displayMode = ko.computed(function(){
+			var c = currentView();
+	    	var mode;
+	    	switch(c){
+	    		case displayModes.manage.hash:
+	    			mode = displayModes.manage;
+	    		break;
+	    		case displayModes.editwidget.hash:
+	    			mode = displayModes.editwidget;
+	    		break;
+	    		case displayModes.managewidgets.hash:
+	    			mode = displayModes.managewidgets;
+	    		break;
+	    		case displayModes.create.hash:
+	    			mode = displayModes.create;
+	    		break;
+	    		default:
+	    			if(currentDashboardId){
+	    				mode = displayModes.dashboardview;
+	    			}
+	    			else{
+	    				mode = displayModes.defaultview;
+	    			}
+	    	}
+	    	return mode;
+		});
+
+	    // self.currentViewTemplate = ko.computed(function(){
+	    // 	var mode = self.displayMode();
+	    // 	var template;
+	    // 	switch(mode){
+	    // 		case displayModes.manage:
+	    // 			template = {
+	    // 				name: 'dashboardmanager-template',
+	    // 				data: self.dashboardManager
+	    // 			};
+	    // 		break;
+	    // 		case displayModes.editwidget:
+	    // 			template = {
+	    // 				name: 'widgeteditor-template',
+	    // 				data: self.widgetEditor
+	    // 			};
+	    // 		break;
+	    // 		case displayModes.managewidgets:
+	    // 			template = {
+	    // 				name: 'widgetmanager-template',
+	    // 				data: self.widgetManager
+	    // 			};
+	    // 		break;
+	    // 		case displayModes.create:
+	    // 			template = {
+	    // 				name: 'dashboard-create-template',
+	    // 				data: self.dashboardCreator
+	    // 			};
+	    // 		break;
+	    // 		case displayModes.dashboardview:
+	    			
+    	// 			template = {
+    	// 				name: 'dashboard-template',
+    	// 				data: self.currentDashboard
+    	// 			}
+	    // 		break;
+	    // 		case displayModes.defaultview:
+	    // 			template = {
+	    // 				name: 'dashboard-create-manage-template',
+	    // 				data: {
+	    // 					create: self.dashboardCreator,
+	    // 					manage: self.dashboardManager
+	    // 				}
+	    // 			}	
+	    // 		break;
+	    // 	}
+	    // 	return template;
+	    // });
+		
+		self.isDashboardView = ko.computed(function(){
+			return self.displayMode() === displayModes.dashboardview;
+		});
+
+		self.isWidgetEditorView = ko.computed(function(){
+			return self.displayMode() === displayModes.editwidget;
+		});
+
+		self.isDashboardCreatorView = ko.computed(function(){
+			return self.displayMode() === displayModes.create;
+		});
+
+		self.isDashboardManagerView = ko.computed(function(){
+			return self.displayMode() === displayModes.manage;
+		});
+		self.isWidgetManagerView = ko.computed(function(){
+			return self.displayMode() === displayModes.managewidgets;
+		});
+
+		self.isDefaultView = ko.computed(function(){
+			return self.displayMode() === displayModes.defaultview;
+		});
+
+		var a = [];
+		self.isDashboardView.subscribe(function(newValue){
+	    	if(a.length < 3) a.push(newValue);
+	    	if(a.length == 3) a.shift();
+	    	if(!a[0] && a[1] && resized){
+	    		resizeWidgets();
+	    		resized = false;
+	    	}
+	    });
+
+	    self.isWidgetNavVisible = ko.computed(function(){
+	    	return  self.isDashboardView() && !self.currentDashboard().dashboardNotFound();
+	    });
+
+		currentView(location.hash);
+
+		window.onhashchange = function(){
+    		currentView(location.hash);
+    	}
+
+    	function resizeWidgets(){
+    		_t && clearTimeout(_t);
+        	_t = setTimeout(drata.pubsub.publish('resizewidgets'), 200);
+        	resized = true;
+    	}
+
+        drata.utils.windowResize(function(){
+        	resizeWidgets();
+        	if(self.isDashboardView()) resized = false;
+        });
 	};
 
 	var DashboardManager = function(){
@@ -370,7 +517,7 @@
 	    self.resetProperties = function(){
 	    	properties([]);
 	    }
-	    return self;
+	    //return self;
 	};
 
 	var WidgetEditor = function(){
@@ -858,12 +1005,14 @@
 
 	root.drata.ns('dashboard').extend({
         controlPanel : ControlPanel,
-        propertyManager: propertyManager()
+        propertyManager: new propertyManager()
     });
+
 	root.drata.ns('nsx').extend({
-		views: viewManager(),
-		dashboardSyncService: DashboardSyncService()
+		views: new viewManager(),
+		dashboardSyncService: new DashboardSyncService()
     });
+
     root.drata.ns('models').extend({
         tagList : tagList,
         dashboardList: dashboardList,

@@ -14,7 +14,7 @@ mongoClient.open(function(err, mongoClient) {
         console.log('drataStore connection opened');
         db = mongoClient.db(config.drataInternal.databaseName);
     }else{
-        res.send(500, 'Database connection failure.');
+        console.log('Database connection failure.');
     }
 });
 

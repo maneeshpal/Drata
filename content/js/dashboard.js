@@ -6,15 +6,13 @@ var Dashboard = function(dashboardId){
     self.index= 1;
     self.loading = ko.observable(true);
     self.widgets = ko.observableArray();
-    //self.newDashboardItem = ko.observable();
-    //self.dashboardNotFound = ko.observable(false);
-    
+    self.dashboardNotFound = ko.observable();
     self.loadDashboard = function(d_id){
         dashboardId = d_id;
         drata.apiClient.getDashboard(dashboardId, function(response){
             var d = response.result;
             if(!d || !response.success){
-                drata.nsx.views.dashboardNotFound(true);
+                self.dashboardNotFound(true);
                 return;
             }
             self.name(d.name);
@@ -40,7 +38,7 @@ var Dashboard = function(dashboardId){
             });
         });
         
-        drata.nsx.dashboardSyncService.listenSocket('xxx');
+        //drata.nsx.dashboardSyncService.listenSocket('xxx');
     };
     
     self.noWidgets = ko.computed(function(){
@@ -67,7 +65,6 @@ var Dashboard = function(dashboardId){
     self.getId = function(){
         return dashboardId;
     };
-
     self.loadDashboard(dashboardId);
 };
 

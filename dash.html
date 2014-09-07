@@ -26,14 +26,18 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
-                <!-- ko if: !drata.nsx.views.isDashboardView() && !drata.nsx.views.isWidgetEditorView() -->
+                <li class="divider"></li>
+                <li class="top-bar-text" data-bind="text: $parent.displayMode().displayText">
+                    
+                </li>
+                <!-- ko if: !$parent.isDashboardView() && !$parent.isWidgetEditorView() -->
                 <li class="divider"></li>
                 <li class="has-form">
                             <a href="#" class="button">
                                 <i class="general foundicon-graph"></i>&nbsp;back</a>
                         </li>
                 <!-- /ko -->
-                <!-- ko if: drata.nsx.views.isWidgetNavVisible -->
+                <!-- ko if: $parent.isWidgetNavVisible -->
                 <li class="divider"></li>
                 
                 <li class="has-dropdown not-click">
@@ -49,25 +53,25 @@
 
                 </li>
                 <!-- /ko -->
-                <!-- ko if: drata.nsx.views.isWidgetEditorView -->
+                <!-- ko if: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:drata.cPanel.widgetEditor.preview" class="button">
-                                <i class="general foundicon-graph"></i>&nbsp;Preview</a>
-                        </li>
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:drata.cPanel.widgetEditor.notifyWidget" class="button success">
-                                <i class="general foundicon-plus"></i>
-                                <!-- ko text:drata.cPanel.widgetEditor.addUpdateBtnText -->
-                                <!-- /ko -->
-                            </a>
-                        </li>
+                <li class="has-form">
+                    <a data-bind="click:drata.cPanel.widgetEditor.preview">
+                        <i class="general foundicon-graph"></i>&nbsp;Preview</a>
+                </li>
+                <li class="divider"></li>
+                <li class="has-form">
+                    <a data-bind="click:drata.cPanel.widgetEditor.notifyWidget">
+                        <i class="general foundicon-plus"></i>
+                        <!-- ko text:drata.cPanel.widgetEditor.addUpdateBtnText -->
+                        <!-- /ko -->
+                    </a>
+                </li>
 
-                        <li class="divider"></li>
-                        <li class="has-form">
-                            <a data-bind="click:drata.cPanel.widgetEditor.widgetCancel" class="button alert"><i class="general foundicon-remove"></i></a>
-                        </li>
+                <li class="divider"></li>
+                <li class="has-form">
+                    <a data-bind="click:drata.cPanel.widgetEditor.widgetCancel"><i class="general foundicon-remove"></i></a>
+                </li>
                 <!-- /ko -->
             </ul>
 
@@ -79,42 +83,14 @@
                     <!-- ko text: currentDashboardName() -->
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
-                    <li class="has-form">
-                        <a href="#manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
-                    </li>
-                    <!-- ko foreach: untaggedList -->
-                        <li>
-                            <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
-                                <span class="icon-grid-alt"></span> 
-                                <!-- ko text: dashboardName -->
-                                <!-- /ko --> 
-                            </a>
+                        <li class="has-form">
+                            <a href="#manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
                         </li>
-                    <!-- /ko -->
-
-                    <li><label><span class="icon-folder-open"></span> Tags</label></li>
-                    <!-- ko foreach: taggedList -->
-                      <li class="has-dropdown not-click">
-                        <a>
-                            <span class="icon-folder-open"></span>
-                             <!-- ko text: tagName -->
-                                    <!-- /ko --> 
-                        </a>
-                        <ul class="dropdown">
-                            <li><label>Dashboards</label></li>
-                            <!-- ko foreach: dashboards -->
-                            <li>
-                                <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
-                                    <span class="icon-grid-alt"></span> 
-                                    <!-- ko text: dashboardName -->
-                                    <!-- /ko --> 
-                                </a>
-                            </li>
-                            <!-- /ko -->
-                        </ul>
-                      </li>
-                      <!-- /ko -->
-                      
+                        <!-- ko template : {name: 'dashboard-menu-template'} --><!--/ko-->
+                        
+                        <li class="has-form">
+                            <a href="#create" class="button secondary"><i class="general foundicon-tools"></i>&nbsp;Create Dashboard</a>
+                        </li>
                     </ul>
 
                 </li>
@@ -123,85 +99,38 @@
         </section>
     </nav>
 
-    <div data-bind="with: currentDashboard, visible: drata.nsx.views.isDashboardView">
-        <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
-        </div>
+ 
+   <!--  <div data-bind="template: currentViewTemplate">
+    </div> -->
 
-        <div class="row text-center" style="display:none" data-bind="visible:noWidgets">
-            <div class="medium-8 medium-offset-2 columns">
-                <h2>No widgets to show</h2>
-                <h2><small>Start adding Widgets, you may also clone existing widgets from other dashboards.</small></h2>
-                <div class="clearfix">
-                    <a href="#editwidget" class="button right">Create new widget</a>
-                    <a class="button left" href="#managewidgets">Clone Existing widgets</a>
-                </div>
-            </div>
-        </div>
-        <div class="text-center" style="display:none" data-bind="visible: drata.nsx.views.dashboardNotFound">
-            <h2>Dashboard not found</h2>
-        </div>
-    </div>
-
-    <div data-bind="with: widgetEditor, visible: drata.nsx.views.isWidgetEditorView" style="display:none">
-            <div class="row">
-                <div class="small-12 columns">
-                    <h4>Edit Widget</h4>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="medium-4 small-12 columns">
-                        <div class="row" style="margin-top:1.5rem">
-                        <div class="small-12 columns">
-                            <label>Server
-                                <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
-                                </label>
-                        </div>
-                        <div class="small-12 columns">
-                            <label>Database
-                                <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
-                                </label>
-                        </div>
-                        <div class="small-12 columns">
-                            <label>Collection Name
-                                <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
-                                </label>
-                        </div>
-                        </div>
-                </div>
-                <div class="medium-8 small-12 columns" data-bind="if: previewWidget()">
-                    <!-- ko template:{ name: 'widget-template',data:previewWidget(), afterRender:loadWidget } -->
-                    <!-- /ko -->
-                </div>
-            </div>
-            <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
-                
-            </div>
-            <!-- ko template: {name: 'segment-template', data: segment, if : selectedDataKey() !== undefined} -->
-                    <!-- /ko -->
-    </div>
-    
-    <div data-bind="with: dashboardManager, visible: drata.nsx.views.isDashboardManagerView" style="display:none">
-        <div class="row">
-            <div class="small-12 columns">
-                <h4>Dashboard Manager</h4>
-            </div>
-        </div>
-        <!-- ko template: {name: 'dashboardmanager-template'} -->
+    <div data-bind="visible:isDefaultView" style="display:none">
+        <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
+        <!-- /ko -->
+        <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
         <!-- /ko -->
     </div>
 
-    <div data-bind="with: dashboardCreator, visible: drata.nsx.views.isDashboardCreatorView" style="display:none">
+    <div data-bind="with: currentDashboard, visible:isDashboardView">
+        <!-- ko template: {name: 'dashboard-template'} -->
+        <!-- /ko -->
+    </div>
+
+    <div data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none">
+        <!-- ko template: {name: 'widgeteditor-template'} -->
+        <!-- /ko -->
+    </div>
+    
+    <div data-bind="with: dashboardCreator, visible:isDashboardCreatorView" style="display:none">
         <!-- ko template: {name: 'dashboard-create-template'} -->
         <!-- /ko -->
     </div>
 
-    <div data-bind="with: widgetManager, visible: drata.nsx.views.isWidgetManagerView" style="display:none">
-        <div class="row">
-            <div class="small-12 columns">
-                <h4>Widget Manager</h4>
-            </div>
-        </div>
+    <div data-bind="with: dashboardManager, visible:isDashboardManagerView" style="display:none">
+        <!-- ko template: {name: 'dashboardmanager-template'} -->
+        <!-- /ko -->
+    </div>
+
+    <div data-bind="with: widgetManager, visible:isWidgetManagerView" style="display:none">
         <!-- ko template: {name: 'widgetmanager-template'} -->
         <!-- /ko -->
     </div>
