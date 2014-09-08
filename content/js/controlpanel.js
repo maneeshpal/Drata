@@ -376,6 +376,13 @@
 	    	return  self.isDashboardView() && !self.currentDashboard().dashboardNotFound();
 	    });
 
+	    self.handleCloseView = function(){
+	    	if(self.isWidgetEditorView()){
+	    		self.widgetEditor.widgetCancel();
+	    	}else{
+	    		location.hash = '#';
+	    	}
+	    };
 		currentView(location.hash);
 
 		window.onhashchange = function(){

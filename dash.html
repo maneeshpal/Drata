@@ -26,17 +26,6 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
-                <li class="divider"></li>
-                <li class="top-bar-text" data-bind="text: $parent.displayMode().displayText">
-                    
-                </li>
-                <!-- ko if: !$parent.isDashboardView() && !$parent.isWidgetEditorView() -->
-                <li class="divider"></li>
-                <li class="has-form">
-                            <a href="#" class="button">
-                                <i class="general foundicon-graph"></i>&nbsp;back</a>
-                        </li>
-                <!-- /ko -->
                 <!-- ko if: $parent.isWidgetNavVisible -->
                 <li class="divider"></li>
                 
@@ -67,11 +56,6 @@
                         <!-- /ko -->
                     </a>
                 </li>
-
-                <li class="divider"></li>
-                <li class="has-form">
-                    <a data-bind="click:drata.cPanel.widgetEditor.widgetCancel"><i class="general foundicon-remove"></i></a>
-                </li>
                 <!-- /ko -->
             </ul>
 
@@ -92,9 +76,14 @@
                             <a href="#create" class="button secondary"><i class="general foundicon-tools"></i>&nbsp;Create Dashboard</a>
                         </li>
                     </ul>
-
                 </li>
+                <!-- ko if: $parent.displayMode().displayText -->
                 <li class="divider"></li>
+                <li class="top-bar-text">
+                    <!--ko text: $parent.displayMode().displayText --><!--/ko -->
+                    &nbsp;<i class="icon-cancel-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></i>
+                </li>
+                <!-- /ko -->
             </ul>
         </section>
     </nav>

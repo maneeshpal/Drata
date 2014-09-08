@@ -228,20 +228,26 @@ input.error {
   color:#008cba;
 }
 /*topbar*/
-.top-bar-text {
-  padding:0 12px;
-  line-height: 35px;
-  background-color: #f5f5f5;
-
-  font-size: .9rem;
-}
 
 .top-bar {
-  .right > .has-form{
-        background-color: #f5f5f5;
+  .top-bar-text {
+    padding:0 12px;
+    line-height: 35px;
+    background-color: #f5f5f5;
+    border-radius: 5px 5px 0 0;
+    font-size: .9rem;
   }
-  .right > .divider {
-      border-right: 1px solid #cccccc;
+  .right {
+    & > .has-form{
+          //background-color: #f5f5f5;
+          /*a {
+            background-color: #f5f5f5;
+            color:#333;
+          }*/
+    }
+    & > .divider {
+        //border-right: 1px solid #cccccc;
+    }
   }
 }
 /*end topbar */
