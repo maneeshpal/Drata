@@ -97,8 +97,7 @@
     
     <div class="row">
         <div class="small-12 columns">
-            <fieldset>
-                <legend>Filter by Chart Type</legend>
+            <span>Filter by Chart Type: </span>
                 <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
                 <!-- ko foreach: drata.global.chartTypes -->
                 <input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data, checked: $parent.chosenChartTypes" />
@@ -106,8 +105,7 @@
                     <label data-bind="attr:{'for': 'chk_chartType'+ $index()}, text: $data"></label>
                 <!-- /ko -->
                 <button class="tiny" data-bind="enable: chosenWidgets().length > 0, click: addWidgets">Add to dashboard</button>
-            </fieldset>   
-
+            
         </div>
     </div>
     <div class="row fancytable header">
