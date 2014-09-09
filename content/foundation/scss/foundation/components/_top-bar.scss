@@ -301,10 +301,7 @@ $topbar-arrows: true !default; //Set false to remove the triangle icon from the 
           display: block;
           width: 100%;
           color: $topbar-link-color;
-          //padding: 12px 0 12px 0;
-          padding:0;
-          line-height:35px;
-          height:35px;
+          padding: 12px 0 12px 0;
           padding-#{$default-float}: $topbar-link-padding;
           font-family: $topbar-link-font-family;
           font-size: $topbar-link-font-size;
