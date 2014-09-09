@@ -26,22 +26,6 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
-                <!-- ko if: $parent.isWidgetNavVisible -->
-                <li class="divider"></li>
-                
-                <li class="has-dropdown not-click">
-                    <a><span class="icon-grid"></span> Widgets</a>
-                    <ul class="dropdown">
-                        <li class="has-form">
-                        <a href="#editwidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
-                        </li>
-                        <li class="has-form">
-                        <a href="#managewidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
-                        </li>
-                    </ul>
-
-                </li>
-                <!-- /ko -->
                 <!-- ko if: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-form">
@@ -77,6 +61,22 @@
                         </li>
                     </ul>
                 </li>
+                <!-- ko if: $parent.isWidgetNavVisible -->
+                <li class="divider"></li>
+                
+                <li class="has-dropdown not-click">
+                    <a><span class="icon-grid"></span> Widgets</a>
+                    <ul class="dropdown">
+                        <li class="has-form">
+                        <a href="#editwidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
+                        </li>
+                        <li class="has-form">
+                        <a href="#managewidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
+                        </li>
+                    </ul>
+
+                </li>
+                <!-- /ko -->
                 <!-- ko if: $parent.displayMode().displayText -->
                 <li class="divider"></li>
                 <li class="top-bar-text">
@@ -95,8 +95,17 @@
     <div data-bind="visible:isDefaultView" style="display:none">
         <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
         <!-- /ko -->
-        <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
-        <!-- /ko -->
+        <div class="row">
+            <div class="medium-6 medium-offset-3 small-12 columns">
+            <div class="row">
+                <div class="small-12 columns text-center">
+                    <h3 class="view-heading">Or, select existing Dashboard</h3>
+                </div>
+            </div>
+            <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
+            <!-- /ko -->
+            </div>
+        </div>
     </div>
 
     <div data-bind="with: currentDashboard, visible:isDashboardView">
@@ -115,6 +124,11 @@
     </div>
 
     <div data-bind="with: dashboardManager, visible:isDashboardManagerView" style="display:none">
+        <div class="row">
+            <div class="small-12 columns">
+                <h3 class="view-heading">Manage Existing Dashboards</h3>
+            </div>
+        </div>
         <!-- ko template: {name: 'dashboardmanager-template'} -->
         <!-- /ko -->
     </div>

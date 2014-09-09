@@ -416,7 +416,7 @@
 	        var includeUntagged = chosenTags.indexOf('untagged') > -1;
 	        if(chosenTags.length === 0) return self.dashboards();
 	        return self.dashboards().filter(function(d){
-	            tags = d.tagList().map(function(i){return i.tagName});
+	            tags = d.tagList.tagList().map(function(i){return i.tagName});
 	            return (tags.length === 0 && includeUntagged) || _.intersection(tags, chosenTags).length > 0;
 	        });
 	    }).extend({ rateLimit: 500 });

@@ -1,30 +1,23 @@
 <script type="text/html" id="dashboardmanager-template">
     <div class="row">
-        <div class="medium-3 columns">
-            <ul class="tag-filter no-bullet">
-                <li>
-                    <strong>Filter by tags: </strong>
-                </li>
-                <li>
-                     <input type="checkbox" id="chkAll" data-bind="click: toggleAllTags" />
+        <div class="small-12 columns">
+                <span>Filter by tags: </span>
+                <input type="checkbox" id="chkAll" data-bind="click: toggleAllTags" />
                     <label>Select All</label>
-                </li>
                 <!-- ko foreach: drata.models.tagNameList -->
-                <li>
-                    <input type="checkbox" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
+                <input type="checkbox" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
                     <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
-                </li>
+                
                 <!-- /ko -->
-                <li>
-                     <input type="checkbox" id="chkUnTagged" data-bind="checkedValue: 'untagged', checked: chosenTags" />
-                    <label for="chkUnTagged">Untagged</label>
-                </li>
-            </ul>
+                <input type="checkbox" id="chkUnTagged" data-bind="checkedValue: 'untagged', checked: chosenTags" />
+                <label for="chkUnTagged">Untagged</label>
+            
         </div>
-        <div class="left medium-9 columns">
+        <div class="small-12 columns">
             <div class="row fancytable header">
                 <div class="small-4 columns">Dashboard Name</div>
                 <div class="small-4 columns">Date Created</div>
+                <div class="small-4 columns">Actions</div>
             </div>
             <!-- ko template: {name: 'dashboardView-template', foreach: filteredDashboards} -->
             <!-- /ko --> 
@@ -97,34 +90,34 @@
 
 <script id="widgetmanager-template" type="text/html">
     <div class="row">
-        <div class="medium-3 columns">
-            <ul class="tag-filter no-bullet">
-                <li>
-                    <strong>Filter by Chart Type: </strong>
-                </li>
+        <div class="small-12 columns">
+            <h3 class="view-heading">Clone widgets from existing dashboards to the current Dashboard</h3>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="small-12 columns">
+            <fieldset>
+                <legend>Filter by Chart Type</legend>
+                <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
                 <!-- ko foreach: drata.global.chartTypes -->
-                <li><input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data, checked: $parent.chosenChartTypes" />
+                <input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data, checked: $parent.chosenChartTypes" />
                     
                     <label data-bind="attr:{'for': 'chk_chartType'+ $index()}, text: $data"></label>
-                </li>
                 <!-- /ko -->
-            </ul>
+                <button class="tiny" data-bind="enable: chosenWidgets().length > 0, click: addWidgets">Add to dashboard</button>
+            </fieldset>   
+
         </div>
-        <div class="medium-9 columns">
-            <div class="row">
-                <div class="small-3 columns">
-                    <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
-                </div>
-                <div class="small-3 columns">
-                    <button class="tiny" data-bind="click: addWidgets">Add</button>
-                </div>
-            </div>
-            <div class="row fancytable header">
-                    <div class="medium-4 columns">Widget Name</div>
-                    <div class="medium-2 columns">Chart Type</div>
-                    <div class="medium-3 columns">Collection</div>
-                    <div class="medium-3 columns">Last Updated</div>
-                </div>
+    </div>
+    <div class="row fancytable header">
+        <div class="medium-4 columns">Widget Name</div>
+        <div class="medium-2 columns">Chart Type</div>
+        <div class="medium-3 columns">Collection</div>
+        <div class="medium-3 columns">Last Updated</div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns">
             <!-- ko template :{name:'widgetDetails-template', foreach: widgetList} -->
             <!-- /ko -->
         </div>
@@ -171,8 +164,8 @@
         <div class="medium-6 medium-offset-3 small-12 columns">
             <div class="row">
                 <div class="small-12 columns text-center">
-                    <h2>Create Dashboard</h2>
-                    <h2><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h2>
+                    <h3 class="view-heading">Create Dashboard</h3>
+                    <h3 class="view-heading"><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h3>
                 </div>
             </div>
             <div class="row collapse">
