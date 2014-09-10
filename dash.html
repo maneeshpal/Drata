@@ -84,6 +84,7 @@
                     &nbsp;<i class="icon-cancel-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></i>
                 </li>
                 <!-- /ko -->
+                <li class="divider"></li>
             </ul>
         </section>
     </nav>
@@ -113,7 +114,7 @@
         <!-- /ko -->
     </div>
 
-    <div data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none">
+    <div class="widget-editor" data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none">
         <!-- ko template: {name: 'widgeteditor-template'} -->
         <!-- /ko -->
     </div>

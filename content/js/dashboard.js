@@ -36,9 +36,9 @@ var Dashboard = function(dashboardId){
                     ind++;
                 });
             });
+            //socket
+            drata.nsx.dashboardSyncService.listenWidgetCreated(dashboardId);
         });
-        
-        //drata.nsx.dashboardSyncService.listenSocket('xxx');
     };
     
     self.noWidgets = ko.computed(function(){
@@ -76,9 +76,45 @@ var Widget = function(widgetModel, index, previewMode){
     self.displayIndex = ko.observable(widgetModel.displayIndex);
     self.pieKeys = ko.observableArray([]);
     self.selectedPieKey = ko.observable();
-    self.name = ko.observable(previewMode ? 'Preview' : (widgetModel.name || 'widget x'));
-    self.sizex = ko.observable(widgetModel.sizex || 4);
-    self.sizey = ko.observable(widgetModel.sizey || 2);
+    var _name = ko.observable(previewMode ? 'Preview' : (widgetModel.name || 'widget x')), _sizex = ko.observable(widgetModel.sizex), _sizey = ko.observable(widgetModel.sizey);
+
+    self.name = ko.computed({
+        read: function(){
+            return _name();
+        },
+        write: function(newValue){
+            _name(newValue);
+            self.update();
+            self.resizeContent();
+        }
+    });
+
+    self.sizex = ko.computed({
+        read: function(){
+            return _sizex();
+        },
+        write: function(newValue){
+            console.log('sizex saved in db');
+            _sizex(newValue);
+            self.update();
+            self.resizeContent();
+        }
+    });
+
+    self.sizey = ko.computed({
+        read: function(){
+            return _sizey();
+        },
+        write: function(newValue){
+            _sizey(newValue);
+            console.log('sizey saved in db');
+            self.update();
+            self.resizeContent();
+        }
+    });
+
+    // self.sizex = ko.observable(widgetModel.sizex || 4);
+    // self.sizey = ko.observable(widgetModel.sizey || 2);
     self.widgetClass= ko.computed(function(){
         if(previewMode) return 'widget-size-4';
         return 'widget-size-' + self.sizex();
@@ -117,7 +153,7 @@ var Widget = function(widgetModel, index, previewMode){
     });
 
     self.widgetHeight = ko.computed(function(){
-        if(previewMode) return 200;
+        if(previewMode) return 300;
         var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
         wh = Math.max(200, wh);
         return wh;
@@ -187,6 +223,11 @@ var Widget = function(widgetModel, index, previewMode){
 
     self.loadWidget = function(wm){
         if(wm) widgetModel = wm;
+        var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
+        _sizex(widgetModel.sizex);
+        _sizey(widgetModel.sizey);
+        _name(widgetModel.name);
+        resizeContent && self.resizeContent();
         self.parseError(undefined);
         self.chartType(widgetModel.segmentModel.chartType);
         console.log('loadWidget');
@@ -254,20 +295,26 @@ var Widget = function(widgetModel, index, previewMode){
         drata.apiClient.deleteWidget(widgetModel._id);
     };
 
-    self.sizex.subscribe(function(){
-        self.update();
-        self.resizeContent();
-    });
-    self.sizey.subscribe(function(){
-        self.update();
-        self.resizeContent();
-    });
+    // self.sizex.subscribe(function(){
+    //     self.update();
+    //     self.resizeContent();
+    // });
+    // self.sizey.subscribe(function(){
+    //     self.update();
+    //     self.resizeContent();
+    // });
+
     self.displayIndex.subscribe(function(){
         self.update();
     });
-    self.name.subscribe(function(){
-        self.update();
-    });
+    // self.name.subscribe(function(){
+    //     self.update();
+    // });
+    //socket
+    if(!previewMode){
+        drata.nsx.dashboardSyncService.listenWidgetUpdated(widgetModel._id);
+        drata.nsx.dashboardSyncService.listenWidgetRemoved(widgetModel._id);
+    }
 };
 
 var LineContent = function(contentOptions){

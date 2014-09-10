@@ -133,14 +133,13 @@
 
         	return widget.length > 0 ? widget[0] : undefined;
 		}
-
-		self.listenSocket = function(){
-			var socket = io.connect();
-			socket.on('widgetupdated', function (data) {
+		var socket = io.connect();
+		self.listenWidgetUpdated = function(widgetId){
+			socket.on('widgetupdated' + widgetId, function (data) {
 	            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
 	            if(widget){
 	            	drata.nsx.notifier.notifyWidgetUpdated({
-	            		name:response.result.name,
+	            		name:widget.name(),
 	            		onConfirm : function(){
 	            			drata.apiClient.getWidget(data.widgetId, function(response){
 			            		if(!response.success) return;
@@ -150,8 +149,10 @@
 	            	});
 	            }
 	        });
+		};
 
-	        socket.on('widgetcreated', function (data) {
+		self.listenWidgetCreated = function(dashboardId){
+			socket.on('widgetcreated' + dashboardId, function (data) {
 	            var currentDashboard = drata.cPanel.currentDashboard();
 	            if(currentDashboard.getId() === data.dashboardId){
 	            	drata.nsx.notifier.notifyWidgetAdded({
@@ -164,7 +165,9 @@
 	            	});
 	            }
 	        });
-	        socket.on('widgetremoved', function (data) {
+		};
+		self.listenWidgetRemoved = function(widgetId){
+			socket.on('widgetremoved'+widgetId, function (data) {
 	            var widget = getWidgetFromDashboard(data.widgetId);
 	            if(widget){
 	            	drata.nsx.notifier.notifyWidgetRemoved({
@@ -177,7 +180,52 @@
 	            	});
 	            }
 	        });
-		};
+		}
+
+		// self.listenSocket = function(){
+		// 	var socket = io.connect();
+		// 	socket.on('widgetupdated', function (data) {
+	 //            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
+	 //            if(widget){
+	 //            	drata.nsx.notifier.notifyWidgetUpdated({
+	 //            		name:widget.name(),
+	 //            		onConfirm : function(){
+	 //            			drata.apiClient.getWidget(data.widgetId, function(response){
+		// 	            		if(!response.success) return;
+		//             			widget.loadWidget(response.result);
+		// 	            	});
+	 //            		}
+	 //            	});
+	 //            }
+	 //        });
+
+	 //        socket.on('widgetcreated', function (data) {
+	 //            var currentDashboard = drata.cPanel.currentDashboard();
+	 //            if(currentDashboard.getId() === data.dashboardId){
+	 //            	drata.nsx.notifier.notifyWidgetAdded({
+	 //            		onConfirm : function(){
+	 //            			drata.apiClient.getWidget(data.widgetId, function(response){
+		// 	            		if(!response.success) return;
+		//             			currentDashboard.addWidget(response.result);
+		// 	            	});
+	 //            		}
+	 //            	});
+	 //            }
+	 //        });
+	 //        socket.on('widgetremoved', function (data) {
+	 //            var widget = getWidgetFromDashboard(data.widgetId);
+	 //            if(widget){
+	 //            	drata.nsx.notifier.notifyWidgetRemoved({
+	 //            		name: widget.name(),
+	 //            		onConfirm : function(){
+	 //            			widget.clearTimeouts();
+	 //            			drata.cPanel.currentDashboard().widgets.remove(widget);
+	 //            			widget = undefined;
+	 //            		}
+	 //            	});
+	 //            }
+	 //        });
+		// };
 		
 		drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
 			if(!widgetModel._id) return;
@@ -529,7 +577,7 @@
 
 	var WidgetEditor = function(){
 	    var self = this;
-	    self.widgetName = ko.observable();
+	    //self.widgetName = ko.observable();
 	    self.addUpdateBtnText = ko.observable('Save');
 	    self.processSegment = true;
 	    self.dataKeys = ko.observableArray();
@@ -545,6 +593,10 @@
 
 	    var cloneModel = {};
 	    
+	    self.name = ko.observable();
+	    self.sizex = ko.observable("4");
+	    self.sizey = ko.observable("1");
+
 	    self.dataSource.subscribe(function(newValue){
 	        if(!newValue){
 	            self.databaseNames([]);
@@ -608,9 +660,8 @@
 	        cloneModel.dataSource = self.dataSource();
 	        cloneModel.database = self.database();
 	        cloneModel.selectedDataKey  = self.selectedDataKey();
-	        cloneModel.sizex = cloneModel.sizex || 4;
-	        cloneModel.sizey = cloneModel.sizey || 2;
-	        
+	        //placing sizex,name, sizey here doest set those in clone
+	        //model for some reason
 	        var previewW = self.previewWidget();
 	        if(previewW){
 	            var x = previewW.getModel();
@@ -620,6 +671,12 @@
 	            previewW.clearTimeouts();
 	        }
 	        var isNew = !cloneModel._id;
+
+	        //im just setting them here.
+	        cloneModel.sizex = self.sizex();
+	        cloneModel.sizey = self.sizey();
+	        cloneModel.name = self.name() || 'New widget';
+
 	        if(isNew){
 	        	drata.pubsub.publish('widgetcreate', cloneModel);
 	        }
@@ -631,6 +688,9 @@
 	        self.onWidgetCancel = undefined;
 	        self.addUpdateBtnText('Save');
 	        self.dataSource(undefined);
+	        self.name(undefined);
+	        self.sizex("4");
+	        self.sizey("1");
 	        self.previewWidget(undefined);
 	        location.hash = '';
 	    };
@@ -638,7 +698,10 @@
 	    self.attach = function (event,options) {
 	        cloneModel = drata.utils.clone(options.widgetModel);
 	        self.dataSource(cloneModel.dataSource);
-	        
+	        self.name(cloneModel.name);
+	        self.sizex(cloneModel.sizex);
+	        self.sizey(cloneModel.sizey);
+
 	        self.addUpdateBtnText('Update Widget');
 	        self.previewWidget(new Widget(cloneModel, 100, true));
 	    };
