@@ -480,6 +480,7 @@ var NumericContent = function(contentOptions){
 
         self.remainingDataPoints(rdp.reverse());
         self.lastButOneDp(rdp[0]);
+        //self.latestDp(rdp[0]);
     };
 
     self.setChartBackground = function(chartType){
@@ -502,14 +503,14 @@ var NumericContent = function(contentOptions){
         switch(self.backgroundChartType())
         {
             case 'line':
-                chart = drata.charts.lineChart().drawLabels(true).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
+                chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
                 data = [{
                     key: self.currentDataKey(),
                     values: firstArr.slice()
                 }];
             break;
             case 'area':
-                chart = drata.charts.areaChart().drawLabels(true).includeDataMarkers(true).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
+                chart = drata.charts.areaChart().drawLabels(false).includeDataMarkers(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
                 data = [{
                     key: self.currentDataKey(),
                     values: firstArr.slice()
@@ -525,7 +526,7 @@ var NumericContent = function(contentOptions){
                         }
                     })
                 }];
-                chart = drata.charts.barChart();
+                chart = drata.charts.barChart().drawLabels(false).drawXAxis(false).drawYAxis(false);
                 break; 
             case 'pie':
                 data = {
@@ -537,7 +538,7 @@ var NumericContent = function(contentOptions){
                         }
                     })
                 }
-                chart = drata.charts.pieChart();
+                chart = drata.charts.pieChart().drawOuterLabels(false);
                 break;
         }
 
@@ -553,6 +554,7 @@ var NumericContent = function(contentOptions){
         self.latestDp(undefined);
         //dummy(dummy() +1);
         chart && chart.resize && chart.resize();
+        console.log('resizing');
         self.latestDp(a);
     };
     

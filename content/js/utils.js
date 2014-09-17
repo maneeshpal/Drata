@@ -143,7 +143,7 @@
             $('body').append(txt);
         }
         style  = style || 'font-size: 12px; font-family: arial;';
-        txt.attr('style', style + ' display:none');
+        txt.attr('style', style + ' position:relative; left:-100%;visibility:hidden;');
         txt.html(text);
         return {height: txt.height(), width: txt.width() };
     };

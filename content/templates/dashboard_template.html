@@ -148,58 +148,68 @@
         <svg></svg>
     </div>
 </script>
+
 <script type="text/html" id="numeric-content-template">
-    <div class="row collapse numeric-chart" data-bind="attr :{style: 'height:'+ $parent.widgetHeight() + 'px'}">
-        <div class="small-9 columns" style="position:relative">
-            <div class="overlay-content">
-                <div class="row">
-                    <div class="small-6 columns">
-                        <div data-bind="if: totalPerChange() !== undefined" class="sub-heading text-center">
-                            <!-- ko text: initialDp().xLabel -->
-                            <!-- /ko -->
-                            -
-                            <!-- ko text: latestDp().xLabel -->
-                            <!-- /ko -->
-                            <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
-                                <!-- ko text: totalPerChange --><!-- /ko -->%
-                                <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="small-6 columns">
-                        <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading text-center">
-                            <!-- ko text: lastButOneDp().xLabel -->
-                            <!-- /ko --> -
-                            <!-- ko text: latestDp().xLabel -->
-                            <!-- /ko -->
-                            <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
-                                <!-- ko text: latestDp().perc --><!-- /ko -->%
-                                <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
-                            </label>
-                        </div>
+    <div class="numeric-chart" data-bind="style: { height: $parent.widgetHeight() + 'px' }">
+        <div class="small-8 columns">
+            <div class="row collapse">
+                <div class="small-6 columns">
+                    <div data-bind="style: {
+                        height: (($parent.widgetHeight() - 120)) + 'px',
+                        lineHeight: (($parent.widgetHeight() - 100)) + 'px',
+                        zIndex: ($parent.widgetHeight() * 0.3 * 9/10) + 'px' 
+                        }, resizeText: mainHeading">
                     </div>
                 </div>
-                <div class="main-heading text-center" data-bind="attr :{ style: 'height:'+ ($parent.widgetHeight() * 0.3) + 'px'},resizeText: mainHeading">
+                <div class="small-6 columns">
+                    <div data-bind="attr :{id: widgetContentId}, style: { height: (($parent.widgetHeight() - 120)) + 'px'}">
+                        <svg></svg>
+                    </div>                    
                 </div>
-            
-                <div class="sub-heading text-center" data-bind="text: subHeading">
-                </div>
-                    
             </div>
-            <div data-bind="attr :{id: widgetContentId, style: 'height:'+ $parent.widgetHeight() + 'px'}" >
-                <svg></svg>
+            <div class="row" style="max-height:120px;">
+                <div class="medium-6 columns">
+                    <div data-bind="if: totalPerChange() !== undefined" class="sub-heading">
+                        <!-- ko text: initialDp().xLabel -->
+                        <!-- /ko -->
+                        -
+                        <!-- ko text: latestDp().xLabel -->
+                        <!-- /ko -->
+                        <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
+                            <!-- ko text: totalPerChange --><!-- /ko -->%
+                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
+                        </label>
+                    </div>
+
+                    <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading">
+                        <!-- ko text: lastButOneDp().xLabel -->
+                        <!-- /ko --> -
+                        <!-- ko text: latestDp().xLabel -->
+                        <!-- /ko -->
+                        <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
+                            <!-- ko text: latestDp().perc --><!-- /ko -->%
+                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="medium-6 columns">
+                    <div data-bind="checkboxDropdown:{options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select ddd', optionsText:'key'}">
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="data-points small-3 columns" data-bind="attr :{style: 'height:'+ $parent.widgetHeight() + 'px'}">
-           <div style="padding:.5rem" >
+        <div class="small-4 columns">
+            <div style="padding:.5rem" >
                 <span class="icon-statistics" data-bind="css: {'primary': backgroundChartType() === 'line'}, click: setChartBackground.bind($data, 'line')"></span>
                 <span class="icon-graph" data-bind="css: {'primary': backgroundChartType() === 'area'}, click: setChartBackground.bind($data, 'area')"></span>
                 <span class="icon-pie" data-bind="css: {'primary': backgroundChartType() === 'pie'}, click: setChartBackground.bind($data, 'pie')"></span>
                 <span class="icon-bars2" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
-                </div>
-            <div style="padding:.5rem" data-bind="checkboxDropdown:{options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select ddd', optionsText:'key'}">
             </div>
-            <ul class="no-bullet stacked-heading" data-bind="foreach: remainingDataPoints">
+            <ul class="no-bullet stacked-heading" data-bind="style: { 
+                height: ($parent.widgetHeight() - 30) + 'px',
+                overflow:'scroll'
+            },
+            foreach: remainingDataPoints">
                 <li>
                     <div data-bind="text: xLabel"></div>
                     <label data-bind="css: { 'success': perc > 0, 'alert': perc < 0}">
@@ -214,6 +224,7 @@
         </div>
     </div>
 </script>
+
 <script type="text/html" id="dashboard-menu-template">
     <!-- ko foreach: untaggedList -->
         <li>

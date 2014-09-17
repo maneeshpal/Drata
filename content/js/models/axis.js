@@ -2,7 +2,7 @@
  ;(function(root) {
     var Axis = function(){
 
-        var _orient, _scale, _domain, _gl = false, _dims, _axisType, _axisTicType,_dateInterval, _ticks = 0, _tickFormat;
+        var _orient, _scale, _domain, _gl = false, _dims, _axisType, _axisTicType,_dateInterval, _ticks = 0, _tickFormat, _drawAxis = true;
         var axis = d3.svg.axis();
         //var _m = {l:30, r:10, t:30, b:30};
         
@@ -109,8 +109,9 @@
                     })
                     .orient(_orient);
 
+                if(!_drawAxis) return;
+
                 var xis = container.call(axis);
-                //var turnXaxis = axisLabelLength > _dims.w - _dims.m.l - _dims.m.r;
                  
                 var angle = (_dims.w < 250)? -60 : -30;
                 if(_axisType === 'x' && _axisTicType === 'date'){
@@ -123,16 +124,7 @@
                     });
                     
                 _dims.m.b = mb;
-
                 }
-                // else{
-                //     xis.selectAll('text')
-                //     .style("text-anchor", "end")
-                //     .attr("dx", "0")
-                //     .attr("dy", ".50em")
-                //     .attr("transform", null);
-                // }
-                
                 
             });
             return chart;
@@ -193,6 +185,12 @@
             
             return chart;
         };
+        chart.drawAxis = function(value){
+            if (!arguments.length) return _drawAxis;
+            _drawAxis = value;
+            return chart;  
+        };
+
         return chart;
     };
     root.drata.ns('models').extend({

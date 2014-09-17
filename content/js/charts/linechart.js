@@ -98,12 +98,13 @@
                 }
                 
                 
-                    
+                xAxis.drawAxis(_drawXAxis);
+                yAxis.drawAxis(_drawYAxis);
+
                 var xAxisContainer = gWrapper.select('g.x.axis');
-                
-                xAxisContainer.call(xAxis);
-                
-                xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
+                    xAxisContainer.call(xAxis);
+                    xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");    
+
                 if(_drawLabels){
                     labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
                 }
@@ -121,8 +122,6 @@
                     .select('g.line-group')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     .call(lines);
-
-                
 
                 if(_dataMarkers){
                     gWrapperEnter.append("g").attr("class", "dot-group");

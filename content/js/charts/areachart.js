@@ -1,7 +1,7 @@
 
  ;(function(root) {
     var AreaChart = function(){
-        var _xAxisType = 'numeric',_yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
+        var _xAxisType = 'numeric', _drawXAxis = true, _drawYAxis = true, _yticks, _drawLabels = true, _dateInterval, _dataMarkers = false;
         var xAxis = drata.models.axis()
             .orient("bottom")
             .axisType('x');
@@ -98,10 +98,11 @@
                     labelContainer.datum(data).call(labels);
                 }
 
+                xAxis.drawAxis(_drawXAxis);
+                yAxis.drawAxis(_drawYAxis);
+
                 var xAxisContainer = gWrapper.select('g.x.axis');
- 
                 xAxisContainer.call(xAxis);
-            
                 xAxisContainer.attr("transform", "translate(" + dims.m.l +"," + (dims.h - dims.m.b) + ")");
                 
                 if(_drawLabels){
@@ -175,6 +176,18 @@
         chart.drawLabels = function(value){
             if (!arguments.length) return _drawLabels;
             _drawLabels = value;
+            return chart;
+        };
+
+        chart.drawYAxis = function(value){
+            if (!arguments.length) return _drawYAxis;
+            _drawYAxis = value;
+            return chart;
+        };
+
+        chart.drawXAxis = function(value){
+            if (!arguments.length) return _drawXAxis;
+            _drawXAxis = value;
             return chart;
         };
 

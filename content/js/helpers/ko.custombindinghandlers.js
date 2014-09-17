@@ -365,19 +365,22 @@
     var resizeText = {
         update: function(element, valueAccessor){
             var txt = ko.utils.unwrapObservable(valueAccessor());
+            if(!txt) return;
             $(element).html(txt);
             var w = $(element).width();
             var h = $(element).height();
+            //console.log('height: ' + h + '; width: ' + w);
             var maxFontSize = 0;
             function resize(){
-                var x = {width:0, height: 0}, f = 40, l = 0;
+                var x = {width:0, height: 0}, f = parseInt(h * 9/10), l = 0;
                 do{
                     x = drata.utils.textToPixel(txt, 'font-size:' + f + 'px;');
-                    
-                    f = f+2;
+                    //console.log(x);
+                    //console.log('font: ' + f);
+                    f = f - 10;
                     l++;
                 }
-                while(w - 20 > x.width && h > x.height && l < 50);
+                while((x.width > w - 20 || x.height > h) && l < 10);
                 $(element).css('font-size', f + 'px');
             }
             resize();

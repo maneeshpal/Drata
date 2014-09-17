@@ -143,37 +143,6 @@ ul.widget-nav-list li.action-icon{
 }
 /*widget nav*/
 
-/*Modal segment*/
-.mymodal-wrapper {
-  position: absolute;
-  z-index: 100;
-  opacity: 0;
-  transition: all .5s linear;
-  width:100%;
-  visibility: hidden;
-  top:0;
-  &.showme {
-    opacity: 1;
-    visibility: visible;
-    .mymodal-inner {
-      //height: 100%;
-    }
-  }
-}
-.mymodal-inner{
-  width:60%;
-  position:relative;
-  background-color:#fff;
-  margin:0 auto;
-  box-shadow: 0px 0px 15px 3px #333;
-  //overflow: hidden;
-  //height:0;
-  //-webkit-transition-delay: 2s; /* Safari */
-  //transition-delay: 2s;
-  //transition: all 1s linear;
-}
-/*End Modal Segment*/
-
 
 @media only screen and (max-width: 767px) {
   .ui-sortable-placeholder {
@@ -232,7 +201,7 @@ input.error {
 .top-bar {
   .top-bar-text {
     padding:0 12px;
-    line-height: 35px;
+    line-height: 45px;
     background-color: #f5f5f5;
     border-radius: 5px 5px 0 0;
     font-size: .9rem;
