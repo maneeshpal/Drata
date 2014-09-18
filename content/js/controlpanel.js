@@ -233,7 +233,7 @@
             	var widget = getWidgetFromDashboard(widgetModel._id, widgetModel.dashboardId);
             	widget && widget.loadWidget(widgetModel);
             	drata.nsx.notifier.addNotification({
-        			message: 'widget: ' + widget.name()  + ' updated successfully',
+        			message: 'widget: ' + widgetModel.name  + ' updated successfully',
         			type: 'success',
         			displayTimeout: 3000
         		});
@@ -313,14 +313,23 @@
 			self.currentDashboard(d);
 		}
 		self.displayMode = ko.computed(function(){
-			var c = currentView();
+			var c = currentView() ? currentView().split('/'): [''];
 	    	var mode;
-	    	switch(c){
+	    	switch(c[0]){
 	    		case displayModes.manage.hash:
 	    			mode = displayModes.manage;
 	    		break;
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
+	    			if(c[1]){
+	    				drata.apiClient.getWidget(c[1], function(response){
+	    					if(response.success){
+	    						drata.pubsub.publish('widgetedit', {
+						            widgetModel: response.result
+						        });
+	    					}
+	    				});
+	    			}
 	    		break;
 	    		case displayModes.managewidgets.hash:
 	    			mode = displayModes.managewidgets;

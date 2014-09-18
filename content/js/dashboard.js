@@ -201,10 +201,10 @@ var Widget = function(widgetModel, index, previewMode){
     });
 
     self.editWidget = function () {
-        drata.pubsub.publish('widgetedit', {
-            widgetModel: widgetModel
-        });
-        location.hash = '#editwidget';
+        // drata.pubsub.publish('widgetedit', {
+        //     widgetModel: widgetModel
+        // });
+        location.hash = '#editwidget/' + self.getId();
     };
 
     var _t = undefined, resize = true;

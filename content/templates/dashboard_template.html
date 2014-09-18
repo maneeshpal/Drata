@@ -20,7 +20,7 @@
 </script>
 
 <script type="text/html" id="widgeteditor-template">
-    <div class="row">
+    <div class="row" style="position:relative">
         <div class="medium-4 small-12 columns">
             <div class="row" style="margin-top:1.5rem">
                 <div class="small-12 columns">
@@ -69,6 +69,9 @@
         <div class="medium-8 small-12 columns" data-bind="if: previewWidget()">
             <!-- ko template:{ name: 'widget-template',data:previewWidget(), afterRender:loadWidget } -->
             <!-- /ko -->
+        </div>
+        <div class="medium-8 small-12 columns preview-placeholder" data-bind="visible: !previewWidget()">
+            <h3>Chart Preview</h3>
         </div>
     </div>
     <div data-bind="visible: !!parseError(), html: parseError" class="alert-box alert">
