@@ -43,10 +43,11 @@
     <div class="row fancytable">
         <div class="medium-12 columns">
                 <div class="row fancytable header">
-                    <div class="medium-4 columns">Widget Name</div>
+                    <div class="medium-3 columns">Widget Name</div>
                     <div class="medium-2 columns">Chart Type</div>
                     <div class="medium-3 columns">Collection</div>
-                    <div class="medium-3 columns">Last Updated</div>
+                    <div class="medium-2 columns">Last Updated</div>
+                    <div class="medium-2 columns">Manage widget</div>
                 </div>
 
                 <!-- ko template :{name:'widgetDetails-template', foreach: widgetList} -->
@@ -108,10 +109,11 @@
         </div>
     </div>
     <div class="row fancytable header">
-        <div class="medium-4 columns">Widget Name</div>
+        <div class="medium-3 columns">Widget Name</div>
         <div class="medium-2 columns">Chart Type</div>
         <div class="medium-3 columns">Collection</div>
-        <div class="medium-3 columns">Last Updated</div>
+        <div class="medium-2 columns">Last Updated</div>
+        <div class="medium-2 columns">Manage widget</div>
     </div>
     <div class="row">
         <div class="small-12 columns">
@@ -125,15 +127,18 @@
     <div class="row fancytable content">
         <div class="large-12 columns">
             <div class="row">
-                <div class="medium-4 small-12 columns">
-                    <input type="checkbox" data-bind="visible: chooseWidgets, checkedValue: $data, checked: $parent.chosenWidgets, " style="margin-bottom:0"></input>
+                <div class="medium-3 small-12 columns">
+                    <input type="checkbox" data-bind="visible: chooseWidgets, checkedValue: $data, checked: $parent.chosenWidgets" style="margin-bottom:0"></input>
                      &nbsp;&nbsp;
                     <span data-bind="text:name,click: toggleExtendedDetails"></span>
                     &nbsp;<i class="general" data-bind=" click: toggleExtendedDetails, css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}"></i>
                 </div>
                 <div class="medium-2 small-6 columns" data-bind="text:chartType"></div>
                 <div class="medium-3 small-6 columns" data-bind="text: selectedDataKey"></div>
-                <div class="medium-3 small-6 columns" data-bind="text:dateUpdated"></div>
+                <div class="medium-2 small-6 columns" data-bind="text:dateUpdated"></div>
+                <div class="medium-2 small-6 columns">
+                <a data-bind="attr: {'href': manageUrl}">manage</a>
+                </div>
             </div>
             <!-- ko if:viewDetails -->
             <div class="row fancytable content-extended">

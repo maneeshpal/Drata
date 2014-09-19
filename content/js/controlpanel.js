@@ -961,6 +961,7 @@
 	    this.toggleExtendedDetails = function(){
 	        this.viewDetails(!this.viewDetails());
 	    };
+	    this.manageUrl = '#editwidget/'+ model._id;
 	    this.selectionsExpression = drata.utils.selectionsExpression(model.segmentModel.selection, true);
 	    this.conditionsExpression = drata.utils.conditionsExpression(model.segmentModel.group) || 'none';
 	    this.dataFilterExpression = '';
