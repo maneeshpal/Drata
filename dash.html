@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
 
 </head>
-<body>
+<body data-bind="css: theme">
 
     <div class="sticky">
     <nav class="top-bar dashboard" data-bind="with: topBar" data-topbar>
@@ -28,6 +28,20 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
+                <li class="divider"></li>
+                <li class="has-dropdown dashboard-settings">
+                    <a data-dropdown="dashboard_settings" data-options="align:bottom"><i class="icon-cog"></i></a>
+                    <ul class="dropdown">
+                        <li class="theme">
+                            <label>Theme &nbsp;
+                                <select data-bind="value: $parent.theme">
+                                    <option>default</option>
+                                    <option>campfire</option>
+                                </select>
+                            </label>
+                        </li>
+                    </ul>
+                </li>
                 <!-- ko if: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-form">
@@ -92,23 +106,18 @@
     </nav>
     </div>
  
-   <!--  <div data-bind="template: currentViewTemplate">
+    <!--  <div data-bind="template: currentViewTemplate">
     </div> -->
 
-    <div data-bind="visible:isDefaultView" style="display:none">
-        <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
-        <!-- /ko -->
-        <div class="row">
-            <div class="medium-8 large-6 small-centered small-centered small-12 columns">
-            <div class="row">
-                <div class="small-12 columns text-center">
-                    <h3 class="view-heading">Or, select existing Dashboard</h3>
-                </div>
-            </div>
+    <div data-bind="visible:isDefaultView" style="display:none" class="row">
+        <div class="small-12 medium-10 large-8 columns small-centered">
+            <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
+            <!-- /ko -->
+            <h3 class="view-heading">Or, select existing Dashboard</h3>
             <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
             <!-- /ko -->
-            </div>
         </div>
+        
     </div>
 
     <div data-bind="with: currentDashboard, visible:isDashboardView">
@@ -121,19 +130,27 @@
         <!-- /ko -->
     </div>
     
-    <div data-bind="with: dashboardCreator, visible:isDashboardCreatorView" style="display:none">
+    <div class="row" data-bind="with: dashboardCreator, visible:isDashboardCreatorView" style="display:none">
+        <div class="small-12 medium-10 large-8 columns small-centered">
         <!-- ko template: {name: 'dashboard-create-template'} -->
         <!-- /ko -->
+        </div>
     </div>
 
     <div data-bind="with: dashboardManager, visible:isDashboardManagerView" style="display:none">
         <div class="row">
-            <div class="small-12 columns">
+            <div class="small-12 columns text-center">
                 <h3 class="view-heading">Manage Existing Dashboards</h3>
             </div>
         </div>
-        <!-- ko template: {name: 'dashboardmanager-template'} -->
-        <!-- /ko -->
+
+        <div class="row">
+            <div class="small-12 medium-10 large-8 columns small-centered">
+                <!-- ko template: {name: 'dashboardmanager-template'} -->
+                <!-- /ko -->
+            </div>
+        </div>
+        
     </div>
 
     <div data-bind="with: widgetManager, visible:isWidgetManagerView" style="display:none">
@@ -192,6 +209,7 @@
     <script type="text/javascript" src="/js/keypress.js"></script>
     <script type="text/javascript" src="/js/notifier.js"></script>
     <script type="text/javascript" src="/js/controlpanel.js"></script>
+    <script type="text/javascript" src="/js/lib/responsive-tables.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {

@@ -1,7 +1,7 @@
 
 
 <script type="text/html" id="dashboard-template">
-    <div class="row" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
+    <div class="row dashboard" data-bind="template:{ name: 'widget-template',foreach:widgets, afterRender:loadWidget }, sortableList: widgets">
     </div>
 
     <div class="row text-center" style="display:none" data-bind="visible:noWidgets">

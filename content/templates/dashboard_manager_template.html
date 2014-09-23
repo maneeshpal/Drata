@@ -1,32 +1,29 @@
 <script type="text/html" id="dashboardmanager-template">
     <div class="row">
-        <div class="small-12 columns">
-                <span>Filter by tags: </span>
-                <input type="checkbox" id="chkAll" data-bind="click: toggleAllTags" />
-                    <label>Select All</label>
-                <!-- ko foreach: drata.models.tagNameList -->
-                <input type="checkbox" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
-                    <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
-                
-                <!-- /ko -->
-                <input type="checkbox" id="chkUnTagged" data-bind="checkedValue: 'untagged', checked: chosenTags" />
-                <label for="chkUnTagged">Untagged</label>
+        <div class="small-12 columns text-center">
+            <span>Filter by tags: </span>
+            <input type="checkbox" id="chkAll" data-bind="click: toggleAllTags" />
+                <label>Select All</label>
+            <!-- ko foreach: drata.models.tagNameList -->
+            <input type="checkbox" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
+                <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
             
+            <!-- /ko -->
+            <input type="checkbox" id="chkUnTagged" data-bind="checkedValue: 'untagged', checked: chosenTags" />
+            <label for="chkUnTagged">Untagged</label>
         </div>
-        <div class="small-12 columns">
-            <div class="row fancytable header">
-                <div class="small-4 columns">Dashboard Name</div>
-                <div class="small-4 columns">Date Created</div>
-                <div class="small-4 columns">Actions</div>
-            </div>
-            <!-- ko template: {name: 'dashboardView-template', foreach: filteredDashboards} -->
-            <!-- /ko --> 
-        </div> 
     </div>
+    <div class="row fancytable header">
+        <div class="small-4 columns">Dashboard Name</div>
+        <div class="small-4 columns">Date Created</div>
+        <div class="small-4 columns">Actions</div>
+    </div>
+    <!-- ko template: {name: 'dashboardView-template', foreach: filteredDashboards} -->
+    <!-- /ko --> 
 </script>
 <script type="text/html" id="dashboardView-template">
     <div class="row fancytable content">
-        <div class="small-4 columns" style="padding-left:30px">
+        <div class="small-4 columns" style="padding-left:35px">
            <!-- ko editLabel: {title: name, href:url} -->
            <!-- /ko -->
         </div>
@@ -37,20 +34,12 @@
         <div class="small-4 columns">
             <a data-bind="click: cloneDashboard">clone</a>&nbsp; <a data-bind="click:$parent.deleteDashboard.bind($parent)">remove</a>
         </div>
-        <i class="general" style="position:absolute; top:12px;left:12px" data-bind="{click: viewDetails,css: {'foundicon-plus': !toggleExtendedDetails(), 'foundicon-minus': toggleExtendedDetails}}"></i> 
+        <i class="general" style="position:absolute; top:17px;left:12px" data-bind="{click: viewDetails,css: {'foundicon-plus': !toggleExtendedDetails(), 'foundicon-minus': toggleExtendedDetails}}"></i> 
     </div>
     <!-- ko if: toggleExtendedDetails -->
     <div class="row fancytable">
         <div class="medium-12 columns">
-                <div class="row fancytable header">
-                    <div class="medium-3 columns">Widget Name</div>
-                    <div class="medium-2 columns">Chart Type</div>
-                    <div class="medium-3 columns">Collection</div>
-                    <div class="medium-2 columns">Last Updated</div>
-                    <div class="medium-2 columns">Manage widget</div>
-                </div>
-
-                <!-- ko template :{name:'widgetDetails-template', foreach: widgetList} -->
+                <!-- ko template :{name:'widgetDetails-template'} -->
                 <!-- /ko -->
         </div>
 
@@ -90,13 +79,13 @@
 </script>
 
 <script id="widgetmanager-template" type="text/html">
-    <div class="row">
+    <div class="row text-center">
         <div class="small-12 columns">
             <h3 class="view-heading">Clone widgets from existing dashboards to the current Dashboard</h3>
         </div>
     </div>
     
-    <div class="row">
+    <div class="row text-center">
         <div class="small-12 columns">
             <span>Filter by Chart Type: </span>
                 <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
@@ -108,90 +97,90 @@
             
         </div>
     </div>
-    <div class="row fancytable header">
-        <div class="medium-3 columns">Widget Name</div>
-        <div class="medium-2 columns">Chart Type</div>
-        <div class="medium-3 columns">Collection</div>
-        <div class="medium-2 columns">Last Updated</div>
-        <div class="medium-2 columns">Manage widget</div>
-    </div>
-    <div class="row">
-        <div class="small-12 columns">
-            <!-- ko template :{name:'widgetDetails-template', foreach: widgetList} -->
-            <!-- /ko -->
+    
+    <div class="row text-center">
+        <div class="large-10 medium-12 small-12 small-centered columns">
+        <!-- ko template :{name:'widgetDetails-template'} -->
+        <!-- /ko -->
         </div>
     </div>
 </script>
 
 <script id="widgetDetails-template" type="text/html">
-    <div class="row fancytable content">
-        <div class="large-12 columns">
-            <div class="row">
-                <div class="medium-3 small-12 columns">
-                    <input type="checkbox" data-bind="visible: chooseWidgets, checkedValue: $data, checked: $parent.chosenWidgets" style="margin-bottom:0"></input>
-                     &nbsp;&nbsp;
-                    <span data-bind="text:name,click: toggleExtendedDetails"></span>
-                    &nbsp;<i class="general" data-bind=" click: toggleExtendedDetails, css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}"></i>
-                </div>
-                <div class="medium-2 small-6 columns" data-bind="text:chartType"></div>
-                <div class="medium-3 small-6 columns" data-bind="text: selectedDataKey"></div>
-                <div class="medium-2 small-6 columns" data-bind="text:dateUpdated"></div>
-                <div class="medium-2 small-6 columns">
-                <a data-bind="attr: {'href': manageUrl}">manage</a>
-                </div>
-            </div>
-            <!-- ko if:viewDetails -->
-            <div class="row fancytable content-extended">
-                <div class="medium-4 small-12 columns">
-                Date Range:</div>
-                <div class="medium-8 small-12 columns" data-bind="html:dataFilterExpression"></div>
-            </div>
-            <div class="row fancytable content-extended">
-                <div class="medium-4 small-12 columns">
-                Selections:</div>
-                <div class="medium-8 small-12 columns" data-bind="html:selectionsExpression"></div>
-            </div>
-            <div class="row fancytable content-extended">
-                <div class="medium-4 small-12 columns">
-                Filters:
-                </div>
-                <div class="medium-8 small-12 columns" data-bind="html:conditionsExpression"></div>
-            </div>
-            <!-- /ko -->
-        </div>
-    </div>
+    <table class="responsive" style="width:100%">
+        <tr>
+            <th>Select widgets</th>
+            <th>Chart Type</th>
+            <th>Collection</th>
+            <th>Date updated</th>
+            <th></th>
+        </tr>
+        <!-- ko template :{name:'widgetDetail-template', foreach: widgetList} -->
+        <!-- /ko -->
+    </table>        
+</script>
+<script id="widgetDetail-template" type="text/html">
+
+<tr>
+    <td>
+        <!--ko if: chooseWidgets -->
+        <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.chosenWidgets" style="margin-bottom:0"></input> &nbsp;
+        <!-- /ko -->
+        <span data-bind="text:name,click: toggleExtendedDetails"></span> &nbsp;
+        <i class="general" data-bind=" click: toggleExtendedDetails, css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}"></i>
+    </td>
+    <td> <!-- ko text:chartType --> <!--/ko --> </td>
+    <td> <!-- ko text:selectedDataKey --> <!--/ko --> </td>
+    <td><!-- ko text:dateUpdated --> <!--/ko --> </td>
+    <td><a data-bind="attr: {'href': manageUrl}">manage</a></td>
+</tr>
+ 
+    <tr data-bind="visible:viewDetails">
+        <td>&nbsp;&nbsp;&nbsp;|</td>
+        <td colspan="4">
+            Date Range: <span data-bind="html: dataFilterExpression"></span> 
+        </td>
+    </tr>
+    <tr data-bind="visible:viewDetails">
+        <td>&nbsp;&nbsp;&nbsp;|</td>
+        <td colspan="4">
+            Selections: <span data-bind="html: selectionsExpression"></span> 
+        </td>
+    </tr>
+    <tr data-bind="visible:viewDetails">
+        <td>&nbsp;&nbsp;&nbsp;--</td>
+        <td colspan="4">
+            Filters: <span data-bind="html: conditionsExpression"></span> 
+        </td>
+    </tr>
 </script>
 <script type="text/html" id="dashboard-create-template">
     <div class="row">
-        <div class="medium-8 large-6 small-centered small-12 columns">
-            <div class="row">
-                <div class="small-12 columns text-center">
-                    <h3 class="view-heading">Create Dashboard</h3>
-                    <h3 class="view-heading"><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h3>
-                </div>
-            </div>
-            <div class="row collapse">
-                <div class="small-8 columns">
-                    <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:name" />
-                </div>
-                <div class="small-4 columns">
-                    <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</a>
-                </div>
-            </div>
-            <!-- ko if: widgetList().length>0 -->
-                    <h6 class="strong">Included widgets &nbsp;&nbsp;<input type="checkbox" id="chk_w_s_all" data-bind="checked: selectAll"/><label for="chk_w_s_all">select all </label></h6>
-                        <ul class="tag-filter no-bullet" data-bind="foreach: widgetList">
-                            <li>
-                                <input type="checkbox" style="margin:0" data-bind="attr:{'id': 'chk_widget'+ $index()}, checkedValue: $data, checked: $parent.chosenWidgets" />
-                                <label data-bind="attr:{'for': 'chk_widget'+ $index()}, text: name"></label>
-                            </li>
-                        </ul>
-                    <!-- /ko -->
-            <div class="row">
-                <div class="small-12 columns">
-                    <!-- ko template : {name: 'tags-template', data: tags} --><!-- /ko -->
-                </div>
-            </div>
+        <div class="small-12 columns text-center">
+            <h3 class="view-heading">Create Dashboard</h3>
+            <h3 class="view-heading"><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h3>
+        </div>
+    </div>
+    <div class="row collapse">
+        <div class="small-8 columns">
+            <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:name" />
+        </div>
+        <div class="small-4 columns">
+            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+        </div>
+    </div>
+    <!-- ko if: widgetList().length>0 -->
+        <h6 class="strong">Included widgets &nbsp;&nbsp;<input type="checkbox" id="chk_w_s_all" data-bind="checked: selectAll"/><label for="chk_w_s_all">select all </label></h6>
+            <ul class="tag-filter no-bullet" data-bind="foreach: widgetList">
+                <li>
+                    <input type="checkbox" style="margin:0" data-bind="attr:{'id': 'chk_widget'+ $index()}, checkedValue: $data, checked: $parent.chosenWidgets" />
+                    <label data-bind="attr:{'for': 'chk_widget'+ $index()}, text: name"></label>
+                </li>
+            </ul>
+            <!-- /ko -->
+    <div class="row">
+        <div class="small-12 columns">
+            <!-- ko template : {name: 'tags-template', data: tags} --><!-- /ko -->
         </div>
     </div>
 </script>

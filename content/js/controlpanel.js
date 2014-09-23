@@ -269,6 +269,12 @@
 		self.widgetEditor = new WidgetEditor();
 		self.widgetManager = new WidgetManager();
 		self.dashboardCreator = new DashboardCreator();
+		
+		self.theme = ko.observable('default');
+
+		self.theme.subscribe(function(newValue){
+			drata.pubsub.publish('themechanged', newValue);
+		});
 
         self.removeTag = function(tag){
         	var tagToRemove = drata.models.tagList().filter(function(t){
@@ -492,7 +498,6 @@
 	                console.log('widgets deleted');
 	            });
 	        }
-	        
 	    };
 
 	    var populateDashboards = function(ds){
@@ -988,7 +993,8 @@
 
 		this.upsertDashboard = function(){
 	        var dashboardModel = {
-	            name: this.name()
+	            name: this.name(),
+	            theme: 'default'
 	        };
 
 	        drata.apiClient.upsertDashboard(dashboardModel, function(response){
@@ -1047,20 +1053,11 @@
 
 	var TopBar = function(){
 	    var self = this;
-	    // self.addWidget = function(){
-	    //     location.hash = 'editwidget';
-	    // };
+	    
 	    self.manageDashboards = function(){
-	        //drata.cPanel.dashboardManager.populateDashboards();
-	        //$('#dashboardManager').toggleClass('showme');
 	        location.hash = 'manage';
 	    };
-	    // self.manageWidgets = function(){
-	    //     drata.cPanel.widgetManager.bindWidgets();
-	    //     location.hash = 'managewidgets';
-	    //     //$('#widgetManager').toggleClass('showme');
-	    // };
-
+	    
 	    self.taggedList = ko.observableArray();
 	    self.untaggedList = ko.observableArray();
 	    

@@ -7,7 +7,7 @@
 }
 
 .logo {
-  @include logo(35px);
+  @include logo(45px);
   padding:0 10px;
   background-color : $orange_base;
 }
@@ -220,12 +220,31 @@ input.error {
     & > .divider {
         //border-right: 1px solid #cccccc;
     }
+
   }
 }
 /*end topbar */
+
+
+/**dashboard settings**/
+
+  .dashboard-settings {
+    li.theme {
+      label {
+        background:$dark;
+      }
+      select {
+        width:100px;
+        margin-left:5px;
+      }
+    }
+  }
+/**end dashboard settings**/
+
 h3.view-heading {
   font-weight: 300;
   margin:20px 0;
+  text-align:center;
 }
 .preview-placeholder {
   height: 89%;
@@ -234,6 +253,6 @@ h3.view-heading {
   right: 20px;
   top: 25px;
   width: 61.7%;
-  padding-top: 16%;
+  padding-top: 130px;
   text-align: center;
 }

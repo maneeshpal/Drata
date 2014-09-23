@@ -3,7 +3,10 @@
 @import "dratamixins";
 
 body.campfire {
-	background:$superdark;
+	background:$dark;
+	.dashboard {
+		background: $superdark;
+	}
 	color:$superlight;
 	h1, h2, h3, h4, h5, h6 {
 		color:$superlight;
@@ -45,13 +48,6 @@ body.campfire {
 		}
 	}
 	//END CHARTS
-
-	//MODAL
-	.widget-editor{
-		background:$dark;
-		//box-shadow: 0px 0px 15px 3px #000;
-	}
-	//END MODAL
 
 	//INPUTS
 	input[type="text"], input[type="password"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="week"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="time"], input[type="url"], textarea{

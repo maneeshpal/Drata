@@ -3,6 +3,7 @@
 var Dashboard = function(dashboardId){
     var self = this;
     self.name = ko.observable();
+    var theme;
     self.index= 1;
     self.loading = ko.observable(true);
     self.widgets = ko.observableArray();
@@ -17,6 +18,9 @@ var Dashboard = function(dashboardId){
             }
             self.name(d.name);
             drata.cPanel.topBar.currentDashboardName(d.name);
+            drata.cPanel.theme(d.theme);
+            theme = d.theme;
+
             //dashboardId = d._id;
             drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
                 var ind = 0;
@@ -62,9 +66,28 @@ var Dashboard = function(dashboardId){
             self.widgets.remove(widget);    
         }
     };
+
     self.getId = function(){
         return dashboardId;
     };
+
+    self.update = function(){
+        if(self.dashboardNotFound()) return;
+        var model = {
+            name: self.name(),
+            _id: dashboardId,
+            theme: theme
+        };
+        drata.apiClient.upsertDashboard(model);    
+    };
+
+    drata.pubsub.subscribe('themechanged', function(eventName, newTheme){
+        if(newTheme !== theme){
+            theme = newTheme;
+            self.update();
+        }
+    });
+
     self.loadDashboard(dashboardId);
 };
 
