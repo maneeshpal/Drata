@@ -87,6 +87,76 @@ ul.combolist li:hover {
 
 /*end checkbox dropdown*/
 
+/*--------Complex combo -----------*/
+
+.complexcombo{
+    border: 1px solid #999999;
+    background: #f2f2f2;
+    box-shadow: 0px 0px 5px 0px #999999;
+    overflow: visible;
+    font-size: 0.875rem;
+    position: absolute;
+    margin-top: -3.3rem;
+    z-index: 10;
+    padding: 0 0.9375rem;
+    width: 300px;
+}
+
+i.complexcombo-toggle{
+    position: absolute;
+    right: 16px;
+    top: 9px;    
+    color:#358854;
+}
+
+.combolist.complexcombo ul.combolist{
+    /*position:static;*/
+    width:197px;
+}
+.complexcombo .complexcombo{
+    margin-left:-6px;
+}
+.conditioncombo{
+    /*overflow: hidden;*/
+}
+.complexcombo .row .columns, .complexcombo .row .column, .conditioncombo .row .columns, .conditioncombo .row .column {
+  padding-left: .6rem; /* change the values to anything that you want */
+  padding-right: .6rem;
+}
+
+.complexcombo .row .row, .complexcombo .row .row, .conditioncombo .row .row, .conditioncombo .row .row {
+  margin-left: -0.6rem; /* change the values to anything that you want */
+  margin-right: -0.6rem;
+}
+
+.complex-overlay.top-selection {
+    position: absolute;
+    top: 0;
+    left: 77px;
+    right: 14px;
+    z-index: 9;
+}
+
+.complex-overlay {
+    height: 2.3125rem;
+    padding:0.7rem 0.5rem 0.5rem 0.5rem;
+    border-style: solid;
+    border-width: 1px;
+    display: block;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    font-size:.8125rem;
+    background-color: #a0d3e8;
+    border-color: #74bfdd;
+    color: #4f4f4f;
+}
+
+.complex-overlay:hover{
+    background-color:#74bfdd;
+}
+
+/*-------End Complex combo---------*/
+
 /*-------Edit Label---------*/
 .edit-label .title-display{
     display: block;

@@ -25,13 +25,9 @@ var findObject = function(collectionName, id, callback){
         }
         else{
             collection.findOne({'_id' : mongo.ObjectID(id)}, function(err, result) {
-                // console.log(JSON.stringify(err, null, '\t'));
-                // console.log(JSON.stringify(result, null, '\t'));
                 if(err || !result){
-                    //console.log(collectionName + ' not found :' + id);
                     callback(null);
                 }else{
-                    //console.log(collectionName + ' found :' + id);
                     callback(result);   
                 }
             });
@@ -108,10 +104,8 @@ exports.findWidgetsOfDashboard = function(req, res) {
 };
 
 exports.upsertWidget = function(req, res){
-    //console.log(req.headers);
     db.collection('widget',function(err, collection) {
         if(err){
-            //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
@@ -138,19 +132,9 @@ exports.upsertWidget = function(req, res){
                         //console.log(JSON.stringify(result));
                         if(isNew){
                             res.send(result);
-                            // socket.emitEvent('widgetcreated', {
-                            //     widgetId : result._id, 
-                            //     dashboardId: result.dashboardId, 
-                            //     clientId: req.headers.clientid
-                            // });
                         }
                         else{
                             res.send(200);
-                            // socket.emitEvent('widgetupdated', {
-                            //     widgetId : widgetId, 
-                            //     dashboardId: widgetModel.dashboardId, 
-                            //     clientId: req.headers.clientid
-                            // });
                         }
                     });
                 });    

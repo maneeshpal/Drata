@@ -57,10 +57,10 @@ body.campfire {
 		color: $superlight;
 	}
 	select{
-		background-color: $kindadark;
+		background-color: $dark2;
 		border-color: $kindadark;
 		box-shadow: none;
-		//color: $superlight;
+		color: $superlight;
 	}
 	//END INPUTS
 
@@ -70,11 +70,11 @@ body.campfire {
 	}
 	//end label
 	fieldset{
-		border-color: $medium;
+		border-color: $dark2;
 	}
 	.row .columns.combo-dd, .row .columns .combo-dd{
 		border-color: $kindadark;
-		background-color: $kindadark;
+		background-color: $dark2;
 	}
 
 	span.postfix, label.postfix{
@@ -84,7 +84,7 @@ body.campfire {
 	}
 	.keystroke, kbd{
 		border-color: $dark;
-		background-color: $kindadark;
+		background-color: $dark2;
 		color:$light;
 	}
 	.top-bar{
@@ -161,6 +161,38 @@ body.campfire {
 		box-shadow: 1px 1px 1px $superdark;
 	}
 
+	//tables
+	table tr.even, table tr.alt, table tr:nth-of-type(even){
+		background: $dark;
+	}
+
+	table {
+		background:$dark2;
+		border-color: $dark2;
+	}
+
+	table tr th, table tr td {
+		color:$superlight;
+	}
+
+	//end tables
+
+	//complex combo
+	.complexcombo {
+		border-color:$medium;
+		box-shadow: none;
+		background: $dark2;
+	}
+
+	//end complex combo
+
+	//alert box
+	.alert-box.secondary {
+		border-color: $medium;
+		background: $dark2;
+		color:$superlight;
+	}
+	//end alert box
 
 	@include txt_placeholder($medium);
 	@include fancyscrollbar($superdark, $dark);
