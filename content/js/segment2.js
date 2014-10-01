@@ -21,13 +21,13 @@ var Segmentor = function(model){
     
     self.initialize = function(model){
         model = model || {};
-        //self.setPropertyTypes(propertyTypes);
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataFilter.prefill(model.dataFilter || {});
         self.chartType(model.chartType);
         self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
         self.chartType.isModified(false);
+        self.formErrors([]);
     };
     
     self.dataGroupTemplate = ko.computed(function(){
@@ -88,6 +88,7 @@ var Segmentor = function(model){
 
         //logic validation 8
         //any non numeric selection by value is invalid 
+        //numeric value in simple selection is invalid
         if(selections.simple.length > 0){
             var l8 = selections.simple.filter(function(s){
                 if(!isNaN(+s.selectedProp) && !drata.dashboard.propertyManager.getPropertyType(s.selectedProp)){

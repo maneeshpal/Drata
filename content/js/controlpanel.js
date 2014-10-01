@@ -39,87 +39,7 @@
     	});
 	});
 
-	var viewManager = function(){
-		// var _c = ko.observable();
-
-		// var currentView = ko.computed({
-		// 	read: function(){
-		// 		return _c();
-		// 	},
-		// 	write: function(newValue){
-		// 		_c(newValue.replace('#', ''));
-		// 	}
-		// });
-
-		// var self = this, _t, resized = false;
-		// self.dashboardNotFound = ko.observable();
-		
-		
-		// self.isDashboardManagerView = ko.computed(function(){
-	 //    	return currentView() === hashes.manage || (!self.currentDashboardId && currentView() === '');
-	 //    });
-
-	 //    self.isWidgetEditorView = ko.computed(function(){
-	 //    	return currentView() === hashes.editwidget;
-	 //    });
-
-	 //    self.isWidgetManagerView = ko.computed(function(){
-	 //    	return currentView() === hashes.manageWidgets;
-	 //    });
-		
-		// self.isDashboardCreatorView = ko.computed(function(){
-	 //    	return currentView() === hashes.create;
-	 //    });
-
-
-
-	    // var a = [];
-	    // self.isDashboardView = ko.computed(function(){
-	    // 	var temp = !self.isDashboardManagerView()
-	    // 		&& !self.isWidgetEditorView()
-	    // 		&& !self.isWidgetManagerView()
-	    // 		&& !self.isDashboardCreatorView();
-	    // 	return temp;
-	    // });
-	    
-	    // self.isDashboardView.subscribe(function(newValue){
-	    // 	if(a.length < 3) a.push(newValue);
-	    // 	if(a.length == 3) a.shift();
-	    // 	if(!a[0] && a[1] && resized){
-	    // 		resizeWidgets();
-	    // 		resized = false;
-	    // 	}
-	    // });
-
-	    // self.isWidgetNavVisible = ko.computed(function(){
-	    // 	return !self.dashboardNotFound() && self.isDashboardView();
-	    // });
-
-		
-	 //    if(!self.currentDashboardId && location.hash === ''){
-	 //    	location.hash = 'manage';
-		// }
-
-		// currentView(location.hash);
-
-		// window.onhashchange = function(){
-  //   		currentView(location.hash);
-  //   	}
-
-    	// var resizeWidgets  = function(){
-    	// 	_t && clearTimeout(_t);
-     //    	_t = setTimeout(drata.pubsub.publish('resizewidgets'), 200);
-     //    	resized = true;
-    	// }
-
-     //    drata.utils.windowResize(function(){
-     //    	resizeWidgets();
-     //    	if(self.isDashboardView()) resized = false;
-     //    });
-
-    	//return self;
-	}
-
+	
 	var DashboardSyncService = function(){
 		var self = this;
 		function getWidgetFromDashboard(widgetId, dashboardId){
@@ -181,51 +101,6 @@
 	            }
 	        });
 		}
-
-		// self.listenSocket = function(){
-		// 	var socket = io.connect();
-		// 	socket.on('widgetupdated', function (data) {
-	 //            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
-	 //            if(widget){
-	 //            	drata.nsx.notifier.notifyWidgetUpdated({
-	 //            		name:widget.name(),
-	 //            		onConfirm : function(){
-	 //            			drata.apiClient.getWidget(data.widgetId, function(response){
-		// 	            		if(!response.success) return;
-		//             			widget.loadWidget(response.result);
-		// 	            	});
-	 //            		}
-	 //            	});
-	 //            }
-	 //        });
-
-	 //        socket.on('widgetcreated', function (data) {
-	 //            var currentDashboard = drata.cPanel.currentDashboard();
-	 //            if(currentDashboard.getId() === data.dashboardId){
-	 //            	drata.nsx.notifier.notifyWidgetAdded({
-	 //            		onConfirm : function(){
-	 //            			drata.apiClient.getWidget(data.widgetId, function(response){
-		// 	            		if(!response.success) return;
-		//             			currentDashboard.addWidget(response.result);
-		// 	            	});
-	 //            		}
-	 //            	});
-	 //            }
-	 //        });
-	 //        socket.on('widgetremoved', function (data) {
-	 //            var widget = getWidgetFromDashboard(data.widgetId);
-	 //            if(widget){
-	 //            	drata.nsx.notifier.notifyWidgetRemoved({
-	 //            		name: widget.name(),
-	 //            		onConfirm : function(){
-	 //            			widget.clearTimeouts();
-	 //            			drata.cPanel.currentDashboard().widgets.remove(widget);
-	 //            			widget = undefined;
-	 //            		}
-	 //            	});
-	 //            }
-	 //        });
-		// };
 		
 		drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
 			if(!widgetModel._id) return;
@@ -353,54 +228,6 @@
 	    	}
 	    	return mode;
 		});
-
-	    // self.currentViewTemplate = ko.computed(function(){
-	    // 	var mode = self.displayMode();
-	    // 	var template;
-	    // 	switch(mode){
-	    // 		case displayModes.manage:
-	    // 			template = {
-	    // 				name: 'dashboardmanager-template',
-	    // 				data: self.dashboardManager
-	    // 			};
-	    // 		break;
-	    // 		case displayModes.editwidget:
-	    // 			template = {
-	    // 				name: 'widgeteditor-template',
-	    // 				data: self.widgetEditor
-	    // 			};
-	    // 		break;
-	    // 		case displayModes.managewidgets:
-	    // 			template = {
-	    // 				name: 'widgetmanager-template',
-	    // 				data: self.widgetManager
-	    // 			};
-	    // 		break;
-	    // 		case displayModes.create:
-	    // 			template = {
-	    // 				name: 'dashboard-create-template',
-	    // 				data: self.dashboardCreator
-	    // 			};
-	    // 		break;
-	    // 		case displayModes.dashboardview:
-	    			
-    	// 			template = {
-    	// 				name: 'dashboard-template',
-    	// 				data: self.currentDashboard
-    	// 			}
-	    // 		break;
-	    // 		case displayModes.defaultview:
-	    // 			template = {
-	    // 				name: 'dashboard-create-manage-template',
-	    // 				data: {
-	    // 					create: self.dashboardCreator,
-	    // 					manage: self.dashboardManager
-	    // 				}
-	    // 			}	
-	    // 		break;
-	    // 	}
-	    // 	return template;
-	    // });
 		
 		self.isDashboardView = ko.computed(function(){
 			return self.displayMode() === displayModes.dashboardview;
@@ -1086,7 +913,6 @@
     });
 
 	root.drata.ns('nsx').extend({
-		views: new viewManager(),
 		dashboardSyncService: new DashboardSyncService()
     });
 

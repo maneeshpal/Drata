@@ -209,9 +209,7 @@
                 <span class="icon-bars2" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
             </div>
             <ul class="no-bullet stacked-heading" data-bind="style: { 
-                height: ($parent.widgetHeight() - 30) + 'px',
-                overflow:'scroll'
-            },
+                height: ($parent.widgetHeight() - 30) + 'px' },
             foreach: remainingDataPoints">
                 <li>
                     <div data-bind="text: xLabel"></div>

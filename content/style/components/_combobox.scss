@@ -21,7 +21,7 @@ ul.combolist {
     position:absolute;
     width:100%;
     margin-top:-1rem;
-    z-index:9;
+    z-index:10;
 } 
 ul.combolist.showtop {
     bottom:1rem;
@@ -56,6 +56,10 @@ ul.combolist li:hover {
     padding-left: .6rem;
 }
 .row .columns.combo-txt input{
+    padding-left:68px;
+}
+
+.row .columns.combo-txt span.error{
     padding-left:65px;
 }
 

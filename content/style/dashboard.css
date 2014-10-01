@@ -19,7 +19,7 @@ ul.combolist {
   position: absolute;
   width: 100%;
   margin-top: -1rem;
-  z-index: 9; }
+  z-index: 10; }
 
 ul.combolist.showtop {
   bottom: 1rem;
@@ -51,6 +51,9 @@ ul.combolist li:hover {
   padding-left: 0.6rem; }
 
 .row .columns.combo-txt input {
+  padding-left: 68px; }
+
+.row .columns.combo-txt span.error {
   padding-left: 65px; }
 
 /*dd checkbox list*/
@@ -713,7 +716,9 @@ body.campfire {
 .numeric-chart .axis path, .numeric-chart .axis line {
   display: none; }
 .numeric-chart ul.stacked-heading {
-  margin-bottom: 0; }
+  margin-bottom: 0;
+  overflow-y: scroll;
+  overflow-x: hidden; }
 .numeric-chart ul.stacked-heading li {
   font-size: 0.7rem;
   border-bottom: 1px dashed #cccccc;

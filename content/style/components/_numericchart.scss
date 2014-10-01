@@ -24,6 +24,8 @@
 
     ul.stacked-heading{
         margin-bottom:0;
+        overflow-y:scroll;
+        overflow-x:hidden;
     }
     ul.stacked-heading li{
         font-size:.7rem;
