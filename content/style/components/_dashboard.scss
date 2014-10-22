@@ -94,6 +94,7 @@
 
 .widget-nav{
   border-bottom:1px dashed #ccc;
+  height:30px;
 }
 .widget-nav .title{
   line-height: 2rem;
@@ -255,4 +256,9 @@ h3.view-heading {
   width: 61.7%;
   padding-top: 130px;
   text-align: center;
+}
+
+.widget-editor, .widget-manager {
+  max-width:62rem;
+  margin:0 auto;
 }

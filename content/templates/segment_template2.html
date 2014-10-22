@@ -150,7 +150,7 @@
     </div>
     <!-- ko if:hasGrouping -->
     <label>
-        <input type="checkbox" data-bind="checked:hasDivideBy" /> Slice by
+        <input type="checkbox" data-bind="checked:hasDivideBy" /> Groupby level 2
     </label>
         <div class="row">
             <div class="columns" data-bind="css: {'small-9' : needsDivideByInterval(),'small-12' : !needsDivideByInterval()}, ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:drata.dashboard.propertyManager.allProperties,optionsCaption:'Slice By', allowCustom:false}">
@@ -163,27 +163,27 @@
     <!-- /ko -->
 </script>
 <script type="text/html" id="track-datagroup-template">
-    <label>Aggregate with</label>
-            <div data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:properties,optionsCaption:'x Axis', allowCustom:false}">
-            </div>
-    
     <div class="row">
-        <div class="small-6 columns">
-            <label>
-                <input type="checkbox" data-bind="checked:hasGrouping" />
-                &nbsp;Split by</label>
-                <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
-                </select>
-            
-        </div>
-        <div class="small-6 columns">
-            <label>
-                <input type="checkbox" data-bind="checked:timeseries" />
-                        Interval
-            </label>
-                <div data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
-                    
+        <div class="small-8 columns">
+            <label>x-axis
+                <div data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:properties,optionsCaption:'x Axis', allowCustom:false}">
                 </div>
+            </label>
+        </div>
+        <div class="small-4 columns">
+            <input style="margin-bottom:0" type="checkbox" data-bind="checked:timeseries" />
+            <label>Interval</label>
+            <div data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="small-12 columns">
+            <label>
+                <input type="checkbox" data-bind="checked:hasGrouping" />&nbsp;Split by
+            </label>
+            <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
+            </select>
         </div>
     </div>
     

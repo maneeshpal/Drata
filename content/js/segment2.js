@@ -141,7 +141,7 @@ var Segmentor = function(model){
                 return s2.selectedProp;
             });
             if(l2a.length > 0){
-                errors.push('Error in Selections and Grouping: When aggregations exist, <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + l2a.join(', ') + '</em>');
+                errors.push('Error in Selections and Grouping: When "Group by" exists, aggregate functions <em>sum, avg, count </em> are expected in <em style="font-weight:bold">' + l2a.join(', ') + '</em>');
             }
         }else if(isTrackChart){
             var l2b  = segmentModel.selection.filter(function(s){
@@ -150,7 +150,7 @@ var Segmentor = function(model){
                 return s2.selectedProp;
             });
             if(l2b.length > 0){
-                errors.push('Error in Selections and Grouping: When aggregations don\'t exist, <em>sum, avg, count </em> are not allowed in <em style="font-weight:bold">' + l2b.join(', ') + '</em>');
+                errors.push('Error in Selections and Grouping: When "Group by" dosen\'t exist, aggregate function <em>sum, avg, count </em> are not allowed in <em style="font-weight:bold">' + l2b.join(', ') + '</em>');
             }
 
         }else{
@@ -161,9 +161,8 @@ var Segmentor = function(model){
                 return s2.selectedProp;
             });
             if(l2c.length > 0){
-                errors.push('For this visualization, if no aggregation is specified, Selections cannot be of type <em style="font-weight:bold">value</em>');
+                errors.push('Either apply "Group by" or apply aggregete functions to selections such as <em>sum, avg, count </em>. <em style="font-weight:bold">value</em> is not permitted for your selections <em style="font-weight:bold">' + l2c.join(', ') + '</em>');
             }
-
         }
 
         //logic validation 3
@@ -243,7 +242,7 @@ var TrackDataGroup = function(){
     self.xAxisProp = ko.observable();
     self.timeseriesInterval = ko.observable();
     self.intervalOptions = ko.computed(function(){
-        return self.xAxisType() !== 'date' ? []: ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
+        return self.xAxisType() !== 'date' ? undefined: ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
     });
 
     self.hasGrouping.subscribe(function(newValue){
@@ -635,8 +634,7 @@ var Condition = function(options){
     
     self.addComplexCondition = function(){
         self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true }));
-    };
-    
+    };    
     
     self.boldExpression= ko.observable(false);
     self.removeCondition = function(condition){
@@ -1069,7 +1067,6 @@ var SelectionGroup = function(options){
         
         return 'Select ' + expressions.join(', ');
     });
-
 };
 
 var DataRetriever = {
@@ -1079,15 +1076,14 @@ var DataRetriever = {
             selection: model.segment.selection,
             dataGroup: model.segment.dataGroup,
             dataFilter: model.segment.dataFilter,
-            group: model.segment.group,
-            applyClientAggregation: model.applyClientAggregation
+            group: model.segment.group
         };
 
-        drata.apiClient.getData(postData, {dataSource: model.dataSource, database: model.database, collectionName: model.collectionName}, function(response){
-            if(response.success && model.applyClientAggregation){
-                var result = response.result;
-                response.result = Conditioner.getGraphData(model.segment, response.result);
-            }
+        drata.apiClient.getData(postData, {
+            dataSource: model.dataSource, 
+            database: model.database, 
+            collectionName: model.collectionName
+        }, function(response){
             callback && callback(response);
         });
     }

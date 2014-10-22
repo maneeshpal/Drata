@@ -18,12 +18,9 @@ ul.combolist {
   font-size: 0.875rem;
   position: absolute;
   width: 100%;
-  margin-top: -1rem;
-  z-index: 10; }
-
-ul.combolist.showtop {
-  bottom: 1rem;
-  margin-top: 0; }
+  top: 2.3125rem;
+  z-index: 10;
+  margin-bottom: 0; }
 
 ul.combolist li {
   padding: 0.5rem;
@@ -307,7 +304,8 @@ text {
 /*widget topbar*/
 /*widger nav*/
 .widget-nav {
-  border-bottom: 1px dashed #cccccc; }
+  border-bottom: 1px dashed #cccccc;
+  height: 30px; }
 
 .widget-nav .title {
   line-height: 2rem;
@@ -424,6 +422,10 @@ h3.view-heading {
   width: 61.7%;
   padding-top: 130px;
   text-align: center; }
+
+.widget-editor, .widget-manager {
+  max-width: 62rem;
+  margin: 0 auto; }
 
 .label.tag {
   margin-bottom: 10px;

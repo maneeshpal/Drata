@@ -108,13 +108,7 @@ exports.findCollection = function(req, res) {
                 for(var i = 0; i< items.length; i++){
                     ret.push(utils.flatten(items[i]));
                 }
-                //console.log('flattened result : ' + (+(new Date()) - ss));
-                //ss = +(new Date());
                 
-                if(segment.applyClientAggregation){
-                    res.send(ret); 
-                   return;
-                }
                 var graphData;
                 try{
                     graphData = aggregator.aggregator.getGraphData(segment, ret);    

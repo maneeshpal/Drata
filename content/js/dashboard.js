@@ -99,7 +99,7 @@ var Widget = function(widgetModel, index, previewMode){
     self.displayIndex = ko.observable(widgetModel.displayIndex);
     self.pieKeys = ko.observableArray([]);
     self.selectedPieKey = ko.observable();
-    var _name = ko.observable(previewMode ? 'Preview' : (widgetModel.name || 'widget x')), _sizex = ko.observable(widgetModel.sizex), _sizey = ko.observable(widgetModel.sizey);
+    var _name = ko.observable(widgetModel.name || 'New widget'), _sizex = ko.observable(widgetModel.sizex), _sizey = ko.observable(widgetModel.sizey);
 
     self.name = ko.computed({
         read: function(){
@@ -108,7 +108,7 @@ var Widget = function(widgetModel, index, previewMode){
         write: function(newValue){
             _name(newValue);
             self.update();
-            self.resizeContent();
+            //self.resizeContent();
         }
     });
 
@@ -224,9 +224,6 @@ var Widget = function(widgetModel, index, previewMode){
     });
 
     self.editWidget = function () {
-        // drata.pubsub.publish('widgetedit', {
-        //     widgetModel: widgetModel
-        // });
         location.hash = '#editwidget/' + self.getId();
     };
 
@@ -254,7 +251,12 @@ var Widget = function(widgetModel, index, previewMode){
         self.parseError(undefined);
         self.chartType(widgetModel.segmentModel.chartType);
         console.log('loadWidget');
-        DataRetriever.getData({applyClientAggregation:false, dataSource: widgetModel.dataSource, database: widgetModel.database, collectionName: widgetModel.selectedDataKey, segment: widgetModel.segmentModel}, function(response){
+        DataRetriever.getData({
+            dataSource: widgetModel.dataSource, 
+            database: widgetModel.database, 
+            collectionName: widgetModel.selectedDataKey, 
+            segment: widgetModel.segmentModel
+        }, function(response){
             if(!response.success){
                 self.parseError(response.message);
                 return;
@@ -318,22 +320,10 @@ var Widget = function(widgetModel, index, previewMode){
         drata.apiClient.deleteWidget(widgetModel._id);
     };
 
-    // self.sizex.subscribe(function(){
-    //     self.update();
-    //     self.resizeContent();
-    // });
-    // self.sizey.subscribe(function(){
-    //     self.update();
-    //     self.resizeContent();
-    // });
-
     self.displayIndex.subscribe(function(){
         self.update();
     });
-    // self.name.subscribe(function(){
-    //     self.update();
-    // });
-    //socket
+
     if(!previewMode){
         drata.nsx.dashboardSyncService.listenWidgetUpdated(widgetModel._id);
         drata.nsx.dashboardSyncService.listenWidgetRemoved(widgetModel._id);
@@ -363,7 +353,6 @@ var LineContent = function(contentOptions){
         }else{
             self.drawChart(_data, _segmentModel);
         }
-        //chart && 
     };
 };
 

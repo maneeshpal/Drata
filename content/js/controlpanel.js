@@ -565,6 +565,7 @@
 	        var model = self.segment.getModel();
 	        if(!model) return;
 	        self.previewWidget(new Widget({
+	        	name: self.name(),
 	            dataSource: self.dataSource(),
 	            database: self.database(),
 	            segmentModel: model,

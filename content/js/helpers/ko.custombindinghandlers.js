@@ -4,12 +4,12 @@
     /********** KO TEMPLATES ******************/
     var comboTemplateStr = [
         '<div style="position:relative">',
-        '<input type="text" id="txtInput" data-bind="enable: enabled,value:selectedValue,attr:{placeholder:optionsCaption}"></input>',
         '<ul id="combolist" class="combolist no-bullet" style="display:none">',
             '<!-- ko foreach: filteredOptions -->',
             '<li data-bind="value: $data, text: $data, click: $parent.selectItem"></li>',
             '<!-- /ko -->',
         '</ul>',
+        '<input type="text" id="txtInput" data-bind="enable: enabled,value:selectedValue,attr:{placeholder:optionsCaption}"></input>',
         '</div>'
     ].join('');
 
@@ -81,7 +81,7 @@
         var $combolist;
         var hideCombo = function(){
             $combolist.hide();
-            $combolist.removeClass('showtop');
+            $combolist.css('top', '2.3125rem');
 
             if(!config.allowCustom){
                 var sel = self.selectedValue();
@@ -101,11 +101,14 @@
             }
         };
         var showCombo = function(){
+            if(!self.filteredOptions() || self.filteredOptions().length === 0){
+                return;
+            }
             $combolist.show();
             if($combolist.height() + $combolist.offset().top - $(window).scrollTop() > $(window).height()){
-                $combolist.addClass('showtop');
+                $combolist.css('top', '-' + $combolist.height() + 'px');
             }else{
-                $combolist.removeClass('showtop');
+                $combolist.css('top', '2.3125rem');
             }
         };
 
@@ -118,7 +121,7 @@
                 if(filteredList.length === 0){
                     $elem.addClass('combo-error');
                     $combolist.hide();
-                    $combolist.removeClass('showtop');
+                    $combolist.css('top', '2.3125rem');
                     self.filteredOptions(self.availableOptions());
                 }
                 else{
