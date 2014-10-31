@@ -8,19 +8,6 @@ fieldset legend {
     background:transparent;
 }
 
-.condition-wrapper{
-    left:100%;
-    transition:  left .5s;
-    position:relative;
-}
-.condition-wrapper.enter{
-    left:0;
-}
-.condition-wrapper.enter-no-tr{
-    position:static;
-    left:0;
-}
-
 select.error{
     margin-bottom:0;
     border:1px solid #f04124;

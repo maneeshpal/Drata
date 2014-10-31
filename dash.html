@@ -40,6 +40,11 @@
                                 </select>
                             </label>
                         </li>
+                        <li>
+                            <label>Help &nbsp;
+                                <input type="checkbox" style="margin-bottom:1rem" data-bind="checked: drata.nsx.tooltip.enabledToolTips"></input>
+                            </label>
+                        </li>
                     </ul>
                 </li>
                 <!-- ko if: $parent.isWidgetEditorView -->
@@ -125,7 +130,7 @@
         <!-- /ko -->
     </div>
 
-    <div class="widget-editor" data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none">
+    <div class="widget-editor" data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none; margin-bottom:100px">
         <!-- ko template: {name: 'widgeteditor-template'} -->
         <!-- /ko -->
     </div>
@@ -210,6 +215,7 @@
     <script type="text/javascript" src="/js/notifier.js"></script>
     <script type="text/javascript" src="/js/controlpanel.js"></script>
     <script type="text/javascript" src="/js/lib/responsive-tables.js"></script>
+    <script type="text/javascript" src="/js/tooltipcontent.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {

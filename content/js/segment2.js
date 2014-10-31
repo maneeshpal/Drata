@@ -503,8 +503,8 @@ var DataFilter = function(){
     };
 
     self.expression = ko.computed(function(){
-        var range = drata.utils.getDateRange(self.getModel());
-        return drata.utils.format('{2} from : {0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'), self.dateProp() || '* Date Property');
+        return drata.utils.getDataFilterExpression(self.getModel());
+        //return drata.utils.format('{2} from : {0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'), self.dateProp() || '* Date Property');
         
     }).extend({ throttle: 500 });
 
@@ -584,11 +584,16 @@ var DataFilter = function(){
 var Condition = function(options){
     var self = this;
     self.level = options.level;
+    self.isTopLevel = false;
     self.logic = ko.observable('and');
     self.selection = new Selection({ level: options.level, renderType: 'topCondition'});
     self.operation = ko.observable('=');
     self.value = ko.observable();
     self.conditions = ko.observableArray();
+
+    self.isComplex = ko.computed(function(){
+        return self.conditions().length > 0;
+    });
 
     var _valType = ko.observable('unknown');
     self.valType = ko.computed({
@@ -602,9 +607,10 @@ var Condition = function(options){
         write: function(newValue){
             _valType(newValue);
             
-            if(self.selection.isComplex())
-                return;
-            drata.dashboard.propertyManager.setPropertyType(self.selection.selectedProp(), newValue);
+            //lets not set the property type
+            //if(self.selection.isComplex())
+            //    return;
+            //drata.dashboard.propertyManager.setPropertyType(self.selection.selectedProp(), newValue);
         }
     });
     
@@ -629,14 +635,14 @@ var Condition = function(options){
     });
 
     self.addCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand }));
+        self.conditions.push(new Condition({ level:options.level+1 }));
     };
     
     self.addComplexCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1,onExpand: options.onExpand, expand:true }));
+        self.conditions.push(new Condition({ level:options.level+1 }));
     };    
     
-    self.boldExpression= ko.observable(false);
+    //self.boldExpression= ko.observable(false);
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
@@ -644,13 +650,35 @@ var Condition = function(options){
         self.conditions([]);
     };
 
-    self.isComplex = ko.computed(function(){
-        return self.conditions().length > 0;
+    self.showComplex = ko.observable(false);
+    
+    self.hideComplex = ko.computed(function(){
+        return !self.showComplex();
     });
 
-    self.expand = function(){
-        options.onExpand && options.onExpand(self);
-    };    
+    self.toggleComplex = function(){
+        self.showComplex(!self.showComplex());
+        if(self.showComplex() && !self.isComplex()){
+            self.selection.clearGroups(); //reset the selection.
+            self.value(undefined);
+            self.value.isModified(false);
+            //prefill inner condition with outer
+        }
+    };
+
+    self.done = function(){
+        if(self.isValidCondition()) {
+            self.toggleComplex();
+        }
+    };
+
+    self.clear = function(){
+        self.conditions([]);
+        self.showComplex(false);
+        self.selection.clearGroups(); //reset the selection.
+        self.value(undefined);
+        self.value.isModified(false);
+    };
 
     self.prefill = function(m){
         self.logic(m.logic);
@@ -659,11 +687,11 @@ var Condition = function(options){
         self.operation(m.operation);
         self.prefillGroups(m.groups);
     };
-    self.prefillGroups = function(m){
+    self.prefillGroups = function(conditionGroupsModel){
         self.conditions(ko.utils.arrayMap(
-            m,
+            conditionGroupsModel,
             function(groupModel) {
-                return new Condition({ level:options.level+1, model:groupModel, onExpand: options.onExpand }); 
+                return new Condition({ level:options.level+1, model:groupModel }); 
             }
         )); 
     }
@@ -694,12 +722,7 @@ var Condition = function(options){
         _.each(innerGroups, function(gr,index){
             expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
         });
-        if(self.boldExpression()){
-            expression = '<strong style="color:#008cba; font-size:1rem">(' + expression + ')</strong>';
-        }
-        else{
-            expression = '(' + expression + ')';
-        }
+        expression = '(' + expression + ')';
         return expression;
     });
 
@@ -752,22 +775,23 @@ var Condition = function(options){
     if(options.model){
         self.prefill(options.model);
     }
-    options.expand && self.expand();
+    //options.expand && self.expand();
 };
 
 var ConditionGroup = function(options){
     var self = this;
     self.level = options.level;
     self.conditions = ko.observableArray();
-    self.trace = ko.observableArray();
-    self.currentBinding = ko.observable(self);
-    self.boldExpression = ko.observable(false);
-    self.currentBinding.subscribeChanged(function(newValue, oldValue){
-        newValue.boldExpression(true);
-        oldValue.boldExpression(false);
-    });
-    var goingback = false;
-    self.boldExpression = ko.observable(false);
+    self.isTopLevel = true;
+    //self.trace = ko.observableArray();
+    //self.currentBinding = ko.observable(self);
+    //self.boldExpression = ko.observable(false);
+    // self.currentBinding.subscribeChanged(function(newValue, oldValue){
+    //     newValue.boldExpression(true);
+    //     oldValue.boldExpression(false);
+    // });
+    //var goingback = false;
+    //self.boldExpression = ko.observable(false);
    
     self.getModel = function(){
         var returnGroups = [];
@@ -777,25 +801,23 @@ var ConditionGroup = function(options){
         return returnGroups;
     };
 
-    self.onExpand = function(condition){
-        var currBinding = self.currentBinding();
-        self.trace.push(currBinding);
-        self.currentBinding(condition);
-    };
+    // self.onExpand = function(condition){
+    //     var currBinding = self.currentBinding();
+    //     self.trace.push(currBinding);
+    //     self.currentBinding(condition);
+    // };
     self.prefill = function(model){
         self.conditions(ko.utils.arrayMap(
             model,
             function(cond) {
-              return new Condition({ level:options.level+1,model: cond, onExpand:self.onExpand.bind(self) });
+              return new Condition({ level:options.level+1,model: cond});
             }
         ));
     };
     self.addCondition = function(){
-        self.conditions.push(new Condition({ level: options.level+1, onExpand: self.onExpand.bind(self) }));
+        self.conditions.push(new Condition({ level: options.level+1 }));
     };
-    self.addComplexCondition = function(){
-        self.conditions.push(new Condition({ level:options.level+1, onExpand: self.onExpand.bind(self), expand:true }));
-    };
+    
     self.removeCondition = function(condition){
        self.conditions.remove(condition);
     };
@@ -805,15 +827,15 @@ var ConditionGroup = function(options){
     };
 
     self.afterRender = function(elem){
-        _.delay(function(){
-            $(elem).addClass(goingback?'enter-no-tr':'enter');
-            goingback = false;
-        }, goingback ? 100:10);
+        // _.delay(function(){
+        //     $(elem).addClass(goingback?'enter-no-tr':'enter');
+        //     goingback = false;
+        // }, goingback ? 100:10);
         
     };
 
     self.beforeLeave = function(elem){
-        $(elem).hide().removeClass('exit').show().removeClass('enter');
+        //$(elem).hide().removeClass('exit').show().removeClass('enter');
     };
 
     self.afterAdd = function(elem){
@@ -828,31 +850,31 @@ var ConditionGroup = function(options){
       });
     };
 
-    self.goback = function(condition){
-        var isValid = !condition.isComplex() || condition.isValidCondition();
-        if(isValid){
-            goingback = true;
-            $('#conditionWrapper').removeClass('enter-no-tr');
-            _.delay(function(){
-                $('#conditionWrapper').removeClass('enter');
-                _.delay(function(){
-                    var prev = self.trace.pop();
-                    self.currentBinding(prev);
-                },100);                
-            }, 10);            
-        }
-    };
-    self.goBackTopLevel = function(){
-        self.trace([]);
-        goingback = true;
-        $('#conditionWrapper').removeClass('enter-no-tr');
-        _.delay(function(){
-            $('#conditionWrapper').removeClass('enter');
-            _.delay(function(){
-                self.currentBinding(self);
-            },100);                
-        }, 10);
-    };
+    // self.goback = function(condition){
+    //     var isValid = !condition.isComplex() || condition.isValidCondition();
+    //     if(isValid){
+    //         goingback = true;
+    //         $('#conditionWrapper').removeClass('enter-no-tr');
+    //         _.delay(function(){
+    //             $('#conditionWrapper').removeClass('enter');
+    //             _.delay(function(){
+    //                 var prev = self.trace.pop();
+    //                 self.currentBinding(prev);
+    //             },100);                
+    //         }, 10);            
+    //     }
+    // };
+    // self.goBackTopLevel = function(){
+    //     self.trace([]);
+    //     goingback = true;
+    //     $('#conditionWrapper').removeClass('enter-no-tr');
+    //     _.delay(function(){
+    //         $('#conditionWrapper').removeClass('enter');
+    //         _.delay(function(){
+    //             self.currentBinding(self);
+    //         },100);                
+    //     }, 10);
+    // };
 
     self.expression = ko.computed(function(){
         var expression = '';
@@ -911,8 +933,8 @@ var Selection = function(options){
             if(selectedProp){
                 self.selections.push(new Selection({ level:options.level+1, model: { selectedProp:selectedProp }, renderType: 'childSelection' }));
             }
-            self.selectedProp('');
-        }        
+            self.selectedProp(undefined);
+        }
     };
     
     self.selectedProp.subscribe(function(newValue){
@@ -924,6 +946,7 @@ var Selection = function(options){
         self.selections([]);
         self.selectedProp(undefined);
         self.showComplex(false);
+        self.selectedProp.isModified(false);
     };
     self.done = function(){
         var errors = ko.validation.group(self, {deep:true});

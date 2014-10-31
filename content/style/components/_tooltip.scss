@@ -1,0 +1,25 @@
+@import "variables";
+
+span{
+  &.dtooltip {
+    color: $primary;
+    cursor: pointer;
+    z-index: $z1;
+    //display:none;
+  }
+  &.dtooltip-aggregate-func{
+    position:absolute;
+    left: -4px;
+    top: 10px;
+  }
+  &.dtooltip-selection-prop {
+    position:absolute;
+    right: 32px;
+    top: 10px; 
+  }
+  &.dtooltip-datafilter-expression {
+    right: 19px;
+    top: 5px;
+    position:absolute;
+  }
+}

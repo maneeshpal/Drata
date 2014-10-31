@@ -797,14 +797,7 @@
 	    this.manageUrl = '#editwidget/'+ model._id;
 	    this.selectionsExpression = drata.utils.selectionsExpression(model.segmentModel.selection, true);
 	    this.conditionsExpression = drata.utils.conditionsExpression(model.segmentModel.group) || 'none';
-	    this.dataFilterExpression = '';
-
-	    if(model.segmentModel.dataFilter.intervalType === 'dynamic'){
-	        this.dataFilterExpression = drata.utils.format('{0} {1}s from current time until {2} {1}s from current time',model.segmentModel.dataFilter.max,model.segmentModel.dataFilter.intervalKind, model.segmentModel.dataFilter.min);
-	    }
-	    else{
-	        this.dataFilterExpression = drata.utils.format('{0} to {1}', model.segmentModel.dataFilter.min, model.segmentModel.dataFilter.max)
-	    }
+	    this.dataFilterExpression = drata.utils.getDataFilterExpression(model.segmentModel.dataFilter);
 
 	    this.getModel = function(){
 	        return model;
@@ -908,13 +901,49 @@
 	    self.currentDashboardName = ko.observable('Dashboards');
 	}
 
+	var toolTip = function(){
+		var $body = $('body');
+		this.enabledToolTips = ko.observable();
+		
+		var hideToolTips = function(){
+			$body.find('[data-tooltipkey]').hide();
+		}
+
+		this.enabledToolTips.subscribe(function(newValue){
+			if(!newValue){
+				hideToolTips();
+			}else{
+				$body.find('[data-tooltipkey]').show();
+			}
+		});
+
+    	this.attachToolTip = function(vm, e){
+    		var elem = $(e.target);
+    		if(elem.data('dropdown')){
+    			return;
+    		}
+    		var key = elem.data('tooltipkey');
+    		var size = elem.data('tsize') || 'small';
+    		var uniqId = 'tt' + +(new Date());
+    		elem.attr('data-dropdown', uniqId);
+    		var contentElem = document.createElement('div');
+    		contentElem.id = uniqId;
+    		$(contentElem)
+    			.attr('data-dropdown-content', '')
+    			.addClass('f-dropdown content ' + size)
+    			.html(drata.nsx.toolTipContent[key]);
+    		$body.append(contentElem);
+    	}
+    };
+
 	root.drata.ns('dashboard').extend({
         controlPanel : ControlPanel,
         propertyManager: new propertyManager()
     });
 
 	root.drata.ns('nsx').extend({
-		dashboardSyncService: new DashboardSyncService()
+		dashboardSyncService: new DashboardSyncService(),
+		tooltip: new toolTip()
     });
 
     root.drata.ns('models').extend({
