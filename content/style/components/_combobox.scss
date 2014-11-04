@@ -1,3 +1,6 @@
+
+@import "../../foundation/scss/foundation/settings";
+
 .combobox-container{
     width:50%;
     margin:0 auto;
@@ -107,11 +110,11 @@ ul.combolist li:hover {
     width: 300px;
 }
 
-i.complexcombo-toggle{
+[class^="icon-"].complexcombo-toggle, [class*=" icon-"].complexcombo-toggle{
     position: absolute;
     right: 16px;
     top: 9px;    
-    color:#358854;
+    color:$success-color;
 }
 
 .combolist.complexcombo ul.combolist{

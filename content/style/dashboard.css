@@ -91,11 +91,11 @@ ul.combolist li:hover {
   padding: 0 0.9375rem;
   width: 300px; }
 
-i.complexcombo-toggle {
+[class^="icon-"].complexcombo-toggle, [class*=" icon-"].complexcombo-toggle {
   position: absolute;
   right: 16px;
   top: 9px;
-  color: #358854; }
+  color: #43ac6a; }
 
 .combolist.complexcombo ul.combolist {
   /*position:static;*/
@@ -552,14 +552,18 @@ select.error {
   right: -6px;
   position: absolute; }
 
-[class^="icon-"].condition-action, [class*=" icon-"].condition-action {
-  color: #cccccc;
-  line-height: 2rem; }
+[class^="icon-"].condition-action-complex, [class*=" icon-"].condition-action-complex {
+  line-height: 2rem;
+  color: #008cba; }
 
-.selection-action.alert:hover, .condition-action.alert:hover {
+[class^="icon-"].condition-action-cancel, [class*=" icon-"].condition-action-cancel {
+  line-height: 2rem;
   color: #f04124; }
 
-.selection-action.success:hover, .condition-action.success:hover {
+.selection-action.alert:hover {
+  color: #f04124; }
+
+.selection-action.success:hover {
   color: #368a54; }
 
 /* Date picker */
@@ -854,7 +858,10 @@ span.dtooltip-selection-prop {
   position: absolute;
   right: 32px;
   top: 10px; }
-span.dtooltip-datafilter-expression {
+span.dtooltip-expression {
   right: 19px;
-  top: 5px;
+  top: 4px;
   position: absolute; }
+span.dtooltip-complexcondition {
+  position: absolute;
+  top: -8px; }

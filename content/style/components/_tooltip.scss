@@ -17,9 +17,13 @@ span{
     right: 32px;
     top: 10px; 
   }
-  &.dtooltip-datafilter-expression {
+  &.dtooltip-expression {
     right: 19px;
-    top: 5px;
+    top: 4px;
     position:absolute;
+  }
+  &.dtooltip-complexcondition {
+    position:absolute;
+    top:-8px;
   }
 }

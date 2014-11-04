@@ -1,5 +1,8 @@
 (function(root){
 	var toolTipContent = {
+		servername: '<p>This dropdown is populated from the server names you added to the config file.</p>',
+		databasename: '<p>All the databases found in the server selected above.</p>',
+		collectionname: '<p>In relational databases, this refers to the table you can connect to for pulling data. In document oriented databases, this refers to the collection.</p><div class="alert-box secondary">Drata doesn\'t have the ability to join on multiple collections. You will have to de-normalize your data incase your collection has foriegn key reference. Sorry pal!</div>',
 		selectionsInfo : ['<p>Selection is the property that you select for visualization.<br />',
 			'Depending on the type of chart and aggregations, your selections end ',
 			'up together as one visualization or seperated out in a chart</p>'
@@ -15,7 +18,10 @@
 		dateproperty: '<p>the main date property that you use to filter out results. This can be the date created or any other date property that will be used as a top level filter. <br /> You may specify this date as part of <span style="font-weight:bold">Conditions</span> as well.</p>',
 		slidingInterval: '<p>When selected, you will see a slider and a dropdown. The dropdown signifies whether the interval being set is of type <em>minute, hours, months or years.</em>, while you can use the slider to set a range.<br /> This functionality set a dynamic interval which will cause the results to change over time.</p>',
 		staticInterval: '<p>A static interval that does not change over time.</p>',
-		dataFilterExpression: '<p>This expression is generated for easy understanding of the interval you selected.</p>'
+		dataFilterExpression: '<p>This expression is dynamically generated based on the interval you selected.</p>',
+		conditionValue: '<p>The dropdown specifies whether the value you entered should be treated as <em>numeric, boolean, string or date.</em> The dropdown value gets preselected whenever you select a property against which the condition is set. You can always override the default type in the dropdown.</p>',
+		complexCondition: '<p>"<span class="icon-plus"></span>" Converts a simple condition <br /> Ex: <em>(a > b)</em> into a complex condition <br />Ex:<em> (a > b or (c < d && e = f))</em>.<br /> This allows you to group conditions. </p>',
+		conditionSummary: '<p>This summary is a sql representation of conditions you build. It is generated dynamically as you build the conditions</p>'
 	}
 
 	root.drata.ns('nsx').extend({

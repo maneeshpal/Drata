@@ -1,4 +1,6 @@
 
+@import "../../foundation/scss/foundation/settings";
+
 .keystroke.expression{
     margin-bottom: 15px;
     line-height: 1.3rem;
@@ -32,15 +34,20 @@ select.error{
     position: absolute;
 }
 
-[class^="icon-"].condition-action, [class*=" icon-"].condition-action {
-    color: #ccc;
+[class^="icon-"].condition-action-complex, [class*=" icon-"].condition-action-complex {
     line-height: 2rem;
+    color: $primary-color;
 }
 
-.selection-action.alert:hover, .condition-action.alert:hover {
+[class^="icon-"].condition-action-cancel, [class*=" icon-"].condition-action-cancel {
+    line-height: 2rem;
+    color: $alert-color;
+}
+
+.selection-action.alert:hover{
     color:#f04124;
 }
-.selection-action.success:hover, .condition-action.success:hover{
+.selection-action.success:hover{
     color:#368a54;
 }
 

@@ -51,16 +51,19 @@
                 </div>
                 <div class="small-12 columns">
                     <label>Server
+                    <span data-tooltipkey="servername" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
                         <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
                         </label>
                 </div>
                 <div class="small-12 columns">
                     <label>Database
+                    <span data-tooltipkey="databasename" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
                         <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
                         </label>
                 </div>
                 <div class="small-12 columns">
                     <label>Collection Name
+                    <span data-tooltipkey="collectionname" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
                         <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
                         </label>
                 </div>

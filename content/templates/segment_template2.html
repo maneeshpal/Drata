@@ -37,7 +37,13 @@
     <div class="large-12 columns">
         <fieldset>
             <legend>Conditions</legend>
-            <div class="keystroke expression" data-bind="visible: conditions().length>0, html:expression"></div>
+            <div class="row" data-bind="visible: conditions().length>0">
+                <div class="small-12 columns">
+                    <div class="keystroke expression" data-bind=" html:expression"></div>
+                    <span data-tooltipkey="conditionSummary" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-expression"></span>
+                </div>
+            </div>
+            
             <!-- ko template: { name : 'condition-group-template'} -->
             <!-- /ko -->
         </fieldset>
@@ -105,7 +111,7 @@
         <div class="small-12 columns">
             <div class="keystroke expression" data-bind="html:expression">
             </div>
-            <span data-tooltipkey="dataFilterExpression" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-datafilter-expression"></span>
+            <span data-tooltipkey="dataFilterExpression" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-expression"></span>
         </div>
     </div>
 </script>
@@ -229,8 +235,8 @@
                 
                  <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
-                <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex" style="right:20px">
-                </i>
+                <span class="complexcombo-toggle" data-bind="css:{'icon-plus': !showComplex() , 'icon-minus' : showComplex}, click:toggleComplex" style="right:-5px">
+                </span>
                  <!-- /ko -->
                 <!-- ko if: isComplex() -->
                     <div class="small-12 columns" >
@@ -248,8 +254,8 @@
                 <!-- ko if: !isComplex() -->
                 <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
-                <i class="general complexcombo-toggle" data-bind="css:{'foundicon-plus': !showComplex() , 'foundicon-minus' : showComplex}, click:toggleComplex">
-                </i>
+                <span class="complexcombo-toggle" data-bind="css:{'icon-plus': !showComplex() , 'icon-minus' : showComplex}, click:toggleComplex">
+                </span>
                 <!-- /ko -->
                 <!-- ko if: isComplex() -->
                     <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0}">
@@ -260,7 +266,7 @@
                 <!-- /ko -->
             <!-- /ko -->
             <!-- ko if:renderType !== 'topCondition' -->
-            <i class="icon-close selection-action alert" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parent.removeItem(vm)}} ">
+           <i class="icon-close selection-action alert" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parent.removeItem(vm)}} ">
             </i>
            <!-- /ko -->
         </div>
@@ -337,6 +343,9 @@
             <select data-bind="options:availableOperations, value:operation"></select>
         </div>
         <div class="small-4 columns" data-bind="visible: operation() !== 'exists'">
+            <span data-tooltipkey="conditionValue" data-bind="visible: $index() === 0, click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-aggregate-func">
+                </span>
+
             <div data-bind=" ddComboBox :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, options:availableValues,optionsCaption:'value'}">
                 </div>
         </div>
@@ -348,8 +357,10 @@
         </div>
         <!-- /ko -->
         <div class="right" style="width:40px">
-            <i class="icon-plus condition-action success" data-bind="click:toggleComplex"></i>
-            <i class="icon-close condition-action alert" data-bind="click: $parent.removeCondition"></i>
+             <span data-tooltipkey="complexCondition" data-bind=" visible: $index() === 0, click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-complexcondition">
+                </span>            
+            <i class="icon-plus condition-action-complex" data-bind="click:toggleComplex"></i>
+            <i class="icon-close condition-action-cancel" data-bind="click: $parent.removeCondition"></i>
         </div>
     </div>
     <div style="position:relative">
