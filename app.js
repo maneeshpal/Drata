@@ -98,6 +98,8 @@ app.delete('/api/dashboard/:dashboardId/widgets', drataRepository.deleteAllWidge
 
 //find all dashboards. dont include widgets
 app.get('/api/dashboards', drataRepository.getAllDashboards);
+app.get('/api/truncatedata', drataRepository.truncateData);
+app.get('/api/generateDemoDashboard', drataRepository.generateDemoDashboard);
 app.post('/api/widgets', drataRepository.getWidgets);
 //update dashboard
 app.post('/api/dashboard', drataRepository.upsertDashboard);
@@ -109,9 +111,9 @@ app.put('/api/dashboard', drataRepository.upsertDashboard);
 app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);
 
 //update widget
-app.put('/api/widget', drataRepository.upsertWidget);
+app.put('/api/widget', drataRepository.updateWidget);
 //create widget
-app.post('/api/widget', drataRepository.upsertWidget);
+app.post('/api/widget', drataRepository.addWidget);
 //delete widget
 app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
 
@@ -139,13 +141,8 @@ app.get('/api/external/:datasource/:dbname/collectionNames', callInstance.bind(t
 app.get('/api/external/:datasource/:dbname/:collectionName/properties', callInstance.bind(this, 'findProperties'));
 app.post('/api/external/:datasource/:dbname/:collectionName', callInstance.bind(this, 'findCollection'));
 
-// app.get('/api/external/:datasource/database', mongoRepository.getDatabaseNames);
-// app.get('/api/external/:datasource/:dbname/collectionNames', mongoRepository.getCollectionNames);
-// app.get('/api/external/:datasource/:dbname/:collectionName/properties', mongoRepository.findProperties);
-// app.post('/api/external/:datasource/:dbname/:collectionName', mongoRepository.findCollection);
-
 var server = http.createServer(app);
-//drataRepository.setIO(io);
+
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

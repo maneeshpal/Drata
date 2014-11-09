@@ -123,7 +123,7 @@
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
-			drata.apiClient.upsertWidget(widgetModel, function(response){
+			drata.apiClient.addWidget(widgetModel, function(response){
                 if(!response.success){
                 	return;
             	}

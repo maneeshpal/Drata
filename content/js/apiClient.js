@@ -59,8 +59,8 @@
         _perform('DELETE', url,undefined, callback);
     };
 
-    var upsertWidget = function(model, callback){
-        _perform('PUT', apiRoot + 'widget',model, function(response){
+    var addWidget = function(model, callback){
+        _perform('POST', apiRoot + 'widget',model, function(response){
             callback(response);
             socket.emit('widgetcreated', {
                 widgetId : response.result._id, 
@@ -70,7 +70,7 @@
     };
 
     var updateWidget = function(model, callback){
-        _perform('POST', apiRoot + 'widget',model, function(response){
+        _perform('PUT', apiRoot + 'widget',model, function(response){
             callback(response);
             socket.emit('widgetupdated', {
                 widgetId : model._id, 
@@ -190,7 +190,7 @@
         getWidget: getWidget,
         getWidgetsOfDashboard: getWidgetsOfDashboard,
         getWidgets: getWidgets,
-        upsertWidget: upsertWidget,
+        addWidget: addWidget,
         updateWidget: updateWidget,
         deleteWidget:deleteWidget,
         upsertDashboard: upsertDashboard,
