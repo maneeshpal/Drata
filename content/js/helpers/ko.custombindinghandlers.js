@@ -31,7 +31,7 @@
             '</div>',
             '<div class="row collapse title-edit">',
                 '<div class="small-8 columns">',
-                    '<input type="text" data-bind="value: title"></input>',
+                    '<input type="text" data-bind="value: overrideTitle"></input>',
                 '</div>',
                 '<div class="small-2 columns" data-bind="click: acceptEdit">',
                     '<span class="postfix">',
@@ -295,19 +295,20 @@
         this.title = config.title;
         this.editingTitle = ko.observable(false);
         this.href = ko.isObservable(config.href) ? config.href: ko.observable(config.href);
-        var temp = this.title();
+        this.overrideTitle = ko.observable();
         this.editTitle = function(){
-            temp = this.title();
+            //temp = this.title();
             this.editingTitle(true);
+            this.overrideTitle(ko.unwrap(this.title));
             return false;
         }
         this.cancelEdit = function(){
-            this.title(temp);
+            //this.title(temp);
             this.editingTitle(false);
         }
         this.acceptEdit = function(){
             this.editingTitle(false);
-            temp = this.title();
+            this.title(this.overrideTitle());
         }
     };
 

@@ -199,91 +199,7 @@ exports.addWidget = function(req, res){
     }, function(err){
         res.send(404);
     });
-    
-
-    // db.collection(widgetCollection,function(err, collection) {
-    //     if(err){
-    //         res.send(404);
-    //     }
-    //     else{
-    //         var widgetModel = req.body;
-    //         var isNew = !widgetModel._id;
-    //         function _temp(){
-    //             getDashboard(widgetModel.dashboardId, function(result){
-    //                 if(!result) {
-    //                     res.send(404);
-    //                     return;
-    //                 }
-    //                 var widgetId = widgetModel._id;
-    //                 if(!isNew){
-    //                     widgetModel._id = mongo.ObjectID(widgetId);
-    //                     widgetModel.dateCreated = new Date();
-    //                 }
-
-    //                 widgetModel.dateUpdated = new Date();
-                    
-    //                 //delete widgetModel._id;
-    //                 collection.save(widgetModel, {safe:true}, function(err, result) {
-    //                     //console.log(JSON.stringify(err));
-    //                     if(err) res.send(404);
-    //                     //console.log(JSON.stringify(result));
-    //                     if(isNew){
-    //                         res.send(result);
-    //                     }
-    //                     else{
-    //                         res.send(200);
-    //                     }
-    //                 });
-    //             });    
-    //         }
-    //         if(!isNew){
-    //             getWidget(widgetModel._id, function(result){
-    //                 if(!result) {
-    //                     res.send(404);
-    //                     return;
-    //                 }
-    //                 _temp();
-    //             });
-    //         }else{
-    //             _temp();
-    //         }
-    //     }
-    // });
 };
-
-// exports.updateWidget = function(req, res){
-//     //console.log(JSON.stringify(req.body, null, '\t'));
-//     db.collection(widgetCollection,function(err, collection) {
-//         if(err){
-//             //console.log(JSON.stringify(err, null, '\t'));
-//             res.send(404);
-//         }
-//         else{
-//             var widgetModel = req.body;
-//             if(!widgetModel._id) res.send(404);
-//             getDashboard(widgetModel.dashboardId, function(result){
-//                 if(!result) {
-//                     res.send(404);
-//                     return;
-//                 }
-//                 var widgetId = mongo.ObjectID(widgetModel._id);
-//                 delete widgetModel._id;
-//                 widgetModel.dateUpdated = new Date();
-                
-//                 collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
-//                     //console.log(JSON.stringify(err));
-//                     if(err) {
-//                         res.send(404);
-//                         return;
-//                     }
-//                     //console.log(JSON.stringify(result));
-                    
-//                     res.send(result);
-//                 });
-//             });
-//         }
-//     });
-// };
 
 exports.deleteWidget = function(req, res){
     var widgetId = mongo.ObjectID(req.params.widgetId);
@@ -402,8 +318,6 @@ exports.generateDemoDashboard = function(req, res){
     },function(){
         res.send(404);
     });
-    //use dashboardid and create tag
-    //use dashboardid and create widget
 
 };
 
@@ -547,59 +461,6 @@ exports.deleteAllWidgetsDashboard = function(req, res){
                 //console.log(JSON.stringify(result));
                 res.send(200);
             });
-        }
-    });
-};
-
-var populateDB = function(req, res) {
-    var maxProps = 20;
-    var data= [];
-    var y = [0,0,0,0,0,0,0];
-    var ordernumber = 1;
-    var geos = ['texas', 'Alabama', 'Misissipi', 'Arizona', 'Minnesota'];
-    var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
-    var colors = ['blue', 'gray', 'black', 'white', 'purple'];
-    var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
-    var startDate = new Date('3/10/2014');
-    for(var j = 0; j <= maxProps; j++){
-        for(var yy = 0; yy < y.length; yy++){
-            y[yy] += Math.floor((Math.random() * 10 - j%10));
-        }
-        //y += (Math.random() * 10 - j%10);
-        ordernumber = 10 + (Math.floor(j/ 3) * (3)); // 3 items per order
-        data.push({
-            //ordernumber : ordernumber,
-            item : items[Math.floor(Math.random() * items.length)],
-            price : Math.abs(y[0]) * 100,
-            geography : geos[Math.floor(Math.random() * geos.length)],
-            timestamp : new Date(startDate.setHours(startDate.getHours() + j)),
-            sex : Math.random() * 10 > 5 ? 'female': 'male',
-            itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
-            hasCoupon :  Math.random() * 10 > 7,
-            discount: Math.abs(Math.floor(y[1])),
-            color : colors[Math.abs(Math.floor(y[1]%5))],
-            errorCount: Math.abs(Math.floor(y[2]% 10)),
-            pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
-            tax : Math.abs(y[0]) * 8,
-            shippingPrice: Math.abs(y[0]) * 12,
-            itemAgeGroup : ageGroups[Math.abs(y[4] %5)],
-            totalItems : Math.floor(Math.abs(y[5]) % 10),
-            total: {
-                price : Math.abs(y[0]) * 100,
-                tax : Math.abs(y[0]) * 8,
-                shippingPrice: Math.abs(y[0]) * 12
-            }
-        });
-    }
- 
-    db.collection('shoppercheckout', function(err, collection) {
-        if(err){
-            res.send('somethig went wrong');
-        }
-        else{
-            //collection.remove();
-            collection.insert(data, {safe:true}, function(err, result) {});
-            res.send('done');    
         }
     });
 };

@@ -83,7 +83,7 @@ app.get('/', function(req, res){
 });
 
 
-app.get('/api/dashboardpop', drataRepository.pop);
+app.get('/api/dashboardpop', mongoRepository.pop);
 
 //get dashboard
 app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
@@ -117,10 +117,6 @@ app.post('/api/widget', drataRepository.addWidget);
 //delete widget
 app.delete('/api/widget/:widgetId', drataRepository.deleteWidget);
 
-
-// //create dashboard
-// app.post('/api/dashboard', drataRepository.createDashboard);
-
 app.get('/api/tags', drataRepository.getAllTags);
 
 app.get('/api/dashboard/:dashboardId/tags', drataRepository.getAllTagsOfDashboard);
@@ -131,8 +127,6 @@ app.put('/api/tags', drataRepository.addTag);
 
 app.delete('/api/tags/:tagId', drataRepository.removeTag);
 
-
-app.get('/api/external/pop2539', sqlRepository.pop);
 app.get('/api/external/datasource', function(req, res){
   res.json(serverNames);
 });

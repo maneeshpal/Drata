@@ -3,10 +3,6 @@ var utils = require('./utils');
 var aggregator = require('./aggregator');
 var config = require('./config.json');
 var baseMongoRepo = require('./baseMongoRepository');
-//var BSON = mongo.BSONPure;
-
-//var mongoClients = {};
-
 
 exports.pop = function(req, res){
     populateDB(req, res);
