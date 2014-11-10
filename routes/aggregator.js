@@ -83,6 +83,7 @@ var calc = function(left, operation, right){
     
 var divideDataByInterval = function(params){
     var val, groupBy;
+    debugger;
     var intervalGroup = _.groupBy(params.data, function(item){
         val = item[params.property];
         //TODO: Clean this 
@@ -400,6 +401,9 @@ var Aggregator = {
                 return (name/1000000).toFixed(2) + 'M';
             },
             string: function(name){
+                return name;
+            },
+            bool: function(name){
                 return name;
             }
         };
