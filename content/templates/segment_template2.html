@@ -292,13 +292,13 @@
             <!-- /ko -->
             <div class="row">
                 <div class="small-4 columns">
-                    <a class="button tiny success" data-bind="click:addSelection"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                    <a class="button tiny success" data-bind="click:addSelection"><span class="icon-plus"></i>&nbsp;Add</a>
                 </div>
                 <div class="small-4 columns">
-                     <a class="button tiny primary" data-bind="click:done"><i class="general foundicon-plus"></i>&nbsp;Done</a>
+                     <a class="button tiny primary" data-bind="click:done"><span class="icon-checkmark"></span>&nbsp;Done</a>
                 </div>
                 <div class="small-4 columns">
-                     <a class="button tiny alert" data-bind="click:clearGroups"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                     <a class="button tiny alert" data-bind="click:clearGroups"><span class="icon-minus"></span>&nbsp;Clear</a>
                 </div>
                 
             </div>
@@ -318,15 +318,15 @@
         </div>
     </div>
     <a class="button left tiny success" style="margin-right:10px" data-bind="click:addCondition">
-        <i class="general foundicon-plus"></i>&nbsp;Add Condition
+        <span class="icon-plus"></span>&nbsp;Add Condition
     </a>
     
     <!-- ko if :!isTopLevel -->
          <a class="button left tiny" style="margin-right:10px" data-bind="click:done">
-            <i class="general foundicon-minus"></i>&nbsp;done
+            <span class="icon-checkmark"></span>&nbsp;done
         </a>
         <a class="button left tiny alert" style="margin-right:10px" data-bind="click:clear">
-            <i class="general foundicon-minus"></i>&nbsp;Cancel
+            <span class="icon-minus"></span>&nbsp;Cancel
         </a>
     <!-- /ko -->
 </script>
