@@ -31,7 +31,7 @@
             '</div>',
             '<div class="row collapse title-edit">',
                 '<div class="small-8 columns">',
-                    '<input type="text" data-bind="value: title"></input>',
+                    '<input type="text" data-bind="value: overrideTitle"></input>',
                 '</div>',
                 '<div class="small-2 columns" data-bind="click: acceptEdit">',
                     '<span class="postfix">',
@@ -295,19 +295,20 @@
         this.title = config.title;
         this.editingTitle = ko.observable(false);
         this.href = ko.isObservable(config.href) ? config.href: ko.observable(config.href);
-        var temp = this.title();
+        this.overrideTitle = ko.observable();
         this.editTitle = function(){
-            temp = this.title();
+            //temp = this.title();
             this.editingTitle(true);
+            this.overrideTitle(ko.unwrap(this.title));
             return false;
         }
         this.cancelEdit = function(){
-            this.title(temp);
+            //this.title(temp);
             this.editingTitle(false);
         }
         this.acceptEdit = function(){
             this.editingTitle(false);
-            temp = this.title();
+            this.title(this.overrideTitle());
         }
     };
 
@@ -402,6 +403,39 @@
         }
     };
 
+    var tooltip = {
+        init: function(element, valueAccessor){
+            var options = valueAccessor();
+            var $elem = $(element);
+            $elem.click(function(){
+                if($elem.data('dropdown')){
+                    return;
+                }
+                
+                var size = options.size || 'small';
+                var uniqId = 'tt' + +(new Date());
+                $elem.attr('data-dropdown', uniqId);
+                var contentElem = document.createElement('div');
+                contentElem.id = uniqId;
+                $(contentElem)
+                    .attr('data-dropdown-content', '')
+                    .addClass('f-dropdown content ' + size)
+                    .html(drata.nsx.toolTipContent[options.datakey]);
+                $('body').append(contentElem);
+            });
+            if(!drata.globalsettings.enableToolTips()){
+                $elem.hide();
+            }
+            drata.globalsettings.enableToolTips.subscribe(function(newValue){
+                if(!newValue) {
+                    $elem.hide();
+                }else{
+                    $elem.show();
+                }
+            });
+        }
+    };
+
     ko.bindingHandlers.slideVisible = slideVisibleBindingHandler;
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;
@@ -409,7 +443,7 @@
     ko.bindingHandlers.sortableList = sortableList;
     ko.bindingHandlers.resizeText = resizeText;
     ko.bindingHandlers.checkboxDropdown = checkboxDropdownBindingHandler;
-
+    ko.bindingHandlers.tooltip = tooltip;
     ko.virtualElements.allowedBindings.editLabel = true;
     ko.virtualElements.allowedBindings.sortableList = true;
 })(ko, jQuery);

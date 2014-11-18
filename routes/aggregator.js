@@ -401,6 +401,9 @@ var Aggregator = {
             },
             string: function(name){
                 return name;
+            },
+            bool: function(name){
+                return name;
             }
         };
 

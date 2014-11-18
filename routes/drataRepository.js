@@ -4,6 +4,10 @@ var socket = require('./socket');
 var config = require('./config.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
+var Q = require('Q');
+var demoDashboardData = require('./demo.json');
+
+var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
 
 var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
@@ -18,29 +22,30 @@ mongoClient.open(function(err, mongoClient) {
     }
 });
 
-var findObject = function(collectionName, id, callback){
+var findObject = function(collectionName, id){
+    var defer = Q.defer();
     db.collection(collectionName,function(err, collection) {
         if(err){
-            callback(null);
+            defer.reject('cannot connect to the collection: ' + collectionName);
         }
         else{
-            collection.findOne({'_id' : mongo.ObjectID(id)}, function(err, result) {
-                if(err || !result){
-                    callback(null);
-                }else{
-                    callback(result);   
-                }
+            collection.findOne({
+                '_id' : mongo.ObjectID(id)
+            }, function(err, result) {
+                (err || !result) ? defer.reject('cannot find document'): defer.resolve(result);
             });
         }
     });
+    return defer.promise;
 };
 
-var getDashboard = function(dashboardId, callback){
-    findObject('dashboard', dashboardId, callback);
+var getDashboard = function(dashboardId){
+    console.log('finding dashboard');
+    return findObject(dashboardCollection, dashboardId);
 };
 
 var getWidget = function(widgetId, callback){
-    findObject('widget', widgetId, callback);
+    return findObject(widgetCollection, widgetId);
 };
 
 exports.setIO = function(socketio){
@@ -48,7 +53,7 @@ exports.setIO = function(socketio){
 }
 
 exports.pop = function(req, res){
-    db.collection('dashboard',function(err, collection) {
+    db.collection(dashboardCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -67,31 +72,53 @@ exports.pop = function(req, res){
     });
 };
 
-exports.findDashboard = function(req, res) {
-    getDashboard(req.params.dashboardId, function(result){
-        if(!result) {
-            res.send(404);
+var findDemoDashboard = function(){
+    var defer = Q.defer();
+    db.collection(dashboardCollection,function(err, collection) {
+        if(err){
+            defer.reject('cannot connect to the dashboard collection ');
         }
         else{
-            res.send(result);
+            collection.findOne({
+                'demo' : true
+            }, function(err, result) {
+                (err || !result) ? defer.reject('cannot find document'): defer.resolve(result);
+            });
         }
+    });
+    return defer.promise;
+}
+exports.redirectDemo = function(req, res){
+    console.log('am i hitting this ?');
+    findDemoDashboard().then(function(demoDashboardModel){
+        console.log(demoDashboardModel);
+        res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
+    }, function(err){
+        res.send(404);
+    });
+};
+
+exports.findDashboard = function(req, res) {
+    getDashboard(req.params.dashboardId)
+    .then(function(result){
+        res.send(result);
+    }, function(err){
+        res.send(404);
     });
 };
 
 exports.findWidget = function(req, res) {
-    getWidget(req.params.widgetId, function(result){
-        if(!result) {
-            res.send(404);
-        }
-        else{
-            res.send(result);
-        }
+    getWidget(req.params.widgetId)
+    .then(function(result){
+        res.send(result);
+    }, function(err){
+        res.send(404);
     });
 };
 
 exports.findWidgetsOfDashboard = function(req, res) {
     var dashboardId = req.params.dashboardId;
-    db.collection('widget',function(err, collection) {
+    db.collection(widgetCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -103,116 +130,153 @@ exports.findWidgetsOfDashboard = function(req, res) {
     });
 };
 
-exports.upsertWidget = function(req, res){
-    db.collection('widget',function(err, collection) {
+var updateWidget = function(widgetModel, allowDemo){
+    var defer = Q.defer();
+    db.collection(widgetCollection,function(err, collection) {
         if(err){
-            res.send(404);
+            defer.reject('widget collection cannot connect');
         }
         else{
-            var widgetModel = req.body;
-            var isNew = !widgetModel._id;
-            function _temp(){
-                getDashboard(widgetModel.dashboardId, function(result){
-                    if(!result) {
-                        res.send(404);
+            //console.log('connected to widget collection');
+            getWidget(widgetModel._id)
+            .then(function(result){
+                //console.log('got widget');
+                getDashboard(widgetModel.dashboardId)
+                .then(function(result){
+                    //console.log('got dashboard');
+                    if(result.demo && !allowDemo){
+                        defer.resolve();
                         return;
                     }
-                    var widgetId = widgetModel._id;
-                    if(!isNew){
-                        widgetModel._id = mongo.ObjectID(widgetId);
-                        widgetModel.dateCreated = new Date();
-                    }
-
+                    widgetModel._id = mongo.ObjectID(widgetModel._id);
                     widgetModel.dateUpdated = new Date();
-                    
-                    //delete widgetModel._id;
                     collection.save(widgetModel, {safe:true}, function(err, result) {
                         //console.log(JSON.stringify(err));
-                        if(err) res.send(404);
+                        err ? defer.reject('cannot update widget') : defer.resolve();
                         //console.log(JSON.stringify(result));
-                        if(isNew){
-                            res.send(result);
-                        }
-                        else{
-                            res.send(200);
-                        }
                     });
-                });    
-            }
-            if(!isNew){
-                getWidget(widgetModel._id, function(result){
-                    if(!result) {
-                        res.send(404);
-                        return;
-                    }
-                    _temp();
+                    
+                }, function(err){
+                    defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
                 });
-            }else{
-                _temp();
-            }
+
+            }, function(err){
+                defer.reject('widget not found. Id: ' + widgetModel._id);
+            });
         }
     });
+    return defer.promise;
+};
+
+var addWidget = function(widgetModel, allowDemo){
+    var defer = Q.defer();
+    console.log('addwidget method entered');
+    db.collection(widgetCollection,function(err, collection) {
+        if(err){
+            defer.reject('widget collection cannot connect');
+        }
+        else{
+            console.log('widget collection entered');
+            getDashboard(widgetModel.dashboardId)
+            .then(function(result){
+                console.log('got dashboard');
+                if(result.demo && !allowDemo){
+                    defer.resolve();
+                    return;
+                }
+                widgetModel.dateCreated = new Date();
+                widgetModel.dateUpdated = new Date();
+                
+                delete widgetModel._id; //just in case
+
+                collection.save(widgetModel, {safe:true}, function(err, result) {
+                    //console.log(JSON.stringify(err));
+                    console.log('saved widget');
+                    err ? defer.reject('cannot save widget') : defer.resolve(result);
+                    //console.log(JSON.stringify(result));
+                });
+            }, function(err){
+                console.log('get dashboard failed when adding widget');
+                defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
+            });
+        }
+    });
+    return defer.promise;
 };
 
 exports.updateWidget = function(req, res){
-    //console.log(JSON.stringify(req.body, null, '\t'));
-    db.collection('widget',function(err, collection) {
-        if(err){
-            //console.log(JSON.stringify(err, null, '\t'));
-            res.send(404);
-        }
-        else{
-            var widgetModel = req.body;
-            if(!widgetModel._id) res.send(404);
-            getDashboard(widgetModel.dashboardId, function(result){
-                if(!result) {
-                    res.send(404);
-                    return;
-                }
-                var widgetId = mongo.ObjectID(widgetModel._id);
-                delete widgetModel._id;
-                widgetModel.dateUpdated = new Date();
-                
-                collection.update({_id: widgetId}, widgetModel, {safe:true, multi: false}, function(err, result) {
-                    //console.log(JSON.stringify(err));
-                    if(err) {
-                        res.send(404);
-                        return;
-                    }
-                    //console.log(JSON.stringify(result));
-                    
-                    res.send(result);
-                });
-            });
-        }
+    var widgetModel = req.body;
+    if(!widgetModel._id){
+        res.send(404);
+    }
+    //console.log('updating widget');
+    updateWidget(widgetModel)
+    .then(function(){
+        //console.log('updated widget');
+        res.send(200);
+    }, function(err){
+        //console.log('error updating widget');
+        res.send(404);
+    });
+}
+
+exports.addWidget = function(req, res){
+    var widgetModel = req.body;
+    //console.log('adding widget');
+    addWidget(widgetModel)
+    .then(function(newWidgetModel){
+        //console.log('added widget');
+        res.send(newWidgetModel);
+    }, function(err){
+        res.send(404);
     });
 };
 
 exports.deleteWidget = function(req, res){
     var widgetId = mongo.ObjectID(req.params.widgetId);
-    db.collection('widget',function(err, collection) {
+    db.collection(widgetCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
-            collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
-                //console.log(JSON.stringify(werr));
-                //console.log('deleted ' + req.params.widgetId);
-                res.send(200);
+            getWidget(widgetId)
+            .then(function(w){
+                getDashboard(w.dashboardId)
+                .then(function(d){
+                    if(d.demo){
+                        res.send(200);
+                        return;
+                    }
+                    //delete the widget
+                    collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
+                        res.send(200);
+                    });
+
+                }, function(err){
+                    console.log('get dashboard failed when deleting widget');
+                    res.send(404);
+                })
+            }, function(err){
+                console.log('get widget failed when deleting widget');
+                res.send(404);
             });
         }
     });
 };
 
-exports.upsertDashboard = function(req, res){
-    db.collection('dashboard',function(err, collection) {
+var upsertDashboard = function(dashboardModel, allowDemo){
+    var defer = Q.defer();
+    db.collection(dashboardCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
-            res.send(404);
+            defer.reject('invalid');
         }
         else{
-            var dashboardModel = req.body;
+            if(dashboardModel.demo && !allowDemo){
+                defer.resolve();
+                return;
+            }
             if(dashboardModel._id){
                 dashboardModel._id = mongo.ObjectID(dashboardModel._id);
             }
@@ -221,33 +285,106 @@ exports.upsertDashboard = function(req, res){
             }
             dashboardModel.dateUpdated = new Date();
             collection.save(dashboardModel, {safe:true}, function(err, result) {
-                //console.log(JSON.stringify(err));
-                if(err) res.send(404);
-                //console.log(JSON.stringify(result));
-                
-                res.send(result);
+                err ? defer.reject('invalid') : defer.resolve(result);
             });
         }
     });
+    return defer.promise;
+};
+
+exports.upsertDashboard = function(req, res){
+    upsertDashboard(req.body)
+        .then(function(result){
+            res.send(result);
+        }, function(err){
+            res.send(404);
+        });
 };
 
 exports.deleteDashboard = function(req, res){
     var dashboardId = mongo.ObjectID(req.params.dashboardId);
-    db.collection('dashboard',function(err, collection) {
+    db.collection(dashboardCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
         }
         else{
-            collection.remove({_id : dashboardId}, {safe:true,justOne:true}, function(err, result) {
+            collection.remove({_id : dashboardId, demo: false}, {safe:true,justOne:true}, function(err, result) {
                 res.send(200);
             });
         }
     });
 };
 
+function removeCollection(collectionName){
+    var defer = Q.defer();
+    db.collection(collectionName,function(err, collection) {
+        if(err){
+            defer.reject('invalid');
+            //console.log('rejected');
+        }
+        else{
+            collection.remove({}, function(err, result) {
+                err ? defer.reject('invalid') : defer.resolve();
+            });
+        }
+    });
+    return defer.promise;
+}
+
+exports.truncateData = function(req, res){
+    var onReject = function(){
+        //console.log('send response when rejected');
+        res.send(404);
+    };
+
+    removeCollection(dashboardCollection)
+        .then(removeCollection(widgetCollection), onReject)
+        .then(removeCollection(tagCollection), onReject)
+        .then(function(result){
+            res.send(200);
+        }, onReject);
+};
+
+exports.generateDemoDashboard = function(req, res){
+    var demoData = utils.clone(demoDashboardData);
+    upsertDashboard(demoData.dashboard, true)
+    .then(function(dashboardModel){
+        console.log('demo dashboard generated');
+        var wPromises = [];
+        var dashboardId = dashboardModel._id.toString();
+        //var c = demoData.widgets.length + demoData.tags.length, temp = 0;
+        // function xx(){
+        //     temp++;
+        //     if(c === temp) res.send(200);
+        // }
+        _.each(demoData.widgets, function(widgetModel){
+            console.log('iterating through widget models');
+            widgetModel.dashboardId = dashboardId;
+            //addWidget(widgetModel).then(xx);
+            wPromises.push(addWidget(widgetModel, true));
+            console.log('demo widget generated');
+        });
+        _.each(demoData.tags, function(tagModel){
+            tagModel.dashboardId = dashboardId;
+            //addTag(tagModel).then(xx);
+            wPromises.push(addTag(tagModel));
+        });
+        
+        Q.all(wPromises)
+        .then(function(){
+            res.send(200);
+        },function(){
+            res.send(500);
+        });
+    },function(){
+        res.send(404);
+    });
+
+};
+
 exports.getAllDashboards = function(req, res) {
-    db.collection('dashboard',function(err, collection) {
+    db.collection(dashboardCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -260,7 +397,7 @@ exports.getAllDashboards = function(req, res) {
 };
 
 exports.getWidgets = function(req, res) {
-    db.collection('widget',function(err, collection) {
+    db.collection(widgetCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -276,7 +413,7 @@ exports.getWidgets = function(req, res) {
 };
 
 exports.getAllTags = function(req, res){
-    db.collection('tags',function(err, collection) {
+    db.collection(tagCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -290,7 +427,7 @@ exports.getAllTags = function(req, res){
 
 exports.getAllTagsOfDashboard = function(req, res){
     var dashboardId = req.params.dashboardId;
-    db.collection('tags',function(err, collection) {
+    db.collection(tagCollection,function(err, collection) {
         if(err){
             res.send(404);
         }
@@ -302,36 +439,54 @@ exports.getAllTagsOfDashboard = function(req, res){
     });
 };
 
-exports.addTag = function(req, res){
-    db.collection('tags',function(err, collection) {
+var addTag = function(tagModel, allowDemo){
+    //console.log('adding tag');
+    var defer = Q.defer();
+    if(!tagModel) {
+        defer.reject('tag model undefined');
+        return;
+    }
+    db.collection(tagCollection,function(err, collection) {
         if(err){
-            res.send(404);
+            defer.reject('tag collection error');
         }
-        else{
-            var tagModel = req.body;
-            if(!tagModel)
-                res.send(404);
-            delete tagModel._id;
-            collection.update({
-                tagName: tagModel.tagName,
-                dashboardId: tagModel.dashboardId
-            },
-            tagModel,
-            { upsert: true },
-            function(err, result){
-                if(err){
-                  res.send(404);
-                  return;  
+        else{       
+            getDashboard(tagModel.dashboardId)
+            .then(function(result){
+                if(result.demo && !allowDemo){
+                    defer.resolve();
+                    return;
                 }
-                res.send(200);
+                collection.update({
+                    tagName: tagModel.tagName,
+                    dashboardId: tagModel.dashboardId
+                },
+                tagModel,
+                { upsert: true },
+                function(err, result){
+                    err ? defer.reject() : defer.resolve();
+                });
+            }, function(err){
+                console.log('get dashboard failed when adding tags');
+                defer.reject('Dashboard not found. Id: ' + tagModel.dashboardId);
             });
         }
+    });
+    return defer.promise;
+}
+
+exports.addTag = function(req, res){
+    addTag(req.body)
+    .then(function(result){
+        res.send(200);
+    }, function(err){
+        res.send(404);
     });
 };
 
 exports.removeTag = function(req, res){
     var tagId = mongo.ObjectID(req.params.tagId);
-    db.collection('tags',function(err, collection) {
+    db.collection(tagCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
@@ -348,7 +503,7 @@ exports.removeTag = function(req, res){
 
 exports.deleteAllTagsDashboard = function(req, res){
     var dashboardId = req.params.dashboardId;
-    db.collection('tags',function(err, collection) {
+    db.collection(tagCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
@@ -365,7 +520,7 @@ exports.deleteAllTagsDashboard = function(req, res){
 
 exports.deleteAllWidgetsDashboard = function(req, res){
     var dashboardId = req.params.dashboardId;
-    db.collection('widget',function(err, collection) {
+    db.collection(widgetCollection,function(err, collection) {
         if(err){
             //console.log(JSON.stringify(err, null, '\t'));
             res.send(404);
@@ -378,105 +533,3 @@ exports.deleteAllWidgetsDashboard = function(req, res){
         }
     });
 };
-
-var populateDB = function(req, res) {
-    var maxProps = 20;
-    var data= [];
-    var y = [0,0,0,0,0,0,0];
-    var ordernumber = 1;
-    var geos = ['texas', 'Alabama', 'Misissipi', 'Arizona', 'Minnesota'];
-    var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
-    var colors = ['blue', 'gray', 'black', 'white', 'purple'];
-    var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
-    var startDate = new Date('3/10/2014');
-    for(var j = 0; j <= maxProps; j++){
-        for(var yy = 0; yy < y.length; yy++){
-            y[yy] += Math.floor((Math.random() * 10 - j%10));
-        }
-        //y += (Math.random() * 10 - j%10);
-        ordernumber = 10 + (Math.floor(j/ 3) * (3)); // 3 items per order
-        data.push({
-            //ordernumber : ordernumber,
-            item : items[Math.floor(Math.random() * items.length)],
-            price : Math.abs(y[0]) * 100,
-            geography : geos[Math.floor(Math.random() * geos.length)],
-            timestamp : new Date(startDate.setHours(startDate.getHours() + j)),
-            sex : Math.random() * 10 > 5 ? 'female': 'male',
-            itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
-            hasCoupon :  Math.random() * 10 > 7,
-            discount: Math.abs(Math.floor(y[1])),
-            color : colors[Math.abs(Math.floor(y[1]%5))],
-            errorCount: Math.abs(Math.floor(y[2]% 10)),
-            pageLoadTime : Math.abs(Math.floor(y[3])) * 500,
-            tax : Math.abs(y[0]) * 8,
-            shippingPrice: Math.abs(y[0]) * 12,
-            itemAgeGroup : ageGroups[Math.abs(y[4] %5)],
-            totalItems : Math.floor(Math.abs(y[5]) % 10),
-            total: {
-                price : Math.abs(y[0]) * 100,
-                tax : Math.abs(y[0]) * 8,
-                shippingPrice: Math.abs(y[0]) * 12
-            }
-        });
-    }
- 
-    db.collection('shoppercheckout', function(err, collection) {
-        if(err){
-            res.send('somethig went wrong');
-        }
-        else{
-            //collection.remove();
-            collection.insert(data, {safe:true}, function(err, result) {});
-            res.send('done');    
-        }
-    });
-};
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-// var populateDB = function(req, res) {
-//     var widgetModel = [
-//     '{"selectedDataKey":"shoppercheckout","segmentModel":{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false}],"dataGroup":{"hasGrouping":true,"groupByProp":"itemAgeGroup","xAxisType":"date","xAxisProp":"timestamp","timeseriesInterval":"300000","errors":[]},"group":[],"dataFilter":{"intervalKind":"day","intervalType":"dynamic","min":19,"max":60,"dateProp":"timestamp"},"chartType":"scatter"},"sizex":"4","sizey":"1"}',
-//     '{"selectedDataKey":"shoppercheckout","segmentModel":{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false}],"dataGroup":{"hasGrouping":true,"groupByProp":"itemAgeGroup","xAxisType":"date","xAxisProp":"timestamp","timeseriesInterval":"300000","errors":[]},"group":[],"dataFilter":{"intervalKind":"day","intervalType":"dynamic","min":19,"max":60,"dateProp":"timestamp"},"chartType":"scatter"},"sizex":"4","sizey":"1"}'
-//     ];
-
-//     var widgets = widgetModel.map(function(item){
-//         return JSON.parse(item);
-//     });
-
-//     var dashboardModel = {
-//         name: 'maneesh'
-//     };
-
-//     db.collection('dashboard', function(err, collection) {
-//         if(err){
-//             res.send('somethig went wrong');
-//         }
-//         else{
-//             //collection.remove();
-//             collection.insert(dashboardModel, {safe:true}, function(err, result) {
-//                 console.log(JSON.stringify(result));
-//                 var dId = result[0]._id.toHexString();
-//                 _.each(widgets, function(w){
-//                     w.dashboardId = dId;
-//                 });
-//                 db.collection('widget', function(err2, collection2) {
-//                     if(err2){
-//                         res.send('somethig went wrong');
-//                     }
-//                     else{
-//                         //collection.remove();
-//                         collection2.insert(widgets, {safe:true}, function(werr, wresult) {
-//                             console.log(JSON.stringify(werr));
-                            
-//                             res.send('done');
-//                         });
-//                     }
-//                 }); 
-
-              
-//                 //res.send('done');
-//             });
-//         }
-//     });        
- 
-// };

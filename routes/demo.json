@@ -1,0 +1,196 @@
+{
+	"dashboard" : {
+	    "name" : "demo dashboard",
+	    "theme" : "default",
+	    "demo": true
+	},
+	"tags" : [
+		{
+		    "tagName" : "lilli tag"
+		}
+	],
+	"widgets" : [
+		{
+		    "dataSource" : "drataDemoExternal",
+		    "database" : "shopperstop",
+		    "selectedDataKey" : "shoppercheckout",
+		    "segmentModel" : {
+		        "selection" : [ 
+		            {
+		                "groupType" : "selection",
+		                "groups" : [],
+		                "logic" : "+",
+		                "groupBy" : "sum",
+		                "selectedProp" : "price",
+		                "isComplex" : false
+		            }
+		        ],
+		        "dataGroup" : {
+		            "hasGrouping" : true,
+		            "groupByProp" : "geography",
+		            "xAxisType" : "date",
+		            "timeseries" : true,
+		            "xAxisProp" : "timestamp",
+		            "timeseriesInterval" : "quarter",
+		            "errors" : []
+		        },
+		        "group" : [ 
+		            {
+		                "groupType" : "condition",
+		                "groups" : [],
+		                "logic" : "and",
+		                "selection" : {
+		                    "groupType" : "selection",
+		                    "groups" : [],
+		                    "logic" : "+",
+		                    "selectedProp" : "sex",
+		                    "isComplex" : false,
+		                    "perc" : false
+		                },
+		                "isComplex" : false,
+		                "operation" : "=",
+		                "value" : "male",
+		                "valType" : "string"
+		            }
+		        ],
+		        "dataFilter" : {
+		            "intervalType" : "static",
+		            "min" : "10/04/2006",
+		            "max" : "11/05/2014",
+		            "dateProp" : "timestamp"
+		        },
+		        "chartType" : "line"
+		    },
+		    "sizex" : "2",
+		    "sizey" : "2",
+		    "name" : "sum of price at checkout for Men by quarter",
+		    "displayIndex" : 0
+		},
+		{
+		    "dataSource" : "drataDemoExternal",
+		    "database" : "shopperstop",
+		    "selectedDataKey" : "shoppercheckout",
+		    "segmentModel" : {
+		        "selection" : [ 
+		            {
+		                "groupType" : "selection",
+		                "groups" : [],
+		                "logic" : "+",
+		                "groupBy" : "sum",
+		                "selectedProp" : "price",
+		                "isComplex" : false,
+		                "perc" : false
+		            }
+		        ],
+		        "dataGroup" : {
+		            "hasGrouping" : true,
+		            "groupByProp" : "geography",
+		            "groupByIntervalType" : "string",
+		            "hasDivideBy" : true,
+		            "divideByProp" : "sex",
+		            "divideByIntervalType" : "string",
+		            "needsGroupByInterval" : false,
+		            "needsDivideByInterval" : false
+		        },
+		        "group" : [],
+		        "dataFilter" : {
+		            "intervalKind" : "year",
+		            "intervalType" : "dynamic",
+		            "min" : 1,
+		            "max" : 5,
+		            "dateProp" : "timestamp"
+		        },
+		        "chartType" : "bar"
+		    },
+		    "sizex" : "2",
+		    "sizey" : "2",
+		    "name" : "sum of price at checkout by region and sex",
+		    "displayIndex" : 1
+		},
+		{
+		    "dataSource" : "drataDemoExternal",
+		    "database" : "shopperstop",
+		    "selectedDataKey" : "shoppercheckout",
+		    "segmentModel" : {
+		        "selection" : [ 
+		            {
+		                "groupType" : "selection",
+		                "groups" : [],
+		                "logic" : "+",
+		                "groupBy" : "sum",
+		                "selectedProp" : "price",
+		                "isComplex" : false
+		            }
+		        ],
+		        "dataGroup" : {
+		            "hasGrouping" : true,
+		            "groupByProp" : "itemAgeGroup",
+		            "xAxisType" : "date",
+		            "timeseries" : true,
+		            "xAxisProp" : "timestamp",
+		            "timeseriesInterval" : "quarter",
+		            "errors" : []
+		        },
+		        "group" : [],
+		        "dataFilter" : {
+		            "intervalKind" : "year",
+		            "intervalType" : "dynamic",
+		            "min" : 1,
+		            "max" : 5,
+		            "dateProp" : "timestamp"
+		        },
+		        "chartType" : "numeric"
+		    },
+		    "sizex" : "6",
+		    "sizey" : "2",
+		    "name" : "Change in amount spent during checkout by agregroup",
+		    "displayIndex" : 2,
+		    "contentModel" : {
+		        "backgroundChartType" : "bar"
+		    }
+		},
+		{
+		    "dataSource" : "drataDemoExternal",
+		    "database" : "shopperstop",
+		    "selectedDataKey" : "shoppercheckout",
+		    "segmentModel" : {
+		        "selection" : [ 
+		            {
+		                "groupType" : "selection",
+		                "groups" : [],
+		                "logic" : "+",
+		                "groupBy" : "sum",
+		                "selectedProp" : "price",
+		                "isComplex" : false,
+		                "perc" : false
+		            }
+		        ],
+		        "dataGroup" : {
+		            "hasGrouping" : true,
+		            "groupByProp" : "itemAgeGroup",
+		            "groupByIntervalType" : "string",
+		            "hasDivideBy" : false,
+		            "divideByIntervalType" : "string",
+		            "needsGroupByInterval" : false,
+		            "needsDivideByInterval" : false
+		        },
+		        "group" : [],
+		        "dataFilter" : {
+		            "intervalKind" : "year",
+		            "intervalType" : "dynamic",
+		            "min" : 1,
+		            "max" : 5,
+		            "dateProp" : "timestamp"
+		        },
+		        "chartType" : "pie"
+		    },
+		    "sizex" : "5",
+		    "sizey" : "2",
+		    "name" : "amount spent during checkout by agregroup",
+		    "displayIndex" : 3,
+		    "contentModel" : {
+		        "backgroundChartType" : "bar"
+		    }
+		}
+	]
+}

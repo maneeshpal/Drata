@@ -20,7 +20,7 @@
 		staticInterval: '<p>A static interval that does not change over time.</p>',
 		dataFilterExpression: '<p>This expression is dynamically generated based on the interval you selected.</p>',
 		conditionValue: '<p>The dropdown specifies whether the value you entered should be treated as <em>numeric, boolean, string or date.</em> The dropdown value gets preselected whenever you select a property against which the condition is set. You can always override the default type in the dropdown.</p>',
-		complexCondition: '<p>"<span class="icon-plus"></span>" Converts a simple condition <br /> Ex: <em>(a > b)</em> into a complex condition <br />Ex:<em> (a > b or (c < d && e = f))</em>.<br /> This allows you to group conditions. </p>',
+		complexCondition: '<p>"<span class="icon-plus"></span>" Converts a simple condition for example <em>(a > b)</em> into a complex condition for example <em> (a > b or (c < d && e = f))</em>.<br /> This allows you to group conditions. </p>',
 		conditionSummary: '<p>This summary is a sql representation of conditions you build. It is generated dynamically as you build the conditions</p>'
 	}
 

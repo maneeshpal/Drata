@@ -608,7 +608,8 @@
 
     var getDataFilterExpression = function(dataFilter){
         if(dataFilter.intervalType === 'dynamic'){
-            return drata.utils.format('{0} {1}s from current time until {2} {1}s from current time',dataFilter.max, dataFilter.intervalKind, dataFilter.min);
+            if(!dataFilter.intervalKind) return;
+            return drata.utils.format('{0} {1}s from current time until {2} {1}s from current time',dataFilter.max || '__', dataFilter.intervalKind, dataFilter.min || '__');
         }
         else{
             return drata.utils.format('{0} to {1}', dataFilter.min || '__', dataFilter.max || '__');

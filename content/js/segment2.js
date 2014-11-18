@@ -715,14 +715,20 @@ var Condition = function(options){
     self.expression = ko.computed(function(){
         var expression = '';
         if(!self.isComplex()){
-            return  self.selection.expression() + ' ' + self.operation() + ' ' + ((self.operation() === 'exists')? '': (self.value() ? self.value(): '__'));
+            var operationIsExists = self.operation() === 'exists';
+            var valtypeIsString = self.valType() === 'string';
+
+            expression = drata.utils.format('{0} {1} {2}{3}{2}', self.selection.expression(), self.operation(), (valtypeIsString && !operationIsExists ? '\'': ''), (operationIsExists ? '': self.value() || '__'));
+            
+        }
+        else{
+            var innerGroups = self.conditions();
+            _.each(innerGroups, function(gr,index){
+                expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
+            });
+            expression = '(' + expression + ')';
         }
         
-        var innerGroups = self.conditions();
-        _.each(innerGroups, function(gr,index){
-            expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
-        });
-        expression = '(' + expression + ')';
         return expression;
     });
 
@@ -942,12 +948,14 @@ var Selection = function(options){
             self.selections([]);
         }
     });
+
     self.clearGroups = function(){
         self.selections([]);
         self.selectedProp(undefined);
         self.showComplex(false);
         self.selectedProp.isModified(false);
     };
+
     self.done = function(){
         var errors = ko.validation.group(self, {deep:true});
         if(errors().length > 0) {
@@ -960,16 +968,19 @@ var Selection = function(options){
             }    
         }        
     };
+
     self.afterAdd = function(elem){
       elem.nodeType === 1 && $(elem).hide().slideDown(100, function(){
         $(elem).show();
       });
     };
+
     self.beforeRemove = function(elem){
       elem.nodeType === 1 && $(elem).slideUp(100, function(){
         $(elem).remove();
       });
     };
+
     self.prefill = function(m){
         self.aliasName(m.aliasName);
         self.logic(m.logic || '+');
@@ -983,6 +994,7 @@ var Selection = function(options){
             }
         )); 
     };
+    
     self.getModel = function(){
         var returnSelections = [];
         _.each(self.selections(), function(sel){

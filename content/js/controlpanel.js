@@ -123,7 +123,7 @@
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
-			drata.apiClient.upsertWidget(widgetModel, function(response){
+			drata.apiClient.addWidget(widgetModel, function(response){
                 if(!response.success){
                 	return;
             	}
@@ -899,42 +899,7 @@
 	    });
 
 	    self.currentDashboardName = ko.observable('Dashboards');
-	}
-
-	var toolTip = function(){
-		var $body = $('body');
-		this.enabledToolTips = ko.observable();
-		
-		var hideToolTips = function(){
-			$body.find('[data-tooltipkey]').hide();
-		}
-
-		this.enabledToolTips.subscribe(function(newValue){
-			if(!newValue){
-				hideToolTips();
-			}else{
-				$body.find('[data-tooltipkey]').show();
-			}
-		});
-
-    	this.attachToolTip = function(vm, e){
-    		var elem = $(e.target);
-    		if(elem.data('dropdown')){
-    			return;
-    		}
-    		var key = elem.data('tooltipkey');
-    		var size = elem.data('tsize') || 'small';
-    		var uniqId = 'tt' + +(new Date());
-    		elem.attr('data-dropdown', uniqId);
-    		var contentElem = document.createElement('div');
-    		contentElem.id = uniqId;
-    		$(contentElem)
-    			.attr('data-dropdown-content', '')
-    			.addClass('f-dropdown content ' + size)
-    			.html(drata.nsx.toolTipContent[key]);
-    		$body.append(contentElem);
-    	}
-    };
+	};
 
 	root.drata.ns('dashboard').extend({
         controlPanel : ControlPanel,
@@ -942,14 +907,17 @@
     });
 
 	root.drata.ns('nsx').extend({
-		dashboardSyncService: new DashboardSyncService(),
-		tooltip: new toolTip()
+		dashboardSyncService: new DashboardSyncService()
     });
 
     root.drata.ns('models').extend({
         tagList : tagList,
         dashboardList: dashboardList,
         tagNameList: tagNameList
+    });
+
+    root.drata.ns('globalsettings').extend({
+    	enableToolTips : ko.observable()
     });
 
 })(this, ko);

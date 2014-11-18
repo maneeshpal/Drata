@@ -40,7 +40,7 @@
             <div class="row" data-bind="visible: conditions().length>0">
                 <div class="small-12 columns">
                     <div class="keystroke expression" data-bind=" html:expression"></div>
-                    <span data-tooltipkey="conditionSummary" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-expression"></span>
+                    <span data-bind="tooltip: {datakey: 'conditionSummary'}" class="icon-question dtooltip dtooltip-expression"></span>
                 </div>
             </div>
             
@@ -56,7 +56,7 @@
     <div class="row">
         <div class="small-12 columns">
             <label>Date Property
-                <span data-tooltipkey="dateproperty" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+                <span data-bind="tooltip: {datakey: 'dateproperty'}" class="icon-question dtooltip"></span>
                 <div data-bind="comboBox :{selectedValue: dateProp, options: drata.dashboard.propertyManager.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
                 </div>
             </label>
@@ -64,12 +64,12 @@
                 <div class="small-6 columns">
                     <label><input type="radio" data-bind="value: 'dynamic', checked: intervalType" name="datafilter" id="rbInterval" />
             Dynamic Interval
-            <span data-tooltipkey="slidingInterval" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+            <span data-bind="tooltip: {datakey: 'slidingInterval'}" class="icon-question dtooltip"></span>
             </label>
                 </div>
                 <div class="small-6 columns">
                     <label><input type="radio" data-bind="value: 'static', checked: intervalType" name="datafilter" id="rbRange" /> Specify Date Range
-                    <span data-tooltipkey="staticInterval" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'staticInterval'}" class="icon-question dtooltip"></span>
                     </label>
                 </div>
             </div>
@@ -109,9 +109,9 @@
 
     <div class="row">
         <div class="small-12 columns">
-            <div class="keystroke expression" data-bind="html:expression">
+            <div class="keystroke expression" data-bind="visible: expression, html:expression">
             </div>
-            <span data-tooltipkey="dataFilterExpression" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-expression"></span>
+            <span data-bind="tooltip: {datakey: 'dataFilterExpression'}" class="icon-question dtooltip dtooltip-expression"></span>
         </div>
     </div>
 </script>
@@ -120,7 +120,7 @@
     <div class="large-12 columns">
         <fieldset>
             <legend>Selections 
-            <span data-tooltipkey="selectionsInfo" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="dtooltip icon-question"></span>
+            <span data-bind="tooltip: {datakey: 'selectionsInfo', size: 'medium'}" class="dtooltip icon-question"></span>
             </legend>
             <div class="keystroke expression" data-bind="html:$data.expression()"></div>
             <div class="row">
@@ -147,14 +147,14 @@
         <div class="small-9 columns">
             <input style="margin-bottom:0" type="checkbox" data-bind="checked:hasGrouping" />
             <label>Groupby
-            <span data-tooltipkey="groupby" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+            <span data-bind="tooltip: {datakey: 'groupby'}" class="icon-question dtooltip"></span>
             </label>
             <div data-bind="ddComboBox :{enabled: hasGrouping, selectedPrefix: groupByIntervalType , prefixOptions: drata.global.propertyTypes,selectedValue: groupByProp, options:drata.dashboard.propertyManager.allProperties,optionsCaption:'Select GroupBy', allowCustom:false}">
             </div>
         </div>
         <div class="small-3 columns">
             <label>Interval
-                <span data-tooltipkey="interval" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+                <span data-bind="tooltip: {datakey: 'interval'}" class="icon-question dtooltip"></span>
             </label>
             <div data-bind="comboBox:{enabled: needsGroupByInterval, selectedValue: groupByInterval, options: groupByIntervalOptions, optionsCaption: 'Interval'}">
             </div>
@@ -165,7 +165,7 @@
             <div class="small-9 columns">
                 <input style="margin-bottom:0" type="checkbox" data-bind="checked:hasDivideBy" />
                 <label>Groupby level 2
-                <span data-tooltipkey="groupby2" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span></label>
+                <span data-bind="tooltip: {datakey: 'groupby2'}" class="icon-question dtooltip"></span></label>
                 <div data-bind="ddComboBox :{enabled: hasDivideBy, selectedPrefix: divideByIntervalType, prefixOptions: drata.global.propertyTypes,selectedValue: divideByProp, options:drata.dashboard.propertyManager.allProperties,optionsCaption:'Slice By', allowCustom:false}">
                 </div>
             </div>
@@ -181,7 +181,7 @@
     <div class="row">
         <div class="small-8 columns">
             <label>x-axis
-                <span data-tooltipkey="xaxis" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+                <span data-bind="tooltip: {datakey: 'xaxis'}"class="icon-question dtooltip"></span>
                 <div data-bind="ddComboBox :{selectedPrefix: xAxisType , prefixOptions: drata.global.xAxisTypes,selectedValue: xAxisProp, options:properties,optionsCaption:'x Axis', allowCustom:false}">
                 </div>
             </label>
@@ -189,7 +189,7 @@
         <div class="small-4 columns">
             <label><input style="margin-bottom:0" type="checkbox" data-bind="checked:timeseries" />
             Interval
-            <span data-tooltipkey="interval" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span></label>
+            <span data-bind="tooltip: {datakey: 'interval'}"  class="icon-question dtooltip"></span></label>
             <div data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
             </div>
         </div>
@@ -197,7 +197,7 @@
     <div class="row">
         <div class="small-12 columns">
                 <input style="margin-bottom:0" type="checkbox" data-bind="checked:hasGrouping" />&nbsp;<label>Split by
-                <span data-tooltipkey="splitby" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span></label>
+                <span data-bind="tooltip: {datakey: 'splitby'}" class="icon-question dtooltip"></span></label>
 
                 <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
                 </select>
@@ -211,7 +211,7 @@
         <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:270px'}">
             <!-- ko if: renderType === 'topSelection' -->
                 <!-- ko if : $index() === 0 -->
-                <span data-tooltipkey="aggregationFunction" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-aggregate-func">
+                <span data-bind="tooltip: {datakey: 'aggregationFunction'}" class="icon-question dtooltip dtooltip-aggregate-func">
                 </span>
                 <!-- /ko -->
                 <div class="small-12 columns">
@@ -227,7 +227,7 @@
                 <i class="complexcombo-toggle" data-bind="css:{'icon-plus': !showComplex() , 'icon-minus' : showComplex}, click:toggleComplex">
                 </i>
                 <!-- ko if : $index() === 0 -->
-                <span data-tooltipkey="selectionProperty" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-selection-prop"></span>
+                <span data-bind="tooltip: {datakey: 'selectionProperty'}" class="icon-question dtooltip dtooltip-selection-prop"></span>
                 <!-- /ko -->
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
@@ -276,7 +276,7 @@
                 <label><input type="checkbox" data-bind="checked: perc"></input> % Chng</label>
             </div>
             <!-- ko if : $index() === 0 -->
-                &nbsp;<span data-tooltipkey="percentChange" data-bind="click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip"></span>
+                &nbsp;<span data-bind="tooltip: {datakey: 'percentChange'}" class="icon-question dtooltip"></span>
                 <!-- /ko -->
         </div>
         <!-- /ko -->     
@@ -292,13 +292,13 @@
             <!-- /ko -->
             <div class="row">
                 <div class="small-4 columns">
-                    <a class="button tiny success" data-bind="click:addSelection"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+                    <a class="button tiny success" data-bind="click:addSelection"><span class="icon-plus"></i>&nbsp;Add</a>
                 </div>
                 <div class="small-4 columns">
-                     <a class="button tiny primary" data-bind="click:done"><i class="general foundicon-plus"></i>&nbsp;Done</a>
+                     <a class="button tiny primary" data-bind="click:done"><span class="icon-checkmark"></span>&nbsp;Done</a>
                 </div>
                 <div class="small-4 columns">
-                     <a class="button tiny alert" data-bind="click:clearGroups"><i class="general foundicon-remove"></i>&nbsp;Clear</a>
+                     <a class="button tiny alert" data-bind="click:clearGroups"><span class="icon-minus"></span>&nbsp;Clear</a>
                 </div>
                 
             </div>
@@ -318,15 +318,15 @@
         </div>
     </div>
     <a class="button left tiny success" style="margin-right:10px" data-bind="click:addCondition">
-        <i class="general foundicon-plus"></i>&nbsp;Add Condition
+        <span class="icon-plus"></span>&nbsp;Add Condition
     </a>
     
     <!-- ko if :!isTopLevel -->
          <a class="button left tiny" style="margin-right:10px" data-bind="click:done">
-            <i class="general foundicon-minus"></i>&nbsp;done
+            <span class="icon-checkmark"></span>&nbsp;done
         </a>
         <a class="button left tiny alert" style="margin-right:10px" data-bind="click:clear">
-            <i class="general foundicon-minus"></i>&nbsp;Cancel
+            <span class="icon-minus"></span>&nbsp;Cancel
         </a>
     <!-- /ko -->
 </script>
@@ -343,7 +343,7 @@
             <select data-bind="options:availableOperations, value:operation"></select>
         </div>
         <div class="small-4 columns" data-bind="visible: operation() !== 'exists'">
-            <span data-tooltipkey="conditionValue" data-bind="visible: $index() === 0, click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-aggregate-func">
+            <span data-bind="tooltip: {datakey: 'conditionValue'}" class="icon-question dtooltip dtooltip-aggregate-func">
                 </span>
 
             <div data-bind=" ddComboBox :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, options:availableValues,optionsCaption:'value'}">
@@ -357,7 +357,7 @@
         </div>
         <!-- /ko -->
         <div class="right" style="width:40px">
-             <span data-tooltipkey="complexCondition" data-bind=" visible: $index() === 0, click:drata.nsx.tooltip.attachToolTip" data-options="align:top" data-tsize="medium" class="icon-question dtooltip dtooltip-complexcondition">
+             <span data-bind="tooltip: {datakey: 'complexCondition'}" class="icon-question dtooltip dtooltip-complexcondition">
                 </span>            
             <i class="icon-plus condition-action-complex" data-bind="click:toggleComplex"></i>
             <i class="icon-close condition-action-cancel" data-bind="click: $parent.removeCondition"></i>

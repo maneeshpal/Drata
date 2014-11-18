@@ -132,7 +132,8 @@ body.campfire {
 
 body {
   position: relative;
-  font-family: exo; }
+  font-family: exo;
+  background-color: #262626; }
 
 .r-corner {
   position: absolute;
@@ -206,17 +207,19 @@ body {
 
 .l1 {
   background: #262626;
+  line-height: 2rem;
   font-size: 2rem;
   padding: 20px 370px 20px 0.9375rem;
+  border-bottom: 1px solid #ea8219;
   color: white; }
 
 .slide-bg-wrapper {
   color: #a6a6a6;
-  padding: 30px 0 200px 0;
+  max-width: 1200px;
+  padding: 30px 0 0 0;
   width: 100%;
   position: relative;
-  background: #262626;
-  border-top: 1px solid #ea8219; }
+  background: #262626; }
 
 .header-content {
   padding-left: 400px;
@@ -267,8 +270,7 @@ body {
     display: none; }
 
 .callout {
-  height: 150px;
-  background-color: #262626;
+  height: 100px;
   transition: all 0.1s linear; }
   .callout [class^="flaticon-"]:before, .callout [class*=" flaticon-"]:before, .callout [class^="flaticon-"]:after, .callout [class*=" flaticon-"]:after {
     font-size: 60px;
@@ -278,11 +280,11 @@ body {
   .callout .desc {
     transition: all 0.1s linear;
     font-size: 20px;
-    padding: 40px 0 20px 0; }
+    padding: 50px 0 0 0; }
   .callout .barchi {
     visibility: hidden;
-    height: 40px;
-    padding: 0 20px; }
+    height: 30px;
+    padding: 0 10px; }
     .callout .barchi svg {
       opacity: 0.7; }
   .callout rect {
@@ -293,7 +295,40 @@ body {
       .callout:hover .barchi {
         visibility: visible; }
       .callout:hover .desc {
-        padding: 20px 0 20px 0; } }
+        padding: 40px 0 0 0; } }
+
+.feature-section {
+  padding: 20px 0;
+  max-width: 1200px; }
+  .feature-section .heading {
+    color: #a6a6a6; }
+    .feature-section .heading .vis {
+      height: 20px;
+      width: 20px;
+      display: inline-block; }
+      .feature-section .heading .vis rect {
+        stroke: #0d0d0d; }
+  .feature-section :hover .heading {
+    color: #ea8219; }
+  .feature-section .content {
+    color: #737373; }
+
+.opensource-section {
+  background-image: url('/images/dashboard_bg.png');
+  background-repeat: repeat;
+  height: 800px;
+  position: relative; }
+
+.section-content {
+  background-color: white;
+  opacity: 0.9;
+  height: 100%;
+  width: 100%;
+  position: absolute; }
+
+@media screen and (max-width: 1024px) {
+  .header-content .subheading {
+    padding-right: 60px; } }
 
 @media screen and (max-width: 768px) {
   .pie-menu {
@@ -304,33 +339,11 @@ body {
   .header-chart .text-group text {
     font: 14px arial; }
   .header-content {
-    padding: 20px; }
+    padding: 0; }
     .header-content .heading {
       padding: 0; }
     .header-content .subheading {
       padding: 0; } }
-
-.cake {
-  background-color: #404040;
-  position: relative;
-  padding: 20px 0;
-  border-bottom: 1px solid #262626; }
-  .cake h3 {
-    color: #ea8219; }
-    .cake h3 small {
-      color: #a6a6a6; }
-  .cake [class^="flaticon-"], .cake [class*=" flaticon-"] {
-    display: inline !important; }
-  .cake [class^="flaticon-"]:before, .cake [class*=" flaticon-"]:before, .cake [class^="flaticon-"]:after, .cake [class*=" flaticon-"]:after {
-    margin-left: 0; }
-  .cake .cake-visual {
-    color: #a6a6a6; }
-    .cake .cake-visual [class^="flaticon-"], .cake .cake-visual [class*=" flaticon-"] {
-      position: relative;
-      top: 60px;
-      margin-left: 20px; }
-    .cake .cake-visual [class^="flaticon-"]:before, .cake .cake-visual [class*=" flaticon-"]:before, .cake .cake-visual [class^="flaticon-"]:after, .cake .cake-visual [class*=" flaticon-"]:after {
-      font-size: 80px; }
 
 .footer {
   background-color: #0d0d0d;
