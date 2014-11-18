@@ -234,9 +234,8 @@ text {
   background-color: #ea8219; }
 
 .ui-sortable-placeholder {
-  background-color: #e5e0e0;
   visibility: visible !important;
-  height: 414px;
+  height: auto;
   width: 100%; }
 
 .postfix.giant, input.giant {

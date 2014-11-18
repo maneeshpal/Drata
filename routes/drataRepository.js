@@ -2,10 +2,10 @@ var mongo = require('mongodb');
 var utils = require('./utils');
 var socket = require('./socket');
 var config = require('./config.json');
-var demoData = require('./demo.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
 var Q = require('Q');
+var demoDashboardData = require('./demo.json');
 
 var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
 
@@ -33,11 +33,6 @@ var findObject = function(collectionName, id){
                 '_id' : mongo.ObjectID(id)
             }, function(err, result) {
                 (err || !result) ? defer.reject('cannot find document'): defer.resolve(result);
-                // if(err || !result){
-                //     callback(null);
-                // }else{
-                //     callback(result);   
-                // }
             });
         }
     });
@@ -45,6 +40,7 @@ var findObject = function(collectionName, id){
 };
 
 var getDashboard = function(dashboardId){
+    console.log('finding dashboard');
     return findObject(dashboardCollection, dashboardId);
 };
 
@@ -73,6 +69,32 @@ exports.pop = function(req, res){
             //     res.send(result);
             // });
         }
+    });
+};
+
+var findDemoDashboard = function(){
+    var defer = Q.defer();
+    db.collection(dashboardCollection,function(err, collection) {
+        if(err){
+            defer.reject('cannot connect to the dashboard collection ');
+        }
+        else{
+            collection.findOne({
+                'demo' : true
+            }, function(err, result) {
+                (err || !result) ? defer.reject('cannot find document'): defer.resolve(result);
+            });
+        }
+    });
+    return defer.promise;
+}
+exports.redirectDemo = function(req, res){
+    console.log('am i hitting this ?');
+    findDemoDashboard().then(function(demoDashboardModel){
+        console.log(demoDashboardModel);
+        res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
+    }, function(err){
+        res.send(404);
     });
 };
 
@@ -108,20 +130,24 @@ exports.findWidgetsOfDashboard = function(req, res) {
     });
 };
 
-var updateWidget = function(widgetModel){
+var updateWidget = function(widgetModel, allowDemo){
     var defer = Q.defer();
     db.collection(widgetCollection,function(err, collection) {
         if(err){
             defer.reject('widget collection cannot connect');
         }
         else{
-            console.log('connected to widget collection');
+            //console.log('connected to widget collection');
             getWidget(widgetModel._id)
             .then(function(result){
-                console.log('got widget');
+                //console.log('got widget');
                 getDashboard(widgetModel.dashboardId)
                 .then(function(result){
-                    console.log('got dashboard');
+                    //console.log('got dashboard');
+                    if(result.demo && !allowDemo){
+                        defer.resolve();
+                        return;
+                    }
                     widgetModel._id = mongo.ObjectID(widgetModel._id);
                     widgetModel.dateUpdated = new Date();
                     collection.save(widgetModel, {safe:true}, function(err, result) {
@@ -129,6 +155,7 @@ var updateWidget = function(widgetModel){
                         err ? defer.reject('cannot update widget') : defer.resolve();
                         //console.log(JSON.stringify(result));
                     });
+                    
                 }, function(err){
                     defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
                 });
@@ -141,8 +168,9 @@ var updateWidget = function(widgetModel){
     return defer.promise;
 };
 
-var addWidget = function(widgetModel){
+var addWidget = function(widgetModel, allowDemo){
     var defer = Q.defer();
+    console.log('addwidget method entered');
     db.collection(widgetCollection,function(err, collection) {
         if(err){
             defer.reject('widget collection cannot connect');
@@ -152,6 +180,10 @@ var addWidget = function(widgetModel){
             getDashboard(widgetModel.dashboardId)
             .then(function(result){
                 console.log('got dashboard');
+                if(result.demo && !allowDemo){
+                    defer.resolve();
+                    return;
+                }
                 widgetModel.dateCreated = new Date();
                 widgetModel.dateUpdated = new Date();
                 
@@ -164,6 +196,7 @@ var addWidget = function(widgetModel){
                     //console.log(JSON.stringify(result));
                 });
             }, function(err){
+                console.log('get dashboard failed when adding widget');
                 defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
             });
         }
@@ -171,30 +204,28 @@ var addWidget = function(widgetModel){
     return defer.promise;
 };
 
-
-
 exports.updateWidget = function(req, res){
     var widgetModel = req.body;
     if(!widgetModel._id){
         res.send(404);
     }
-    console.log('updating widget');
+    //console.log('updating widget');
     updateWidget(widgetModel)
     .then(function(){
-        console.log('updated widget');
+        //console.log('updated widget');
         res.send(200);
     }, function(err){
-        console.log('error updating widget');
+        //console.log('error updating widget');
         res.send(404);
     });
 }
 
 exports.addWidget = function(req, res){
     var widgetModel = req.body;
-    console.log('adding widget');
+    //console.log('adding widget');
     addWidget(widgetModel)
     .then(function(newWidgetModel){
-        console.log('added widget');
+        //console.log('added widget');
         res.send(newWidgetModel);
     }, function(err){
         res.send(404);
@@ -209,16 +240,32 @@ exports.deleteWidget = function(req, res){
             res.send(404);
         }
         else{
-            collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
-                //console.log(JSON.stringify(werr));
-                //console.log('deleted ' + req.params.widgetId);
-                res.send(200);
+            getWidget(widgetId)
+            .then(function(w){
+                getDashboard(w.dashboardId)
+                .then(function(d){
+                    if(d.demo){
+                        res.send(200);
+                        return;
+                    }
+                    //delete the widget
+                    collection.remove({_id : widgetId}, {safe:true,justOne:true}, function(err, result) {
+                        res.send(200);
+                    });
+
+                }, function(err){
+                    console.log('get dashboard failed when deleting widget');
+                    res.send(404);
+                })
+            }, function(err){
+                console.log('get widget failed when deleting widget');
+                res.send(404);
             });
         }
     });
 };
 
-var upsertDashboard = function(dashboardModel){
+var upsertDashboard = function(dashboardModel, allowDemo){
     var defer = Q.defer();
     db.collection(dashboardCollection,function(err, collection) {
         if(err){
@@ -226,6 +273,10 @@ var upsertDashboard = function(dashboardModel){
             defer.reject('invalid');
         }
         else{
+            if(dashboardModel.demo && !allowDemo){
+                defer.resolve();
+                return;
+            }
             if(dashboardModel._id){
                 dashboardModel._id = mongo.ObjectID(dashboardModel._id);
             }
@@ -258,7 +309,7 @@ exports.deleteDashboard = function(req, res){
             res.send(404);
         }
         else{
-            collection.remove({_id : dashboardId}, {safe:true,justOne:true}, function(err, result) {
+            collection.remove({_id : dashboardId, demo: false}, {safe:true,justOne:true}, function(err, result) {
                 res.send(200);
             });
         }
@@ -270,7 +321,7 @@ function removeCollection(collectionName){
     db.collection(collectionName,function(err, collection) {
         if(err){
             defer.reject('invalid');
-            console.log('rejected');
+            //console.log('rejected');
         }
         else{
             collection.remove({}, function(err, result) {
@@ -283,7 +334,7 @@ function removeCollection(collectionName){
 
 exports.truncateData = function(req, res){
     var onReject = function(){
-        console.log('send response when rejected');
+        //console.log('send response when rejected');
         res.send(404);
     };
 
@@ -296,19 +347,30 @@ exports.truncateData = function(req, res){
 };
 
 exports.generateDemoDashboard = function(req, res){
-    //create dashboard
-    upsertDashboard(demoData.dashboard)
+    var demoData = utils.clone(demoDashboardData);
+    upsertDashboard(demoData.dashboard, true)
     .then(function(dashboardModel){
+        console.log('demo dashboard generated');
         var wPromises = [];
         var dashboardId = dashboardModel._id.toString();
+        //var c = demoData.widgets.length + demoData.tags.length, temp = 0;
+        // function xx(){
+        //     temp++;
+        //     if(c === temp) res.send(200);
+        // }
         _.each(demoData.widgets, function(widgetModel){
+            console.log('iterating through widget models');
             widgetModel.dashboardId = dashboardId;
-            wPromises.push(addWidget(widgetModel));
+            //addWidget(widgetModel).then(xx);
+            wPromises.push(addWidget(widgetModel, true));
+            console.log('demo widget generated');
         });
         _.each(demoData.tags, function(tagModel){
             tagModel.dashboardId = dashboardId;
+            //addTag(tagModel).then(xx);
             wPromises.push(addTag(tagModel));
         });
+        
         Q.all(wPromises)
         .then(function(){
             res.send(200);
@@ -377,8 +439,8 @@ exports.getAllTagsOfDashboard = function(req, res){
     });
 };
 
-var addTag = function(tagModel){
-    console.log('adding tag');
+var addTag = function(tagModel, allowDemo){
+    //console.log('adding tag');
     var defer = Q.defer();
     if(!tagModel) {
         defer.reject('tag model undefined');
@@ -389,17 +451,24 @@ var addTag = function(tagModel){
             defer.reject('tag collection error');
         }
         else{       
-            //delete tagModel._id;
-            console.log('tag collection entered');
-            collection.update({
-                tagName: tagModel.tagName,
-                dashboardId: tagModel.dashboardId
-            },
-            tagModel,
-            { upsert: true },
-            function(err, result){
-                console.log('added tag');
-                err ? defer.reject() : defer.resolve();
+            getDashboard(tagModel.dashboardId)
+            .then(function(result){
+                if(result.demo && !allowDemo){
+                    defer.resolve();
+                    return;
+                }
+                collection.update({
+                    tagName: tagModel.tagName,
+                    dashboardId: tagModel.dashboardId
+                },
+                tagModel,
+                { upsert: true },
+                function(err, result){
+                    err ? defer.reject() : defer.resolve();
+                });
+            }, function(err){
+                console.log('get dashboard failed when adding tags');
+                defer.reject('Dashboard not found. Id: ' + tagModel.dashboardId);
             });
         }
     });

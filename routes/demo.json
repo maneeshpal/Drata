@@ -1,7 +1,8 @@
 {
 	"dashboard" : {
 	    "name" : "demo dashboard",
-	    "theme" : "default"
+	    "theme" : "default",
+	    "demo": true
 	},
 	"tags" : [
 		{

@@ -13,10 +13,11 @@
 }
 
 .ui-sortable-placeholder {
-  background-color: #E5E0E0;
+  //background-color: #E5E0E0;
   visibility: visible !important;
-  height: 414px;
-  width: 100%; }
+  height: auto;
+  width: 100%; 
+}
 
 .postfix.giant, input.giant{
   height: 3.5rem;

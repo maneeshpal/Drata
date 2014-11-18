@@ -83,7 +83,6 @@ var calc = function(left, operation, right){
     
 var divideDataByInterval = function(params){
     var val, groupBy;
-    debugger;
     var intervalGroup = _.groupBy(params.data, function(item){
         val = item[params.property];
         //TODO: Clean this 

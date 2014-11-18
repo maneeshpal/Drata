@@ -403,6 +403,39 @@
         }
     };
 
+    var tooltip = {
+        init: function(element, valueAccessor){
+            var options = valueAccessor();
+            var $elem = $(element);
+            $elem.click(function(){
+                if($elem.data('dropdown')){
+                    return;
+                }
+                
+                var size = options.size || 'small';
+                var uniqId = 'tt' + +(new Date());
+                $elem.attr('data-dropdown', uniqId);
+                var contentElem = document.createElement('div');
+                contentElem.id = uniqId;
+                $(contentElem)
+                    .attr('data-dropdown-content', '')
+                    .addClass('f-dropdown content ' + size)
+                    .html(drata.nsx.toolTipContent[options.datakey]);
+                $('body').append(contentElem);
+            });
+            if(!drata.globalsettings.enableToolTips()){
+                $elem.hide();
+            }
+            drata.globalsettings.enableToolTips.subscribe(function(newValue){
+                if(!newValue) {
+                    $elem.hide();
+                }else{
+                    $elem.show();
+                }
+            });
+        }
+    };
+
     ko.bindingHandlers.slideVisible = slideVisibleBindingHandler;
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;
@@ -410,7 +443,7 @@
     ko.bindingHandlers.sortableList = sortableList;
     ko.bindingHandlers.resizeText = resizeText;
     ko.bindingHandlers.checkboxDropdown = checkboxDropdownBindingHandler;
-
+    ko.bindingHandlers.tooltip = tooltip;
     ko.virtualElements.allowedBindings.editLabel = true;
     ko.virtualElements.allowedBindings.sortableList = true;
 })(ko, jQuery);

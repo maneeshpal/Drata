@@ -12,6 +12,7 @@
 body {
 	position:relative;
 	font-family: exo;
+	background-color: $dark;
 }
 
 .r-corner {
@@ -79,19 +80,21 @@ body {
 
 .l1 {
 	background: rgba($dark,1);
-	//min-height:141.421px;
+	line-height:2rem;
 	font-size:2rem;
 	padding:20px 370px 20px 0.9375rem;
+	border-bottom: 1px solid $orange_base;
 	color:#fff;
 }
 
 .slide-bg-wrapper {
 	color:$superlight;
-	padding:30px 0 200px 0;
+	max-width: 1200px;
+	padding:30px 0 0 0;
 	width:100%;
 	position: relative;
 	background:$dark;
-	border-top: 1px solid $orange_base;
+	//background-image: linear-gradient(0deg,$dark 0,$superdark 100%);
 }
 
 .header-content {
@@ -149,7 +152,7 @@ body {
 		opacity: .8;
 		.arc {
 			stroke-width:3;
-			stroke:$dark;
+			stroke: $dark;
 		}	
 	}
 	.text-group text{
@@ -157,7 +160,7 @@ body {
 	}
 }
 .callout {
-	height: 150px;
+	height: 100px;
 	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
 		font-size:60px;
 		display: block;
@@ -167,12 +170,12 @@ body {
 	.desc{
 		transition: all .1s linear;
 		font-size: 20px;
-		padding:40px 0 20px 0;
+		padding:50px 0 0 0;
 	}
 	.barchi {
 		visibility: hidden;
-		height:40px;
-		padding:0 20px;
+		height:30px;
+		padding:0 10px;
 		svg {
 			opacity: .7;
 		}
@@ -181,7 +184,7 @@ body {
 		stroke : $dark;
 	}
 	
-	background-color: $dark;
+	//background-color: $dark;
 	transition: all .1s linear;
 	@media screen and (min-width: 600px){
 	&:hover{
@@ -190,12 +193,59 @@ body {
 			visibility: visible;
 		}
 		.desc{
-			padding:20px 0 20px 0;
+			padding:40px 0 0 0;
 		}
 	}
 	}
 }
 
+.feature-section {
+	//background-image: linear-gradient(0deg,$superdark 0,$dark 100%);
+	//background-color: $superdark;
+	//border-bottom: 1px solid $orange_base;
+	padding:20px 0;
+	max-width: 1200px;
+	.heading {
+		color: $superlight;
+		.vis {
+			height:20px;
+			width:20px;
+			display: inline-block;
+			rect {
+				stroke:$superdark;
+			}
+		}
+	}
+	:hover .heading{
+		color:$orange_base;
+	}
+	.content {
+		color: $light;
+	}
+}
+.opensource-section {
+	background-image: url('/images/dashboard_bg.png');
+	background-repeat: repeat;
+	height: 800px;
+	position: relative;
+}
+
+.section-content {
+	//background-image: linear-gradient(45deg,$superlight 0,#fff 100%);
+	background-color: #fff;
+	opacity: .9;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+}
+
+@media screen and (max-width: 1024px){
+	.header-content {
+		.subheading {
+			padding-right:60px;
+		}
+	}
+}
 @media screen and (max-width: 768px){
 	.pie-menu {
 		height:300px;
@@ -212,7 +262,7 @@ body {
 	.header-chart-inner{
 	}
 	.header-content {
-		padding:20px;
+		padding:0;
 		.heading {
 			padding:0;
 		}
@@ -222,36 +272,6 @@ body {
 	}
 }
 
-.cake {
-	background-color: $kindadark;
-	position: relative;
-	padding:20px 0;
-	border-bottom: 1px solid $dark;
-	h3 {
-		color: $orange_base;
-		small {
-			color : $superlight;
-		}
-	}
-	[class^="flaticon-"], [class*=" flaticon-"]{
-		display: inline !important;
-	}
-	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
-		margin-left: 0;
-	}	
-	.cake-visual{
-		color:$superlight;
-		[class^="flaticon-"], [class*=" flaticon-"]{
-			position: relative;
-			top:60px;
-			margin-left: 20px;
-		}
-		[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
-			font-size:80px;
-		}	
-	}
-	
-}
 .footer{
 	background-color: $superdark;
 	padding:20px 0;
