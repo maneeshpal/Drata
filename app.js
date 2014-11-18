@@ -51,7 +51,7 @@ app.configure(function () {
     app.use(express.static(path.join(__dirname, 'content')));
 });
 
-app.set('port', 4000);
+app.set('port',process.env.PORT || 3000);
 console.log('prcess port: ' + process.env.PORT);
 
 app.get('/dashboard/manage', function(req, res){
