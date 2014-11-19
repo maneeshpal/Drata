@@ -4,7 +4,7 @@ var socket = require('./socket');
 var config = require('./config.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
-var Q = require('Q');
+var Q = require('q');
 var demoDashboardData = require('./demo.json');
 
 var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
