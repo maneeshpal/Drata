@@ -101,11 +101,11 @@ body {
 	padding-left:400px;
 	padding-top: 40px; 
 	.heading {
-		padding-right:240px;
+		padding-right:110px;
 		color: $orange_base;
 	}
 	.subheading {
-		padding-right:150px;
+		padding-right:110px;
 		button, .button {
 			margin-top:1.5rem;
 		}
@@ -115,6 +115,7 @@ body {
 
 .pie-menu {
 	position: relative;
+	padding-top:40px;
 	width:400px;
 	height:400px;
 	left:-20px;
@@ -203,18 +204,11 @@ body {
 	//background-image: linear-gradient(0deg,$superdark 0,$dark 100%);
 	//background-color: $superdark;
 	//border-bottom: 1px solid $orange_base;
-	padding:20px 0;
-	max-width: 1200px;
+	padding-top:20px;
+	padding-bottom:20px;
+	//max-width: 1000px;
 	.heading {
 		color: $superlight;
-		.vis {
-			height:20px;
-			width:20px;
-			display: inline-block;
-			rect {
-				stroke:$superdark;
-			}
-		}
 	}
 	:hover .heading{
 		color:$orange_base;
@@ -222,6 +216,23 @@ body {
 	.content {
 		color: $light;
 	}
+}
+
+.vis, .vismain {
+	display: inline-block;
+	rect {
+		stroke:$superdark;
+	}
+}
+.vis {
+	height:20px;
+	width:20px;
+}
+.vismain {
+	height: 25px;
+	width: 25px;
+	position: relative;
+	top: 1px;
 }
 .opensource-section {
 	background-image: url('/images/dashboard_bg.png');
@@ -239,10 +250,15 @@ body {
 	position: absolute;
 }
 
+@media screen and (min-width: 1024px){
+	.feature-section {
+		padding-left:40px;
+	}
+}
 @media screen and (max-width: 1024px){
 	.header-content {
 		.subheading {
-			padding-right:60px;
+			padding-right:75px;
 		}
 	}
 }

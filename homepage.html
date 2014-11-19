@@ -15,7 +15,7 @@
     <div class="small-12 columns">
         <div class="r-corner">
             <div class="r-corner1 show-for-large-up">
-                <span class="take_demo">demo</span>
+                <span class="take_demo"><a href="/demo">demo</a></span>
             </div>
             
             <div class="r-corner3">drata</div>
@@ -24,53 +24,49 @@
                     <li>about</li>
                     <li><a href="http://github.com/maneeshpal/drata/wiki">docs</a></li>
                     <li><a href="http://github.com/maneeshpal/drata">download</a></li>
-                    <li class="hide-for-large-up">demo</li>
+                    <li class="hide-for-large-up"><a href="/demo">demo</a></li>
                 </ul>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="ddd">
             <div class="small-12 columns l1">
-                Data Driven Dashboard
+                <div class="vismain"><svg></svg></div>Data Driven Dashboard
             </div>
         </div>
         <div class="row">
-            <div class="medium-12 large-10 columns medium-centered">
-                <div id="slideBgWrapper" class="slide-bg-wrapper">
-                    <div class="row" style="margin:0 auto; max-width:80rem">
-                        <div class="pie-menu">
-                            <div class="header-chart" id="pieMenu">
-                                        <svg></svg>
-                            </div>
-                            <div class="header-chart-inner" id="pieMenuSub">
-                                <svg></svg>
-                            </div>
+            <div class="medium-12 large-10 columns large-centered">
+                <div class="pie-menu">
+                    <div class="header-chart" id="pieMenu">
+                        <svg></svg>
+                    </div>
+                    <div class="header-chart-inner" id="pieMenuSub">
+                        <svg></svg>
+                    </div>
+                </div>
+                <div class="header-content">
+                    <h2 id="mainHeader" class="heading"></h2>
+                    <h2 class="subheading"><small id="subHeader"></small></h2>
+                </div>
+                <div class="row" style="position:absolute; display:none; bottom:0;left:0;right:0">
+                    <div class="small-4 columns text-center callout">
+                        <span class="flaticon-analytics5"></span> 
+                        <div class="desc">Open Source</div>
+                        <div id="openSource" class="barchi">
+                            <svg></svg>    
                         </div>
-                        <div class="header-content">
-                            <h2 class="heading"></h2>
-                            <h2 class="subheading"><small></small></h2>
+                    </div>
+                    <div class="small-4 columns text-center callout">
+                        <span class="flaticon-wireless29"></span> 
+                        <div class="desc">Minimal setup</div>
+                        <div id="misnimal" class="barchi">
+                            <svg></svg>    
                         </div>
-                        <div class="row" style="position:absolute; display:none; bottom:0;left:0;right:0">
-                            <div class="small-4 columns text-center callout">
-                                <span class="flaticon-analytics5"></span> 
-                                <div class="desc">Open Source</div>
-                                <div id="openSource" class="barchi">
-                                    <svg></svg>    
-                                </div>
-                            </div>
-                            <div class="small-4 columns text-center callout">
-                                <span class="flaticon-wireless29"></span> 
-                                <div class="desc">Minimal setup</div>
-                                <div id="misnimal" class="barchi">
-                                    <svg></svg>    
-                                </div>
-                            </div>
-                            <div class="small-4 columns text-center callout">
-                                <span class="flaticon-analytics5"></span> 
-                                <div class="desc">No coding</div>
-                                <div id="noTracking" class="barchi">
-                                    <svg></svg>    
-                                </div>
-                            </div>
+                    </div>
+                    <div class="small-4 columns text-center callout">
+                        <span class="flaticon-analytics5"></span> 
+                        <div class="desc">No coding</div>
+                        <div id="noTracking" class="barchi">
+                            <svg></svg>    
                         </div>
                     </div>
                 </div>
@@ -85,35 +81,35 @@
 </section> -->
 
 <div id="setup" class="feature-section easytosetup row">
-    <div class="medium-12 large-10 column medium-centered">
+    <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>Easy to Setup</h3>
     <p class="content">Drata is very easy to setup and get going. Infact, it would not take more than a few minutes to configure if you have Node, MongoDB and GIT up and running. All the other dependancies are downloaded via node package manager.</p>
     </div>
 </div>
 
 <div id="minimal" class="feature-section trackingcode row">
-    <div class="medium-12 large-10 column medium-centered">
+    <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>No extra coding needed</h3>
     <p class="content">Drata is a data warehousing tool that runs on your local network and connects to your database instance to pull analytics. There is no need to use any copy paste scripts on your webpages, or any additional logging in your code behind files.</p>
     </div>
 </div>
 
 <div id="dashboards" class="feature-section dashboardswidgets row">
-    <div class="medium-12 large-10 column medium-centered">
+    <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>Dashboard & widgets</h3>
     <p class="content">There is no limit to the number of dashboads you can have, or the number of different widgets you can attach to a dashboard. One of the main features of a Drata is that you can connect each widget to a different datasource on a different database server. Widgets can be easily cloned to a different dashboard without interfearing with anyone else's setup. See it for yourself.</p>
     </div>
 </div>
 
 <div id="opensource" class="feature-section row">
-    <div class="medium-12 large-10 column medium-centered">
+    <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>Proudly opensource</h3>
     <p class="content">Drata embraces opensource softwares. It is free for anyone to use modify to their needs. More info..</p>
     </div>
 </div>
 
 <div id="visuals" class="feature-section row">
-    <div class="medium-12 large-10 column medium-centered">
+    <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>Powerful and extendable visualizations</h3>
     <p class="content">All the visualizations used on Drata are custom built on D3 js library. All the components used are reusable modules. So, you can easily extend any chart to include components from existing charts. You may also tinker with the animations and dispatch events, there are a lot of those, and I am a bit overwhelmed with the complexity of some myself.</p>
     </div>
@@ -135,7 +131,7 @@
     <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript">
         (function (root, $) {
-            var mainheader = $('#slideBgWrapper');
+            //var mainheader = $('#slideBgWrapper');
             // var minh = Math.max(600, $(window).height() - 68, mainheader.height());
             // mainheader.attr('style', 'min-height:' + minh + 'px');
             var data = {
@@ -172,8 +168,8 @@
             var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).textFillColor('#6f6f6f').onEvent('arcClick', function(d){
                 setTimeout(chart2.resize, 200);
                 //chart2.resize();
-                $('h2.heading').html(d.data.heading);
-                $('h2.subheading small').html(d.data.content);
+                $('#mainHeader').html(d.data.heading);
+                $('#subHeader').html(d.data.content);
             });
 
             d3.select('#pieMenu svg')
@@ -184,8 +180,8 @@
                 .datum(data)
                 .call(chart2);
 
-            $('h2.heading').html(data.values[0].heading);
-            $('h2.subheading small').html(data.values[0].content);
+            $('#mainHeader').html(data.values[0].heading);
+            $('#subHeader').html(data.values[0].content);
             
             function drawBarCallout(elemId){
                 var _t;
@@ -215,7 +211,7 @@
             drawBarCallout('dashboards');
             drawBarCallout('opensource');
             drawBarCallout('visuals');
-
+            drawBarCallout('ddd');
             var t;
             drata.utils.windowResize(function(){
                 t && clearTimeout(t);

@@ -225,15 +225,16 @@ body {
   padding-left: 400px;
   padding-top: 40px; }
   .header-content .heading {
-    padding-right: 240px;
+    padding-right: 110px;
     color: #ea8219; }
   .header-content .subheading {
-    padding-right: 150px; }
+    padding-right: 110px; }
     .header-content .subheading button, .header-content .subheading .button {
       margin-top: 1.5rem; }
 
 .pie-menu {
   position: relative;
+  padding-top: 40px;
   width: 400px;
   height: 400px;
   left: -20px;
@@ -298,20 +299,29 @@ body {
         padding: 40px 0 0 0; } }
 
 .feature-section {
-  padding: 20px 0;
-  max-width: 1200px; }
+  padding-top: 20px;
+  padding-bottom: 20px; }
   .feature-section .heading {
     color: #a6a6a6; }
-    .feature-section .heading .vis {
-      height: 20px;
-      width: 20px;
-      display: inline-block; }
-      .feature-section .heading .vis rect {
-        stroke: #0d0d0d; }
   .feature-section :hover .heading {
     color: #ea8219; }
   .feature-section .content {
     color: #737373; }
+
+.vis, .vismain {
+  display: inline-block; }
+  .vis rect, .vismain rect {
+    stroke: #0d0d0d; }
+
+.vis {
+  height: 20px;
+  width: 20px; }
+
+.vismain {
+  height: 25px;
+  width: 25px;
+  position: relative;
+  top: 1px; }
 
 .opensource-section {
   background-image: url('/images/dashboard_bg.png');
@@ -326,9 +336,13 @@ body {
   width: 100%;
   position: absolute; }
 
+@media screen and (min-width: 1024px) {
+  .feature-section {
+    padding-left: 40px; } }
+
 @media screen and (max-width: 1024px) {
   .header-content .subheading {
-    padding-right: 60px; } }
+    padding-right: 75px; } }
 
 @media screen and (max-width: 768px) {
   .pie-menu {

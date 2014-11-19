@@ -6,7 +6,13 @@
 ; (function(root) {
     var unique_id = drata.global.uniqueClientId;
     var apiRoot = '/api/';
-    var socket = io.connect();
+    var socket;
+    try{
+        socket = io.connect();
+    }
+    catch(e){
+        
+    }
     var apiExternalRoot = apiRoot + 'external/';
     var database = 'shopperstop';
     var _perform = function(verb, url, body, callback){
