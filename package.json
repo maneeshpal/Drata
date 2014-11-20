@@ -15,9 +15,10 @@
     "underscore": "^1.6.0"
   },
   "devDependencies": {
-    "node-sass": "~0.7.0",
     "grunt": "~0.4.1",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-watch": "~0.5.3",
-    "grunt-sass": "~0.8.0"
+    "grunt-sass": "~0.8.0",
+    "node-sass": "~0.7.0"
   }
 }

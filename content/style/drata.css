@@ -306,7 +306,14 @@ body {
   .feature-section :hover .heading {
     color: #ea8219; }
   .feature-section .content {
-    color: #737373; }
+    color: #737373;
+    font-size: 1.1em; }
+
+.home-button {
+  background-color: #ea8219; }
+
+.home-button:hover {
+  background-color: #dd750c; }
 
 .vis, .vismain {
   display: inline-block; }
@@ -315,7 +322,8 @@ body {
 
 .vis {
   height: 20px;
-  width: 20px; }
+  width: 20px;
+  margin-right: 4px; }
 
 .vismain {
   height: 25px;

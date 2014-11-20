@@ -215,7 +215,15 @@ body {
 	}
 	.content {
 		color: $light;
+		font-size: 1.1em;
 	}
+}
+
+.home-button {
+	background-color: #EA8219;
+}
+.home-button:hover {
+	background-color: rgb(221,117,12);
 }
 
 .vis, .vismain {
@@ -227,6 +235,7 @@ body {
 .vis {
 	height:20px;
 	width:20px;
+	margin-right: 4px;
 }
 .vismain {
 	height: 25px;
