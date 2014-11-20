@@ -8,7 +8,6 @@ var express = require('express'),
     sqlRepository = require('./routes/sqlRepository.js'),
     drataRepository = require('./routes/drataRepository.js'),
    	http = require('http'),
-   	cors = require('cors'),
    	path = require('path'),
     config = require('./routes/config.json'),
     skt = require('./routes/socket.js');
@@ -46,17 +45,11 @@ app.configure(function () {
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
     //app.use(express.bodyParser());
     app.use(express.json());
-    //app.use(cors());
     app.use(express.urlencoded());
     app.use(express.static(path.join(__dirname, 'content')));
 });
 
 app.set('port',process.env.PORT || 3000);
-console.log('prcess port: ' + process.env.PORT);
-
-app.get('/dashboard/manage', function(req, res){
-  res.sendfile('manage.html');
-});
 
 app.get('/dashboard/:dashboardId', function(req, res){
   res.sendfile('dash.html');
@@ -64,18 +57,6 @@ app.get('/dashboard/:dashboardId', function(req, res){
 
 app.get('/dashboard', function(req, res){
   res.sendfile('dash.html');
-});
-
-app.get('/segment', function(req, res){
-  res.sendfile('segment.html');
-});
-
-app.get('/temp', function(req, res){
-  res.sendfile('temp.html');
-});
-
-app.get('/tcup', function(req, res){
-  res.sendfile('tcup.html');
 });
 
 app.get('/', function(req, res){
