@@ -273,20 +273,30 @@ var upsertDashboard = function(dashboardModel, allowDemo){
             defer.reject('invalid');
         }
         else{
-            if(dashboardModel.demo && !allowDemo){
-                defer.resolve();
-                return;
-            }
             if(dashboardModel._id){
-                dashboardModel._id = mongo.ObjectID(dashboardModel._id);
+                getDashboard(dashboardModel._id)
+                .then(function(d){
+                    if(d.demo && !allowDemo){
+                        defer.resolve();
+                        return;
+                    }
+                    dashboardModel._id = mongo.ObjectID(dashboardModel._id);
+                    dashboardModel.dateUpdated = new Date();
+                    collection.save(dashboardModel, {safe:true}, function(err, result) {
+                        err ? defer.reject('invalid') : defer.resolve(result);
+                    });
+                }, function(err){
+                    console.log('get dashboard failed when updating/creating dashboard');
+                    defer.reject();
+                });
             }
-            if(!dashboardModel.dateCreated){
+            else{
                 dashboardModel.dateCreated = new Date();
+                dashboardModel.dateUpdated = new Date();
+                collection.save(dashboardModel, {safe:true}, function(err, result) {
+                    err ? defer.reject('invalid') : defer.resolve(result);
+                });
             }
-            dashboardModel.dateUpdated = new Date();
-            collection.save(dashboardModel, {safe:true}, function(err, result) {
-                err ? defer.reject('invalid') : defer.resolve(result);
-            });
         }
     });
     return defer.promise;
