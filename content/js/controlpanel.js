@@ -190,7 +190,7 @@
     	var currentDashboardId = window.location.pathname.split('/')[2];
 		
 		if(currentDashboardId){
-			var d = new Dashboard(currentDashboardId);
+			var d = new drata.dashboard.dashboard(currentDashboardId);
 			self.currentDashboard(d);
 		}
 		self.displayMode = ko.computed(function(){
@@ -544,7 +544,7 @@
 	        self.sizey(cloneModel.sizey);
 
 	        self.addUpdateBtnText('Update Widget');
-	        self.previewWidget(new Widget(cloneModel, 100, true));
+	        self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
 	    };
 
 	    self.widgetCancel = function() {
@@ -564,7 +564,7 @@
 	    self.preview = function(){
 	        var model = self.segment.getModel();
 	        if(!model) return;
-	        self.previewWidget(new Widget({
+	        self.previewWidget(new drata.dashboard.widget({
 	        	name: self.name(),
 	            dataSource: self.dataSource(),
 	            database: self.database(),

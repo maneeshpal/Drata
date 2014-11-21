@@ -160,53 +160,11 @@ body {
 		display: none;
 	}
 }
-.callout {
-	height: 100px;
-	[class^="flaticon-"]:before, [class*=" flaticon-"]:before, [class^="flaticon-"]:after, [class*=" flaticon-"]:after{
-		font-size:60px;
-		display: block;
-		width: 100%;
-		margin-left: 0;
-	}
-	.desc{
-		transition: all .1s linear;
-		font-size: 20px;
-		padding:50px 0 0 0;
-	}
-	.barchi {
-		visibility: hidden;
-		height:30px;
-		padding:0 10px;
-		svg {
-			opacity: .7;
-		}
-	}
-	rect{
-		stroke : $dark;
-	}
-	
-	//background-color: $dark;
-	transition: all .1s linear;
-	@media screen and (min-width: 600px){
-	&:hover{
-		color:$orange_base;
-		.barchi {
-			visibility: visible;
-		}
-		.desc{
-			padding:40px 0 0 0;
-		}
-	}
-	}
-}
 
 .feature-section {
 	//background-image: linear-gradient(0deg,$superdark 0,$dark 100%);
-	//background-color: $superdark;
-	//border-bottom: 1px solid $orange_base;
 	padding-top:20px;
 	padding-bottom:20px;
-	//max-width: 1000px;
 	.heading {
 		color: $superlight;
 	}
@@ -242,21 +200,6 @@ body {
 	width: 25px;
 	position: relative;
 	top: 1px;
-}
-.opensource-section {
-	background-image: url('/images/dashboard_bg.png');
-	background-repeat: repeat;
-	height: 800px;
-	position: relative;
-}
-
-.section-content {
-	//background-image: linear-gradient(45deg,$superlight 0,#fff 100%);
-	background-color: #fff;
-	opacity: .9;
-	height: 100%;
-	width: 100%;
-	position: absolute;
 }
 
 @media screen and (min-width: 1024px){
@@ -336,9 +279,6 @@ body {
 }
 
 @media screen and (max-width: 768px){
-.callout .desc {
-	font-size: 14px;
-}
 .l1 {
 	font-size: 1.5rem;
 }
