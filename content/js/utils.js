@@ -26,9 +26,16 @@
     };
 
     function addPartToNamespace(ns, parts) {
-        if (parts.length === 0) return ns;
+        if (parts.length === 0) {
+            return ns;
+        }
         var first = parts.shift();
-        if (!ns[first]) ns[first] = Object.create(nsProto);
+        if (!ns[first]){
+            ns[first] = Object.create(nsProto);
+        }
+        else{
+            ns[first].extend = Object.create(nsProto).extend;
+        }
         return addPartToNamespace(ns[first], parts);
     }
 

@@ -1,0 +1,97 @@
+{
+	"description": "Linechart, sum(price) groupby geography, interval quarter",
+	"inputData": [{
+		"price": 200,
+		"geography": "texas",
+		"timestamp": "10/10/2008",
+		"sex": "male"
+	},{
+		"price": 300,
+		"geography": "misissipi",
+		"timestamp": "3/10/2009",
+		"sex": "male"
+	},{
+		"price": 300,
+		"geography": "misissipi",
+		"timestamp": "3/13/2009",
+		"sex": "male"
+	},{
+		"price": 100,
+		"geography": "texas",
+		"timestamp": "4/10/2009",
+		"sex": "male"
+	}],
+	"expected": [{
+	    "key": "sum_price",
+	    "values": [
+			{
+				"key": "texas",
+				"values": [
+				  {
+				    "x": 1222837200000,
+				    "y": 200
+				  },
+				  {
+				    "x": 1238562000000,
+				    "y": 100
+				  }
+				]
+			},
+			{
+				"key": "misissipi",
+				"values": [
+				  {
+				    "x": 1230789600000,
+				    "y": 600
+				  }
+				]
+			}
+	    ]
+	 }],
+	"segment": {
+		"selection": [
+			{
+				"groupType": "selection",
+				"groups": [],
+				"logic": "+",
+				"groupBy": "sum",
+				"selectedProp": "price",
+				"isComplex": false
+			}
+		],
+		"dataGroup": {
+			"hasGrouping": true,
+			"groupByProp": "geography",
+			"xAxisType": "date",
+			"timeseries": true,
+			"xAxisProp": "timestamp",
+			"timeseriesInterval": "quarter"
+		},
+		"group": [
+			{
+				"groupType": "condition",
+				"groups": [],
+				"logic": "and",
+				"selection": {
+					"groupType": "selection",
+					"groups": [],
+					"logic": "+",
+					"selectedProp": "sex",
+					"isComplex": false,
+					"perc": false
+				},
+				"isComplex": false,
+				"operation": "=",
+				"value": "male",
+				"valType": "string"
+			}
+		],
+		"dataFilter": {
+			"intervalType": "static",
+			"min": "10/04/2006",
+			"max": "11/05/2014",
+			"dateProp": "timestamp"
+		},
+		"chartType": "line"
+	}
+}

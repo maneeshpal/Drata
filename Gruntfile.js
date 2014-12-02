@@ -55,6 +55,7 @@ module.exports = function(grunt) {
         'content/js/pubsub.js',
         'content/js/keypress.js',
         'content/js/notifier.js',
+        'content/js/widgeteditor.js',
         'content/js/controlpanel.js',
         'content/js/tooltipcontent.js'
         ],
@@ -83,6 +84,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('buildcss', ['sass']);
-  grunt.registerTask('buildjs', ['concat', 'uglify']);
+  grunt.registerTask('buildjs', ['concat']);
   grunt.registerTask('default', ['buildcss', 'buildjs', 'watch']);
 }

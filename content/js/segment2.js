@@ -912,7 +912,7 @@ var Selection = function(options){
     };
 
     self.showPercentChange = ko.computed(function(){
-        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.cPanel.widgetEditor.segment.chartType()) > -1){
+        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.dashboard.widgetEditor.segment.chartType()) > -1){
             return true;
         }
         else{
@@ -1089,6 +1089,7 @@ var SelectionGroup = function(options){
         });
         return returnGroups;
     };
+    
     self.expression = ko.computed(function(){
         var expressions = [], exp;
         var innerGroups = self.items();
@@ -1102,24 +1103,4 @@ var SelectionGroup = function(options){
         
         return 'Select ' + expressions.join(', ');
     });
-};
-
-var DataRetriever = {
-    getData : function(model,callback){
-        var postData = {
-            chartType: model.segment.chartType,
-            selection: model.segment.selection,
-            dataGroup: model.segment.dataGroup,
-            dataFilter: model.segment.dataFilter,
-            group: model.segment.group
-        };
-
-        drata.apiClient.getData(postData, {
-            dataSource: model.dataSource, 
-            database: model.database, 
-            collectionName: model.collectionName
-        }, function(response){
-            callback && callback(response);
-        });
-    }
 };

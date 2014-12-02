@@ -93,6 +93,6 @@
         }
     };
     root.drata.ns('utils').extend({
-        tempData : tempData
+        tempdata : tempData
     });
 })(this);

@@ -1,11 +1,11 @@
 var mongo = require('mongodb');
-var utils = require('./utils');
-var socket = require('./socket');
-var config = require('./config.json');
+var utils = require('../utils/utils');
+var socket = require('../routes/socket');
+var config = require('../routes/config.json');
 var BSON = mongo.BSONPure;
 var _ = require('underscore');
 var Q = require('q');
-var demoDashboardData = require('./demo.json');
+var demoDashboardData = require('../routes/demo.json');
 
 var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
 
@@ -378,7 +378,7 @@ exports.generateDemoDashboard = function(req, res){
         _.each(demoData.tags, function(tagModel){
             tagModel.dashboardId = dashboardId;
             //addTag(tagModel).then(xx);
-            wPromises.push(addTag(tagModel));
+            wPromises.push(addTag(tagModel, true));
         });
         
         Q.all(wPromises)

@@ -1,29 +1,32 @@
 //var mongo = require('mongodb');
-var utils = require('./utils');
-var aggregator = require('./aggregator');
-var config = require('./config.json');
+var utils = require('../utils/utils');
+var aggregator = require('../utils/aggregator');
+var config = require('../routes/config.json');
 var baseMongoRepo = require('./baseMongoRepository');
+var Q = require('q');
 
 exports.pop = function(req, res){
     populateDB(req, res);
 };
 
-exports.getDatabaseNames = function(req, res){
-    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName('local')(function(db){
+exports.getDatabaseNames = function(datasource){
+    var defer = Q.defer();
+    baseMongoRepo.dbInstance().serverName(datasource).dbName('local')(function(db){
         if(!db){
-            res.send(500, 'Database connection failure.');
+            defer.reject({code: 500, message:'Database connection failure'});
             return;
         }
         db.admin().listDatabases(function(err, resp){
             if(err){
-                res.send(500);
+                defer.reject({code: 500, message:'Error getting database names'});
                 return;
             }
-            res.json(resp.databases.map(function(d){
+            defer.resolve(resp.databases.map(function(d){
                 return d.name;
             }));    
         });
     });
+    return defer.promise;
 };
 
 exports.getCollectionNames = function(req, res) {
@@ -82,12 +85,8 @@ exports.findCollection = function(req, res) {
         }
         var collectionName = req.params.collectionName;
         var segment = req.body;
-        //console.log('my segment :' + JSON.stringify(segment, 'null', '\t'));
         var query = utils.getMongoQuery(segment);
         var selectOnly = utils.getMongoProperties(segment);
-        //console.log('mongo query :' + JSON.stringify(query, null, '\t'));
-        //console.log('select only :' + JSON.stringify(selectOnly, null, '\t'));
-        //var ss = +(new Date());
         db.collection(collectionName, function(err, collection) {
             if(err){
                 res.send(500, 'Cannot access collection '+ collectionName);
@@ -98,8 +97,6 @@ exports.findCollection = function(req, res) {
                     res.send(500);
                     return;
                 }
-                //console.log('got response : ' + (+(new Date()) - ss));
-                //ss = +(new Date());
                 var ret = [];
                 for(var i = 0; i< items.length; i++){
                     ret.push(utils.flatten(items[i]));
@@ -107,16 +104,13 @@ exports.findCollection = function(req, res) {
                 
                 var graphData;
                 try{
-                    graphData = aggregator.aggregator.getGraphData(segment, ret);    
+                    graphData = aggregator.getGraphData(segment, ret);    
                 }
                 catch(e){
                    res.send(500, e); 
                    return;
                 }
-                //console.log('aggregator done : ' + (+(new Date()) - ss));
-                
                 res.send(graphData);
-                //db.close();
             });
             
         });

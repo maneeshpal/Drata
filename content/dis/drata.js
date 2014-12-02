@@ -9493,9 +9493,16 @@ return isNaN(t)?d:t},g=p(l[0]),m=Math.max(g,p(l[1]||"")),g=a?Math.max(g,a.getFul
     };
 
     function addPartToNamespace(ns, parts) {
-        if (parts.length === 0) return ns;
+        if (parts.length === 0) {
+            return ns;
+        }
         var first = parts.shift();
-        if (!ns[first]) ns[first] = Object.create(nsProto);
+        if (!ns[first]){
+            ns[first] = Object.create(nsProto);
+        }
+        else{
+            ns[first].extend = Object.create(nsProto).extend;
+        }
         return addPartToNamespace(ns[first], parts);
     }
 
@@ -13915,179 +13922,180 @@ return isNaN(t)?d:t},g=p(l[0]),m=Math.max(g,p(l[1]||"")),g=a?Math.max(g,a.getFul
     }
     var apiExternalRoot = apiRoot + 'external/';
     var database = 'shopperstop';
-    var _perform = function(verb, url, body, callback){
+    var _perform = function(verb, url, body){
         var options = {
             type: verb.toUpperCase(),
             url: url,
             contentType: 'application/json',
-            headers: { 'Access-Control-Allow-Origin': '*', 'clientid': unique_id },
-            success: function(response, stats){
-                callback && callback({success: true, result:response});
-            },
-            error: function(response){
-                console.log(response);
-                callback && callback({
-                    success: false,
-                    status: response.status,
-                    message: response.responseText
-                });
-            }
+            headers: { 'Access-Control-Allow-Origin': '*', 'clientid': unique_id }
         };
         if(body){
             options.data = JSON.stringify(body);
         }
                   
-        $.ajax(options);
+        return $.ajax(options);
     };
 
-    var getDashboard = function(id, callback){
+    var getDashboard = function(id){
         var url = apiRoot + drata.utils.format('dashboard/{0}', id);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidget = function(id, callback){
+    var getWidget = function(id){
         var url = apiRoot + drata.utils.format('widget/{0}', id);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidgetsOfDashboard = function(dashboardId, callback){
+    var getWidgetsOfDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidgets = function(model, callback){
+    var getWidgets = function(model){
         var url = apiRoot + 'widgets';
-        _perform('POST', url,model, callback);
+        return _perform('POST', url,model);
     };
 
-    var deleteAllWidgetsDashboard = function(dashboardId, callback){
+    var deleteAllWidgetsDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
-        _perform('DELETE', url,undefined, callback);
+        return _perform('DELETE', url);
     };
 
-    var addWidget = function(model, callback){
-        _perform('POST', apiRoot + 'widget',model, function(response){
-            callback(response);
+    var addWidget = function(model){
+        var promise = _perform('POST', apiRoot + 'widget',model);
+        promise.done(function(response){
             socket.emit('widgetcreated', {
-                widgetId : response.result._id, 
-                dashboardId: response.result.dashboardId
+                widgetId : response._id, 
+                dashboardId: response.dashboardId
             });
         });
+        return promise;
     };
 
-    var updateWidget = function(model, callback){
-        _perform('PUT', apiRoot + 'widget',model, function(response){
-            callback(response);
+    var updateWidget = function(model){
+        var promise = _perform('PUT', apiRoot + 'widget',model);
+        promise.done(function(response){
             socket.emit('widgetupdated', {
                 widgetId : model._id, 
                 dashboardId: model.dashboardId
             });
         });
+        return promise;
     };
 
-    var deleteWidget = function(widgetId, callback){
+    var deleteWidget = function(widgetId){
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
-        _perform('DELETE',url, undefined, function(response){
-            callback && callback(response);
-            console.log('emiting widge removed');
+        var promise = _perform('DELETE',url);
+        promise.done(function(){
             socket.emit('widgetremoved', {
                 widgetId : widgetId
             });
         });
-        //console.log(JSON.stringify(model, null, '\t'));
+        return promise;
     };
 
-    var upsertDashboard = function(model, callback){
-        _perform('PUT', apiRoot + 'dashboard',model, callback);
-        //console.log(JSON.stringify(model, null, '\t'));
+    var upsertDashboard = function(model){
+        return _perform('PUT', apiRoot + 'dashboard',model);
     };
 
-    var deleteDashboard = function(dashboardId, callback){
+    var deleteDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}', dashboardId);
-        _perform('DELETE',url, undefined, callback);
+        return _perform('DELETE',url);
         //console.log(JSON.stringify(model, null, '\t'));
     };
 
-    var getAllDashboards = function(callback){
+    var getAllDashboards = function(){
         var url = apiRoot + 'dashboards';
-        _perform('GET',url, undefined, callback);
+        return _perform('GET',url);
     };
 
-    var getAllTags = function(callback){
+    var getAllTags = function(){
         var url = apiRoot + 'tags';
-        var len = 0, tagList = [];
-        var self = this;
-        getAllDashboards(function(response){
-            len = response.result.length;
-            _.each(response.result, function(dash){
-                getAllTagsOfDashboard(dash._id, function(tagResponse){
-                    len--;
-                    if(tagResponse.result.length === 0){
-                        tagList.push({
-                            tagName: '__',
-                            dashboardName: dash.name,
-                            dashboardId: dash._id
-                        });
-                    }
-                    else{
-                        _.each(tagResponse.result, function(tag){
-                            tag.dashboardName = dash.name;
-                            tagList.push(tag);
-                        });
-                    }
-                    
-                    if(len === 0){
-                        callback && callback({result:tagList});
-                    }
+        var tagPromiseList = [];
+        var defer = $.Deferred();
+        getAllDashboards().then(function(dashboardList){
+            var dnameMapping = {};
+            _.each(dashboardList, function(dash){
+                dnameMapping[dash._id] = dash.name;
+                tagPromiseList.push(getAllTagsOfDashboard(dash._id));
+            });
+            $.when.apply($, tagPromiseList).done(function(){
+                var tagList = [];
+                _.each(arguments, function(tags){
+                    _.each(tags[0], function(tag){
+                        tag.dashboardName = dnameMapping[tag.dashboardId];
+                        delete dnameMapping[tag.dashboardId];
+                        tagList.push(tag);
+                    });
+                });
 
-                })
+                _.each(dnameMapping, function(name, id){
+                    tagList.push({
+                        tagName: '__',
+                        dashboardName: name,
+                        dashboardId: id
+                    });
+                });
+                defer.resolve(tagList);
+            }).fail(function(error){
+                defer.reject();
             })
+        }, function(error){
+            defer.reject();
         });
+        return defer.promise();
     };
 
-    var getAllTagsOfDashboard = function(dashboardId, callback){
+    var getAllTagsOfDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/tags', dashboardId);
-        _perform('GET',url, undefined, callback);
+        return _perform('GET',url);
     };
 
-    var deleteAllTagsDashboard = function(dashboardId, callback){
+    var deleteAllTagsDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/tags', dashboardId);
-        _perform('DELETE',url, undefined, callback);
+        return _perform('DELETE',url);
     };
 
-    var addTag = function(model, callback){
-        _perform('PUT', apiRoot + 'tags',model, callback);
+    var addTag = function(model){
+        return _perform('PUT', apiRoot + 'tags',model);
     };
 
-    var removeTag = function(tagId, callback){
+    var removeTag = function(tagId){
         var url = apiRoot + drata.utils.format('tags/{0}', tagId);
-        _perform('DELETE', url,undefined, callback);
+        return _perform('DELETE', url);
     };
 
     //EXTERNAL API
-    var getDataSourceNames = function(callback){
+    var getDataSourceNames = function(){
         var url = apiExternalRoot + 'datasource';
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getDatabaseNames = function(dataSource, callback){
+    var getDatabaseNames = function(dataSource){
         var url = apiExternalRoot + drata.utils.format('{0}/database', dataSource);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getUniqueProperties = function(params, callback){
+    var getUniqueProperties = function(params){
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}/properties',params.dataSource, params.database, params.collectionName);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getDataKeys = function(params, callback){
+    var getDataKeys = function(params){
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/collectionNames',params.dataSource, params.database);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
     
-    var getData = function(model, params, callback){
-        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', params.dataSource, params.database, params.collectionName);
-        _perform('POST', url, model, callback);
+    var getData = function(model){
+        var postData = {
+            chartType: model.segment.chartType,
+            selection: model.segment.selection,
+            dataGroup: model.segment.dataGroup,
+            dataFilter: model.segment.dataFilter,
+            group: model.segment.group
+        };
+        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', model.dataSource, model.database, model.collectionName);
+        return _perform('POST', url, postData);
     };
 
     //END EXTERNAL API
@@ -15041,7 +15049,7 @@ var Selection = function(options){
     };
 
     self.showPercentChange = ko.computed(function(){
-        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.cPanel.widgetEditor.segment.chartType()) > -1){
+        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.dashboard.widgetEditor.segment.chartType()) > -1){
             return true;
         }
         else{
@@ -15218,6 +15226,7 @@ var SelectionGroup = function(options){
         });
         return returnGroups;
     };
+    
     self.expression = ko.computed(function(){
         var expressions = [], exp;
         var innerGroups = self.items();
@@ -15233,26 +15242,6 @@ var SelectionGroup = function(options){
     });
 };
 
-var DataRetriever = {
-    getData : function(model,callback){
-        var postData = {
-            chartType: model.segment.chartType,
-            selection: model.segment.selection,
-            dataGroup: model.segment.dataGroup,
-            dataFilter: model.segment.dataFilter,
-            group: model.segment.group
-        };
-
-        drata.apiClient.getData(postData, {
-            dataSource: model.dataSource, 
-            database: model.database, 
-            collectionName: model.collectionName
-        }, function(response){
-            callback && callback(response);
-        });
-    }
-};
-
 (function(root, ko){
     "use strict";
     var Dashboard = function(dashboardId){
@@ -15265,21 +15254,15 @@ var DataRetriever = {
         self.dashboardNotFound = ko.observable();
         self.loadDashboard = function(d_id){
             dashboardId = d_id;
-            drata.apiClient.getDashboard(dashboardId, function(response){
-                var d = response.result;
-                if(!d || !response.success){
-                    self.dashboardNotFound(true);
-                    return;
-                }
-                self.name(d.name);
-                drata.cPanel.topBar.currentDashboardName(d.name);
-                drata.cPanel.theme(d.theme);
-                theme = d.theme;
+            drata.apiClient.getDashboard(dashboardId).then(function(dashboard){
+                self.name(dashboard.name);
+                drata.cPanel.topBar.currentDashboardName(dashboard.name);
+                drata.cPanel.theme(dashboard.theme);
+                theme = dashboard.theme;
 
                 //dashboardId = d._id;
-                drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
+                drata.apiClient.getWidgetsOfDashboard(dashboard._id).then(function(widgets){
                     var ind = 0;
-                    var widgets = widgetResponse.result;
                     self.loading(false);
                     widgets = widgets.sort(function(x,y){
                         return x.displayIndex - y.displayIndex;
@@ -15297,6 +15280,8 @@ var DataRetriever = {
                 });
                 //socket
                 drata.nsx.dashboardSyncService.listenWidgetCreated(dashboardId);
+            }, function(err){
+                self.dashboardNotFound(true);
             });
         };
         
@@ -15441,8 +15426,8 @@ var DataRetriever = {
             if(previewMode) return;
             var m = self.getModel();
             if(!m._id) return;
-            drata.apiClient.updateWidget(m, function(resp){
-                console.log('widget updated');    
+            drata.apiClient.updateWidget(m).then(function(resp){
+                console.log('widget updated'); 
             });
         };
 
@@ -15506,19 +15491,15 @@ var DataRetriever = {
             self.parseError(undefined);
             self.chartType(widgetModel.segmentModel.chartType);
             console.log('loadWidget');
-            DataRetriever.getData({
+
+            drata.apiClient.getData({
                 dataSource: widgetModel.dataSource, 
                 database: widgetModel.database, 
                 collectionName: widgetModel.selectedDataKey, 
                 segment: widgetModel.segmentModel
-            }, function(response){
-                if(!response.success){
-                    self.parseError(response.message);
-                    return;
-                }
-                chartData = response.result;
+            }).then(function(response){
+                chartData = response;
                 var dataToMap;
-
                 if(widgetModel.segmentModel.chartType === 'pie'){
                     dataToMap = chartData[0].values;
                 }
@@ -15534,6 +15515,8 @@ var DataRetriever = {
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
+            }, function(error){
+                self.parseError('Widget loading error');
             });
         };
 
@@ -16035,7 +16018,7 @@ var DataRetriever = {
         }
     };
     root.drata.ns('utils').extend({
-        tempData : tempData
+        tempdata : tempData
     });
 })(this);
 
@@ -16227,38 +16210,187 @@ var DataRetriever = {
     drata.ns('nsx').extend({
         notifier : new Notifier()
     });
+})(this);(function(root){
+    var WidgetEditor = function(){
+        var self = this;
+        self.addUpdateBtnText = ko.observable('Save');
+        self.processSegment = true;
+        self.dataKeys = ko.observableArray();
+        
+        self.selectedDataKey = ko.observable();
+        self.dataSource = ko.observable();
+        self.dataSourceNames = ko.observableArray();
+        self.databaseNames = ko.observableArray();
+        self.database = ko.observable();
+        self.parseError = ko.observable();
+        self.previewWidget = ko.observable();
+
+        var cloneModel = {};
+        
+        self.name = ko.observable();
+        self.sizex = ko.observable("4");
+        self.sizey = ko.observable("1");
+
+        self.dataSource.subscribe(function(newValue){
+            if(!newValue){
+                self.databaseNames([]);
+                self.database(undefined);
+            }
+            else{
+                if(cloneModel.dataSource !== newValue ){
+                    cloneModel.dataSource = newValue;
+                    cloneModel.database = undefined;
+                }
+                drata.apiClient.getDatabaseNames(newValue).then(function(resp){
+                    self.databaseNames(resp);
+                    self.database(cloneModel.database);
+                });
+            }
+        });
+
+        self.database.subscribe(function(newValue){
+            if(!newValue || !self.dataSource()){
+                self.dataKeys([]);
+                self.selectedDataKey(undefined);
+            }
+            else{
+                if(cloneModel.database !== newValue ){
+                    cloneModel.database = newValue;
+                    cloneModel.selectedDataKey = undefined;
+                }
+                drata.apiClient.getDataKeys({dataSource: self.dataSource(),database: newValue}).then(function(resp){
+                    self.dataKeys(resp);
+                    self.selectedDataKey(cloneModel.selectedDataKey);
+                });
+            }
+        });
+
+        self.selectedDataKey.subscribe(function(newValue){
+            if(!newValue || !self.dataSource() || !self.database()){
+                drata.dashboard.propertyManager.resetProperties();
+            }
+            else {
+                if(cloneModel.selectedDataKey !== newValue){
+                    cloneModel.segmentModel = undefined;
+                    cloneModel.selectedDataKey = newValue;
+                }
+                drata.apiClient.getUniqueProperties({dataSource: self.dataSource(), database: self.database(), collectionName: newValue}).then(function(response){
+                    drata.dashboard.propertyManager.setPropertyTypes(response);
+                    self.segment.initialize(cloneModel.segmentModel);
+                });
+            }
+        });
+
+        drata.apiClient.getDataSourceNames().then(function(resp){
+            self.dataSourceNames(resp);
+        });
+
+        self.segment = new Segmentor();
+        self.notifyWidget = function () {
+            cloneModel.segmentModel = self.segment.getModel();
+            
+            if(!cloneModel.segmentModel)
+                return;
+            cloneModel.dataSource = self.dataSource();
+            cloneModel.database = self.database();
+            cloneModel.selectedDataKey  = self.selectedDataKey();
+            //placing sizex,name, sizey here doest set those in clone
+            //model for some reason
+            var previewW = self.previewWidget();
+            if(previewW){
+                var x = previewW.getModel();
+                if(x.contentModel){
+                    cloneModel.contentModel = x.contentModel;
+                }
+                previewW.clearTimeouts();
+            }
+            var isNew = !cloneModel._id;
+
+            //im just setting them here.
+            cloneModel.sizex = self.sizex();
+            cloneModel.sizey = self.sizey();
+            cloneModel.name = self.name() || 'New widget';
+
+            if(isNew){
+                drata.pubsub.publish('widgetcreate', cloneModel);
+            }
+            else{
+                drata.pubsub.publish('widgetupdate', cloneModel);   
+            }
+            cloneModel = {};
+            self.onWidgetUpdate = undefined;
+            self.onWidgetCancel = undefined;
+            self.addUpdateBtnText('Save');
+            self.dataSource(undefined);
+            self.name(undefined);
+            self.sizex("4");
+            self.sizey("1");
+            self.previewWidget(undefined);
+            location.hash = '';
+        };
+
+        self.attach = function (event,options) {
+            cloneModel = drata.utils.clone(options.widgetModel);
+            self.dataSource(cloneModel.dataSource);
+            self.name(cloneModel.name);
+            self.sizex(cloneModel.sizex);
+            self.sizey(cloneModel.sizey);
+
+            self.addUpdateBtnText('Update Widget');
+            self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
+        };
+
+        self.widgetCancel = function() {
+            self.parseError(undefined);
+            self.onWidgetUpdate = undefined;
+            self.onWidgetCancel = undefined;
+            self.addUpdateBtnText('Add Widget');
+
+            self.dataSource(undefined);
+            location.hash = '';
+            var w = self.previewWidget();
+            if(w) w.clearTimeouts();
+            self.previewWidget(undefined);
+            cloneModel = {};
+        };
+
+        self.preview = function(){
+            var model = self.segment.getModel();
+            if(!model) return;
+            self.previewWidget(new drata.dashboard.widget({
+                name: self.name(),
+                dataSource: self.dataSource(),
+                database: self.database(),
+                segmentModel: model,
+                selectedDataKey: self.selectedDataKey()
+            }, 100, true));
+        };
+        
+        //this is for widget preview. since, its parent is widgeteditor, we need
+        //this method here.
+        self.loadWidget = function(elem,widget){
+            widget && widget.loadWidget();
+            $(document).foundation();
+        };
+
+        drata.pubsub.subscribe('widgetedit', self.attach);
+    };
+    root.drata.ns('dashboard').extend({
+        widgetEditor: new WidgetEditor()
+    });
 })(this);
+
 (function(root, ko){
 	
-	var tagList = ko.observableArray(), _tagList = [], dashboardList = ko.observableArray();
+	var tagList = ko.observableArray(), dashboardList = ko.observableArray();
 	
+	drata.apiClient.getAllDashboards().done(function(response){
+		dashboardList(response);
+	});
 
-	drata.apiClient.getAllDashboards(function(response){
-        len = response.result.length;
-        dashboardList(response.result);
-        _.each(response.result, function(dash){
-            drata.apiClient.getAllTagsOfDashboard(dash._id, function(tagResponse){
-                len--;
-                if(tagResponse.result.length === 0){
-                    _tagList.push({
-                        tagName: '__',
-                        dashboardName: dash.name,
-                        dashboardId: dash._id
-                    });
-                }
-                else{
-                    _.each(tagResponse.result, function(tag){
-                        tag.dashboardName = dash.name;
-                        _tagList.push(tag);
-                    });
-                }
-                
-                if(len === 0){
-                    tagList(_tagList);
-                }
-            })
-        })
-    });
+	drata.apiClient.getAllTags().done(function(response){
+		tagList(response);
+	});
 
 	var tagNameList = ko.computed(function(){
 		return _.uniq(tagList().map(function(t){
@@ -16290,9 +16422,8 @@ var DataRetriever = {
 	            	drata.nsx.notifier.notifyWidgetUpdated({
 	            		name:widget.name(),
 	            		onConfirm : function(){
-	            			drata.apiClient.getWidget(data.widgetId, function(response){
-			            		if(!response.success) return;
-		            			widget.loadWidget(response.result);
+	            			drata.apiClient.getWidget(data.widgetId).then(function(response){
+			            		widget.loadWidget(response);
 			            	});
 	            		}
 	            	});
@@ -16306,9 +16437,8 @@ var DataRetriever = {
 	            if(currentDashboard.getId() === data.dashboardId){
 	            	drata.nsx.notifier.notifyWidgetAdded({
 	            		onConfirm : function(){
-	            			drata.apiClient.getWidget(data.widgetId, function(response){
-			            		if(!response.success) return;
-		            			currentDashboard.addWidget(response.result);
+	            			drata.apiClient.getWidget(data.widgetId).then(function(response){
+			            		currentDashboard.addWidget(response);
 			            	});
 	            		}
 	            	});
@@ -16333,7 +16463,7 @@ var DataRetriever = {
 		
 		drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
 			if(!widgetModel._id) return;
-	        drata.apiClient.updateWidget(widgetModel, function(response){
+	        drata.apiClient.updateWidget(widgetModel).then(function(response){
             	var widget = getWidgetFromDashboard(widgetModel._id, widgetModel.dashboardId);
             	widget && widget.loadWidget(widgetModel);
             	drata.nsx.notifier.addNotification({
@@ -16352,12 +16482,8 @@ var DataRetriever = {
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
-			drata.apiClient.addWidget(widgetModel, function(response){
-                if(!response.success){
-                	return;
-            	}
-            	widgetModel = response.result;
-	            console.log('widget created in db');
+			drata.apiClient.addWidget(widgetModel).then(function(widgetModel){
+                console.log('widget created in db');
 	            currentDashboard.addWidget(widgetModel);
 	        });
 		});
@@ -16370,7 +16496,7 @@ var DataRetriever = {
 		self.currentDashboard = ko.observable();
 		self.topBar = new TopBar();
 		self.dashboardManager = new DashboardManager();
-		self.widgetEditor = new WidgetEditor();
+		//self.widgetEditor = new WidgetEditor();
 		self.widgetManager = new WidgetManager();
 		self.dashboardCreator = new DashboardCreator();
 		
@@ -16432,12 +16558,10 @@ var DataRetriever = {
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
 	    			if(c[1]){
-	    				drata.apiClient.getWidget(c[1], function(response){
-	    					if(response.success){
-	    						drata.pubsub.publish('widgetedit', {
-						            widgetModel: response.result
-						        });
-	    					}
+	    				drata.apiClient.getWidget(c[1]).then(function(response){
+    						drata.pubsub.publish('widgetedit', {
+					            widgetModel: response
+					        });
 	    				});
 	    			}
 	    		break;
@@ -16497,7 +16621,7 @@ var DataRetriever = {
 
 	    self.handleCloseView = function(){
 	    	if(self.isWidgetEditorView()){
-	    		self.widgetEditor.widgetCancel();
+	    		drata.dashboard.widgetEditor.widgetCancel();
 	    	}else{
 	    		location.hash = '#';
 	    	}
@@ -16542,15 +16666,15 @@ var DataRetriever = {
 
 	    self.deleteDashboard = function(dashboardItem){
 	        if(confirm("Deleting Dashboard will delete all the widgets and tags associated. Do you wish to Continue?")){
-	            drata.apiClient.deleteDashboard(dashboardItem._id,function(resp){
+	            drata.apiClient.deleteDashboard(dashboardItem._id).then(function(resp){
 	                self.dashboards.remove(dashboardItem);
 	            });
 
-	            drata.apiClient.deleteAllTagsDashboard(dashboardItem._id,function(resp){
+	            drata.apiClient.deleteAllTagsDashboard(dashboardItem._id).then(function(resp){
 	                console.log('tags deleted');
 	            });
 
-	            drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id,function(resp){
+	            drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id).then(function(resp){
 	                console.log('widgets deleted');
 	            });
 	        }
@@ -16645,180 +16769,12 @@ var DataRetriever = {
 	    //return self;
 	};
 
-	var WidgetEditor = function(){
-	    var self = this;
-	    //self.widgetName = ko.observable();
-	    self.addUpdateBtnText = ko.observable('Save');
-	    self.processSegment = true;
-	    self.dataKeys = ko.observableArray();
-	    
-	    self.selectedDataKey = ko.observable();
-	    self.dataSource = ko.observable();
-	    self.dataSourceNames = ko.observableArray();
-	    self.databaseNames = ko.observableArray();
-	    self.database = ko.observable();
-	    self.parseError = ko.observable();
-	    //self.propertyTypes = ko.observable();
-	    self.previewWidget = ko.observable();
-
-	    var cloneModel = {};
-	    
-	    self.name = ko.observable();
-	    self.sizex = ko.observable("4");
-	    self.sizey = ko.observable("1");
-
-	    self.dataSource.subscribe(function(newValue){
-	        if(!newValue){
-	            self.databaseNames([]);
-	            self.database(undefined);
-	        }
-	        else{
-	            if(cloneModel.dataSource !== newValue ){
-	                cloneModel.dataSource = newValue;
-	                cloneModel.database = undefined;
-	            }
-	            drata.apiClient.getDatabaseNames(newValue, function(resp){
-	                self.databaseNames(resp.result);
-	                self.database(cloneModel.database);
-	            });
-	        }
-	    });
-
-	    self.database.subscribe(function(newValue){
-	        if(!newValue || !self.dataSource()){
-	            self.dataKeys([]);
-	            self.selectedDataKey(undefined);
-	        }
-	        else{
-	            if(cloneModel.database !== newValue ){
-	                cloneModel.database = newValue;
-	                cloneModel.selectedDataKey = undefined;
-	            }
-	            drata.apiClient.getDataKeys({dataSource: self.dataSource(),database: newValue}, function(resp){
-	                self.dataKeys(resp.result);
-	                self.selectedDataKey(cloneModel.selectedDataKey);
-	            });
-	        }
-	    });
-
-	    self.selectedDataKey.subscribe(function(newValue){
-	        if(!newValue || !self.dataSource() || !self.database()){
-	            drata.dashboard.propertyManager.resetProperties();
-	        }
-	        else {
-	            if(cloneModel.selectedDataKey !== newValue){
-	                cloneModel.segmentModel = undefined;
-	                cloneModel.selectedDataKey = newValue;
-	            }
-	            drata.apiClient.getUniqueProperties({dataSource: self.dataSource(), database: self.database(), collectionName: newValue}, function(response){
-	                drata.dashboard.propertyManager.setPropertyTypes(response.result);
-	                self.segment.initialize(cloneModel.segmentModel);
-	            });
-	        }
-	    });
-
-	    drata.apiClient.getDataSourceNames(function(resp){
-	        self.dataSourceNames(resp.result);
-	    });
-
-	    self.segment = new Segmentor();
-	    self.notifyWidget = function () {
-	        cloneModel.segmentModel = self.segment.getModel();
-	        
-	        if(!cloneModel.segmentModel)
-	            return;
-	        cloneModel.dataSource = self.dataSource();
-	        cloneModel.database = self.database();
-	        cloneModel.selectedDataKey  = self.selectedDataKey();
-	        //placing sizex,name, sizey here doest set those in clone
-	        //model for some reason
-	        var previewW = self.previewWidget();
-	        if(previewW){
-	            var x = previewW.getModel();
-	            if(x.contentModel){
-	                cloneModel.contentModel = x.contentModel;
-	            }
-	            previewW.clearTimeouts();
-	        }
-	        var isNew = !cloneModel._id;
-
-	        //im just setting them here.
-	        cloneModel.sizex = self.sizex();
-	        cloneModel.sizey = self.sizey();
-	        cloneModel.name = self.name() || 'New widget';
-
-	        if(isNew){
-	        	drata.pubsub.publish('widgetcreate', cloneModel);
-	        }
-	        else{
-	        	drata.pubsub.publish('widgetupdate', cloneModel);	
-	        }
-	        cloneModel = {};
-	        self.onWidgetUpdate = undefined;
-	        self.onWidgetCancel = undefined;
-	        self.addUpdateBtnText('Save');
-	        self.dataSource(undefined);
-	        self.name(undefined);
-	        self.sizex("4");
-	        self.sizey("1");
-	        self.previewWidget(undefined);
-	        location.hash = '';
-	    };
-
-	    self.attach = function (event,options) {
-	        cloneModel = drata.utils.clone(options.widgetModel);
-	        self.dataSource(cloneModel.dataSource);
-	        self.name(cloneModel.name);
-	        self.sizex(cloneModel.sizex);
-	        self.sizey(cloneModel.sizey);
-
-	        self.addUpdateBtnText('Update Widget');
-	        self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
-	    };
-
-	    self.widgetCancel = function() {
-	        self.parseError(undefined);
-	        self.onWidgetUpdate = undefined;
-	        self.onWidgetCancel = undefined;
-	        self.addUpdateBtnText('Add Widget');
-
-	        self.dataSource(undefined);
-	        location.hash = '';
-	        var w = self.previewWidget();
-	        if(w) w.clearTimeouts();
-	        self.previewWidget(undefined);
-	        cloneModel = {};
-	    };
-
-	    self.preview = function(){
-	        var model = self.segment.getModel();
-	        if(!model) return;
-	        self.previewWidget(new drata.dashboard.widget({
-	        	name: self.name(),
-	            dataSource: self.dataSource(),
-	            database: self.database(),
-	            segmentModel: model,
-	            selectedDataKey: self.selectedDataKey()
-	        }, 100, true));
-	    };
-	    
-	    //this is for widget preview. since, its parent is widgeteditor, we need
-	    //this method here.
-	    self.loadWidget = function(elem,widget){
-	        widget && widget.loadWidget();
-	        $(document).foundation();
-	    };
-
-	    drata.pubsub.subscribe('widgetedit', self.attach);
-	};
-
-
 	var WidgetManager = function(model, options){
 	    this.widgetList = ko.observableArray();
 	    this.bindWidgets = function(model){
-	        drata.apiClient.getWidgets(model, function(response){
+	        drata.apiClient.getWidgets(model).then(function(response){
 	            this.widgetList(ko.utils.arrayMap(
-	                response.result,
+	                response,
 	                function(widgetModel) {
 	                    return new WidgetItem(widgetModel, {chooseWidgets: true}); 
 	                }
@@ -16880,20 +16836,21 @@ var DataRetriever = {
 	    this.widgetList = ko.observableArray();
 	    this.tagList = new TagList({dashboardId: model._id, name: this.name});
 	    
-	    this.bindWidgets = function(callback){
+	    this.bindWidgets = function(){
+	    	var defer = $.Deferred();
 	    	if(widgetsBound) {
-	    		callback && callback.call(this, this.widgetList());
+	    		defer.resolve(this.widgetList());
 	    		return;
 	    	}
-	        drata.apiClient.getWidgetsOfDashboard(model._id, function(response){
+	        drata.apiClient.getWidgetsOfDashboard(model._id).then(function(response){
 	            this.widgetList(ko.utils.arrayMap(
-	                response.result,
+	                response,
 	                function(widgetModel) {
 	                    return new WidgetItem(widgetModel); 
 	                }
 	            ));
 	            widgetsBound = true;
-	            callback && callback.call(this, this.widgetList());
+	            defer.resolve(this.widgetList());
 	        }.bind(this));
 	    };
 
@@ -16910,7 +16867,7 @@ var DataRetriever = {
 	    });
 	    
 	    this.cloneDashboard = function(){
-	    	this.bindWidgets(function(widgetList){
+	    	this.bindWidgets().then(function(widgetList){
 	    		drata.pubsub.publish('onDashboardClone', {
 	        		tagList: this.tagList.tagList(),
 	        		widgetList: widgetList,
@@ -16933,14 +16890,14 @@ var DataRetriever = {
 	            tagName: this.newTag(), 
 	            dashboardId: options.dashboardId
 	        };
-	        drata.apiClient.addTag(newTagModel, function(resp){
-	            if(resp.success){
-	            	newTagModel.dashboardName = options.name();
-	            	drata.models.tagList.push(newTagModel);	
-	            }
-	            this.newTag(undefined);
+	        drata.apiClient.addTag(newTagModel).done(function(resp){
+            	newTagModel.dashboardName = options.name();
+            	drata.models.tagList.push(newTagModel);	
+	        }.bind(this))
+	        .always(function(){
+	        	this.newTag(undefined);
 	            this.addingTag(false);
-	        }.bind(this));
+	        });
 	    }.bind(this);
 
 		this.tagList = ko.computed(function(){
@@ -16974,7 +16931,7 @@ var DataRetriever = {
 	    		removeTagFromList(tag);
 	    		return;
 	    	}
-	    	drata.apiClient.removeTag(tag._id, removeTagFromList.bind(this, tag));
+	    	drata.apiClient.removeTag(tag._id).then(removeTagFromList.bind(this, tag));
 	    }.bind(this);
 	    
 	};
@@ -17047,8 +17004,8 @@ var DataRetriever = {
 	            theme: 'default'
 	        };
 
-	        drata.apiClient.upsertDashboard(dashboardModel, function(response){
-	            var _id = response.result._id;
+	        drata.apiClient.upsertDashboard(dashboardModel).then(function(response){
+	            var _id = response._id;
 	            var tagList = self.tags.tagList(), chosenWidgets = self.chosenWidgets();
 	            var i = 0, c = tagList.length + chosenWidgets.length;
 	            if(c === 0){
@@ -17063,7 +17020,7 @@ var DataRetriever = {
 	                _.each(tagList, function(t){
 	                    t.dashboardId = _id;
 	                    delete t.dateCreated;
-	                    drata.apiClient.addTag(t, respCounter);
+	                    drata.apiClient.addTag(t).then(respCounter);
 	                });
 	                
 	                _.each(chosenWidgets, function(w){
@@ -17072,7 +17029,7 @@ var DataRetriever = {
 	                    delete widgetModel.dateCreated;
 	                    delete widgetModel.dateUpdated;
 	                    delete widgetModel._id;
-	                    drata.apiClient.upsertWidget(widgetModel, respCounter);
+	                    drata.apiClient.upsertWidget(widgetModel).then(respCounter);
 	                });
 	            }
 	            

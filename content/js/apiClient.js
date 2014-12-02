@@ -15,179 +15,180 @@
     }
     var apiExternalRoot = apiRoot + 'external/';
     var database = 'shopperstop';
-    var _perform = function(verb, url, body, callback){
+    var _perform = function(verb, url, body){
         var options = {
             type: verb.toUpperCase(),
             url: url,
             contentType: 'application/json',
-            headers: { 'Access-Control-Allow-Origin': '*', 'clientid': unique_id },
-            success: function(response, stats){
-                callback && callback({success: true, result:response});
-            },
-            error: function(response){
-                console.log(response);
-                callback && callback({
-                    success: false,
-                    status: response.status,
-                    message: response.responseText
-                });
-            }
+            headers: { 'Access-Control-Allow-Origin': '*', 'clientid': unique_id }
         };
         if(body){
             options.data = JSON.stringify(body);
         }
                   
-        $.ajax(options);
+        return $.ajax(options);
     };
 
-    var getDashboard = function(id, callback){
+    var getDashboard = function(id){
         var url = apiRoot + drata.utils.format('dashboard/{0}', id);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidget = function(id, callback){
+    var getWidget = function(id){
         var url = apiRoot + drata.utils.format('widget/{0}', id);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidgetsOfDashboard = function(dashboardId, callback){
+    var getWidgetsOfDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
-        _perform('GET', url,undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getWidgets = function(model, callback){
+    var getWidgets = function(model){
         var url = apiRoot + 'widgets';
-        _perform('POST', url,model, callback);
+        return _perform('POST', url,model);
     };
 
-    var deleteAllWidgetsDashboard = function(dashboardId, callback){
+    var deleteAllWidgetsDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/widgets', dashboardId);
-        _perform('DELETE', url,undefined, callback);
+        return _perform('DELETE', url);
     };
 
-    var addWidget = function(model, callback){
-        _perform('POST', apiRoot + 'widget',model, function(response){
-            callback(response);
+    var addWidget = function(model){
+        var promise = _perform('POST', apiRoot + 'widget',model);
+        promise.done(function(response){
             socket.emit('widgetcreated', {
-                widgetId : response.result._id, 
-                dashboardId: response.result.dashboardId
+                widgetId : response._id, 
+                dashboardId: response.dashboardId
             });
         });
+        return promise;
     };
 
-    var updateWidget = function(model, callback){
-        _perform('PUT', apiRoot + 'widget',model, function(response){
-            callback(response);
+    var updateWidget = function(model){
+        var promise = _perform('PUT', apiRoot + 'widget',model);
+        promise.done(function(response){
             socket.emit('widgetupdated', {
                 widgetId : model._id, 
                 dashboardId: model.dashboardId
             });
         });
+        return promise;
     };
 
-    var deleteWidget = function(widgetId, callback){
+    var deleteWidget = function(widgetId){
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
-        _perform('DELETE',url, undefined, function(response){
-            callback && callback(response);
-            console.log('emiting widge removed');
+        var promise = _perform('DELETE',url);
+        promise.done(function(){
             socket.emit('widgetremoved', {
                 widgetId : widgetId
             });
         });
-        //console.log(JSON.stringify(model, null, '\t'));
+        return promise;
     };
 
-    var upsertDashboard = function(model, callback){
-        _perform('PUT', apiRoot + 'dashboard',model, callback);
-        //console.log(JSON.stringify(model, null, '\t'));
+    var upsertDashboard = function(model){
+        return _perform('PUT', apiRoot + 'dashboard',model);
     };
 
-    var deleteDashboard = function(dashboardId, callback){
+    var deleteDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}', dashboardId);
-        _perform('DELETE',url, undefined, callback);
+        return _perform('DELETE',url);
         //console.log(JSON.stringify(model, null, '\t'));
     };
 
-    var getAllDashboards = function(callback){
+    var getAllDashboards = function(){
         var url = apiRoot + 'dashboards';
-        _perform('GET',url, undefined, callback);
+        return _perform('GET',url);
     };
 
-    var getAllTags = function(callback){
+    var getAllTags = function(){
         var url = apiRoot + 'tags';
-        var len = 0, tagList = [];
-        var self = this;
-        getAllDashboards(function(response){
-            len = response.result.length;
-            _.each(response.result, function(dash){
-                getAllTagsOfDashboard(dash._id, function(tagResponse){
-                    len--;
-                    if(tagResponse.result.length === 0){
-                        tagList.push({
-                            tagName: '__',
-                            dashboardName: dash.name,
-                            dashboardId: dash._id
-                        });
-                    }
-                    else{
-                        _.each(tagResponse.result, function(tag){
-                            tag.dashboardName = dash.name;
-                            tagList.push(tag);
-                        });
-                    }
-                    
-                    if(len === 0){
-                        callback && callback({result:tagList});
-                    }
+        var tagPromiseList = [];
+        var defer = $.Deferred();
+        getAllDashboards().then(function(dashboardList){
+            var dnameMapping = {};
+            _.each(dashboardList, function(dash){
+                dnameMapping[dash._id] = dash.name;
+                tagPromiseList.push(getAllTagsOfDashboard(dash._id));
+            });
+            $.when.apply($, tagPromiseList).done(function(){
+                var tagList = [];
+                _.each(arguments, function(tags){
+                    _.each(tags[0], function(tag){
+                        tag.dashboardName = dnameMapping[tag.dashboardId];
+                        delete dnameMapping[tag.dashboardId];
+                        tagList.push(tag);
+                    });
+                });
 
-                })
+                _.each(dnameMapping, function(name, id){
+                    tagList.push({
+                        tagName: '__',
+                        dashboardName: name,
+                        dashboardId: id
+                    });
+                });
+                defer.resolve(tagList);
+            }).fail(function(error){
+                defer.reject();
             })
+        }, function(error){
+            defer.reject();
         });
+        return defer.promise();
     };
 
-    var getAllTagsOfDashboard = function(dashboardId, callback){
+    var getAllTagsOfDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/tags', dashboardId);
-        _perform('GET',url, undefined, callback);
+        return _perform('GET',url);
     };
 
-    var deleteAllTagsDashboard = function(dashboardId, callback){
+    var deleteAllTagsDashboard = function(dashboardId){
         var url = apiRoot + drata.utils.format('dashboard/{0}/tags', dashboardId);
-        _perform('DELETE',url, undefined, callback);
+        return _perform('DELETE',url);
     };
 
-    var addTag = function(model, callback){
-        _perform('PUT', apiRoot + 'tags',model, callback);
+    var addTag = function(model){
+        return _perform('PUT', apiRoot + 'tags',model);
     };
 
-    var removeTag = function(tagId, callback){
+    var removeTag = function(tagId){
         var url = apiRoot + drata.utils.format('tags/{0}', tagId);
-        _perform('DELETE', url,undefined, callback);
+        return _perform('DELETE', url);
     };
 
     //EXTERNAL API
-    var getDataSourceNames = function(callback){
+    var getDataSourceNames = function(){
         var url = apiExternalRoot + 'datasource';
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getDatabaseNames = function(dataSource, callback){
+    var getDatabaseNames = function(dataSource){
         var url = apiExternalRoot + drata.utils.format('{0}/database', dataSource);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getUniqueProperties = function(params, callback){
+    var getUniqueProperties = function(params){
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}/properties',params.dataSource, params.database, params.collectionName);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
 
-    var getDataKeys = function(params, callback){
+    var getDataKeys = function(params){
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/collectionNames',params.dataSource, params.database);
-        _perform('GET', url, undefined, callback);
+        return _perform('GET', url);
     };
     
-    var getData = function(model, params, callback){
-        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', params.dataSource, params.database, params.collectionName);
-        _perform('POST', url, model, callback);
+    var getData = function(model){
+        var postData = {
+            chartType: model.segment.chartType,
+            selection: model.segment.selection,
+            dataGroup: model.segment.dataGroup,
+            dataFilter: model.segment.dataFilter,
+            group: model.segment.group
+        };
+        var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', model.dataSource, model.database, model.collectionName);
+        return _perform('POST', url, postData);
     };
 
     //END EXTERNAL API

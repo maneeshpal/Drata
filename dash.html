@@ -49,14 +49,14 @@
                 <!-- ko if: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-form">
-                    <a class="button" data-bind="click:drata.cPanel.widgetEditor.preview">
+                    <a class="button" data-bind="click:drata.dashboard.widgetEditor.preview">
                         <i class="general foundicon-graph"></i>&nbsp;Preview</a>
                 </li>
                 <li class="divider"></li>
                 <li class="has-form">
-                    <a class="button" data-bind="click:drata.cPanel.widgetEditor.notifyWidget">
+                    <a class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
                         <i class="general foundicon-plus"></i>
-                        <!-- ko text:drata.cPanel.widgetEditor.addUpdateBtnText -->
+                        <!-- ko text:drata.dashboard.widgetEditor.addUpdateBtnText -->
                         <!-- /ko -->
                     </a>
                 </li>
@@ -126,7 +126,7 @@
         <!-- /ko -->
     </div>
 
-    <div class="widget-editor" data-bind="with: widgetEditor, visible:isWidgetEditorView" style="display:none; margin-bottom:100px">
+    <div class="widget-editor" data-bind="with: drata.dashboard.widgetEditor, visible:isWidgetEditorView" style="display:none; margin-bottom:100px">
         <!-- ko template: {name: 'widgeteditor-template'} -->
         <!-- /ko -->
     </div>
@@ -163,8 +163,8 @@
     <!-- /ko -->
 
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/dis/drata.min.js"></script>
-    
+    <script type="text/javascript" src="/dis/drata.js"></script>
+    <script type="text/javascript" src="/js/test.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {

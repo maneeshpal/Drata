@@ -345,21 +345,6 @@ var _getBaseSelectionProperties = function(selections){
     return _.uniq(ret);
 };
 
-//var getMongoSelectionProperties = function(selections){
-    // _.each(selections, function(sel){
-    //     if(!sel.isComplex){
-    //         ret[sel.selectedProp.split('.')[0]] = 1;
-    //     }
-    //     else {
-    //         innerSel = getMongoSelectionProperties(sel.groups);
-    //         for(var inner in innerSel){
-    //             if(innerSel.hasOwnProperty(inner)) ret[inner] = 1;
-    //         }
-    //     }
-    // });
-    // return ret;
-//};
-
 var toArray = function(args,ix){
     return Array.prototype.slice.call(args,ix || 0); 
 };
@@ -464,6 +449,59 @@ var getSqlQuery = function(dbname, tableName, segment){
     return returnQuery;
 };
 
+var applyOperation = function(left, operation, right){
+    var result;
+    switch (operation){
+        case '>':
+            result = left > right;
+            break;
+        case '<':
+            result = left < right;
+            break;
+        case '<=':
+            result = left <= right;
+            break;
+        case '=':
+            result = (left === right);
+            break;
+        case '!=':
+            result = (left !== right);
+            break;
+        case '>=':
+            result = left >= right;
+            break;
+        case 'exists':
+            result = left !== undefined;
+            break;
+        case 'and':
+            result = left && right;
+            break;
+        case 'or':
+            result = left || right;
+            break;
+        case '+':
+            result = (+left) + (+right);
+            break;
+        case '-':
+            result = (+left) - (+right);
+            break;
+        case '*':
+            result = (+left) * (+right);
+            break;
+        case 'like':
+            result = left.indexOf(right) > -1;
+            break;
+        case 'not like':
+                result = left.indexOf(right) === -1;
+                break;
+        case '/':
+            result = (+left) / (+right);
+    }
+
+    return result;
+};
+
+exports.applyOperation = applyOperation;
 exports.getUniqueProperties = getUniqueProperties;
 exports.getMongoQuery = getMongoQuery;
 exports.getSqlQuery = getSqlQuery;
@@ -474,3 +512,4 @@ exports.format = format;
 exports.percChange = percChange;
 exports.getPercentageChange = getPercentageChange;
 exports.clone = clone;
+exports.getType = getType;

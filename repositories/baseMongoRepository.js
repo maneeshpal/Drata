@@ -1,5 +1,5 @@
 var mongo = require('mongodb');
-var config = require('./config.json');
+var config = require('../routes/config.json');
 var _ = require('underscore');
 var BSON = mongo.BSONPure;
 

@@ -1,9 +1,8 @@
 //var mongo = require('mongodb');
-var utils = require('./utils');
-var aggregator = require('./aggregator');
-var config = require('./config.json');
-
-
+var utils = require('../utils/utils');
+var aggregator = require('../utils/aggregator');
+var config = require('../routes/config.json');
+var Q = require('q');
 var getConfig = function(datasource, dbname){
     var ds = config.dataSources.filter(function(d){
         return d.alias === datasource;
@@ -18,10 +17,12 @@ var getConfig = function(datasource, dbname){
         }
     };
 }
-var sql = require('mssql'); 
+var sql = require('mssql');
 
-exports.getDatabaseNames = function(req, res){
-    res.json(['uShipDevTrunk']);
+exports.getDatabaseNames = function(datasource){
+    var defer = Q.defer();
+    defer.resolve(['uShipDevTrunk']);
+    return defer.promise;
 };
 
 exports.getCollectionNames = function(req, res) {
@@ -106,14 +107,12 @@ exports.findCollection = function(req, res) {
             }
             var graphData;
             try{
-                graphData = aggregator.aggregator.getGraphData(segment, recordset);    
+                graphData = aggregator.getGraphData(segment, recordset);    
             }
             catch(e){
                res.send(500, e); 
                return;
             }
-            //console.log('aggregator done : ' + (+(new Date()) - ss));
-            
             res.send(graphData);
             
         });

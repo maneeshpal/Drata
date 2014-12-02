@@ -119,10 +119,11 @@
     <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="/js/utils.js"></script>
+    <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript" src="/js/models/labels.js"></script>
     <script type="text/javascript" src="/js/charts/barchart.js"></script>
     <script type="text/javascript" src="/js/charts/pie.js"></script>
-    <script type="text/javascript" src="/js/tempdata.js"></script>
+    
     <script type="text/javascript">
         (function (root, $) {
             //var mainheader = $('#slideBgWrapper');
@@ -179,7 +180,7 @@
             
             function drawBarCallout(elemId){
                 var _t;
-                var bardata = tempData.randomData(1,1, 3, 10);
+                var bardata = drata.utils.tempdata.randomData(1,1, 3, 10);
                 var barchi = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
                 
                 d3.select('#' + elemId + ' svg')
@@ -188,7 +189,7 @@
                 function redraw(){
                     _t && clearTimeout(_t);
                     _t = setInterval(function(){
-                        bardata = tempData.randomData(1,1, 3, 10);
+                        bardata = drata.utils.tempdata.randomData(1,1, 3, 10);
                         barchi.change(bardata);
                     }, 500);
                 }

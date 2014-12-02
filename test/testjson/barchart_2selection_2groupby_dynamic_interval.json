@@ -1,0 +1,155 @@
+{
+	"description": "barchart, sum(price), avg(discount),groupby geography, sex",
+	"inputData": [{
+		"price": 200,
+		"discount": 10,
+		"geography": "texas",
+		"timestamp": "10/10/2008",
+		"sex": "male"
+	},{
+		"price": 150,
+		"discount": 10,
+		"geography": "texas",
+		"timestamp": "11/10/2008",
+		"sex": "female"
+	},{
+		"price": 300,
+		"discount": 12,
+		"geography": "misissipi",
+		"timestamp": "3/10/2009",
+		"sex": "female"
+	},{
+		"price": 20,
+		"discount": 12,
+		"geography": "misissipi",
+		"timestamp": "3/10/2009",
+		"sex": "male"
+	},{
+		"price": 300,
+		"discount": 20,
+		"geography": "misissipi",
+		"timestamp": "3/13/2009",
+		"sex": "female"
+	},{
+		"price": 100,
+		"discount": 23,
+		"geography": "texas",
+		"timestamp": "4/10/2009",
+		"sex": "male"
+	},{
+		"price": 400,
+		"discount": 11,
+		"geography": "texas",
+		"timestamp": "4/10/2009",
+		"sex": "male"
+	}],
+	"expected":[{
+		"key": "sum_price",
+		"groupLevel": "A",
+		"values": [
+			{
+				"key": "texas",
+				"groupLevel": "B",
+				"values": [
+					{
+						"key": "male",
+						"value": 700
+					},
+					{
+						"key": "female",
+						"value": 150
+					}
+				]
+			},
+			{
+				"key": "misissipi",
+				"groupLevel": "B",
+				"values": [
+					{
+						"key": "female",
+						"value": 600
+					},
+					{
+						"key": "male",
+						"value": 20
+					}
+				]
+			}
+		]
+	},
+	{
+		"key": "avg_discount",
+		"groupLevel": "A",
+		"values": [
+			{
+				"key": "texas",
+				"groupLevel": "B",
+				"values": [
+					{
+						"key": "male",
+						"value": 14.666666666666666
+					},
+					{
+						"key": "female",
+						"value": 10
+					}
+				]
+			},
+			{
+				"key": "misissipi",
+				"groupLevel": "B",
+				"values": [
+					{
+						"key": "female",
+						"value": 16
+					},
+					{
+						"key": "male",
+						"value": 12
+					}
+				]
+			}
+		]
+	}],
+	"segment": {
+		"selection": [
+			{
+				"groupType": "selection",
+				"groups": [],
+				"logic": "+",
+				"groupBy": "sum",
+				"selectedProp": "price",
+				"isComplex": false,
+				"perc": false
+			},
+			{
+				"groupType": "selection",
+				"groups": [],
+				"logic": "+",
+				"groupBy": "avg",
+				"selectedProp": "discount",
+				"isComplex": false,
+				"perc": false
+			}
+		],
+		"dataGroup": {
+			"hasGrouping": true,
+			"groupByProp": "geography",
+			"groupByIntervalType": "string",
+			"hasDivideBy": true,
+			"divideByProp": "sex",
+			"divideByIntervalType": "string",
+			"needsGroupByInterval": false,
+			"needsDivideByInterval": false
+		},
+		"group": [],
+		"dataFilter": {
+			"intervalKind": "year",
+			"intervalType": "dynamic",
+			"min": 1,
+			"max": 5,
+			"dateProp": "timestamp"
+		},
+		"chartType": "bar"
+	}
+}

@@ -4,42 +4,20 @@
 //  */
 
 var express = require('express'),
-    mongoRepository = require('./routes/mongoRepository.js'),
-    sqlRepository = require('./routes/sqlRepository.js'),
-    drataRepository = require('./routes/drataRepository.js'),
+    drataRepository = require('./repositories/drataRepository'),
+    controller = require('./routes/externaldatacontroller'),
    	http = require('http'),
    	path = require('path'),
     config = require('./routes/config.json'),
-    skt = require('./routes/socket.js');
+    skt = require('./routes/socket');
 
 var app = express();
-
 
 var serverNames = config.dataSources.map(function(d){
     return d.alias;
 });
 
-var callInstance = function(callback, req, res){
-    var dataSourceType = config.dataSources.filter(function(item){
-        return item.alias === req.params.datasource;
-    });
-    var instance;
-    if(dataSourceType && dataSourceType.length > 0){
-        switch (dataSourceType[0].type){
-            case 'mongodb':
-                instance = mongoRepository;
-            break;
-            case 'sqlserver':
-                instance = sqlRepository;
-            break;
-        }
-    }
-    if(!callback || !instance || !instance[callback]){
-      res.send(404);
-      return;
-    } 
-    instance[callback].call(this, req, res);
-};
+
 
 app.configure(function () {
     app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
@@ -65,7 +43,7 @@ app.get('/', function(req, res){
 
 app.get('/demo',  drataRepository.redirectDemo);
 
-app.get('/api/dashboardpop', mongoRepository.pop);
+//app.get('/api/dashboardpop', mongoRepository.pop);
 
 //get dashboard
 app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
@@ -112,10 +90,10 @@ app.delete('/api/tags/:tagId', drataRepository.removeTag);
 app.get('/api/external/datasource', function(req, res){
   res.json(serverNames);
 });
-app.get('/api/external/:datasource/database', callInstance.bind(this, 'getDatabaseNames'));
-app.get('/api/external/:datasource/:dbname/collectionNames', callInstance.bind(this, 'getCollectionNames'));
-app.get('/api/external/:datasource/:dbname/:collectionName/properties', callInstance.bind(this, 'findProperties'));
-app.post('/api/external/:datasource/:dbname/:collectionName', callInstance.bind(this, 'findCollection'));
+app.get('/api/external/:datasource/database', controller.getDatabaseNames);
+app.get('/api/external/:datasource/:dbname/collectionNames', controller.getCollectionNames);
+app.get('/api/external/:datasource/:dbname/:collectionName/properties', controller.findProperties);
+app.post('/api/external/:datasource/:dbname/:collectionName', controller.findCollection);
 
 var server = http.createServer(app);
 

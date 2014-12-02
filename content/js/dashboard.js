@@ -11,21 +11,15 @@
         self.dashboardNotFound = ko.observable();
         self.loadDashboard = function(d_id){
             dashboardId = d_id;
-            drata.apiClient.getDashboard(dashboardId, function(response){
-                var d = response.result;
-                if(!d || !response.success){
-                    self.dashboardNotFound(true);
-                    return;
-                }
-                self.name(d.name);
-                drata.cPanel.topBar.currentDashboardName(d.name);
-                drata.cPanel.theme(d.theme);
-                theme = d.theme;
+            drata.apiClient.getDashboard(dashboardId).then(function(dashboard){
+                self.name(dashboard.name);
+                drata.cPanel.topBar.currentDashboardName(dashboard.name);
+                drata.cPanel.theme(dashboard.theme);
+                theme = dashboard.theme;
 
                 //dashboardId = d._id;
-                drata.apiClient.getWidgetsOfDashboard(d._id, function(widgetResponse){
+                drata.apiClient.getWidgetsOfDashboard(dashboard._id).then(function(widgets){
                     var ind = 0;
-                    var widgets = widgetResponse.result;
                     self.loading(false);
                     widgets = widgets.sort(function(x,y){
                         return x.displayIndex - y.displayIndex;
@@ -43,6 +37,8 @@
                 });
                 //socket
                 drata.nsx.dashboardSyncService.listenWidgetCreated(dashboardId);
+            }, function(err){
+                self.dashboardNotFound(true);
             });
         };
         
@@ -187,8 +183,8 @@
             if(previewMode) return;
             var m = self.getModel();
             if(!m._id) return;
-            drata.apiClient.updateWidget(m, function(resp){
-                console.log('widget updated');    
+            drata.apiClient.updateWidget(m).then(function(resp){
+                console.log('widget updated'); 
             });
         };
 
@@ -252,19 +248,15 @@
             self.parseError(undefined);
             self.chartType(widgetModel.segmentModel.chartType);
             console.log('loadWidget');
-            DataRetriever.getData({
+
+            drata.apiClient.getData({
                 dataSource: widgetModel.dataSource, 
                 database: widgetModel.database, 
                 collectionName: widgetModel.selectedDataKey, 
                 segment: widgetModel.segmentModel
-            }, function(response){
-                if(!response.success){
-                    self.parseError(response.message);
-                    return;
-                }
-                chartData = response.result;
+            }).then(function(response){
+                chartData = response;
                 var dataToMap;
-
                 if(widgetModel.segmentModel.chartType === 'pie'){
                     dataToMap = chartData[0].values;
                 }
@@ -280,6 +272,8 @@
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
+            }, function(error){
+                self.parseError('Widget loading error');
             });
         };
 
