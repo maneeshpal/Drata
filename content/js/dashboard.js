@@ -221,7 +221,17 @@
         });
 
         self.editWidget = function () {
-            location.hash = '#editwidget/' + self.getId();
+            var widgetId = self.getId();
+            
+            if(widgetModel.isDemo) {
+                location.hash = '#editwidget/demo';
+                drata.pubsub.publish('widgetedit', {
+                    widgetModel: widgetModel
+                });
+            }
+            else{
+                location.hash = '#editwidget/' + widgetId;    
+            }
         };
 
         var _t = undefined, resize = true;

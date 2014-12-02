@@ -105,6 +105,7 @@
             else{
                 drata.pubsub.publish('widgetupdate', cloneModel);   
             }
+            
             cloneModel = {};
             self.onWidgetUpdate = undefined;
             self.onWidgetCancel = undefined;

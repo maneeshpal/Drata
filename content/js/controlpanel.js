@@ -27,6 +27,8 @@
 		    if(!currentDashboard || (dashboardId && currentDashboard.getId() !== dashboardId)){
             	return;
         	}
+
+        	//use _.find
         	var widget = currentDashboard.widgets().filter(function(w){
         		return w.getId() === widgetId;
         	});
@@ -64,6 +66,7 @@
 	            }
 	        });
 		};
+		
 		self.listenWidgetRemoved = function(widgetId){
 			socket.on('widgetremoved'+widgetId, function (data) {
 	            var widget = getWidgetFromDashboard(data.widgetId);
@@ -78,10 +81,11 @@
 	            	});
 	            }
 	        });
-		}
+		};
 		
 		drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
 			if(!widgetModel._id) return;
+			
 	        drata.apiClient.updateWidget(widgetModel).then(function(response){
             	var widget = getWidgetFromDashboard(widgetModel._id, widgetModel.dashboardId);
             	widget && widget.loadWidget(widgetModel);
@@ -101,9 +105,14 @@
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
-			drata.apiClient.addWidget(widgetModel).then(function(widgetModel){
+			drata.apiClient.addWidget(widgetModel).then(function(response){
                 console.log('widget created in db');
-	            currentDashboard.addWidget(widgetModel);
+                // if(response && response._id) {
+                // 	widgetModel = response;
+                // }else{
+                // 	widgetModel._id = 'demo';
+                // }
+	            currentDashboard.addWidget(response);
 	        });
 		});
 
@@ -176,7 +185,7 @@
 	    		break;
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
-	    			if(c[1]){
+	    			if(c[1] && c[1]!== 'demo'){
 	    				drata.apiClient.getWidget(c[1]).then(function(response){
     						drata.pubsub.publish('widgetedit', {
 					            widgetModel: response
@@ -599,11 +608,21 @@
 	    this.toggleExtendedDetails = function(){
 	        this.viewDetails(!this.viewDetails());
 	    };
-	    this.manageUrl = '#editwidget/'+ model._id;
+	    //this.manageUrl = '#editwidget/'+ model._id || '';
 	    this.selectionsExpression = drata.utils.selectionsExpression(model.segmentModel.selection, true);
 	    this.conditionsExpression = drata.utils.conditionsExpression(model.segmentModel.group) || 'none';
 	    this.dataFilterExpression = drata.utils.getDataFilterExpression(model.segmentModel.dataFilter);
-
+	    
+	    this.manageWidget = function(){
+	    	if(model.isDemo) {
+	    		location.hash = '#editwidget/demo';
+                drata.pubsub.publish('widgetedit', {
+                    widgetModel: model
+                });
+            }else{
+            	location.hash = '#editwidget/'+ this._id;
+            }
+	    };
 	    this.getModel = function(){
 	        return model;
 	    }

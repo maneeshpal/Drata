@@ -132,36 +132,32 @@ exports.findWidgetsOfDashboard = function(req, res) {
 
 var updateWidget = function(widgetModel, allowDemo){
     var defer = Q.defer();
+    // if(widgetModel.isDemo && !allowDemo){
+    //     defer.resolve();
+    //     return;
+    // }
     db.collection(widgetCollection,function(err, collection) {
         if(err){
             defer.reject('widget collection cannot connect');
         }
         else{
-            //console.log('connected to widget collection');
-            getWidget(widgetModel._id)
-            .then(function(result){
-                //console.log('got widget');
-                getDashboard(widgetModel.dashboardId)
-                .then(function(result){
-                    //console.log('got dashboard');
-                    if(result.demo && !allowDemo){
-                        defer.resolve();
-                        return;
-                    }
+            getDashboard(widgetModel.dashboardId).then(function(result){
+                if(result.demo && !allowDemo){
+                    defer.resolve();
+                    return;
+                }
+                getWidget(widgetModel._id).then(function(result){
                     widgetModel._id = mongo.ObjectID(widgetModel._id);
                     widgetModel.dateUpdated = new Date();
                     collection.save(widgetModel, {safe:true}, function(err, result) {
-                        //console.log(JSON.stringify(err));
                         err ? defer.reject('cannot update widget') : defer.resolve();
-                        //console.log(JSON.stringify(result));
                     });
-                    
                 }, function(err){
-                    defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
+                    defer.reject('widget not found. Id: ' + widgetModel._id);
                 });
 
             }, function(err){
-                defer.reject('widget not found. Id: ' + widgetModel._id);
+                defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
             });
         }
     });
@@ -175,20 +171,22 @@ var addWidget = function(widgetModel, allowDemo){
         if(err){
             defer.reject('widget collection cannot connect');
         }
-        else{
+        else {
             console.log('widget collection entered');
             getDashboard(widgetModel.dashboardId)
             .then(function(result){
                 console.log('got dashboard');
                 if(result.demo && !allowDemo){
-                    defer.resolve();
+                    widgetModel._id = new mongo.ObjectID();
+                    widgetModel.isDemo = true;
+                    defer.resolve(widgetModel);
                     return;
                 }
                 widgetModel.dateCreated = new Date();
                 widgetModel.dateUpdated = new Date();
                 
                 delete widgetModel._id; //just in case
-
+                delete widgetModel.isDemo; // just incase, a user clones a demo widget to a different dashboard.
                 collection.save(widgetModel, {safe:true}, function(err, result) {
                     //console.log(JSON.stringify(err));
                     console.log('saved widget');
