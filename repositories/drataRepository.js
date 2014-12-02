@@ -144,18 +144,18 @@ var updateWidget = function(widgetModel, allowDemo){
             getDashboard(widgetModel.dashboardId).then(function(result){
                 if(result.demo && !allowDemo){
                     defer.resolve();
-                    return;
                 }
-                getWidget(widgetModel._id).then(function(result){
-                    widgetModel._id = mongo.ObjectID(widgetModel._id);
-                    widgetModel.dateUpdated = new Date();
-                    collection.save(widgetModel, {safe:true}, function(err, result) {
-                        err ? defer.reject('cannot update widget') : defer.resolve();
-                    });
-                }, function(err){
-                    defer.reject('widget not found. Id: ' + widgetModel._id);
-                });
-
+                else{
+                    getWidget(widgetModel._id).then(function(result){
+                        widgetModel._id = mongo.ObjectID(widgetModel._id);
+                        widgetModel.dateUpdated = new Date();
+                        collection.save(widgetModel, {safe:true}, function(err, result) {
+                            err ? defer.reject('cannot update widget') : defer.resolve();
+                        });
+                    }, function(err){
+                        defer.reject('widget not found. Id: ' + widgetModel._id);
+                    });    
+                }
             }, function(err){
                 defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
             });
@@ -180,19 +180,20 @@ var addWidget = function(widgetModel, allowDemo){
                     widgetModel._id = new mongo.ObjectID();
                     widgetModel.isDemo = true;
                     defer.resolve(widgetModel);
-                    return;
                 }
-                widgetModel.dateCreated = new Date();
-                widgetModel.dateUpdated = new Date();
-                
-                delete widgetModel._id; //just in case
-                delete widgetModel.isDemo; // just incase, a user clones a demo widget to a different dashboard.
-                collection.save(widgetModel, {safe:true}, function(err, result) {
-                    //console.log(JSON.stringify(err));
-                    console.log('saved widget');
-                    err ? defer.reject('cannot save widget') : defer.resolve(result);
-                    //console.log(JSON.stringify(result));
-                });
+                else{
+                    widgetModel.dateCreated = new Date();
+                    widgetModel.dateUpdated = new Date();
+                    
+                    delete widgetModel._id; //just in case
+                    delete widgetModel.isDemo; // just incase, a user clones a demo widget to a different dashboard.
+                    collection.save(widgetModel, {safe:true}, function(err, result) {
+                        //console.log(JSON.stringify(err));
+                        console.log('saved widget');
+                        err ? defer.reject('cannot save widget') : defer.resolve(result);
+                        //console.log(JSON.stringify(result));
+                    });    
+                }
             }, function(err){
                 console.log('get dashboard failed when adding widget');
                 defer.reject('Dashboard not found. Id: ' + widgetModel.dashboardId);
@@ -276,13 +277,14 @@ var upsertDashboard = function(dashboardModel, allowDemo){
                 .then(function(d){
                     if(d.demo && !allowDemo){
                         defer.resolve();
-                        return;
                     }
-                    dashboardModel._id = mongo.ObjectID(dashboardModel._id);
-                    dashboardModel.dateUpdated = new Date();
-                    collection.save(dashboardModel, {safe:true}, function(err, result) {
-                        err ? defer.reject('invalid') : defer.resolve(result);
-                    });
+                    else{
+                        dashboardModel._id = mongo.ObjectID(dashboardModel._id);
+                        dashboardModel.dateUpdated = new Date();
+                        collection.save(dashboardModel, {safe:true}, function(err, result) {
+                            err ? defer.reject('invalid') : defer.resolve(result);
+                        });    
+                    }
                 }, function(err){
                     console.log('get dashboard failed when updating/creating dashboard');
                     defer.reject();
@@ -452,34 +454,36 @@ var addTag = function(tagModel, allowDemo){
     var defer = Q.defer();
     if(!tagModel) {
         defer.reject('tag model undefined');
-        return;
     }
-    db.collection(tagCollection,function(err, collection) {
-        if(err){
-            defer.reject('tag collection error');
-        }
-        else{       
-            getDashboard(tagModel.dashboardId)
-            .then(function(result){
-                if(result.demo && !allowDemo){
-                    defer.resolve();
-                    return;
-                }
-                collection.update({
-                    tagName: tagModel.tagName,
-                    dashboardId: tagModel.dashboardId
-                },
-                tagModel,
-                { upsert: true },
-                function(err, result){
-                    err ? defer.reject() : defer.resolve();
+    else{
+        db.collection(tagCollection,function(err, collection) {
+            if(err){
+                defer.reject('tag collection error');
+            }
+            else{       
+                getDashboard(tagModel.dashboardId)
+                .then(function(result){
+                    if(result.demo && !allowDemo){
+                        defer.resolve();
+                    }
+                    else{
+                        collection.update({
+                            tagName: tagModel.tagName,
+                            dashboardId: tagModel.dashboardId
+                        },
+                        tagModel,
+                        { upsert: true },
+                        function(err, result){
+                            err ? defer.reject() : defer.resolve();
+                        });    
+                    }
+                }, function(err){
+                    console.log('get dashboard failed when adding tags');
+                    defer.reject('Dashboard not found. Id: ' + tagModel.dashboardId);
                 });
-            }, function(err){
-                console.log('get dashboard failed when adding tags');
-                defer.reject('Dashboard not found. Id: ' + tagModel.dashboardId);
-            });
-        }
-    });
+            }
+        });    
+    }
     return defer.promise;
 }
 

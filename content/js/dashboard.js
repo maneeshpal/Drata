@@ -283,7 +283,7 @@
                 self.widgetLoading(false);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
             }, function(error){
-                self.parseError('Widget loading error');
+                self.parseError(error.responseText);
             });
         };
 

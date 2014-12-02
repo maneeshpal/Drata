@@ -23,7 +23,7 @@ exports.getDatabaseNames = function(datasource){
             }
             defer.resolve(resp.databases.map(function(d){
                 return d.name;
-            }));    
+            }));
         });
     });
     return defer.promise;
@@ -107,7 +107,7 @@ exports.findCollection = function(req, res) {
                     graphData = aggregator.getGraphData(segment, ret);    
                 }
                 catch(e){
-                   res.send(500, e); 
+                   res.send(500, e);
                    return;
                 }
                 res.send(graphData);

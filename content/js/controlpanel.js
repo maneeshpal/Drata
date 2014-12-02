@@ -468,18 +468,19 @@
 	    	var defer = $.Deferred();
 	    	if(widgetsBound) {
 	    		defer.resolve(this.widgetList());
-	    		return;
 	    	}
-	        drata.apiClient.getWidgetsOfDashboard(model._id).then(function(response){
-	            this.widgetList(ko.utils.arrayMap(
-	                response,
-	                function(widgetModel) {
-	                    return new WidgetItem(widgetModel); 
-	                }
-	            ));
-	            widgetsBound = true;
-	            defer.resolve(this.widgetList());
-	        }.bind(this));
+	    	else{
+	    		drata.apiClient.getWidgetsOfDashboard(model._id).then(function(response){
+		            this.widgetList(ko.utils.arrayMap(
+		                response,
+		                function(widgetModel) {
+		                    return new WidgetItem(widgetModel); 
+		                }
+		            ));
+		            widgetsBound = true;
+		            defer.resolve(this.widgetList());
+		        }.bind(this));	
+	    	}
 	    };
 
 	    this.toggleExtendedDetails = ko.observable(false);

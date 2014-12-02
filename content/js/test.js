@@ -2,9 +2,16 @@
 
 window.pr = function(msg){
     var d = $.Deferred();
-    setTimeout(function(){
-        msg ? d.resolve('resolved'): d.reject('failed');
-    }, 3000);
+    //setTimeout(function(){
+    	if(msg){
+    		d.resolve('resolved');
+    	}
+    	else{
+    		d.reject('failed');
+    	}
+        //console.log('im still here');
+        return;
+    //}, 3000);
     return d.promise();
 }
 var promisearr  = [];
