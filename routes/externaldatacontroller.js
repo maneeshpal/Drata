@@ -12,7 +12,7 @@ var getInstance = function(datasource){
     });
 
     if(!dataSourceType || dataSourceType.length === 0){
-        defer.reject('Cannot find database server in the Configuration');
+        defer.reject({code: 404, error: 'Cannot find database server in the Configuration'});
     }
     else{
         switch (dataSourceType[0].type){
@@ -21,8 +21,6 @@ var getInstance = function(datasource){
             break;
             case 'sqlserver':
                 defer.resolve(sqlRepository);
-            default:
-                defer.reject();
             break;
         }    
     }
@@ -31,42 +29,41 @@ var getInstance = function(datasource){
 };
 
 exports.getDatabaseNames = function(req, res){
-    getInstance(req.params.datasource)
-    .then(function(instance){
-        instance.getDatabaseNames(req.params.datasource)
-        .then(function(result){
-            res.send(result);
-        }, function(err){
-            res.send(err.code, err.message);
-        });
-    }, function(message){
-        res.send(404, message);
+    getInstance(req.params.datasource).then(function(instance){
+        return instance.getDatabaseNames(req.params.datasource);
+    }).done(function(result){
+        res.send(result);
+    },function(error){
+        res.send(error.code, error.message);
     });
 };
 
 exports.getCollectionNames = function(req, res){
-    getInstance(req.params.datasource)
-    .then(function(instance){
-        instance.getCollectionNames(req, res);
-    }, function(message){
-        res.send(404, message);
+    getInstance(req.params.datasource).then(function(instance){
+        return instance.getCollectionNames(req.params.datasource, req.params.dbname);
+    }).done(function(result){
+        res.send(result);
+    },function(error){
+        res.send(error.code, error.message);
     });
 };
 
 exports.findProperties = function(req, res){
-    getInstance(req.params.datasource)
-    .then(function(instance){
-        instance.findProperties(req, res);
-    }, function(message){
-        res.send(404, message);
+    getInstance(req.params.datasource).then(function(instance){
+        return instance.findProperties(req.params.datasource, req.params.dbname, req.params.collectionName);
+    }).done(function(result){
+        res.send(result);
+    },function(error){
+        res.send(error.code, error.message);
     });
 };
 
 exports.findCollection = function(req, res){
-    getInstance(req.params.datasource)
-    .then(function(instance){
-        instance.findCollection(req, res);
-    }, function(message){
-        res.send(404, message);
+    getInstance(req.params.datasource).then(function(instance){
+        return instance.findCollection(req.params.datasource, req.params.dbname, req.params.collectionName, req.body);
+    }).done(function(result){
+        res.send(result);
+    },function(error){
+        res.send(error.code, error.message);
     });
 };

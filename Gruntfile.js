@@ -36,34 +36,43 @@ module.exports = function(grunt) {
         // define a string to put between each file in the concatenated output
         separator: ''
       },
-      dist: {
-        // the files to concatenate
+      lib: {
         src: [
-        'content/js/lib/*.js',
-        'content/js/ko.*.js',
-        'content/js/utils.js',
-        'content/foundation/js/foundation/foundation.js',
-        'content/foundation/js/foundation/foundation.topbar.js',
-        'content/foundation/js/foundation/foundation.dropdown.js',
-        'content/js/models/*.js',
-        'content/js/charts/*.js',
-        'content/js/apiClient.js',
-        'content/js/sortable.js',
-        'content/js/segment2.js',
-        'content/js/dashboard.js',
-        'content/js/tempdata.js',
-        'content/js/pubsub.js',
-        'content/js/keypress.js',
-        'content/js/notifier.js',
-        'content/js/widgeteditor.js',
-        'content/js/controlpanel.js',
-        'content/js/tooltipcontent.js'
+          'content/js/lib/*.js',
+          'content/foundation/js/foundation/foundation.js',
+          'content/foundation/js/foundation/foundation.topbar.js',
+          'content/foundation/js/foundation/foundation.dropdown.js'
         ],
-        // the location of the resulting JS file
-        dest: 'content/dis/<%= pkg.name %>.js'
+        dest: 'content/dis/lib.js'
+      },
+      dashboard: {
+          // the files to concatenate
+          src: [
+            'content/js/utils.js',
+            'content/js/ko.*.js',
+            'content/js/apiClient.js',
+            'content/js/sortable.js',
+            'content/js/segment2.js',
+            'content/js/dashboard.js',
+            'content/js/tempdata.js',
+            'content/js/pubsub.js',
+            'content/js/keypress.js',
+            'content/js/notifier.js',
+            'content/js/widgeteditor.js',
+            'content/js/controlpanel.js',
+            'content/js/tooltipcontent.js'
+          ],
+          // the location of the resulting JS file
+          dest: 'content/dis/dashboard.js'
+      },
+      charts: {
+        src: [
+          'content/js/models/*.js',
+          'content/js/charts/*.js'
+        ],
+        dest: 'content/dis/charts.js'
       }
     },
-
     uglify: {
       options: {
         // the banner is inserted at the top of the output

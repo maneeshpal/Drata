@@ -5,124 +5,109 @@ var config = require('../routes/config.json');
 var baseMongoRepo = require('./baseMongoRepository');
 var Q = require('q');
 
-exports.pop = function(req, res){
-    populateDB(req, res);
-};
-
 exports.getDatabaseNames = function(datasource){
-    var defer = Q.defer();
-    baseMongoRepo.dbInstance().serverName(datasource).dbName('local')(function(db){
-        if(!db){
-            defer.reject({code: 500, message:'Database connection failure'});
-            return;
-        }
+    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName('local')();
+    return getDbInstance.then(function(db){
+        var defer = Q.defer();
         db.admin().listDatabases(function(err, resp){
             if(err){
                 defer.reject({code: 500, message:'Error getting database names'});
-                return;
             }
-            defer.resolve(resp.databases.map(function(d){
-                return d.name;
-            }));
+            else{
+                defer.resolve(resp.databases.map(function(d){
+                    return d.name;
+                }));
+            }
         });
+        return defer.promise;
     });
-    return defer.promise;
 };
 
-exports.getCollectionNames = function(req, res) {
-    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
-        if(!db){
-            res.send(500, 'Database connection failure.');
-            return;
-        }
+exports.getCollectionNames = function(datasource, database) {
+    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    return getDbInstance.then(function(db){
+        var defer = Q.defer();
         db.collectionNames(function(err, result) {
             if(err){
-                res.send(500);
-                return;
+                defer.reject({code: 500, message: 'Error retreiving collection names'});
             }
-            //console.log('getting collections');
-            //console.log(JSON.stringify(result, null, '\t'));
-            var returnCollections = result.filter(function(v){
-                return v.name.indexOf('.system.') < 0;
-            }).map(function(v){
-                return v.name.replace(req.params.dbname + '.','');
-            });
-            res.send(returnCollections);
-            //db.close();
+            else{
+                var returnCollections = result.filter(function(v){
+                    return v.name.indexOf('.system.') < 0;
+                }).map(function(v){
+                    return v.name.replace(database + '.','');
+                });
+                defer.resolve(returnCollections);
+            }
         });
+        return defer.promise;
     });
 };
 
-exports.findProperties = function(req, res){
-    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
-        if(!db){
-            res.send(500, 'Database connection failure.');  
-            return;
-        }
-        var collectionName = req.params.collectionName;
+exports.findProperties = function(datasource, database, collectionName){
+    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    return getDbInstance.then(function(db){
+        var defer = Q.defer();
         db.collection(collectionName, function(err, collection) {
             if(err){
-                res.send(500);
-                return;
+                defer.reject({code:500, message: 'Error retreiving properties for collection: ' + collectionName});
             }
-            collection.find({$query:{}, $orderby:{$natural:-1}, $maxScan : 100}).toArray(function(err, items) {
-                if(err){
-                    res.send(500);
-                    return;
-                }
-                res.send(utils.getUniqueProperties(items));
-                //db.close();
-            });
+            else{
+                collection.find({$query:{}, $orderby:{$natural:-1}, $maxScan : 100}).toArray(function(err, items) {
+                    if(err){
+                        defer.reject({code:500, message: 'Error retreiving properties for collection: ' + collectionName});
+                    }
+                    else{
+                        defer.resolve(utils.getUniqueProperties(items));
+                    }
+                });
+            }
         });
+        return defer.promise;
     });
 };
 
-exports.findCollection = function(req, res) {
-    baseMongoRepo.dbInstance().serverName(req.params.datasource).dbName(req.params.dbname)(function(db){
-        if(!db){
-            res.send(500, 'Database connection failure.');
-            return;
-        }
-        var collectionName = req.params.collectionName;
-        var segment = req.body;
+exports.findCollection = function(datasource, database, collectionName, segment) {
+    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    return getDbInstance.then(function(db){
+        var defer = Q.defer();
         var query = utils.getMongoQuery(segment);
         var selectOnly = utils.getMongoProperties(segment);
         db.collection(collectionName, function(err, collection) {
             if(err){
-                res.send(500, 'Cannot access collection '+ collectionName);
-                return;
+                defer.reject({code: 500, message: 'Cannot access collection '+ collectionName});
             }
-            collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
-                if(err){
-                    res.send(500);
-                    return;
-                }
-                var ret = [];
-                for(var i = 0; i< items.length; i++){
-                    ret.push(utils.flatten(items[i]));
-                }
-                
-                var graphData;
-                try{
-                    graphData = aggregator.getGraphData(segment, ret);    
-                }
-                catch(e){
-                   res.send(500, e);
-                   return;
-                }
-                res.send(graphData);
-            });
-            
+            else{
+                collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
+                    if(err){
+                        defer.reject({code: 500, message: utils.format('Error executing Mongo query on [{0}].[{1}].[{2}]', datasource,database, collectionName)});
+                    }
+                    else{
+                        var ret = [];
+                        for(var i = 0; i < items.length; i++){
+                            ret.push(utils.flatten(items[i]));
+                        }
+                        try{
+                            var graphData = aggregator.getGraphData(segment, ret);
+                            defer.resolve(graphData);   
+                        }
+                        catch(e){
+                           defer.reject({code: 500, message: 'Error processing data. Check segmentation.'})
+                        }
+                    }
+                });
+            }
         });
+        return defer.promise;
     });
 };
 
-var populateDB = function(req, res) {
+exports.pop = function() {
     var maxProps = 500;
     var data= [];
     var y = [0,0,0,0,0,0,0];
     var ordernumber = 1;
-    var geos = ['texas', 'Alabama', 'Misissipi', 'Arizona', 'Minnesota'];
+    var geos = ['texas', 'Alabama', 'Misissipi', 'Arizona', 'Minnesota', 'Mindi'];
     var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
     var colors = ['blue', 'gray', 'black', 'white', 'purple'];
     var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
@@ -159,15 +144,24 @@ var populateDB = function(req, res) {
         //console.log(dd.timestamp);
         data.push(dd);
     }
-    baseMongoRepo.dbInstance().serverName('drataDemoExternal').dbName('shopperstop')(function(db){
+    var getDbInstance = baseMongoRepo.dbInstance().serverName('drataDemoExternal').dbName('shopperstop')();
+    return getDbInstance.then(function(db){
+        var defer = Q.defer();
         db.collection('shoppercheckout', function(err, collection) {
             if(err){
-                res.send('something went wrong');
+                defer.reject({code: 500, message: 'something went wrong'});
             }
             else{
-                collection.insert(data, {safe:true}, function(err, result) {});
-                res.send('done');    
+                collection.insert(data, {safe:true}, function(err, result) {
+                    if(err){
+                        defer.reject({code: 500, message: 'something went wrong'});
+                    }
+                    else{
+                        defer.resolve({message: 'shoppercheckout collection populated successfully'});  
+                    }
+                });
             }
-        });    
+        });
+        return defer.promise;   
     });
 };

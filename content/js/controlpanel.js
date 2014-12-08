@@ -297,14 +297,13 @@
 	            drata.apiClient.deleteDashboard(dashboardItem._id).then(function(resp){
 	                self.dashboards.remove(dashboardItem);
 	            });
+	            // drata.apiClient.deleteAllTagsDashboard(dashboardItem._id).then(function(resp){
+	            //     console.log('tags deleted');
+	            // });
 
-	            drata.apiClient.deleteAllTagsDashboard(dashboardItem._id).then(function(resp){
-	                console.log('tags deleted');
-	            });
-
-	            drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id).then(function(resp){
-	                console.log('widgets deleted');
-	            });
+	            // drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id).then(function(resp){
+	            //     console.log('widgets deleted');
+	            // });
 	        }
 	    };
 
@@ -512,39 +511,41 @@
 	};
 
 	var TagList = function(options){
-		this.newTag = ko.observable();
-	    this.addingTag = ko.observable(false);
-	    this.addTag = function(){
+		var self = this;
+		self.newTag = ko.observable();
+	    self.addingTag = ko.observable(false);
+	    
+	    self.addTag = function(){
 	        var newTagModel = {
-	            tagName: this.newTag(), 
+	            tagName: self.newTag(), 
 	            dashboardId: options.dashboardId
 	        };
 	        drata.apiClient.addTag(newTagModel).done(function(resp){
             	newTagModel.dashboardName = options.name();
             	drata.models.tagList.push(newTagModel);	
-	        }.bind(this))
+	        })
 	        .always(function(){
-	        	this.newTag(undefined);
-	            this.addingTag(false);
+	        	self.newTag(undefined);
+	            self.addingTag(false);
 	        });
-	    }.bind(this);
-
-		this.tagList = ko.computed(function(){
-	    	return drata.models.tagList().filter(function(t){
-	    		return t.dashboardId === options.dashboardId && t.tagName !== '__';
-	    	}, this);
-	    }, this);
-
-	    this.toggleTagInput = function(x){
-	        this.addingTag(x);
 	    };
 
-	    this.availableTags = ko.computed(function(){
-	    	var existingTags = this.tagList().map(function(t){
+		self.tagList = ko.computed(function(){
+	    	return drata.models.tagList().filter(function(t){
+	    		return t.dashboardId === options.dashboardId && t.tagName !== '__';
+	    	});
+	    });
+
+	    self.toggleTagInput = function(x){
+	        self.addingTag(x);
+	    };
+
+	    self.availableTags = ko.computed(function(){
+	    	var existingTags = self.tagList().map(function(t){
 	        	return t.tagName;
 	        });
 	        return _.difference(drata.models.tagNameList(),existingTags);
-	    }, this);
+	    });
 
 	    var removeTagFromList = function(tag){
 	    	var tag = drata.models.tagList().filter(function(t){
@@ -555,45 +556,43 @@
             }
 	    };
 
-	    this.removeTag = function(tag){
+	    self.removeTag = function(tag){
 	    	if(!tag._id){
 	    		removeTagFromList(tag);
 	    		return;
 	    	}
-	    	drata.apiClient.removeTag(tag._id).then(removeTagFromList.bind(this, tag));
-	    }.bind(this);
-	    
+	    	drata.apiClient.removeTag(tag._id).then(removeTagFromList.bind(self, tag));
+	    };
 	};
 
 	var NewDashboardTagList = function(){
-		this.newTag = ko.observable();
-	    this.addingTag = ko.observable(false);
-	    this.tagList = ko.observableArray();
+		var self = this;
+		self.newTag = ko.observable();
+	    self.addingTag = ko.observable(false);
+	    self.tagList = ko.observableArray();
 
-		this.addTag = function(){
-        	this.tagList.push({
-        		tagName: this.newTag()
+		self.addTag = function(){
+        	self.tagList.push({
+        		tagName: self.newTag()
         	});
-            this.newTag(undefined);
-            this.addingTag(false);
-	    }.bind(this);
-
+            self.newTag(undefined);
+            self.addingTag(false);
+	    };
 		
-	    this.toggleTagInput = function(x){
-	        this.addingTag(x);
+	    self.toggleTagInput = function(x){
+	        self.addingTag(x);
 	    };
 
-	    this.availableTags = ko.computed(function(){
-	    	var existingTags = this.tagList().map(function(t){
+	    self.availableTags = ko.computed(function(){
+	    	var existingTags = self.tagList().map(function(t){
 	        	return t.tagName;
 	        });
 	        return _.difference(drata.models.tagNameList(),existingTags);
-	    }, this);
-
+	    });
 	    
-	    this.removeTag = function(tag){
-	    	this.tagList.remove(tag);
-	    }.bind(this);
+	    self.removeTag = function(tag){
+	    	self.tagList.remove(tag);
+	    };
 	    
 	};
 
@@ -711,6 +710,8 @@
 	        var tgList = _.groupBy(t, function(item){
 	            return item.tagName;
 	        });
+	        self.untaggedList([]);
+	        self.taggedList([]);
 	        for(var i in tgList){
 	            if(tgList.hasOwnProperty(i)){
 	                var a = tgList[i];

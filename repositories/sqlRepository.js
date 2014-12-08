@@ -3,21 +3,37 @@ var utils = require('../utils/utils');
 var aggregator = require('../utils/aggregator');
 var config = require('../routes/config.json');
 var Q = require('q');
-var getConfig = function(datasource, dbname){
-    var ds = config.dataSources.filter(function(d){
+var _ = require('underscore');
+var sql = require('mssql');
+
+var getConfig = function(datasource, database){
+    var ds = _.find(config.dataSources, function(d){
         return d.alias === datasource;
-    })[0];
+    });
     return {
         user: ds.username,
         password: ds.password,
         server: ds.serverName,
-        database: dbname,
+        database: database,
         options: {
-            encrypt: false // Use this if you're on Windows Azure
+            encrypt: false
         }
     };
 }
-var sql = require('mssql');
+
+var connectToDatabase = function(datasource, database) {
+    var conStr = getConfig(datasource, database);
+    var defer = Q.defer();
+    sql.connect(conStr, function(err) {
+        if(err){
+            defer.reject({code:500, message: utils.format('Error connecting to Sql Server: {0}, database: {1}', datasource, database)});
+        }
+        else{
+            defer.resolve(sql.Request());
+        }
+    });
+    return defer.promise;
+};
 
 exports.getDatabaseNames = function(datasource){
     var defer = Q.defer();
@@ -25,40 +41,37 @@ exports.getDatabaseNames = function(datasource){
     return defer.promise;
 };
 
-exports.getCollectionNames = function(req, res) {
-
-    var query = 'SELECT TABLE_SCHEMA AS \'schema\', TABLE_NAME As \'name\' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = \'BASE TABLE\' ORDER BY TABLE_SCHEMA, TABLE_NAME';
-
-    var conStr = getConfig(req.params.datasource, req.params.dbname);
-
-    sql.connect(conStr, function(err) {
-        var request = new sql.Request();
+exports.getCollectionNames = function(datasource, database) {
+    return connectToDatabase(datasource, database).then(function(request){
+        var defer = Q.defer();
+        var query = 'SELECT TABLE_SCHEMA AS \'schema\', TABLE_NAME As \'name\' FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = \'BASE TABLE\' ORDER BY TABLE_SCHEMA, TABLE_NAME';
         request.query(query, function(err, recordset) {
             if(err){
-                console.log(JSON.stringify(err, null, '\t'));
-                res.send(500);
-                return;
+                defer.reject({code: 500, message:utils.format('Error retrieving table names for Sql Server: {0}, database: {1}', datasource, database)});
             }
-            res.json(recordset.map(function(d){
+            defer.resolve(recordset.map(function(d){
                 return d.schema ? d.schema + '.' + d.name : d.name;
-            }));
+            })); //json
         });
+        return defer.promise; 
     });
 };
 
+// return connectToDatabase(datasource, database).then(function(request){
+//     var defer = Q.defer();
 
-exports.findProperties = function(req, res){
-    var conStr = getConfig(req.params.datasource, req.params.dbname);
-    
-    sql.connect(conStr, function(err) {
-        var request = new sql.Request();
-        var schemaSplit = req.params.collectionName.split('.');
+//     return defer.promise;
+// });
+
+exports.findProperties = function(datasource, database, collectionName){
+    return connectToDatabase(datasource, database).then(function(request){
+        var defer = Q.defer();
+        var schemaSplit = collectionName.split('.');
         var query = utils.format('SELECT c.Name as property_name, t.name as datatype FROM sys.columns c JOIN sys.objects o ON o.object_id = c.object_id JOIN sys.types t ON t.user_type_id = c.user_type_id JOIN sys.schemas s ON o.schema_id = s.schema_id WHERE s.name =\'{0}\' AND o.name = \'{1}\'', schemaSplit[0], schemaSplit[1]);
         request.query(query, function(err, recordset) {
             if(err){
-                console.log(JSON.stringify(err, null, '\t'));
-                res.send(500);
-                return;
+                //console.log(JSON.stringify(err, null, '\t'));
+                defer.reject({code:500, message: utils.format('Error retreiving properties for table: {0}', collectionName)});
             }
 
             var ret = {}, d, converted_datatype;
@@ -85,40 +98,28 @@ exports.findProperties = function(req, res){
                 ret[d.property_name] = converted_datatype;
             }
             
-            res.json(ret);
+            defer.resolve(ret); //json
         });
+        return defer.promise;
     });
 };
 
-exports.findCollection = function(req, res) {
-    var conStr = getConfig(req.params.datasource, req.params.dbname);
-    var segment = req.body;
-    sql.connect(conStr, function(err) {
-        var request = new sql.Request();
-        var query = utils.getSqlQuery(req.params.dbname, req.params.collectionName, segment);
-        
-        console.log('sql query : ' + query);
-        
+exports.findCollection = function(datasource, database, collectionName, segment) {
+    return connectToDatabase(datasource, database).then(function(request){
+        var defer = Q.defer();
+        var query = utils.getSqlQuery(database, collectionName, segment);
         request.query(query, function(err, recordset) {
             if(err){
-                console.log(JSON.stringify(err, null, '\t'));
-                res.send(500);
-                return;
+                //console.log(JSON.stringify(err, null, '\t'));
+                defer.reject({code: 500, message: utils.format('Error executing Sql query on [{0}].[{1}].[{2}]', datasource,database, collectionName)});
             }
-            var graphData;
             try{
-                graphData = aggregator.getGraphData(segment, recordset);    
+                defer.resolve(aggregator.getGraphData(segment, recordset));
             }
             catch(e){
-               res.send(500, e); 
-               return;
+               defer.reject({code: 500, message: 'Error processing data. Check the segmentation.'});
             }
-            res.send(graphData);
-            
         });
+        return defer.promise;
     });
 };
-
-
-
-

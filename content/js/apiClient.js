@@ -25,7 +25,6 @@
         if(body){
             options.data = JSON.stringify(body);
         }
-                  
         return $.ajax(options);
     };
 
@@ -105,38 +104,37 @@
     var getAllTags = function(){
         var url = apiRoot + 'tags';
         var tagPromiseList = [];
-        var defer = $.Deferred();
-        getAllDashboards().then(function(dashboardList){
+        //var defer = $.Deferred();
+        return getAllDashboards().then(function(dashboardList){
             var dnameMapping = {};
             _.each(dashboardList, function(dash){
                 dnameMapping[dash._id] = dash.name;
-                tagPromiseList.push(getAllTagsOfDashboard(dash._id));
+                var p = getAllTagsOfDashboard(dash._id);
+                tagPromiseList.push(p);
+                p.then(function(){
+                    console.log(arguments);
+                });
             });
-            $.when.apply($, tagPromiseList).done(function(){
-                var tagList = [];
-                _.each(arguments, function(tags){
+            return $.when.apply($, tagPromiseList).then(function(){
+                var tagList = [], hasTags = [];
+                var listOfTags = tagPromiseList.length > 1 ? arguments : [arguments];
+                _.each(listOfTags, function(tags){
                     _.each(tags[0], function(tag){
                         tag.dashboardName = dnameMapping[tag.dashboardId];
-                        delete dnameMapping[tag.dashboardId];
+                        hasTags.push(tag.dashboardId);
                         tagList.push(tag);
                     });
                 });
-
                 _.each(dnameMapping, function(name, id){
-                    tagList.push({
+                    hasTags.indexOf(id) < 0 && tagList.push({
                         tagName: '__',
                         dashboardName: name,
                         dashboardId: id
                     });
                 });
-                defer.resolve(tagList);
-            }).fail(function(error){
-                defer.reject();
+                return tagList;
             })
-        }, function(error){
-            defer.reject();
         });
-        return defer.promise();
     };
 
     var getAllTagsOfDashboard = function(dashboardId){
@@ -216,4 +214,3 @@
         getDatabaseNames: getDatabaseNames
     });
 })(this);
-
