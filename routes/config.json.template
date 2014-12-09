@@ -1,0 +1,15 @@
+
+{
+	"demo" : true,
+	"dataSources" : [{
+		"alias" : "drataDemoExternal",
+		"serverName": "localhost",
+		"port" : 27017,
+		"type": "mongodb"
+	}],
+	"drataInternal" : {
+		"serverName": "localhost",
+		"port" : 27017,
+		"databaseName": "drataStore"
+	}
+}
