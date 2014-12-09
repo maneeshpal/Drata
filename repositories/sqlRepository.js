@@ -37,6 +37,26 @@ var connectToDatabase = function(datasource, database) {
 
 exports.getDatabaseNames = function(datasource){
     var defer = Q.defer();
+
+
+    return connectToDatabase(datasource, 'master').then(function(request){
+        var defer = Q.defer();
+        var query = 'SELECT name FROM sysdatabases WHERE name NOT IN (\'master\', \'tempdb\', \'model\', \'msdb\')';
+        request.query(query, function(err, recordset) {
+            if(err){
+                defer.reject({code: 500, message:utils.format('Error retrieving database names for Sql Server: {0}', datasource)});
+            }
+            else{
+                console.log(JSON.stringify(recordset, null, '\t'));
+                defer.resolve(recordset);
+            }
+            // defer.resolve(recordset.map(function(d){
+            //     return d.schema ? d.schema + '.' + d.name : d.name;
+            // })); //json
+        });
+        return defer.promise; 
+    });
+
     defer.resolve(['uShipDevTrunk']);
     return defer.promise;
 };
@@ -48,10 +68,11 @@ exports.getCollectionNames = function(datasource, database) {
         request.query(query, function(err, recordset) {
             if(err){
                 defer.reject({code: 500, message:utils.format('Error retrieving table names for Sql Server: {0}, database: {1}', datasource, database)});
+            }else{
+                defer.resolve(recordset.map(function(d){
+                    return d.schema ? d.schema + '.' + d.name : d.name;
+                })); //json
             }
-            defer.resolve(recordset.map(function(d){
-                return d.schema ? d.schema + '.' + d.name : d.name;
-            })); //json
         });
         return defer.promise; 
     });

@@ -27,7 +27,7 @@ app.configure(function () {
     app.use(express.static(path.join(__dirname, 'content')));
 });
 
-app.set('port',process.env.PORT || 4000);
+app.set('port',process.env.PORT || 3000);
 
 app.get('/dashboard/:dashboardId', function(req, res){
   res.sendfile('dash.html');
