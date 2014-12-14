@@ -194,11 +194,11 @@ var groupByInterval = function(data, dataGroup, selection){
         });
     }
     //here sort the values by x
-    if(dataGroup.xAxisType === 'currency' || dataGroup.xAxisType === 'numeric'){
-        ret.sort(function(x,y){
-            return x.x - y.x;
+    //if(dataGroup.xAxisType === 'currency' || dataGroup.xAxisType === 'numeric'){
+        ret.sort(function(a, b){
+            return a.x - b.x;
         });
-    }
+    //}
     if(selection.perc){
         ret = utils.getPercentageChange(ret, 'y');
     }

@@ -119,6 +119,7 @@
         };
 
         self.attach = function (event,options) {
+            self.dataSource(undefined);
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);

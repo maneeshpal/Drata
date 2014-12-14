@@ -297,13 +297,6 @@
 	            drata.apiClient.deleteDashboard(dashboardItem._id).then(function(resp){
 	                self.dashboards.remove(dashboardItem);
 	            });
-	            // drata.apiClient.deleteAllTagsDashboard(dashboardItem._id).then(function(resp){
-	            //     console.log('tags deleted');
-	            // });
-
-	            // drata.apiClient.deleteAllWidgetsDashboard(dashboardItem._id).then(function(resp){
-	            //     console.log('widgets deleted');
-	            // });
 	        }
 	    };
 

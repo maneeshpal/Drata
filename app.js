@@ -37,6 +37,10 @@ app.get('/dashboard', function(req, res){
   res.sendfile('dash.html');
 });
 
+app.get('/test', function(req, res){
+  res.sendfile('test.html');
+});
+
 app.get('/', function(req, res){
   res.sendfile('homepage.html');
 });

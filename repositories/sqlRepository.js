@@ -23,23 +23,22 @@ var getConfig = function(datasource, database){
 
 var connectToDatabase = function(datasource, database) {
     var conStr = getConfig(datasource, database);
+    console.log(JSON.stringify(conStr, null, '\t'));
     var defer = Q.defer();
-    sql.connect(conStr, function(err) {
+    var connection = sql.connect(conStr, function(err) {
         if(err){
+            console.log(JSON.stringify(err, null, '\t'));
             defer.reject({code:500, message: utils.format('Error connecting to Sql Server: {0}, database: {1}', datasource, database)});
         }
         else{
-            defer.resolve(sql.Request());
+            defer.resolve(new sql.Request(connection));
         }
     });
     return defer.promise;
 };
 
 exports.getDatabaseNames = function(datasource){
-    var defer = Q.defer();
-
-
-    return connectToDatabase(datasource, 'master').then(function(request){
+    return connectToDatabase(datasource, 'AdventureWorksDW2012').then(function(request){
         var defer = Q.defer();
         var query = 'SELECT name FROM sysdatabases WHERE name NOT IN (\'master\', \'tempdb\', \'model\', \'msdb\')';
         request.query(query, function(err, recordset) {
@@ -48,17 +47,13 @@ exports.getDatabaseNames = function(datasource){
             }
             else{
                 console.log(JSON.stringify(recordset, null, '\t'));
-                defer.resolve(recordset);
+                defer.resolve(recordset.map(function(d){
+                    return d.name;
+                }));
             }
-            // defer.resolve(recordset.map(function(d){
-            //     return d.schema ? d.schema + '.' + d.name : d.name;
-            // })); //json
         });
-        return defer.promise; 
+        return defer.promise;
     });
-
-    defer.resolve(['uShipDevTrunk']);
-    return defer.promise;
 };
 
 exports.getCollectionNames = function(datasource, database) {
@@ -69,6 +64,7 @@ exports.getCollectionNames = function(datasource, database) {
             if(err){
                 defer.reject({code: 500, message:utils.format('Error retrieving table names for Sql Server: {0}, database: {1}', datasource, database)});
             }else{
+                console.log(JSON.stringify(recordset, null, '\t'));
                 defer.resolve(recordset.map(function(d){
                     return d.schema ? d.schema + '.' + d.name : d.name;
                 })); //json
@@ -77,12 +73,6 @@ exports.getCollectionNames = function(datasource, database) {
         return defer.promise; 
     });
 };
-
-// return connectToDatabase(datasource, database).then(function(request){
-//     var defer = Q.defer();
-
-//     return defer.promise;
-// });
 
 exports.findProperties = function(datasource, database, collectionName){
     return connectToDatabase(datasource, database).then(function(request){
@@ -105,15 +95,18 @@ exports.findProperties = function(datasource, database, collectionName){
                     case 'unique_identifier':
                     case 'varbinary':
                     case 'nvarchar':
-                    converted_datatype = 'string';
-                    break;
+                    case 'nchar':
+                        converted_datatype = 'string';
+                        break;
                     case 'bit':
-                    converted_datatype = 'bool';
+                        converted_datatype = 'bool';
+                        break;
                     case 'datetime':
-                    converted_datatype = 'date';
-                    break;
+                    case 'date':
+                        converted_datatype = 'date';
+                        break;
                     default :
-                    converted_datatype = 'numeric';
+                        converted_datatype = 'numeric';
                 }
 
                 ret[d.property_name] = converted_datatype;
