@@ -2,9 +2,10 @@
 "use strict";
 
  ;(function(root) {
+    
     var BarChart = function(){
         var z = d3.scale.category10();
-        var dims = {m: {t:20, r:10, b:30, l:40}};
+        var dims = {m: {t:60, r:10, b:30, l:40}};
         var _dims = dims;
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
@@ -12,6 +13,14 @@
         var x0 = d3.scale.ordinal();
         var x1 = d3.scale.ordinal();
         var y = d3.scale.linear();
+        
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+            return drata.utils.format('{0}: {1}', d.key ,d.value);
+        });
+
         var yAxis = d3.svg.axis()
             .scale(y)
             .tickFormat(d3.format('.2s'))
@@ -100,6 +109,8 @@
                     .selectAll('g.topgroup')
                     .data([data]);
 
+                
+
                 var gWrapperEnter = gWrapper.enter()
                     .append("g")
                     .attr('class', 'topgroup');
@@ -169,7 +180,12 @@
 
                     rects.enter()
                         .append('rect').attr("height", 0)
-                        .attr("y", y(yrange[0]));
+                        .attr("y", y(yrange[0]))
+                        .attr("class", "rect-bar")
+                        .on('mouseover', tip.show)
+                        .on('mouseout', tip.hide);
+
+                    rects.call(tip);
 
                     rects
                         .style("fill", function(d) { 

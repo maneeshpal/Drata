@@ -1,51 +1,89 @@
-    text{
-        font: 10px arial;
-    }
-    .axis {
-        path{
-            stroke:#ccc;
-            fill:none;
-            shape-rendering: crispEdges;
-        }
-        line {
-            stroke:#ccc;
-            stroke-opacity: .2;
-            fill:none;
-            shape-rendering: crispEdges;
-        }
-        path.domain{
-            display: none;
-        } 
-        text{
-            fill: #1f77b4;
-        }  
-    }
-
-    .line-group .line{
+text{
+    font: 10px arial;
+}
+.axis {
+    path{
+        stroke:#ccc;
         fill:none;
-        stroke-width:2;
+        shape-rendering: crispEdges;
     }
-    .label-group {
-        cursor:pointer;
+    line {
+        stroke:#ccc;
+        stroke-opacity: .2;
+        fill:none;
+        shape-rendering: crispEdges;
     }
-    .tool-tip {
-        text-anchor:end;
-        font: 12px arial;
-    }
-    .area-group .line{
-        stroke-width:2;
-        stroke-opacity:.6;
-        fill-opacity:.5;
-    }
+    path.domain{
+        display: none;
+    } 
+    text{
+        fill: #1f77b4;
+    }  
+}
 
-    .arcs-group .arc {
-        stroke: #fff;
-        stroke-width: 1;
-    }
+.line-group .line{
+    fill:none;
+    stroke-width:2;
+}
+.label-group {
+    cursor:pointer;
+}
+.tool-tip {
+    text-anchor:end;
+    font: 12px arial;
+}
+.area-group .line{
+    stroke-width:2;
+    stroke-opacity:.6;
+    fill-opacity:.5;
+}
 
-    polyline{
-        opacity: .3;
-        stroke: #404040;
-        stroke-width: 1px;
-        fill: none;
-    }
+.arcs-group .arc {
+    stroke: #fff;
+    stroke-width: 1;
+}
+
+polyline{
+    opacity: .3;
+    stroke: #404040;
+    stroke-width: 1px;
+    fill: none;
+}
+
+/*D3 tool tip*/
+.d3-tip {
+    line-height: 1;
+    font-size: 12px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #F5F5F5;
+    border-radius: 2px;
+    border:1px solid #000;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -2px 0 0 0;
+    top: 100%;
+    left: 0;
+}
+.rect-bar{
+    
+}
+.rect-bar:hover{
+    opacity: .8;
+}
+/*end D3 tool tip*/

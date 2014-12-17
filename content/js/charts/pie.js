@@ -35,7 +35,7 @@
         }
 
         function chart(selection){
-            console.log('pie chart drawn');
+            //console.log('pie chart drawn');
             selection.each(function(data) {
                 var container = d3.select(this);
                 //console.log(data.key);
@@ -74,16 +74,15 @@
                 });
 
 
-                dispatch.on("togglePath", function(d, i){
-                    var toggle;
-                    if(disabledItems.length === itemCount-1){
+                dispatch.on("togglePath", function(d, i) {
+                    if(!d.disabled && disabledItems.length === itemCount-1){
                         _.each(data.values, function(item){
                            item.disabled = false;
                         });
                         disabledItems = [];
                     }
                     else{
-                        toggle = d.disabled;
+                        var toggle = d.disabled;
                         d.disabled = !toggle;
                         if(toggle){
                             disabledItems.splice(disabledItems.indexOf(d.key), 1);
@@ -352,9 +351,6 @@
                         .append("text")
                         .style("opacity", 0)
                         .attr("dy", ".35em")
-                        .text(function(d) {
-                            return d.data.key;
-                        })
                         .each(function(d) {
                             this._current = d;
                         });
@@ -362,6 +358,9 @@
                     polytext.transition().duration(1000)
                         .style("opacity", function(d) {
                             return d.data.value == 0 || d.data.disabled ? 0 : 1;
+                        })
+                        .text(function(d) {
+                            return drata.utils.format('{0}: {1}', d.data.key, Math.round(d.value/total * 100).toFixed(1) + '%');
                         })
                         .attrTween("transform", function(d) {
                             var interpolate = d3.interpolate(this._current, d);

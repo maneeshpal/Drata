@@ -111,9 +111,6 @@
                 dnameMapping[dash._id] = dash.name;
                 var p = getAllTagsOfDashboard(dash._id);
                 tagPromiseList.push(p);
-                p.then(function(){
-                    console.log(arguments);
-                });
             });
             return $.when.apply($, tagPromiseList).then(function(){
                 var tagList = [], hasTags = [];
