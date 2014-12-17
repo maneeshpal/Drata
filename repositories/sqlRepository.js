@@ -23,11 +23,11 @@ var getConfig = function(datasource, database){
 
 var connectToDatabase = function(datasource, database) {
     var conStr = getConfig(datasource, database);
-    console.log(JSON.stringify(conStr, null, '\t'));
+    //console.log(JSON.stringify(conStr, null, '\t'));
     var defer = Q.defer();
     var connection = sql.connect(conStr, function(err) {
         if(err){
-            console.log(JSON.stringify(err, null, '\t'));
+            //console.log(JSON.stringify(err, null, '\t'));
             defer.reject({code:500, message: utils.format('Error connecting to Sql Server: {0}, database: {1}', datasource, database)});
         }
         else{
@@ -38,7 +38,7 @@ var connectToDatabase = function(datasource, database) {
 };
 
 exports.getDatabaseNames = function(datasource){
-    return connectToDatabase(datasource, 'AdventureWorksDW2012').then(function(request){
+    return connectToDatabase(datasource, 'master').then(function(request){
         var defer = Q.defer();
         var query = 'SELECT name FROM sysdatabases WHERE name NOT IN (\'master\', \'tempdb\', \'model\', \'msdb\')';
         request.query(query, function(err, recordset) {

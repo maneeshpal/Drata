@@ -223,3 +223,4 @@ node_modules/
 content/dis/
 *.sublime-project
 *.sublime-workspace
+test.html

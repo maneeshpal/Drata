@@ -158,9 +158,9 @@
                     content: 'All the visualizations are custom built on top of D3 js, adhering to reusable chart components principles. More animations and affects can be added only limited by your imagination and javascript skills. <br /> <a class="button primary large radius"> Live Demo</a>'
                 }]
             }
-            var chart2  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(0).keyLabels(false).innerRadius(10);
+            var chart2  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(0).keyLabels(false).innerRadius(10).drawPolyLines(false);
 
-            var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).textFillColor('#6f6f6f').onEvent('arcClick', function(d){
+            var chart  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(40).keyLabels(true).innerRadius(10).textFillColor('#6f6f6f').drawPolyLines(false).onEvent('arcClick', function(d){
                 setTimeout(chart2.resize, 200);
                 //chart2.resize();
                 $('#mainHeader').html(d.data.heading);

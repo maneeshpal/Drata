@@ -2,11 +2,14 @@
  ;(function(root) {
     var PieChart = function(){
         var arc = d3.svg.arc();
+        var outerArc = d3.svg.arc();
+        var arc2 = d3.svg.arc();
+
         var z = d3.scale.category20();
         var dims = {m: {l:10, r:10, t:10, b:30}};
         var pie = d3.layout.pie();
 
-        var _drawOuterLabels = true, _textFillColor = '#fff', _drawDataKey = true, _innerRadius = 0, _keyLabels = false, _rotateArcs = false, _arcExpand = 0;
+        var _drawOuterLabels = true, _textFillColor = '#fff', _drawDataKey = true, _innerRadius = 0, _keyLabels = false, _rotateArcs = false, _arcExpand = 0, _drawPolyLines = true;
         var enterAntiClockwise = {
                   startAngle: Math.PI * 2,
                   endAngle: Math.PI * 2
@@ -22,6 +25,14 @@
         var raiseEvent = function(eventName, args){
             events.hasOwnProperty(eventName) && events[eventName](args);
         };
+
+        function angle(d) {
+            var a = (d.startAngle + d.endAngle) * 90 / Math.PI;
+            return a > 90 ? a - 180 : a;
+        }
+        function midAngle(d){
+            return d.startAngle + (d.endAngle - d.startAngle)/2;
+        }
 
         function chart(selection){
             console.log('pie chart drawn');
@@ -107,7 +118,7 @@
                     .attr('class', 'topgroup');
 
                 gWrapperEnter.append("g").attr('class', 'arcs-group');
-                
+
                 if(_drawOuterLabels){
                     gWrapperEnter.append("g").attr("class", 'labels-group');
                     var labels = drata.models.labels().color(z).dims(dims).align('topcenter').dispatch(dispatch);
@@ -123,7 +134,6 @@
                 
                 var r = Math.min(dims.w - dims.m.l - dims.m.r, dims.h - dims.m.t - dims.m.b)/2;
                 
-                //var r2 = _arcExpand ? r - _arcExpand/100 * r : r;
                 var r2 = _arcExpand ? r - _arcExpand : r;
 
                 pie.value(function(d) {
@@ -141,6 +151,12 @@
                 
                 arc.outerRadius(r2);
                 
+                outerArc.outerRadius(r2 + (r2 * 0.1));
+                outerArc.innerRadius(r2 + (r2 * 0.1));
+
+                arc2.outerRadius(r2);
+                arc2.innerRadius(r2);
+
                 if(_innerRadius){
                     arc.innerRadius(r2 - _innerRadius);
                 }else{
@@ -187,7 +203,6 @@
                 };
 
                 var arcs = gWrapper.select('g.arcs-group')
-
                     .attr('transform','translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')') 
                     .selectAll('path')
                     .data(pie(data.values));
@@ -212,13 +227,7 @@
 
                 
                 arcs.transition().ease("poly(4)").duration(400).attrTween("d", function(d){
-                    //console.log(d.data);
-                    // if(d.data.disabled) {
-                    //     return arcTweenOut.call(this, d);
-                    // } 
-                    // else{
-                        return arcTween.call(this, d);
-                    //}
+                    return arcTween.call(this, d);
                 });
 
                 arcs.exit()
@@ -227,20 +236,15 @@
                     .attrTween('d', arcTweenOut)
                     .remove(); // now remove the exiting arcs
                     
+                
                 gWrapperEnter.append("g").attr('class', 'text-group');
                 
-                
-
                 var total = 0;
 
                 for(var i = 0; i < data.values.length; i++){
                     if(!data.values[i].disabled) total = total + (+data.values[i].value);
                 }
-                function angle(d) {
-                    var a = (d.startAngle + d.endAngle) * 90 / Math.PI;
-                    return a > 90 ? a - 180 : a;
-                }
-                
+
                 var texts = gWrapper.selectAll('g.text-group')
                     .attr('transform', 'translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')')
                     .selectAll('text')
@@ -300,15 +304,87 @@
                         .attr('transform', 'translate(' +(dims.w/2)+ ',' + (r + r + dims.m.t + 15) + ')');                        
                 }
                 
-                //rotate stuff
 
-                // container
-                //     .select('g.topgroup')
-                //     .attr('transform', 'rotate(60, ' + (dims.w/2) + ',' + (dims.h/2) + ') translate(0,0)')
-                //     .transition().duration(5000)
-                //     .attr('transform', 'rotate(0, ' + (dims.w/2) + ',' + (dims.h/2) + ') translate(0,0)');
-            
-                
+                if(_drawPolyLines){
+                    gWrapperEnter.append("g").attr('class', 'polyline-group');
+                    
+                    var polyline = gWrapper.select('g.polyline-group')
+                        .attr('transform','translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')')
+                        .selectAll('polyline')
+                        .data(pie(data.values));
+                    
+                    polyline.enter()
+                        .append("polyline")
+                        .style("opacity", 0)
+                        .each(function(d) {
+                            this._current = d;
+                        });
+
+                    polyline.transition().duration(1000)
+                        .style("opacity", function(d) {
+                            return d.data.value == 0 || d.data.disabled ? 0 : .5;
+                        })
+                        .attrTween("points", function(d){
+                            this._current = this._current;
+                            var interpolate = d3.interpolate(this._current, d);
+                            var _this = this;
+                            return function(t) {
+                                var d2 = interpolate(t);
+                                _this._current = d2;
+                                var pos = outerArc.centroid(d2);
+                                pos[0] = (r2 * 0.95 * (midAngle(d2) < Math.PI ? 1.1 : -1.1));
+                                return [arc2.centroid(d2), outerArc.centroid(d2), pos];
+                            };          
+                        });
+
+                    polyline
+                        .exit().transition().delay(1000)
+                        .remove();
+
+                    gWrapperEnter.append("g").attr('class', 'polytext-group');
+                    
+                    var polytext = gWrapper.select('g.polytext-group')
+                        .attr('transform','translate(' + (dims.w/2) + ',' + (r + dims.m.t) + ')')
+                        .selectAll('text')
+                        .data(pie(data.values));
+
+                    polytext.enter()
+                        .append("text")
+                        .style("opacity", 0)
+                        .attr("dy", ".35em")
+                        .text(function(d) {
+                            return d.data.key;
+                        })
+                        .each(function(d) {
+                            this._current = d;
+                        });
+
+                    polytext.transition().duration(1000)
+                        .style("opacity", function(d) {
+                            return d.data.value == 0 || d.data.disabled ? 0 : 1;
+                        })
+                        .attrTween("transform", function(d) {
+                            var interpolate = d3.interpolate(this._current, d);
+                            var _this = this;
+                            return function(t) {
+                                var d2 = interpolate(t);
+                                _this._current = d2;
+                                var pos = outerArc.centroid(d2);
+                                pos[0] = r2 * (midAngle(d2) < Math.PI ? 1.1 : -1.1);
+                                return "translate("+ pos +")";
+                            };
+                        })
+                        .styleTween("text-anchor", function(d){
+                            var interpolate = d3.interpolate(this._current, d);
+                            return function(t) {
+                                var d2 = interpolate(t);
+                                return midAngle(d2) < Math.PI ? "start":"end";
+                            };
+                        });
+                    polytext
+                        .exit().transition().delay(1000)
+                        .remove();
+                }
             });
             
             return chart;
@@ -360,6 +436,11 @@
             return chart;
         };
 
+        chart.drawPolyLines = function(value){
+            if (!arguments.length) return _drawPolyLines;
+            _drawPolyLines = value;
+            return chart;
+        };
         
 
         return chart;
