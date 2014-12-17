@@ -220,6 +220,7 @@ pip-log.txt
 
 routes/config.json
 node_modules/
+bower_components/
 content/dis/
 *.sublime-project
 *.sublime-workspace
