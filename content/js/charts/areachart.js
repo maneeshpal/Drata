@@ -12,12 +12,29 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {m: {l:30, r:10, t:30, b:30}};
+        var dims = {m: {l:30, r:10, t:10, b:30}};
+        
+        var getMin = function(data, prop){
+            return d3.min(data, function(d) { 
+                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
+                    return v[prop]; 
+                }); 
+            });
+        };
+
+        var getMax = function(data, prop){
+            return d3.max(data, function(d) { 
+                return d3.max(d.values.filter(function(i){return !i.disabled}), function(v) { 
+                    return v[prop]; 
+                }); 
+            });
+        };
+
         function chart(selection) {
             selection.each(function(data) {
                 console.log('area chart drawn');
                 var container = d3.select(this);
-
+                _yticks > 0 && yAxis.ticks(_yticks);
                 if(_xAxisType === 'date'){
                     _.each(data, function(item){
                         _.each(item.values, function(dataPoint){
@@ -25,9 +42,9 @@
                         });
                     });
                 }
-
                 z.domain(data.map(function(d){return d.key}));
-                chart.resize = function() {
+                
+                chart.resize = function() { 
                     dims = {m: {l:30, r:10, t:30, b:30}};
                     container
                     .transition().duration(500)
@@ -58,10 +75,19 @@
 
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
+
+                var xDomain = [getMin(data, 'x'),getMax(data, 'x')];
+                var yDomain = [getMin(data, 'y'),getMax(data, 'y')];
+
+                var xAxisTickFormat = drata.utils.getTextFormat({
+                    formatType: _xAxisType,
+                    formatSubType: _dateInterval,
+                    domain: xDomain
+                });
                 
-                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
-                yAxis.ticks(_yticks).axisTicType('numeric').dims(dims).includeGridLines(true);
-                                
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).domain(xDomain).dims(dims).includeGridLines(false);
+                yAxis.axisTicType('numeric').dims(dims).domain(yDomain).includeGridLines(true);
+                
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
                 dispatch.on("togglePath", function(d){
@@ -117,7 +143,7 @@
                 var xScale = xAxis.scale(), yScale = yAxis.scale();
                 //var toolTip = drata.models.toolTip().dispatch(dispatch);
 
-                var lines = drata.models.lines().xScale(xScale).yScale(yScale).color(function(){return '#fff'}).interpolate('monotone');
+                var lines = drata.models.lines().xScale(xScale).yScale(yScale).color(z).interpolate('monotone');
                 
                 gWrapper
                     .select('g.line-group')
@@ -131,30 +157,23 @@
                     .call(area);
 
                 if(_dataMarkers){
-                    gWrapperEnter.append("g").attr("class", "tooltip-group");
-                    var toolTip = drata.models.toolTip().dispatch(dispatch);
-                    gWrapper
-                        .select('g.tooltip-group')
-                        .attr("transform", "translate(" + (dims.w-5) +", " +  (dims.m.t-10) +")")
-                        .call(toolTip);
-
                     gWrapperEnter.append("g").attr("class", "dot-group");
 
                     var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                         return yScale(d.y);
-                    }).color(z).dispatch(dispatch);
+                    }).color(z).dispatch(dispatch).xAxisTickFormat(xAxisTickFormat);
                     gWrapper
                         .select('g.dot-group')
                         .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                         .datum(data)
                         .call(dots);   
                 }
-
+                
                 gWrapper.exit().remove();
             });
             return chart;
         };
-        
+
         chart.xAxisType = function(value){
             if (!arguments.length) return _xAxisType;
             _xAxisType = value;
@@ -184,7 +203,6 @@
             _drawYAxis = value;
             return chart;
         };
-
         chart.drawXAxis = function(value){
             if (!arguments.length) return _drawXAxis;
             _drawXAxis = value;

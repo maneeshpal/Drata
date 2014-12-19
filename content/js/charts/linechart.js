@@ -5,7 +5,7 @@
         var xAxis = drata.models.axis()
             .orient("bottom")
             .axisType('x');
-            //.ticks(8);
+            
         var yAxis = drata.models.axis()
             .orient("left")
             .axisType('y')
@@ -14,6 +14,22 @@
         var z = d3.scale.category20();
         var dims = {m: {l:30, r:10, t:10, b:30}};
         
+        var getMin = function(data, prop){
+            return d3.min(data, function(d) { 
+                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
+                    return v[prop]; 
+                }); 
+            });
+        };
+
+        var getMax = function(data, prop){
+            return d3.max(data, function(d) { 
+                return d3.max(d.values.filter(function(i){return !i.disabled}), function(v) { 
+                    return v[prop]; 
+                }); 
+            });
+        };
+
         function chart(selection) {
             console.log('line chart drawn');
             selection.each(function(data) {
@@ -59,9 +75,18 @@
 
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
+
+                var xDomain = [getMin(data, 'x'),getMax(data, 'x')];
+                var yDomain = [getMin(data, 'y'),getMax(data, 'y')];
+
+                var xAxisTickFormat = drata.utils.getTextFormat({
+                    formatType: _xAxisType,
+                    formatSubType: _dateInterval,
+                    domain: xDomain
+                });
                 
-                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
-                yAxis.axisTicType('numeric').dims(dims).includeGridLines(true);
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).domain(xDomain).dims(dims).includeGridLines(false);
+                yAxis.axisTicType('numeric').dims(dims).domain(yDomain).includeGridLines(true);
                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
@@ -127,19 +152,12 @@
                     gWrapperEnter.append("g").attr("class", "dot-group");
                     var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                         return yScale(d.y);
-                    }).color(z).dispatch(dispatch);
+                    }).color(z).dispatch(dispatch).xAxisTickFormat(xAxisTickFormat);
                     gWrapper
                         .select('g.dot-group')
                         .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                         .datum(data)
-                        .call(dots);
-
-                    gWrapperEnter.append("g").attr("class", "tooltip-group");
-                    var toolTip = drata.models.toolTip().dispatch(dispatch);
-                    gWrapper
-                        .select('g.tooltip-group')
-                        .attr("transform", "translate(" + (dims.w-5) +", " +  (dims.m.t-10) +")")
-                        .call(toolTip);                        
+                        .call(dots);   
                 }
                 
                 gWrapper.exit().remove();

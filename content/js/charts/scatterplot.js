@@ -87,7 +87,8 @@
                 dims.w = $(this.parentNode).width();
                 dims.h = $(this.parentNode).height();
                 
-                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).includeGridLines(false);
+                var xDomain = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
+                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).dims(dims).domain(xDomain).includeGridLines(false);
                 
                 
                 //var xrange = [getMin(enabledData, 'x'),getMax(enabledData, 'x')];
@@ -150,14 +151,21 @@
                 
                 var xScale = xAxis.scale();
 
+                var xAxisTickFormat = drata.utils.getTextFormat({
+                    formatType: _xAxisType,
+                    formatSubType: _dateInterval,
+                    domain: xDomain
+                });
+                
                 //dots
                 var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                    return y(d.key);
                 }).color(z)
-                .colorfull(true)
+                //.colorfull(true)
                 .dotRadius(function(d){
                     return rs(d.y);
-                });
+                })
+                .xAxisTickFormat(xAxisTickFormat);
                 gWrapper
                     .select('g.dot-group')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")

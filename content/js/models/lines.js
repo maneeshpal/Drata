@@ -42,7 +42,7 @@
                 paths.enter()
                     .append("path")
                     .attr("class", "line");
-                
+
                 paths
                     .style("stroke", function(d) { 
                         return _color(d.key); 
@@ -53,9 +53,9 @@
                     })
                     .attr("d", function(d) {
                         return (!d.disabled) ? line(d.values) : line(getFlatLine(d.values)); 
-                    })
+                    });
+
                     //.call(moveleft)
-                    ;
                     
                 paths.exit().remove();
             });

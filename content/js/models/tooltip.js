@@ -7,21 +7,22 @@
         function tt(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-                var toolTipEnter = container
-                    .selectAll('text.tooltip')
-                    .data([0])
-                    .enter().append('text')
-                    .attr('class', 'tool-tip');
-
-                var toolTip = container.select('text.tool-tip');
-
-                _dispatch.on("showToolTip", function(d, color){
-                    toolTip.text('x:' + d.x + ', y:' + d.y)
-                        .attr('fill', color);
+                
+                var txt = container.select('#tt');
+                if(!txt[0][0]){
+                    txt = container.append('div')
+                    .attr('id', 'tt').attr('class', 'd3-tip');
+                }
+                
+                //txt.style('display', 'none');
+                _dispatch.on("showToolTip", function(d, color, xPos, yPos){
+                    txt.html('x:' + d.x + ', y:' + d.y)
+                    .attr('style', 'display: \'\', left: ' + xPos + ';top: ' + yPos);
+                    //txt.offset({left: xPos,top: yPos });
                 });
 
                 _dispatch.on("hideToolTip", function(){
-                    toolTip.text('');
+                    //toolTip.text('');
                 });
             });
 

@@ -306,7 +306,6 @@
             }else{
                 content && content.change && content.change(chartData[newValue.value], widgetModel.segmentModel, widgetModel.contentModel);
             }
-            
         });
         
         // self.updatePosition = function(){
@@ -342,7 +341,7 @@
         var chart, chartData;
         
         self.drawChart = function(_data, segmentModel){
-            chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(false);
+            chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true);
             d3.select('#'+self.widgetContentId +' svg')
                 .datum(_data.values)
                 .call(chart);
@@ -354,7 +353,10 @@
         
         self.change = function(_data, _segmentModel){
             if(chart){
-                chart.change && chart.change(_data.values);
+                chart.change && chart
+                    .xAxisType(_segmentModel.dataGroup.xAxisType)
+                    .dateInterval(_segmentModel.dataGroup.timeseriesInterval)
+                    .includeDataMarkers(true).change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }
@@ -555,7 +557,7 @@
                             }
                         })
                     }
-                    chart = drata.charts.pieChart().drawOuterLabels(false);
+                    chart = drata.charts.pieChart().drawOuterLabels(false).drawPolyLines(false);
                     break;
             }
 
@@ -605,7 +607,7 @@
         };
         self.change = function(_data, _segmentModel){
             if(chart){
-                chart.change && chart.change(_data.values);
+                chart.change && chart.xAxisType(_segmentModel.dataGroup.xAxisType).dateInterval(_segmentModel.dataGroup.timeseriesInterval).change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }
@@ -644,7 +646,7 @@
         self.template = 'content-template';
         var chart;
         self.drawChart = function(_data, segmentModel){
-            chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(false);
+            chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true);
             d3.select('#'+self.widgetContentId +' svg')
                 .datum(_data.values)
                 .call(chart);
@@ -654,7 +656,7 @@
         };
         self.change = function(_data, _segmentModel){
             if(chart){
-                chart.change && chart.change(_data.values);
+                chart.change && chart.xAxisType(_segmentModel.dataGroup.xAxisType).dateInterval(_segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true).change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }

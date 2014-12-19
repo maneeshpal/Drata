@@ -2,10 +2,14 @@
  ;(function(root) {
     var Dots = function(){
 
-        var _xScale, _yScale, _colorfull = false, _color = d3.scale.category20(), _dispatch = d3.dispatch();
-        var _dotRadius = function(){
-            return 2;
-        };
+        var _xScale, _yScale, _colorfull = false, _color = d3.scale.category20(), _dispatch = d3.dispatch(), _xAxisTickFormat;
+        var _dotRadius =  2;
+        var tip = d3.tip && d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+            return drata.utils.format('<div class="d3-tip-header">{0}</div>{1}: {2}', d.key, _xAxisTickFormat(d.x) , drata.utils.formatNumber(d.y, 0, '.', ','));
+        });
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
@@ -33,35 +37,34 @@
                     .append('circle')
                     .attr('class', 'circle-each');
 
+                dot.call(tip);
+                
                 dot.attr('r', _dotRadius)
                     .attr('fill', function(d){
-                        return _colorfull ? _color(d.key) : 'none';
+                        return _color(d.key);
+                        //return _colorfull ? _color(d.key) : 'none';
                     })
-                    .attr('stroke', function(d){
-                        return _colorfull ? _color(d.key) : '#fff';
-                    })
-                    .attr('stroke-width', 2)
+                    .attr('stroke', 'transparent')
+                    .attr('stroke-width', 5)
                     .on('mouseover', function(d){
                         var color = _color(d.key);
-                        d3.select(this)
+                        +_dotRadius && d3.select(this)
                             .attr('stroke', color)
-                            .attr('stroke-width', 4)
+                            //.attr('stroke-width', 20)
                             .attr('r', 4)
                             .attr('fill', '#fff');
-                        _dispatch.showToolTip && _dispatch.showToolTip(d, color);
+                            tip.show.apply(this, arguments);
+                        //_dispatch.showToolTip && _dispatch.showToolTip(d, color,_xScale(d.x), _yScale(d));
                     })
                     .on('mouseout', function(d){
                         _dispatch.hideToolTip && _dispatch.hideToolTip();
                         d3.select(this)
                             .attr('r', _dotRadius)
                             .attr('fill', function(d){
-                                return _colorfull ? _color(d.key) : 'none';
+                                return _color(d.key);
                             })
-                            .attr('stroke', function(d){
-                                return _colorfull ? _color(d.key) : '#fff';
-                            })
-                            .attr('stroke-width', 2);
-                        
+                            .attr('stroke', 'transparent');
+                            tip.hide.apply(this, arguments);
                     })
                     .transition().duration(500)
                     .attr('cx', function(d){
@@ -82,11 +85,13 @@
             _color = value;
             return chart;
         };
-        chart.colorfull = function(value){
-            if (!arguments.length) return _colorfull;
-            _colorfull = value;
+        
+        chart.xAxisTickFormat = function(value){
+            if (!arguments.length) return _xAxisTickFormat;
+            _xAxisTickFormat = value;
             return chart;
         };
+        
         chart.xScale = function(value){
             if (!arguments.length) return _xScale;
             _xScale = value;

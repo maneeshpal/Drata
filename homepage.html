@@ -114,10 +114,8 @@
         Drata is developed out of <3 for visualizations by Maneeshpal Bandlamudi
     </div>
 </div>
-
-    <script src="/js/lib/d3.v3.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
+    
+    <script type="text/javascript" src="/dis/lib.js"></script>
     <script type="text/javascript" src="/js/utils.js"></script>
     <script type="text/javascript" src="/js/tempdata.js"></script>
     <script type="text/javascript" src="/js/models/labels.js"></script>
@@ -181,7 +179,7 @@
             function drawBarCallout(elemId){
                 var _t;
                 var bardata = drata.utils.tempdata.randomData(1,1, 3, 10);
-                var barchi = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false);
+                var barchi = drata.charts.barChart().showBarLabels(false).drawYAxis(false).drawXAxis(false).dims({m: {t:0, r:0, b:0, l:0}}).drawLabels(false).showToolTips(false);
                 
                 d3.select('#' + elemId + ' svg')
                 .datum(bardata)

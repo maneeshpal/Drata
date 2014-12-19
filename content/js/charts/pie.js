@@ -360,7 +360,7 @@
                             return d.data.value == 0 || d.data.disabled ? 0 : 1;
                         })
                         .text(function(d) {
-                            return drata.utils.format('{0}: {1}', d.data.key, Math.round(d.value/total * 100).toFixed(1) + '%');
+                            return drata.utils.format('{0}: {1}', d.data.key, drata.utils.formatNumber(d.value, 0, '.', ','));
                         })
                         .attrTween("transform", function(d) {
                             var interpolate = d3.interpolate(this._current, d);

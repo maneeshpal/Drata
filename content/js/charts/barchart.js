@@ -9,16 +9,16 @@
         var _dims = dims;
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
-        var _showBarLabels = false, _drawLabels = true, _drawYAxis = true, _drawXAxis = true;
+        var _showBarLabels = false, _drawLabels = true, _drawYAxis = true, _drawXAxis = true, _showToolTips = true;
         var x0 = d3.scale.ordinal();
         var x1 = d3.scale.ordinal();
         var y = d3.scale.linear();
         
-        var tip = d3.tip()
+        var tip = d3.tip && d3.tip()
             .attr('class', 'd3-tip')
             .offset([-10, 0])
             .html(function(d) {
-            return drata.utils.format('{0}: {1}', d.key ,d.value);
+            return drata.utils.format('<div class="d3-tip-header">{0}</div>{1}: {2}',d.topLevelKey, d.key , drata.utils.formatNumber(d.value, 0,'.', ','));
         });
 
         var yAxis = d3.svg.axis()
@@ -74,6 +74,7 @@
                 _.each(data, function(item){
                      _.each(item.values, function(val){
                         val.disabled = disabledKeys.indexOf(val.key) > -1;
+                        val.topLevelKey = item.key; //todo: figure out a better way
                         if(duplKeys.indexOf(val.key) === -1){
                             duplKeys.push(val.key);   
                         }
@@ -181,11 +182,14 @@
                     rects.enter()
                         .append('rect').attr("height", 0)
                         .attr("y", y(yrange[0]))
-                        .attr("class", "rect-bar")
-                        .on('mouseover', tip.show)
-                        .on('mouseout', tip.hide);
+                        .attr("class", "rect-bar");
 
-                    rects.call(tip);
+                    if(_showToolTips && tip){
+                        rects
+                        .on('mouseover', tip.show)
+                        .on('mouseout', tip.hide)
+                        .call(tip);
+                    }
 
                     rects
                         .style("fill", function(d) { 
@@ -273,7 +277,11 @@
             _dims = value;
             return chart;
         };
-            
+        chart.showToolTips = function(value){
+            if (!arguments.length) return _showToolTips;
+            _showToolTips = value;
+            return chart;
+        };
         return chart;
     };
     root.drata.ns('charts').extend({

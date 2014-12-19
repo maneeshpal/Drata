@@ -5,42 +5,25 @@
         var _orient, _scale, _domain, _gl = false, _dims, _axisType, _axisTicType,_dateInterval, _ticks = 0, _tickFormat, _drawAxis = true;
         var axis = d3.svg.axis();
         //var _m = {l:30, r:10, t:30, b:30};
-        
-        
-        var getMin = function(data, prop){
-            return d3.min(data, function(d) { 
-                return d3.min(d.values.filter(function(i){return !i.disabled}), function(v) {
-                    return v[prop]; 
-                }); 
-            });
-        };
-
-        var getMax = function(data, prop){
-            return d3.max(data, function(d) { 
-                return d3.max(d.values.filter(function(i){return !i.disabled}), function(v) { 
-                    return v[prop]; 
-                }); 
-            });
-        };
 
         
         function chart(selection) {
             selection.each(function(data) {
                 var container = d3.select(this);
-
                 var enabledData = data.filter(function(d){
                     return !d.disabled;
                 });
                 
                 var dataLength = enabledData.length;
                 var intFormat;
-                _domain = [getMin(enabledData, _axisType),getMax(enabledData, _axisType)];
+                //_domain = [getMin(enabledData, _axisType),getMax(enabledData, _axisType)];
                 var ml = 0, mb = 0;
                 _tickFormat = drata.utils.getTextFormat({
                     formatType: _axisTicType,
                     formatSubType: _dateInterval,
                     domain: _domain
                 });
+
                 switch(_axisTicType){
                     case 'numeric':
                         ml = 50; mb = 50;
@@ -101,7 +84,7 @@
                 axis.scale(_scale)
                     .tickFormat(function(d){
                         a = _tickFormat(d);
-                        if(_axisType !== 'x') return a;
+                        if(_axisType === 'y') return a;
 
                          c = drata.utils.textToPixel(a, 'font-size:10px; font-family: arial;');
                          axisLabelLength += c.width;
