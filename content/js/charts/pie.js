@@ -150,8 +150,8 @@
                 
                 arc.outerRadius(r2);
                 
-                outerArc.outerRadius(r2 + (r2 * 0.1));
-                outerArc.innerRadius(r2 + (r2 * 0.1));
+                outerArc.outerRadius(r2 + 2);
+                outerArc.innerRadius(r2 + 2);
 
                 arc2.outerRadius(r2);
                 arc2.innerRadius(r2);

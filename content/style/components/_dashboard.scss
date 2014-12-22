@@ -30,6 +30,9 @@
   background-position: 50% 50%;
   background-repeat: no-repeat;
   width:100%;
+  .widgetContent, numeric-chart {
+    visibility:hidden;
+  }
 }
 
 .ui-sortable-placeholder * {

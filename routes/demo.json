@@ -54,9 +54,8 @@
 		            }
 		        ],
 		        "dataFilter" : {
-		            "intervalType" : "static",
-		            "min" : "10/04/2006",
-		            "max" : "11/05/2014",
+		            "from" : "10/04/2006",
+		            "to" : "11/05/2014",
 		            "dateProp" : "timestamp"
 		        },
 		        "chartType" : "line"
@@ -94,10 +93,8 @@
 		        },
 		        "group" : [],
 		        "dataFilter" : {
-		            "intervalKind" : "year",
-		            "intervalType" : "dynamic",
-		            "min" : 1,
-		            "max" : 5,
+		            "from" : "3y",
+		            "to" : "6d",
 		            "dateProp" : "timestamp"
 		        },
 		        "chartType" : "bar"
@@ -133,10 +130,8 @@
 		        },
 		        "group" : [],
 		        "dataFilter" : {
-		            "intervalKind" : "year",
-		            "intervalType" : "dynamic",
-		            "min" : 1,
-		            "max" : 5,
+		            "from" : "5y",
+		            "to" : "1y",
 		            "dateProp" : "timestamp"
 		        },
 		        "chartType" : "numeric"
@@ -176,10 +171,8 @@
 		        },
 		        "group" : [],
 		        "dataFilter" : {
-		            "intervalKind" : "year",
-		            "intervalType" : "dynamic",
-		            "min" : 1,
-		            "max" : 5,
+		            "from" : "01/02/2005",
+		            "to" : "11/29/2014",
 		            "dateProp" : "timestamp"
 		        },
 		        "chartType" : "pie"

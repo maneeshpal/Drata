@@ -7,28 +7,6 @@ var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /*copy from utils frontend*/
 /*end copy from utils frontend*/
-var parseTime = function(input){
-    if(!input || !isNaN(+input)) return null;
-
-    var hmsConv = {
-        h: 60 * 60 * 1000,
-        m: 60 * 1000,
-        s: 1000,
-        d: 60 * 60 * 1000 * 24,
-        y: 60 * 60 * 1000 * 24 * 365,
-        w: 60 * 60 * 1000 * 24 * 7
-    };
-    var hms = input.split(/[^a-z]/gi).filter(function(j){return !!j && hmsConv.hasOwnProperty(j)});
-    var num = input.split(/\D/g).map(function(i){return +i}).filter(function(j){return !!j});
-    if(hms.length <= 0 || hms.length !== num.length) return null;
-    var output = 0;
-    
-    for(var i=0;i<hms.length;i++){
-        output = output + hmsConv[hms[i]] * num[i];
-    }
-    return output;
-};
-
     
 var divideDataByInterval = function(params){
     var val, groupBy;

@@ -249,6 +249,7 @@
         };
 
         self.loadWidget = function(wm){
+            self.widgetLoading(true);
             if(wm) widgetModel = wm;
             var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
             _sizex(widgetModel.sizex);
@@ -283,6 +284,7 @@
                 self.widgetLoading(false);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
             }, function(error){
+                self.widgetLoading(false);
                 self.parseError(error.responseText);
             });
         };

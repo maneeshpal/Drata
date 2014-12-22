@@ -171,26 +171,36 @@
         return el;
     };
 
-    var parseTime = function(input){
-        if(!input || !isNaN(+input)) return null;
+    var hmsConv = {
+        h: { label: 'hours', labelSingular: 'hour', value: 60 * 60 * 1000 },
+        m: { label: 'minutes', labelSingular: 'minute', value: 60 * 1000 },
+        s: { label: 'seconds', labelSingular: 'second', value: 1000 },
+        d: { label: 'days', labelSingular: 'day', value: 60 * 60 * 1000 * 24 },
+        y: { label: 'years', labelSingular: 'year', value: 60 * 60 * 1000 * 24 * 365 },
+        w: { label: 'weeks', labelSingular: 'week', value: 60 * 60 * 1000 * 24 * 7 }
+    };
 
-        var hmsConv = {
-            h: 60 * 60 * 1000,
-            m: 60 * 1000,
-            s: 1000,
-            d: 60 * 60 * 1000 * 24,
-            y: 60 * 60 * 1000 * 24 * 365,
-            w: 60 * 60 * 1000 * 24 * 7
-        };
-        var hms = input.split(/[^a-z]/gi).filter(function(j){return !!j && hmsConv.hasOwnProperty(j)});
-        var num = input.split(/\D/g).map(function(i){return +i}).filter(function(j){return !!j});
-        if(hms.length <= 0 || hms.length !== num.length) return null;
-        var output = 0;
+    var parseTime = function(input){
+        if(!input || !isNaN(+input)) return { ms: null, expression:'' };
+    
+        var hms = input.split(/[^a-z]/gi).filter(function(j){
+            return !!j && hmsConv.hasOwnProperty(j)
+        });
+        
+        var num = input.split(/\D/g).map(function(i){
+            return +i
+        }).filter(function(j){
+            return !!j
+        });
+        
+        if(hms.length <= 0 || hms.length !== num.length) return { ms: null, expression:'' };
+        var output = 0, expression = [];
         
         for(var i=0;i<hms.length;i++){
-            output = output + hmsConv[hms[i]] * num[i];
+            output = output + hmsConv[hms[i]].value * num[i];
+            expression.push(format('{0} {1}', num[i], (num[i] > 1 ? hmsConv[hms[i]].label: hmsConv[hms[i]].labelSingular)));
         }
-        return output;
+        return {ms : output, expression: expression.join(',')};
     };
 
     var flatten = function(data) {
@@ -331,84 +341,6 @@
             composedDate.getFullYear() == y) ? composedDate : undefined;
     };
 
-    var getBounds = function(type) {
-        var bounds = [];
-        switch(type){
-            case 'day' :
-                bounds = [1, 60];
-                break;
-            case 'minute':
-                bounds = [1,60];
-                break;
-            case 'hour':
-                bounds = [1, 72];
-                break;
-            case 'month':
-                bounds = [1,24];
-                break;
-            case 'year':
-                bounds = [1,5];
-                break;
-        }
-        return bounds;
-    }
-
-    var getDateRange = function(dataFilter){
-        var min, max;
-        switch(dataFilter.intervalType){
-            case 'static':
-                min = getValidDate(dataFilter.min, true);
-                max = getValidDate(dataFilter.max, true);
-                break;
-            case 'dynamic':
-                var bounds = getBounds(dataFilter.intervalKind);
-                var multiplier;
-                min = bounds[1] - dataFilter.min;
-                max = bounds[1] - dataFilter.max;
-                var cd = new Date();
-
-                if(!isNaN(+min) && !isNaN(+max)){
-                    switch(dataFilter.intervalKind){
-                        case 'day':
-                            multiplier = 86400000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            break;
-                        break;
-                        case 'minute':
-                            multiplier = 60000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            break;
-                        case 'hour':
-                            multiplier = 3600000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            
-                            break;
-                        case 'month':
-                            var cm = cd.getMonth();
-                            var d1 = new Date(cd);
-                            min = new Date(cd.setMonth(cm-min));
-                            max = new Date(d1.setMonth(cm-max));
-                            break;
-                        case 'year':
-                            var cy = cd.getFullYear();
-                            var d1 = new Date(cd);
-                            min = new Date(cd.setFullYear(cy-min));
-                            max = new Date(d1.setFullYear(cy-max));
-                            break;
-                    }
-                }
-            break;
-        }
-
-        return {
-            min: min,
-            max: max
-        };
-    };
-
     var intervalFormats = {
         month : {format: '%b %Y', mb: 40, ml: 60},
         year: {format: '%Y', mb: 30, ml: 30},
@@ -423,15 +355,6 @@
                 return this.hours;
             }
             return this.day;
-            // if(interval <= msMonth){
-            //     //3 months
-            //     return this.day;
-            // }
-            // if(interval <= msYear){
-            //     //1 year
-            //     return this.month;
-            // }
-            // return this.year;
         }
     };
 
@@ -637,13 +560,10 @@
     };
 
     var getDataFilterExpression = function(dataFilter){
-        if(dataFilter.intervalType === 'dynamic'){
-            if(!dataFilter.intervalKind) return;
-            return drata.utils.format('{0} {1}s from current time until {2} {1}s from current time',dataFilter.max || '__', dataFilter.intervalKind, dataFilter.min || '__');
-        }
-        else{
-            return drata.utils.format('{0} to {1}', dataFilter.min || '__', dataFilter.max || '__');
-        }
+        var exp = '{0} to {1}';
+        var fromExp = (+new Date(dataFilter.from)) ? dataFilter.from : parseTime(dataFilter.from).expression + ' since current time';
+        var toExp = (+new Date(dataFilter.to)) ? dataFilter.to : parseTime(dataFilter.to).expression + ' since current time';
+        return format(exp, fromExp || '__', toExp || '__');
     };
 
     drata.ns('utils').extend({
@@ -660,9 +580,7 @@
         calc: calc,
         divideDataByInterval: divideDataByInterval,
         getUniqueProperties: getUniqueProperties,
-        getBounds: getBounds,
         getValidDate: getValidDate,
-        getDateRange: getDateRange,
         formatDate: formatDate,
         selectionsExpression: selectionsExpression,
         conditionsExpression: conditionsExpression,

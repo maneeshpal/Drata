@@ -293,12 +293,12 @@ var TrackDataGroup = function(){
 
     self.timeseriesInterval.extend({
         groupingInterval: {
-            _required : function(){
-                return self.timeseries();
-            },
             intervalType : function(){
                 return self.xAxisType();
             }
+        },
+        onlyIf : function(){
+            return self.timeseries();
         }
     });
 
@@ -409,10 +409,13 @@ var ComparisonDataGroup = function(options){
     });
 
     self.groupByInterval.extend({
-        groupingInterval: {
-            _required : function(){
+        required: { 
+            message : 'Enter Interval',
+            onlyIf: function(){
                 return self.needsGroupByInterval();
-            },
+            }
+        },
+        groupingInterval: {
             intervalType : function(){
                 return self.groupByIntervalType();
             }
@@ -420,10 +423,13 @@ var ComparisonDataGroup = function(options){
     });
 
     self.divideByInterval.extend({
-        groupingInterval: {
-            _required : function(){
+        required: { 
+            message : 'Enter Interval',
+            onlyIf: function(){
                 return self.needsDivideByInterval();
-            },
+            }
+        },
+        groupingInterval: {
             intervalType : function(){
                 return self.divideByIntervalType();
             }
@@ -431,154 +437,95 @@ var ComparisonDataGroup = function(options){
     });
 };
 
-var DataFilter = function(){
-    var self = this;
-    self.min = ko.observable();
-    self.max = ko.observable();
-    self.minDate = ko.observable();
-    self.maxDate = ko.observable();
-    
-    var slider;
-
-    self.intervalType = ko.observable('static');
-
-    self.intervalKind = ko.observable();
-    
-    self.dateProp = ko.observable().extend({
-        required: {message: 'Enter your Date Property'}
-    });
-
-    var setSliderValues = function(options){
-        if(slider){
-            var bounds = drata.utils.getBounds(options.intervalKind);
-            options.minMax = options.minMax || [];
-            options.minMax[0] = options.minMax[0] === undefined ? Math.floor((bounds[1] - bounds[0])/3) : options.minMax[0];
-            options.minMax[1] = options.minMax[1] === undefined ? bounds[1] : options.minMax[1];
-            
-            slider.slider( "option", "min", bounds[0]);
-            slider.slider( "option", "max", bounds[1]);
-            slider.slider( "option", "values", options.minMax);
-            self.min(options.minMax[0]);
-            self.max(options.minMax[1]);
-        }
-    };
-    
-    self.intervalKind.subscribe(function(newValue){
-        setSliderValues({intervalKind: newValue});
-    });
-    self.intervalType.subscribe(function(newValue){
-        slider && slider.slider(newValue === 'dynamic'? 'enable': 'disable');
-    });
-    
-    self.getModel = function(){
-        return {
-            intervalKind: self.intervalKind(),
-            intervalType: self.intervalType(),
-            min: (self.intervalType() == 'static') ? self.minDate() : self.min(),
-            max: (self.intervalType() == 'static') ? self.maxDate() :self.max(),
-            dateProp:self.dateProp()
-        }
-    };
-
-    self.prefill = function(model){
-        self.intervalType(model.intervalType || 'static');
-        self.intervalKind(model.intervalKind);
-        if(model.intervalType === 'static'){
-            model.min && self.minDate(model.min);
-            model.max && self.maxDate(model.max);
-        }
-        else if(model.intervalType === 'dynamic'){
-            setSliderValues({
-                intervalKind: model.intervalKind,
-                minMax: [model.min, model.max]
-            })
-            //model.min !== undefined && self.min(model.min);
-            //model.max !== undefined && self.max(model.max);
-            // if(model.min !== undefined && model.max !== undefined){
-            //     slider.slider( "option", "values", [model.min, model.max]); 
-            // }
-        }
-        self.dateProp(model.dateProp);
-        self.dateProp.isModified(false);
-    };
-
-    self.expression = ko.computed(function(){
-        return drata.utils.getDataFilterExpression(self.getModel());
-        //return drata.utils.format('{2} from : {0} to {1}', (range.min ? drata.utils.formatDate(range.min) : '__'),(range.max ? drata.utils.formatDate(range.max) : '__'), self.dateProp() || '* Date Property');
-        
-    }).extend({ throttle: 500 });
-
-    var setupSlider = function(){
-        slider = $("#myslider").slider({
-            range: true,
-            slide: function( event, ui ) {
-                self.min(ui.values[0]);
-                self.max(ui.values[1]);
+var TimeFrameItem = function(timeframeType){
+    var self = this, dp;
+    self.dynamicDate = ko.observable();
+    self.staticDate = ko.observable();
+    self.dateType = ko.observable('static');
+    self.timeframeType = timeframeType;
+    self.dynamicDate.extend({
+        groupingInterval: {},
+        required: {
+            message: 'Enter Interval',
+            onlyIf: function(){
+                return self.dateType() === 'dynamic';
             }
-        });
-    };
-    self.showDatePicker = function(val){
-        if(self.intervalType() !== 'static') return;
-        if(val === 'start'){
-            self.startDp && self.startDp.datepicker('show');
         }
-        else if(val === 'end'){
-            self.endDp && self.endDp.datepicker('show');
+    });
+
+    self.staticDate.extend({
+        validDataFilterDate: {},
+        required: {
+            message: 'Enter Date',
+            onlyIf: function(){
+                return self.dateType() === 'static';
+            }
         }
+    });
+
+    self.showDatePicker = function(){
+        dp && dp.datepicker('show');
     };
 
-    var setupDatePicker = function(){
-        self.startDp = $( "#from" ).datepicker({
+    self.setupDatePicker = function(elems){
+        var container = _.find(elems, function(e){return e.nodeType === 1});
+        dp = $(container).find("#datepicker" + self.timeframeType).datepicker({
             defaultDate: "-1m",
             changeMonth: true,
             changeYear: true,
             numberOfMonths: 1,
             maxDate: new Date(),
             onClose: function( selectedDate ) {
-                $( "#to" ).datepicker( "option", "minDate", selectedDate );
-            }
-        });
-        self.endDp = $( "#to" ).datepicker({
-            changeMonth: true,
-            changeYear: true,
-            numberOfMonths: 1,
-            onClose: function( selectedDate ) {
-                $( "#from" ).datepicker( "option", "maxDate", selectedDate );
+                //$( "#to" ).datepicker( "option", "minDate", selectedDate );
             }
         });
     };
+    self.getModel = function(){
+        return self.dateType() === 'static' ? self.staticDate() : self.dynamicDate();
+    };
+    self.prefill = function(model){
+        if(!model) {
+            self.staticDate(undefined);
+            self.dynamicDate(undefined);
+            self.staticDate.isModified(false);
+            self.dynamicDate.isModified(false);
+        }
+        if(+new Date(model)){
+            self.staticDate(model);
+            self.dateType('static');
+        }else {
+            self.dynamicDate(model);
+            self.dateType('dynamic');
+        }
+    };
+}
 
-    self.afterRender = function(elem){
-        setupSlider();
-        setupDatePicker();
+var DataFilter = function(){
+    var self = this;
+    self.from = new TimeFrameItem('from');
+    self.to = new TimeFrameItem('to');
+    self.dateProp = ko.observable().extend({
+        required: {message: 'Enter your Date Property'}
+    });
+    self.getModel = function(){
+        return {
+            from : self.from.getModel(),
+            to: self.to.getModel(),
+            dateProp: self.dateProp()
+        }
     };
 
-    self.minDate.extend({
-        validDataFilterDate : {
-            message: 'Invalid Date',
-            onlyIf: function(){
-                return self.intervalType() == 'static';
-            }
-        }
-    });
+    self.prefill = function(model){
+        self.dateProp(model.dateProp);
+        if(!model.dateProp) self.dateProp.isModified(false);
+        self.from.prefill(model.from);
+        self.to.prefill(model.to);
+    };
 
-    self.intervalKind.extend({
-        required : {
-            message: 'Please select Interval',
-            onlyIf: function(){
-                return self.intervalType() == 'dynamic';
-            }
-        }
-    });
-
-    self.maxDate.extend({
-        validDataFilterDate : {
-            message: 'Invalid Date',
-            onlyIf: function(){
-                return self.intervalType() == 'static';
-            }
-        }
-    });
+    self.expression = ko.computed(function(){
+        return drata.utils.getDataFilterExpression(self.getModel());
+        
+    }).extend({ throttle: 500 });
 };
 
 var Condition = function(options){

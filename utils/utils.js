@@ -93,12 +93,17 @@ var mongoSymbolMap = {
 
 var getMongoQuery = function(segment){
     var query = segment.group ? getMongoConditions(segment.group) : {};
-    var dateRange = getDateRange(segment.dataFilter);
     
-    query[segment.dataFilter.dateProp] = {
-        $gte : dateRange.min, 
-        $lte: dateRange.max
-    };
+    if(segment.dataFilter.dateProp){
+        query[segment.dataFilter.dateProp] = {};
+        if(segment.dataFilter.from){
+            query[segment.dataFilter.dateProp]['$gte'] = getDateFromTimeframe(segment.dataFilter.from);
+        }
+        if(segment.dataFilter.from){
+            query[segment.dataFilter.dateProp]['$lte'] = getDateFromTimeframe(segment.dataFilter.to);
+        }
+    }
+    
     return query;
 };
 
@@ -235,82 +240,44 @@ var getValidDate = function(dateVal, isUs) {
         composedDate.getMonth() == m &&
         composedDate.getFullYear() == y) ? composedDate : undefined;
 };
-var getBounds = function(type){
-    var bounds = [];
-    switch(type){
-        case 'day' :
-            bounds = [1, 60];
-            break;
-        case 'minute':
-            bounds = [1,60];
-            break;
-        case 'hour':
-            bounds = [1, 72];
-            break;
-        case 'month':
-            bounds = [0,24];
-            break;
-        case 'year':
-            bounds = [0,5];
-            break;
-    }
-    return bounds;
+
+var hmsConv = {
+    h: { label: 'hours', labelSingular: 'hour', value: 60 * 60 * 1000 },
+    m: { label: 'minutes', labelSingular: 'minute', value: 60 * 1000 },
+    s: { label: 'seconds', labelSingular: 'second', value: 1000 },
+    d: { label: 'days', labelSingular: 'day', value: 60 * 60 * 1000 * 24 },
+    y: { label: 'years', labelSingular: 'year', value: 60 * 60 * 1000 * 24 * 365 },
+    w: { label: 'weeks', labelSingular: 'week', value: 60 * 60 * 1000 * 24 * 7 }
 };
 
-var getDateRange = function(dataFilter){
-    var min, max;
-        switch(dataFilter.intervalType){
-            case 'static':
-                min = getValidDate(dataFilter.min, true);
-                max = getValidDate(dataFilter.max, true);
-                break;
-            case 'dynamic':
-                var bounds = getBounds(dataFilter.intervalKind);
-                var multiplier;
-                min = bounds[1] - dataFilter.min;
-                max = bounds[1] - dataFilter.max;
-                var cd = new Date();
+var parseTime = function(input){
+    if(!input || !isNaN(+input)) return { ms: null, expression:'' };
 
-                if(!isNaN(+min) && !isNaN(+max)){
-                    switch(dataFilter.intervalKind){
-                        case 'day':
-                            multiplier = 86400000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            break;
-                        break;
-                        case 'minute':
-                            multiplier = 60000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            break;
-                        case 'hour':
-                            multiplier = 3600000;
-                            min = new Date(+cd - (multiplier * min));
-                            max = new Date(+cd - (multiplier * max));
-                            
-                            break;
-                        case 'month':
-                            var cm = cd.getMonth();
-                            var d1 = new Date(cd);
-                            min = new Date(cd.setMonth(cm-min));
-                            max = new Date(d1.setMonth(cm-max));
-                            break;
-                        case 'year':
-                            var cy = cd.getFullYear();
-                            var d1 = new Date(cd);
-                            min = new Date(cd.setFullYear(cy-min));
-                            max = new Date(d1.setFullYear(cy-max));
-                            break;
-                    }
-                }
-            break;
-        }
+    var hms = input.split(/[^a-z]/gi).filter(function(j){
+        return !!j && hmsConv.hasOwnProperty(j)
+    });
+    
+    var num = input.split(/\D/g).map(function(i){
+        return +i
+    }).filter(function(j){
+        return !!j
+    });
+    
+    if(hms.length <= 0 || hms.length !== num.length) return { ms: null, expression:'' };
+    var output = 0, expression = [];
+    
+    for(var i=0;i<hms.length;i++){
+        output = output + hmsConv[hms[i]].value * num[i];
+        expression.push(format('{0} {1}', num[i], (num[i] > 1 ? hmsConv[hms[i]].label: hmsConv[hms[i]].labelSingular)));
+    }
+    return {ms : output, expression: expression.join(',')};
+};
 
-        return {
-            min: min,
-            max: max
-        };
+var getDateFromTimeframe = function(timeframe){
+    var d = new Date(timeframe);
+    if(+d) return new Date(d);
+    var ms = parseTime(timeframe).ms || 0;
+    return new Date(+new Date() - ms);
 };
 
 var getMongoProperties = function(segment){
@@ -440,9 +407,21 @@ var getSqlQuery = function(dbname, tableName, segment){
 
     var selectionProperties = getSelectionProperties(segment);
     var condition = conditionsExpression(segment.group);
-    var dateRange = getDateRange(segment.dataFilter);
-
-    var returnQuery = format('select {0} from {1}.{2} where {3} between \'{4}\' and \'{5}\'', selectionProperties.join(','), dbname, tableName, segment.dataFilter.dateProp, dateRange.min.format('{0}-{1}-{2}'), dateRange.max.format('{0}-{1}-{2}'));
+    
+    var returnQuery = format('select {0} from {1}.{2}', selectionProperties.join(','), dbname, tableName);
+    
+    if(segment.dataFilter.dateProp){
+        if(segment.dataFilter.from && segment.dataFilter.to){
+            returnQuery = format('{0} where {3} between \'{4}\' and \'{5}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2}'), getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2}'));
+        }
+        else if(segment.dataFilter.from && !segment.dataFilter.to){
+            returnQuery = format('{0} where {3} > \'{4}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2}'));
+        }
+        else if(!segment.dataFilter.from && segment.dataFilter.to){
+            returnQuery = format('{0} where {3} < \'{4}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2}'));
+        }
+    }
+    
     if(condition.trim()){
         returnQuery = format('{0} and {1}',returnQuery, condition);
     }

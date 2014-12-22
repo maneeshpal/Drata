@@ -175,6 +175,7 @@
     };
     
     var getData = function(model){
+        //var defer = $.Deferred();
         var postData = {
             chartType: model.segment.chartType,
             selection: model.segment.selection,
@@ -183,7 +184,13 @@
             group: model.segment.group
         };
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', model.dataSource, model.database, model.collectionName);
-        return _perform('POST', url, postData);
+        //setTimeout(function(){
+            return _perform('POST', url, postData);
+            //.then(function(re){
+               // defer.resolve(re);
+        //     });
+        // }, 10000);
+        // return defer.promise();
     };
 
     //END EXTERNAL API
