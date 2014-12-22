@@ -27,7 +27,7 @@ var divideDataByInterval = function(params){
                         groupBy = new Date(dateVal.getFullYear(), 0, 1);
                         break;
                     default :
-                        var parsedInterval = parseTime(params.interval);
+                        var parsedInterval = utils.parseTime(params.interval).ms;
                         groupBy = Math.floor(+dateVal/ parsedInterval) * parsedInterval;
                 }
                 groupBy = +groupBy;
@@ -219,6 +219,8 @@ var getTrackCharData = function(segmentModel, inputData){
     if(segmentModel.dataGroup.hasGrouping){
         groupedData = _.groupBy(inputData, function(item){return item[segmentModel.dataGroup.groupByProp]});
     }
+    //console.log('data length: '+ inputData.length);
+    //console.log('first item in data:' + JSON.stringify(inputData[0], null, '\t'));
     _.each(segmentModel.selection, function(sel){
        var values;
         if(segmentModel.dataGroup.hasGrouping){

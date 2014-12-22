@@ -46,7 +46,7 @@ exports.getDatabaseNames = function(datasource){
                 defer.reject({code: 500, message:utils.format('Error retrieving database names for Sql Server: {0}', datasource)});
             }
             else{
-                console.log(JSON.stringify(recordset, null, '\t'));
+                //console.log(JSON.stringify(recordset, null, '\t'));
                 defer.resolve(recordset.map(function(d){
                     return d.name;
                 }));
@@ -64,7 +64,7 @@ exports.getCollectionNames = function(datasource, database) {
             if(err){
                 defer.reject({code: 500, message:utils.format('Error retrieving table names for Sql Server: {0}, database: {1}', datasource, database)});
             }else{
-                console.log(JSON.stringify(recordset, null, '\t'));
+                //console.log(JSON.stringify(recordset, null, '\t'));
                 defer.resolve(recordset.map(function(d){
                     return d.schema ? d.schema + '.' + d.name : d.name;
                 })); //json

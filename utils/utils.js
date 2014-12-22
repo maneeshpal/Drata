@@ -2,7 +2,7 @@
 var _ = require('underscore');
 
 Date.prototype.format = function(f){
-    return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate());
+    return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate(), this.getHours(), this.getMinutes(), this.getSeconds());
 }
 
 var getType = function(val){
@@ -408,23 +408,24 @@ var getSqlQuery = function(dbname, tableName, segment){
     var selectionProperties = getSelectionProperties(segment);
     var condition = conditionsExpression(segment.group);
     
-    var returnQuery = format('select {0} from {1}.{2}', selectionProperties.join(','), dbname, tableName);
+    var returnQuery = format('select {0} from {1}', selectionProperties.join(','), tableName);
     
     if(segment.dataFilter.dateProp){
         if(segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {3} between \'{4}\' and \'{5}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2}'), getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2}'));
+            returnQuery = format('{0} where {1} between \'{2}\' and \'{3}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2} {3}:{4}:{5}'), getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2} {3}:{4}:{5}'));
         }
         else if(segment.dataFilter.from && !segment.dataFilter.to){
-            returnQuery = format('{0} where {3} > \'{4}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2}'));
+            returnQuery = format('{0} where {1} > \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2} {3}:{4}:{5}'));
         }
         else if(!segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {3} < \'{4}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2}'));
+            returnQuery = format('{0} where {1} < \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2} {3}:{4}:{5}'));
         }
     }
     
     if(condition.trim()){
         returnQuery = format('{0} and {1}',returnQuery, condition);
     }
+    //console.log(returnQuery);
     return returnQuery;
 };
 
@@ -491,4 +492,5 @@ exports.format = format;
 exports.percChange = percChange;
 exports.getPercentageChange = getPercentageChange;
 exports.clone = clone;
+exports.parseTime = parseTime;
 exports.getType = getType;
