@@ -242,7 +242,7 @@ var TrackDataGroup = function(){
     self.xAxisProp = ko.observable();
     self.timeseriesInterval = ko.observable();
     self.intervalOptions = ko.computed(function(){
-        return self.xAxisType() !== 'date' ? undefined: ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
+        return self.xAxisType() !== 'date' ? undefined: drata.global.dateIntervalTypeAheads;
     });
 
     self.hasGrouping.subscribe(function(newValue){
@@ -337,14 +337,15 @@ var ComparisonDataGroup = function(options){
         self.divideByInterval.isModified(false);
     });
 
+    var intervalOptions = 
     self.groupByIntervalOptions = ko.computed(function(){
         if(self.groupByIntervalType() !== 'date') return [];
-        return ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
+        return drata.global.dateIntervalTypeAheads;
     });
 
     self.divideByIntervalOptions = ko.computed(function(){
         if(self.divideByIntervalType() !== 'date') return [];
-        return ['1h', '5m','60s', '1d','1w', 'month', 'quarter', 'year'];
+        return drata.global.dateIntervalTypeAheads;
     });
 
     self.hasGrouping.subscribe(function(newValue){

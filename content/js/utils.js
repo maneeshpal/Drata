@@ -279,42 +279,6 @@
         return result;
     };
     
-    var divideDataByInterval = function(params){
-        var val, groupBy;
-        var intervalGroup = _.groupBy(params.data, function(item){
-            val = item[params.property];
-            //TODO: Clean this 
-            switch(params.intervalType){
-                case 'date':
-                    var dateVal = new Date(val);
-                    switch(params.interval){
-                        case 'month':
-                            groupBy = new Date(dateVal.getFullYear(), dateVal.getMonth(), 1);
-                            break;
-                        case 'quarter':
-                            groupBy = new Date(dateVal.getFullYear(), Math.floor(dateVal.getMonth()/ 3) * 3, 1);
-                            break;
-                        case 'year':
-                            groupBy = new Date(dateVal.getFullYear(), 0, 1);
-                            break;
-                        default :
-                            var parsedInterval = parseTime(params.interval);
-                            groupBy = Math.floor(+dateVal/ parsedInterval) * parsedInterval;
-                    }
-                    groupBy = +groupBy;
-                break;
-                case 'numeric':
-                case 'currency':
-                    groupBy = Math.floor(+val/ +params.interval) * (+params.interval);
-                    break;
-                default :
-                    groupBy = val;
-            }
-            return groupBy;
-        });
-        return intervalGroup;
-    };
-
     var getType = function(val){
         if(_.isNumber(val))
             return 'number';
@@ -381,6 +345,8 @@
         return s.join(dec);
     };
 
+    var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+
     var getTextFormat = function(type){
         var tickFormat;
         switch(type.formatType){
@@ -395,6 +361,9 @@
                 break;
             case 'date':
                 switch(type.formatSubType){
+                    case 'week': //lets just use the day format for weeks.
+                        tickFormat = d3.time.format(intervalFormats.day.format);
+                        break;
                     case 'month':
                         tickFormat = d3.time.format(intervalFormats.month.format);
                         break;
@@ -552,7 +521,8 @@
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
         timeframes : ['minute', 'hour', 'day', 'month', 'year'],
-        uniqueClientId: parseInt(Math.random() * 100000000)
+        uniqueClientId: parseInt(Math.random() * 100000000),
+        dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', 'week', 'month', 'quarter', 'year']
     });
 
     Date.prototype.format = function(f){
@@ -578,7 +548,6 @@
         flatten: flatten,
         parseTime: parseTime,
         calc: calc,
-        divideDataByInterval: divideDataByInterval,
         getUniqueProperties: getUniqueProperties,
         getValidDate: getValidDate,
         formatDate: formatDate,

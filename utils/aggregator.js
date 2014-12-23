@@ -26,6 +26,9 @@ var divideDataByInterval = function(params){
                     case 'year':
                         groupBy = new Date(dateVal.getFullYear(), 0, 1);
                         break;
+                    case 'week':
+                        groupBy = utils.firstDayOfWeek(dateVal);
+                        break;
                     default :
                         var parsedInterval = utils.parseTime(params.interval).ms;
                         groupBy = Math.floor(+dateVal/ parsedInterval) * parsedInterval;

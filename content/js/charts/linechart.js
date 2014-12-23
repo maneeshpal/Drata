@@ -91,6 +91,7 @@
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
                 dispatch.on("togglePath", function(d){
+                    if(data.length === 1) return;
                     d.disabled = !d.disabled;
                     chart.resize();
                 });

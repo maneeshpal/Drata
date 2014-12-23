@@ -17,7 +17,7 @@
                 if(!val)
                     return true;
                 
-                if(options.intervalType && options.intervalType() === 'date' && ['month', 'year', 'quarter'].indexOf(val) > -1){
+                if(options.intervalType && options.intervalType() === 'date' && ['month', 'year', 'quarter', 'week'].indexOf(val) > -1){
                     return true;
                 }
                 return !!drata.utils.parseTime(val).ms;

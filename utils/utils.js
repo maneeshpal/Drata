@@ -5,6 +5,25 @@ Date.prototype.format = function(f){
     return format(f, this.getFullYear(), this.getMonth() + 1, this.getDate(), this.getHours(), this.getMinutes(), this.getSeconds());
 }
 
+Date.prototype.getWeek = function() {
+    var onejan = new Date(this.getFullYear(),0,1);
+    return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
+}
+
+// Date.prototype.firstDayOfWeek = function(){
+//     var _x = new Date(this);
+//     var day = _x.getDate() - _x.getDay();
+//     _x.setDate(day);
+//     return new Date(_x.toDateString());
+// }
+
+var firstDayOfWeek = function(d){
+    var _x = new Date(d);
+    var day = _x.getDate() - _x.getDay();
+    _x.setDate(day);
+    return new Date(_x.toDateString());
+}
+
 var getType = function(val){
     if(_.isNumber(val))
         return 'numeric';
@@ -494,3 +513,4 @@ exports.getPercentageChange = getPercentageChange;
 exports.clone = clone;
 exports.parseTime = parseTime;
 exports.getType = getType;
+exports.firstDayOfWeek = firstDayOfWeek;

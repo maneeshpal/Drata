@@ -15,8 +15,7 @@
                 });
                 
                 var dataLength = enabledData.length;
-                var intFormat;
-                //_domain = [getMin(enabledData, _axisType),getMax(enabledData, _axisType)];
+                
                 var ml = 0, mb = 0;
                 _tickFormat = drata.utils.getTextFormat({
                     formatType: _axisTicType,
@@ -36,6 +35,10 @@
                     case 'date':
                         _scale = d3.time.scale();
                         switch(_dateInterval){
+                            case 'week':
+                                mb = drata.utils.intervalFormats.day.mb;
+                                ml = drata.utils.intervalFormats.day.ml;
+                                break;
                             case 'month':
                                 mb = drata.utils.intervalFormats.month.mb;
                                 ml = drata.utils.intervalFormats.month.ml;
@@ -48,7 +51,7 @@
                                 ml = drata.utils.intervalFormats.year.ml;
                                 break;
                             default:
-                                intFormat = drata.utils.intervalFormats.get(_domain);
+                                var intFormat = drata.utils.intervalFormats.get(_domain);
                                 mb = intFormat.mb;
                                 ml = intFormat.ml;
                         }
@@ -95,9 +98,14 @@
                 if(!_drawAxis) return;
 
                 var xis = container.call(axis);
-                 
+                // if(_axisType === 'x'){
+                //     console.log(axisLabelLength);
+                //     console.log(_dims.w);    
+                // }
+                
+
                 var angle = (_dims.w < 250)? -60 : -30;
-                if(_axisType === 'x' && _axisTicType === 'date'){
+                if(_axisType === 'x' && _axisTicType === 'date' && axisLabelLength + 100 > _dims.w){
                     xis.selectAll('text')
                     .style("text-anchor", "end")
                     .attr("dx", "0")

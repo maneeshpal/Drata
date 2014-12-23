@@ -122,16 +122,19 @@ exports.findCollection = function(datasource, database, collectionName, segment)
     return connectToDatabase(datasource, database).then(function(request){
         var defer = Q.defer();
         var query = utils.getSqlQuery(database, collectionName, segment);
+        console.log(query);
         request.query(query, function(err, recordset) {
             if(err){
                 //console.log(JSON.stringify(err, null, '\t'));
                 defer.reject({code: 500, message: utils.format('Error executing Sql query on [{0}].[{1}].[{2}]', datasource,database, collectionName)});
             }
-            try{
-                defer.resolve(aggregator.getGraphData(segment, recordset));
-            }
-            catch(e){
-               defer.reject({code: 500, message: 'Error processing data. Check the segmentation.'});
+            else{
+                try{
+                    defer.resolve(aggregator.getGraphData(segment, recordset));
+                }
+                catch(e){
+                   defer.reject({code: 500, message: 'Error processing data. Check the segmentation.'});
+                }
             }
         });
         return defer.promise;
