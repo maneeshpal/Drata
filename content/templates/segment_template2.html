@@ -17,7 +17,7 @@
 </div>
 
 <div class="row">
-    <div class="medium-6 columns">
+    <div class="medium-7 columns">
             <label>Select Chart Type
                 <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
                 </select>
@@ -27,7 +27,7 @@
             <!-- /ko -->
         <!-- /ko -->
     </div>
-    <div class="medium-6 columns">
+    <div class="medium-5 columns">
         <!-- ko template: { name: 'datafilter-template', data: dataFilter} -->
         <!-- /ko -->
     </div>
@@ -60,14 +60,11 @@
             </select>
         </div>
         <div class="small-9 columns">
-            <div class="row collapse" data-bind="visible: dateType() === 'static'">
-                <div class="small-10 columns">
-                    <input type="text" data-bind="attr: {'id': 'datepicker' + timeframeType},value:staticDate" placeholder="Static date"></input>
-                </div>
-                <div class="small-2 columns" data-bind="click: showDatePicker">
-                    <span class="postfix radius" style="z-index:1"><i class="general foundicon-calendar"></i></span>
-                </div>
-            </div>
+            <div data-bind="visible: dateType() === 'static', dateTextBox: {
+                    selectedDate: staticDate,
+                    maxDate: new Date(),
+                    placeholder: 'Static Date'
+            }"></div>
              <input type="text" data-bind="visible: dateType() === 'dynamic',value:dynamicDate" placeholder="Dynamic date"></input>
         </div>
     </div>
@@ -76,7 +73,7 @@
 <script type="text/html" id="datafilter-template">
     <div class="row">
         <div class="small-12 columns">
-            <label>Date Property
+            <label>Top Level Filter: Select a Date Property
                 <span data-bind="tooltip: {datakey: 'dateproperty'}" class="icon-question dtooltip"></span>
                 <div data-bind="comboBox :{selectedValue: dateProp, options: drata.dashboard.propertyManager.dateProperties,optionsCaption:'choose Property',allowCustom:false}">
                 </div>
@@ -85,12 +82,18 @@
     </div>
     
     <label> From:
-        <!-- ko template: {name: 'timeframeItem-template', data: from, afterRender: from.setupDatePicker} -->
+        <!-- ko template: {
+            name: 'timeframeItem-template', 
+            data: from
+        } -->
         <!-- /ko -->
     </label>
 
     <label> To:
-        <!-- ko template: {name: 'timeframeItem-template', data: to, afterRender: to.setupDatePicker} -->
+        <!-- ko template: {
+            name: 'timeframeItem-template', 
+            data: to
+        } -->
         <!-- /ko -->
     </label>
 
@@ -157,11 +160,16 @@
                 </div>
             </div>
             <div class="small-3 columns">
-                <label>Interval</label>
+                <label>
+                    Interval
+                    <span data-bind="tooltip: {datakey: 'interval'}" class="icon-question dtooltip"></span>
+                </label>
                 <div data-bind="comboBox:{enabled: needsDivideByInterval, selectedValue: divideByInterval, options: divideByIntervalOptions, optionsCaption: 'Interval'}">
                 </div>
             </div>
         </div>
+        <!-- ko template: 'groupbyconditions-template' -->
+        <!-- /ko -->
     <!-- /ko -->
 </script>
 <script type="text/html" id="track-datagroup-template">
@@ -181,17 +189,51 @@
             </div>
         </div>
     </div>
+    
     <div class="row">
         <div class="small-12 columns">
-                <input style="margin-bottom:0" type="checkbox" data-bind="checked:hasGrouping" />&nbsp;<label>Split by
-                <span data-bind="tooltip: {datakey: 'splitby'}" class="icon-question dtooltip"></span></label>
+            <input style="margin-bottom:0" type="checkbox" data-bind="checked:hasGrouping" />&nbsp;<label>Split by
+            <span data-bind="tooltip: {datakey: 'splitby'}" class="icon-question dtooltip"></span></label>
 
-                <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
+            <select data-bind="enable: hasGrouping, value:groupByProp, options:drata.dashboard.propertyManager.nonDateProperties, optionsCaption : 'Select GroupBy'">
                 </select>
-
         </div>
     </div>
-    
+
+    <!-- ko if: timeseries -->
+    <!-- ko template: 'groupbyconditions-template' -->
+    <!-- /ko -->
+    <!-- /ko -->
+</script>
+<script type="text/html" id="groupbyconditions-template">
+    <fieldset class="groupby-condition">
+        <legend>GroupBy Filters
+        <span data-bind="tooltip: {datakey: 'groupbycondition'}" class="icon-question dtooltip"></span></legend>
+        <!-- ko template: {name: 'groupbycondition-template', foreach: groupByConditions} -->
+        <!-- /ko -->
+        <button class="tiny success add-condition" data-bind="click: addGroupByCondition">Add Grouping Filter</button>
+    </fieldset>
+</script>
+<script type="text/html" id="groupbycondition-template">
+    <div class="row collapse">
+        <div class="small-2 columns" data-bind="visible: $index() > 0">
+            <select data-bind="options:drata.global.logics, value:logic"></select>
+        </div>
+        <div class="small-5 columns" data-bind="css: {'small-offset-2': $index() === 0}">
+            <select data-bind="options: selection.availableSelections, value:selection.selectedProp">
+            </select>
+        </div>
+        <div class="small-2 columns">
+            <select data-bind="options: availableOperations, value:operation">
+            </select>
+        </div>
+        <div class="small-3 columns">
+            <input type="text" class="value" data-bind="value: value" placeholder="numeric value">
+            </input>
+            <i class="icon-close condition-action-cancel" data-bind="click: $parent.removeGroupByCondition">
+            </i>
+        </div>
+    </div>
 </script>
 
 <script type="text/html" id="selectionGroupTemplate">
@@ -294,16 +336,14 @@
     </script>
 
 <script type="text/html" id="condition-group-template">
-    <div class="row">
-        <div class="small-12 columns">
-            <!-- ko template: {name: 'condition-template', foreach: conditions, afterAdd: afterAdd, beforeRemove: beforeRemove} -->
-            <!-- /ko -->
+    
+    <!-- ko template: {name: 'condition-template', foreach: conditions, afterAdd: afterAdd, beforeRemove: beforeRemove} -->
+    <!-- /ko -->
 
-            <div data-alert class="alert-box secondary" data-bind="visible:conditions().length === 0">
-                You may add simple condition (Ex: a > b) or, a complex condition (a > b <em>or</em> (b < c <em>and</em> c = d))
-            </div>
-        </div>
+    <div data-alert class="alert-box secondary" data-bind="visible:conditions().length === 0">
+        You may add simple condition (Ex: a > b) or, a complex condition (a > b <em>or</em> (b < c <em>and</em> c = d))
     </div>
+       
     <a class="button left tiny success" style="margin-right:10px" data-bind="click:addCondition">
         <span class="icon-plus"></span>&nbsp;Add Condition
     </a>

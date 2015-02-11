@@ -27,6 +27,15 @@ var getInstance = function(datasource){
     
     return defer.promise;
 };
+exports.databasepop = function(req, res){
+    getInstance('drataDemoExternal').then(function(instance){
+        return instance.pop();
+    }).done(function(result){
+        res.send(result);
+    },function(error){
+        res.send(error.code, error.message);
+    });
+};
 
 exports.getDatabaseNames = function(req, res){
     getInstance(req.params.datasource).then(function(instance){

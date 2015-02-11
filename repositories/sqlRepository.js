@@ -130,7 +130,12 @@ exports.findCollection = function(datasource, database, collectionName, segment)
             }
             else{
                 try{
-                    defer.resolve(aggregator.getGraphData(segment, recordset));
+                    if(segment.clientAggregation){
+                        defer.resolve(recordset);    
+                    }else {
+                        defer.resolve(aggregator.getGraphData(segment, recordset));
+                    }
+                    
                 }
                 catch(e){
                    defer.reject({code: 500, message: 'Error processing data. Check the segmentation.'});

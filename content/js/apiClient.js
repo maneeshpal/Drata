@@ -175,22 +175,25 @@
     };
     
     var getData = function(model){
-        //var defer = $.Deferred();
+        var defer = $.Deferred();
+        var clientAggregation = false;
         var postData = {
             chartType: model.segment.chartType,
             selection: model.segment.selection,
             dataGroup: model.segment.dataGroup,
             dataFilter: model.segment.dataFilter,
-            group: model.segment.group
+            group: model.segment.group,
+            clientAggregation:clientAggregation
         };
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', model.dataSource, model.database, model.collectionName);
-        //setTimeout(function(){
-            return _perform('POST', url, postData);
-            //.then(function(re){
-               // defer.resolve(re);
-        //     });
-        // }, 10000);
-        // return defer.promise();
+        
+        _perform('POST', url, postData).then(function(re){
+           defer.resolve(clientAggregation ? drata.exports.getGraphData(postData, re) : re);
+        }, function(err){
+            defer.reject(err);
+        });
+    
+        return defer.promise();
     };
 
     //END EXTERNAL API

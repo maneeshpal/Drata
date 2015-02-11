@@ -16,14 +16,32 @@
                 //     return true;
                 if(!val)
                     return true;
-                
-                if(options.intervalType && options.intervalType() === 'date' && ['month', 'year', 'quarter', 'week'].indexOf(val) > -1){
-                    return true;
+                if(options.intervalType() === 'date'){
+                    if(['month', 'year', 'quarter', 'week'].indexOf(val) > -1){
+                        return true;
+                    }
+                    return !!drata.utils.parseTime(val).ms;
+
+                } 
+                else if(options.intervalType() === 'numeric') {
+                    return !isNaN(+val) && +val > 0;    
                 }
-                return !!drata.utils.parseTime(val).ms;
-                //return !isNaN(+val) && +val > 0;
+                else {
+                    return false;
+                }
+                
             },
             message : 'Invalid Interval'
+        };
+
+        ko.validation.rules['numeric'] = {
+            validator: function (val, options) {
+                if(!val) {
+                    return true;
+                }
+                return !isNaN(+val);
+            },
+            message : 'Invalid Number'
         };
         
     ko.validation.configure({

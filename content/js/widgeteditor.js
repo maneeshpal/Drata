@@ -105,17 +105,21 @@
             else{
                 drata.pubsub.publish('widgetupdate', cloneModel);   
             }
-            
-            cloneModel = {};
-            self.onWidgetUpdate = undefined;
-            self.onWidgetCancel = undefined;
-            self.addUpdateBtnText('Save');
-            self.dataSource(undefined);
-            self.name(undefined);
-            self.sizex("4");
-            self.sizey("1");
-            self.previewWidget(undefined);
-            location.hash = '';
+
+            //no point of closing widget, when there is no dashboard
+            //loaded on page.
+            if(drata.cPanel.currentDashboard()){
+                cloneModel = {};
+                self.onWidgetUpdate = undefined;
+                self.onWidgetCancel = undefined;
+                self.addUpdateBtnText('Save');
+                self.dataSource(undefined);
+                self.name(undefined);
+                self.sizex("4");
+                self.sizey("1");
+                self.previewWidget(undefined);
+                location.hash = '';
+            }
         };
 
         self.attach = function (event,options) {

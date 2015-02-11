@@ -101,12 +101,72 @@
         '</div>'
     ].join('');
 
+    var dateTemplateStr = [
+        '<div class="row collapse">',
+            '<div class="small-10 columns">',
+                '<input type="text" id="datepicker" data-bind="value:selectedDate, placeholder: placeholder"></input>',
+            '</div>',
+            '<div class="small-2 columns" data-bind="click: showDatePicker">',
+                '<span class="postfix radius" style="z-index:1"><i class="general foundicon-calendar"></i></span>',
+            '</div>',
+        '</div>'
+    ].join('');
+
     templateEngine.addTemplate('comboTemplateStr', comboTemplateStr);
     templateEngine.addTemplate('ddComboTemplateStr', ddComboTemplateStr);
     templateEngine.addTemplate('editLabelTemplateStr', editLabelTemplateStr);
     templateEngine.addTemplate('checkboxDropdownTemplateStr', checkboxDropdownTemplateStr);
+    templateEngine.addTemplate('dateTemplateStr', dateTemplateStr);
 
     /********** KO TEMPLATES ******************/
+    var DateTextBoxVM = function(config){
+        var self = this, $elem, dp;
+        
+        self.selectedDate = config.selectedDate;
+        self.placeholder = config.placeholder;
+        self.enabled = config.enabled;
+        var rnd = Math.floor(Math.random() * 1000);
+        var options = {
+            defaultDate: "-1m",
+            changeMonth: true,
+            changeYear: true,
+            numberOfMonths: 1,
+            //onClose: function( selectedDate ) {}
+        };
+
+        if(config.maxDate){
+            options.maxDate = config.maxDate;
+        }
+
+        self.showDatePicker = function(){
+            dp && dp.datepicker('show');
+        };
+
+        self.accessComboElements = function(nodes){
+            dp = $(nodes).find('#datepicker');
+            dp.attr('id', 'datepicker' + rnd);
+            dp.datepicker(options);
+        };
+    };
+
+    var dateTextBoxBindingHandler = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var template = 'dateTemplateStr';
+            var config = {
+                selectedDate : value.selectedDate|| ko.observable(),
+                placeholder: value.placeholder || 'Select Date',
+                enabled: value.enabled === undefined ? true: value.enabled,
+                maxDate: value.maxDate
+            };
+            
+            var dateTextBox = new DateTextBoxVM(config);
+
+            ko.renderTemplate(template, dateTextBox, { templateEngine: templateEngine, afterRender : dateTextBox.accessComboElements.bind(dateTextBox) }, element, 'replaceChildren');
+
+            return { controlsDescendantBindings: true };
+        }
+    };
 
     var ComboVM = function(config){
         var self = this;
@@ -133,10 +193,11 @@
                     selExists = self.availableOptions().some(function(opt){
                         return opt.toLowerCase().indexOf(sel) > -1;
                     });
+                    if(!selExists) console.log('fdup', sel); 
                 }
                 
                 if(!selExists) {
-                    self.selectedValue('');
+                    self.selectedValue(undefined);
                     $elem.removeClass('combo-error');
                 }
             }
@@ -155,7 +216,7 @@
 
         var filterOptions = function(){
             var inputval = $elem.val();
-            var filteredList = self.availableOptions().filter(function(opt){
+            var filteredList = self.availableOptions().filter(function(opt) {
                 return opt.toLowerCase().indexOf(inputval) > -1;
             });
             if(!config.allowCustom){
@@ -485,6 +546,9 @@
     ko.bindingHandlers.resizeText = resizeText;
     ko.bindingHandlers.checkboxDropdown = checkboxDropdownBindingHandler;
     ko.bindingHandlers.tooltip = tooltip;
+    ko.bindingHandlers.dateTextBox = dateTextBoxBindingHandler;
+
     ko.virtualElements.allowedBindings.editLabel = true;
     ko.virtualElements.allowedBindings.sortableList = true;
+    ko.virtualElements.allowedBindings.dateTextBox = true;
 })(ko, jQuery);

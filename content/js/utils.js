@@ -227,7 +227,7 @@
         return result;
     };
 
-    var calc = function(left, operation, right){
+    var applyOperation = function(left, operation, right){
         var result;
         switch (operation){
             case '>':
@@ -536,6 +536,13 @@
         return format(exp, fromExp || '__', toExp || '__');
     };
 
+    var firstDayOfWeek = function(d){
+        var _x = new Date(d);
+        var day = _x.getDate() - _x.getDay();
+        _x.setDate(day);
+        return new Date(_x.toDateString());
+    };
+
     drata.ns('utils').extend({
         format: format,
         toArray:toArray,
@@ -547,7 +554,7 @@
         createTemplate: createTemplate,
         flatten: flatten,
         parseTime: parseTime,
-        calc: calc,
+        applyOperation: applyOperation,
         getUniqueProperties: getUniqueProperties,
         getValidDate: getValidDate,
         formatDate: formatDate,
@@ -559,7 +566,9 @@
         getSelectionProperties: getSelectionProperties,
         percChange: percChange,
         getDataFilterExpression: getDataFilterExpression,
-        formatNumber: formatNumber
+        formatNumber: formatNumber,
+        isArray: isArray,
+        firstDayOfWeek: firstDayOfWeek
     });
 })(this);
 

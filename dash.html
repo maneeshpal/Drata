@@ -52,6 +52,7 @@
                     <a class="button" data-bind="click:drata.dashboard.widgetEditor.preview">
                         <i class="general foundicon-graph"></i>&nbsp;Preview</a>
                 </li>
+                <!-- ko if: $parent.currentDashboard() -->
                 <li class="divider"></li>
                 <li class="has-form">
                     <a class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
@@ -60,6 +61,7 @@
                         <!-- /ko -->
                     </a>
                 </li>
+                <!-- /ko -->
                 <!-- /ko -->
             </ul>
 
@@ -167,15 +169,18 @@
     <script type="text/javascript" src="/dis/dashboard.js"></script>
     <script type="text/javascript" src="/dis/charts.js"></script>
     
-    <script type="text/javascript" src="/js/test.js"></script>
+    <script type="text/javascript" src="/js/aggregator.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {
-            drata.utils.onTemplateLoad(['dashboard_template','segment_template2', 'dashboard_manager_template', 'utility_template'], function(){
-                root.drata.cPanel = new drata.dashboard.controlPanel();
-                ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
+            drata.utils.onTemplateLoad(['dashboard_template', 'widgeteditor_template', 'segment_template2', 'dashboard_manager_template', 'utility_template'], function(){
+                
+                    root.drata.cPanel = new drata.dashboard.controlPanel();
+                    
+                    ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
 
-                $(document).foundation();
+                    $(document).foundation();
+            
             });
         
         })(this, $);

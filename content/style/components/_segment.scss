@@ -68,3 +68,19 @@ select.error{
     }
 }
 
+
+/*Group by conditions*/
+.groupby-condition {
+    .value {
+        width:80%; 
+        display:inline-block;
+    }
+    .condition-action-cancel {
+        position:absolute;
+        right:0;
+    }
+    .add-condition{
+        margin-bottom:0;
+    }
+}
+/*end Group by conditions*/

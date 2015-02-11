@@ -231,6 +231,59 @@ var Segmentor = function(model){
 
 };
 
+var GroupBySelection = function(m){
+    m = m || {};
+    var self = this;
+    self.selectedProp = ko.observable(m.selectedProp);
+    self.availableSelections = ko.computed(function(){
+        var selections = ko.toJS(drata.dashboard.widgetEditor.segment.selectionGroup.items),
+        availableSelections = [];
+        if(selections && selections.length > 0){
+            _.each(selections, function(sel){
+                availableSelections.push(sel.groupBy + '_' + ((sel.isComplex) ? sel.aliasName : sel.selectedProp));
+            });
+        }
+        return availableSelections;
+    });
+
+    self.getModel = function(){
+        return {
+            selectedProp: self.selectedProp(),
+            isComplex: false,
+            logic: '+'
+        }
+    }
+};
+
+var GroupByCondition = function(m){
+    m = m || {};
+    var self = this;
+    self.logic = ko.observable(m.logic || 'and');
+    self.selection = new GroupBySelection(m.selection);
+    self.operation = ko.observable(m.operation || '=');
+    self.value = ko.observable(m.value);
+    self.isComplex = false;
+    self.valType = 'numeric';
+    self.availableOperations = _.difference(drata.global.conditionalOperations, ['exists', 'like', 'not like']);
+    
+    self.getModel = function(){
+        return {
+            logic: self.logic(),
+            operation: self.operation(),
+            value: self.value(),
+            isComplex: false,
+            valType: 'numeric',
+            selection: self.selection.getModel()
+        }
+    }
+    self.value.extend({
+        numeric: {},
+        required: {
+            message: 'Enter Numeric Value'
+        }
+    });
+};
+
 var TrackDataGroup = function(){
     var self = this;    
 
@@ -241,12 +294,22 @@ var TrackDataGroup = function(){
     self.timeseries = ko.observable();
     self.xAxisProp = ko.observable();
     self.timeseriesInterval = ko.observable();
+    self.groupByConditions = ko.observableArray();
+
     self.intervalOptions = ko.computed(function(){
-        return self.xAxisType() !== 'date' ? undefined: drata.global.dateIntervalTypeAheads;
+        return self.xAxisType() !== 'date' ? [] : drata.global.dateIntervalTypeAheads;
     });
 
+    self.addGroupByCondition = function(){
+        self.groupByConditions.push(new GroupByCondition());
+    };
+
+    self.removeGroupByCondition = function(groupByCondition){
+        self.groupByConditions.remove(groupByCondition);
+    };
+    
     self.hasGrouping.subscribe(function(newValue){
-        if(!newValue){
+        if(!newValue) {
             self.groupByProp(undefined);
         }
     });
@@ -271,14 +334,32 @@ var TrackDataGroup = function(){
         self.xAxisProp(model.xAxisProp);
         self.hasGrouping(model.groupByProp !== undefined);
         self.timeseriesInterval(model.timeseriesInterval);
+
+        self.groupByConditions(ko.utils.arrayMap(
+            model.groupByConditions,
+            function(model) {
+                return new GroupByCondition(model); 
+            }
+        ));
     };
+
     self.getModel = function(){
-        var dataGroupModel = ko.toJS(self);
-        delete dataGroupModel.setProps;
-        delete dataGroupModel.getModel;
-        delete dataGroupModel.template;
-        delete dataGroupModel.intervalOptions;
-        delete dataGroupModel.properties;
+        
+        var dataGroupModel = {
+            groupByProp: self.groupByProp(),
+            hasGrouping: self.hasGrouping(),
+            timeseries: self.timeseries(),
+            timeseriesInterval: self.timeseriesInterval(),
+            xAxisProp: self.xAxisProp(),
+            xAxisType: self.xAxisType()
+        }
+
+        if(self.timeseries() && self.groupByConditions().length > 0) {
+            dataGroupModel.groupByConditions = self.groupByConditions().map(function(gc){
+                return gc.getModel();
+            });
+        }
+
         return dataGroupModel;
     }
 
@@ -317,6 +398,7 @@ var ComparisonDataGroup = function(options){
     self.groupByInterval = ko.observable();
     self.divideByInterval = ko.observable();
     self.groupByIntervalType = ko.observable();
+    self.groupByConditions = ko.observableArray();
 
     self.groupByProp.subscribe(function(newValue){
         var newType = drata.dashboard.propertyManager.getPropertyType(newValue);
@@ -337,7 +419,6 @@ var ComparisonDataGroup = function(options){
         self.divideByInterval.isModified(false);
     });
 
-    var intervalOptions = 
     self.groupByIntervalOptions = ko.computed(function(){
         if(self.groupByIntervalType() !== 'date') return [];
         return drata.global.dateIntervalTypeAheads;
@@ -372,16 +453,42 @@ var ComparisonDataGroup = function(options){
         self.groupByInterval(model.groupByInterval);
         //last
         self.divideByInterval(model.divideByInterval);
+
+        self.groupByConditions(ko.utils.arrayMap(
+            model.groupByConditions,
+            function(model) {
+                return new GroupByCondition(model); 
+            }
+        ));
     };
 
     self.getModel = function(){
-        var dataGroupModel = ko.toJS(self);
-        delete dataGroupModel.setProps;
-        delete dataGroupModel.getModel;
-        delete dataGroupModel.groupByIntervalOptions;
-        delete dataGroupModel.divideByIntervalOptions;
-        delete dataGroupModel.errors;
+        var dataGroupModel = {
+            divideByInterval: self.divideByInterval(),
+            divideByIntervalType: self.divideByIntervalType(),
+            divideByProp: self.divideByProp(),
+            groupByInterval: self.groupByInterval(),
+            groupByIntervalType: self.groupByIntervalType(),
+            groupByProp: self.groupByProp(),
+            hasGrouping: self.hasGrouping(),
+            hasDivideBy: self.hasDivideBy()
+        }
+        
+        if(self.hasGrouping() && self.groupByConditions().length > 0) {
+            dataGroupModel.groupByConditions = self.groupByConditions().map(function(gc){
+                return gc.getModel();
+            });
+        }
+
         return dataGroupModel;
+    };
+
+    self.addGroupByCondition = function(){
+        self.groupByConditions.push(new GroupByCondition());
+    };
+
+    self.removeGroupByCondition = function(groupByCondition){
+        self.groupByConditions.remove(groupByCondition);
     };
 
     self.needsGroupByInterval = ko.computed(function(){
@@ -445,7 +552,11 @@ var TimeFrameItem = function(timeframeType){
     self.dateType = ko.observable('static');
     self.timeframeType = timeframeType;
     self.dynamicDate.extend({
-        groupingInterval: {},
+        groupingInterval: {
+            intervalType: function(){
+                return 'date';
+            }
+        },
         required: {
             message: 'Enter Interval',
             onlyIf: function(){
@@ -464,23 +575,24 @@ var TimeFrameItem = function(timeframeType){
         }
     });
 
-    self.showDatePicker = function(){
-        dp && dp.datepicker('show');
-    };
+    // self.showDatePicker = function(){
+    //     dp && dp.datepicker('show');
+    // };
 
-    self.setupDatePicker = function(elems){
-        var container = _.find(elems, function(e){return e.nodeType === 1});
-        dp = $(container).find("#datepicker" + self.timeframeType).datepicker({
-            defaultDate: "-1m",
-            changeMonth: true,
-            changeYear: true,
-            numberOfMonths: 1,
-            maxDate: new Date(),
-            onClose: function( selectedDate ) {
-                //$( "#to" ).datepicker( "option", "minDate", selectedDate );
-            }
-        });
-    };
+    // self.setupDatePicker = function(elems){
+    //     var container = _.find(elems, function(e){return e.nodeType === 1});
+    //     dp = $(container).find("#datepicker" + self.timeframeType).datepicker({
+    //         defaultDate: "-1m",
+    //         changeMonth: true,
+    //         changeYear: true,
+    //         numberOfMonths: 1,
+    //         maxDate: new Date(),
+    //         onClose: function( selectedDate ) {
+    //             //$( "#to" ).datepicker( "option", "minDate", selectedDate );
+    //         }
+    //     });
+    // };
+    
     self.getModel = function(){
         return self.dateType() === 'static' ? self.staticDate() : self.dynamicDate();
     };
@@ -633,16 +745,16 @@ var Condition = function(options){
         self.value(m.value);
         self.selection.prefill(m.selection);
         self.operation(m.operation);
-        self.prefillGroups(m.groups);
+        prefillGroups(m.groups);
     };
-    self.prefillGroups = function(conditionGroupsModel){
+    var prefillGroups = function(conditionGroupsModel){
         self.conditions(ko.utils.arrayMap(
             conditionGroupsModel,
             function(groupModel) {
                 return new Condition({ level:options.level+1, model:groupModel }); 
             }
         )); 
-    }
+    };
     self.getModel = function(){
         var returnConditions = [];
         _.each(self.conditions(), function(sel){
@@ -717,6 +829,7 @@ var Condition = function(options){
         }
         return isValid;
     };
+
     self.value.extend({
         required: { 
             message : 'Enter Value',
@@ -737,16 +850,6 @@ var ConditionGroup = function(options){
     self.level = options.level;
     self.conditions = ko.observableArray();
     self.isTopLevel = true;
-    //self.trace = ko.observableArray();
-    //self.currentBinding = ko.observable(self);
-    //self.boldExpression = ko.observable(false);
-    // self.currentBinding.subscribeChanged(function(newValue, oldValue){
-    //     newValue.boldExpression(true);
-    //     oldValue.boldExpression(false);
-    // });
-    //var goingback = false;
-    //self.boldExpression = ko.observable(false);
-   
     self.getModel = function(){
         var returnGroups = [];
         _.each(self.conditions(), function(sel){
@@ -755,11 +858,6 @@ var ConditionGroup = function(options){
         return returnGroups;
     };
 
-    // self.onExpand = function(condition){
-    //     var currBinding = self.currentBinding();
-    //     self.trace.push(currBinding);
-    //     self.currentBinding(condition);
-    // };
     self.prefill = function(model){
         self.conditions(ko.utils.arrayMap(
             model,
@@ -781,15 +879,11 @@ var ConditionGroup = function(options){
     };
 
     self.afterRender = function(elem){
-        // _.delay(function(){
-        //     $(elem).addClass(goingback?'enter-no-tr':'enter');
-        //     goingback = false;
-        // }, goingback ? 100:10);
         
     };
 
     self.beforeLeave = function(elem){
-        //$(elem).hide().removeClass('exit').show().removeClass('enter');
+        
     };
 
     self.afterAdd = function(elem){
@@ -803,32 +897,6 @@ var ConditionGroup = function(options){
         $(elem).remove();
       });
     };
-
-    // self.goback = function(condition){
-    //     var isValid = !condition.isComplex() || condition.isValidCondition();
-    //     if(isValid){
-    //         goingback = true;
-    //         $('#conditionWrapper').removeClass('enter-no-tr');
-    //         _.delay(function(){
-    //             $('#conditionWrapper').removeClass('enter');
-    //             _.delay(function(){
-    //                 var prev = self.trace.pop();
-    //                 self.currentBinding(prev);
-    //             },100);                
-    //         }, 10);            
-    //     }
-    // };
-    // self.goBackTopLevel = function(){
-    //     self.trace([]);
-    //     goingback = true;
-    //     $('#conditionWrapper').removeClass('enter-no-tr');
-    //     _.delay(function(){
-    //         $('#conditionWrapper').removeClass('enter');
-    //         _.delay(function(){
-    //             self.currentBinding(self);
-    //         },100);                
-    //     }, 10);
-    // };
 
     self.expression = ko.computed(function(){
         var expression = '';
@@ -957,7 +1025,7 @@ var Selection = function(options){
             selectedProp: self.selectedProp(),
             isComplex : self.isComplex(),
             perc: self.perc()
-        }
+        };
     };
     self.expression = ko.computed(function(){
         var expression = '';

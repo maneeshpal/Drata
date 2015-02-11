@@ -88,10 +88,16 @@ exports.findCollection = function(datasource, database, collectionName, segment)
                             ret.push(utils.flatten(items[i]));
                         }
                         try{
-                            var graphData = aggregator.getGraphData(segment, ret);
-                            defer.resolve(graphData);   
+                            if(segment.clientAggregation){
+                                defer.resolve(ret);    
+                            }else{
+                                var graphData = aggregator.getGraphData(segment, ret);
+                                defer.resolve(graphData);    
+                            }
+                            
                         }
                         catch(e){
+                            console.log(e);
                            defer.reject({code: 500, message: 'Error processing data. Check segmentation.'})
                         }
                     }
@@ -103,7 +109,7 @@ exports.findCollection = function(datasource, database, collectionName, segment)
 };
 
 exports.pop = function() {
-    var maxProps = 500;
+    var maxProps = 10;
     var data= [];
     var y = [0,0,0,0,0,0,0];
     var ordernumber = 1;

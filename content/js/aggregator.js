@@ -1,8 +1,9 @@
 
-var _ = require('underscore');
+//var _ = require('underscore');
 
-var utils = require('./utils');
-
+var utils = drata.utils;
+drata.exports = {};
+var exports = drata.exports;
 var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /*copy from utils frontend*/
@@ -156,7 +157,7 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
         console.log('no groupByCondition');
         return data;
     }
-    var cloneCondition = utils.clone(groupByCondition);
+    var cloneCondition = drata.utils.clone(groupByCondition);
     cloneCondition.forEach(function(c){
         c.selection.selectedProp = propertyName;
     });

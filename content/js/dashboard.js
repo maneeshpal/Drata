@@ -54,7 +54,6 @@
         self.addWidget = function(widgetModel){
             var widget = new Widget(widgetModel, self.index++);
             self.widgets.push(widget);
-            console.log('widget added to dashboard');
         };
 
         self.deleteWidget = function(widget){
@@ -114,7 +113,6 @@
                 return _sizex();
             },
             write: function(newValue){
-                console.log('sizex saved in db');
                 _sizex(newValue);
                 self.update();
                 self.resizeContent();
@@ -127,7 +125,6 @@
             },
             write: function(newValue){
                 _sizey(newValue);
-                console.log('sizey saved in db');
                 self.update();
                 self.resizeContent();
             }
@@ -184,7 +181,7 @@
             var m = self.getModel();
             if(!m._id) return;
             drata.apiClient.updateWidget(m).then(function(resp){
-                console.log('widget updated'); 
+
             });
         };
 
@@ -258,8 +255,7 @@
             resizeContent && self.resizeContent();
             self.parseError(undefined);
             self.chartType(widgetModel.segmentModel.chartType);
-            console.log('loadWidget');
-
+            
             drata.apiClient.getData({
                 dataSource: widgetModel.dataSource, 
                 database: widgetModel.database, 
@@ -275,7 +271,6 @@
                 {
                     dataToMap = chartData;
                 }
-                
                 var pieKeys = dataToMap.map(function(dataItem, index){
                     return {label: dataItem.key, value: index};
                 });
@@ -303,6 +298,12 @@
         
         self.selectedPieKey.subscribe(function(newValue){
             if(!newValue) return;
+            if((widgetModel.segmentModel.chartType === 'pie' &&  chartData[0].values.length === 0) ||
+                chartData[newValue.value].values.length === 0){
+                self.parseError('No data found');
+                return;
+            }
+
             if(widgetModel.segmentModel.chartType === 'pie'){
                 content && content.change && content.change(chartData[0], widgetModel.segmentModel, widgetModel.contentModel, newValue);
             }else{
@@ -573,9 +574,7 @@
         self.resize = function(){
             var a = self.latestDp();
             self.latestDp(undefined);
-            //dummy(dummy() +1);
             chart && chart.resize && chart.resize();
-            console.log('resizing');
             self.latestDp(a);
         };
         

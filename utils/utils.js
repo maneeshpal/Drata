@@ -118,7 +118,7 @@ var getMongoQuery = function(segment){
         if(segment.dataFilter.from){
             query[segment.dataFilter.dateProp]['$gte'] = getDateFromTimeframe(segment.dataFilter.from);
         }
-        if(segment.dataFilter.from){
+        if(segment.dataFilter.to){
             query[segment.dataFilter.dateProp]['$lte'] = getDateFromTimeframe(segment.dataFilter.to);
         }
     }
@@ -441,8 +441,10 @@ var getSqlQuery = function(dbname, tableName, segment){
         }
     }
     
+    var dataFilterExists = segment.dataFilter.dateProp && (segment.dataFilter.from || segment.dataFilter.to);
+    
     if(condition.trim()){
-        returnQuery = format('{0} and {1}',returnQuery, condition);
+        returnQuery = format('{0} {1} {2}',returnQuery, (dataFilterExists ? 'and' : 'where'), condition);
     }
     //console.log(returnQuery);
     return returnQuery;

@@ -28,6 +28,10 @@ module.exports = function(grunt) {
         'content/foundation/scss/foundation/*.scss',
         'content/foundation/scss/foundation/components/*.scss'],
         tasks: ['sass']
+      },
+      js : {
+        files: 'content/js/**/*',
+        tasks: ['concat']
       }
     },
 
