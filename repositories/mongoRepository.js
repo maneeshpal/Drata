@@ -75,12 +75,12 @@ exports.findCollection = function(datasource, database, collectionName, segment)
         var selectOnly = utils.getMongoProperties(segment);
         db.collection(collectionName, function(err, collection) {
             if(err){
-                defer.reject({code: 500, message: 'Cannot access collection '+ collectionName});
+                defer.reject({code: 500, message: 'Cannot access collection '+ collectionName, ex: err});
             }
             else{
                 collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
                     if(err){
-                        defer.reject({code: 500, message: utils.format('Error executing Mongo query on [{0}].[{1}].[{2}]', datasource,database, collectionName)});
+                        defer.reject({code: 500, message: utils.format('Error executing Mongo query on [{0}].[{1}].[{2}]', datasource,database, collectionName), ex: err});
                     }
                     else{
                         var ret = [];
@@ -98,7 +98,7 @@ exports.findCollection = function(datasource, database, collectionName, segment)
                         }
                         catch(e){
                             console.log(e);
-                           defer.reject({code: 500, message: 'Error processing data. Check segmentation.'})
+                           defer.reject({code: 500, message: 'Error processing data. Check segmentation.', ex: err})
                         }
                     }
                 });

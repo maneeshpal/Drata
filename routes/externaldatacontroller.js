@@ -73,6 +73,6 @@ exports.findCollection = function(req, res){
     }).done(function(result){
         res.send(result);
     },function(error){
-        res.send(error.code, error.message);
+        res.send(error.code, 'Message: ' + error.message + '; Debug: ' + JSON.stringify(error.ex));
     });
 };

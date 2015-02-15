@@ -124,11 +124,15 @@ exports.findCollection = function(datasource, database, collectionName, segment)
         var query = utils.getSqlQuery(database, collectionName, segment);
         console.log(query);
         request.query(query, function(err, recordset) {
-            if(err){
+            if(err) {
                 //console.log(JSON.stringify(err, null, '\t'));
-                defer.reject({code: 500, message: utils.format('Error executing Sql query on [{0}].[{1}].[{2}]', datasource,database, collectionName)});
+                defer.reject({ 
+                    code: 500, 
+                    message: utils.format('Error executing Sql query on [{0}].[{1}].[{2}]', datasource,database, collectionName), 
+                    ex: err 
+                });
             }
-            else{
+            else {
                 try{
                     if(segment.clientAggregation){
                         defer.resolve(recordset);    
@@ -138,7 +142,11 @@ exports.findCollection = function(datasource, database, collectionName, segment)
                     
                 }
                 catch(e){
-                   defer.reject({code: 500, message: 'Error processing data. Check the segmentation.'});
+                   defer.reject({
+                        code: 500, 
+                        message: 'Exception while processing results.', 
+                        ex: err 
+                    });
                 }
             }
         });
