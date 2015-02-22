@@ -61,11 +61,12 @@
         </div>
         <div class="small-9 columns">
             <div data-bind="visible: dateType() === 'static', dateTextBox: {
-                    selectedDate: staticDate,
+                    selectedValue: staticDate,
                     maxDate: new Date(),
                     placeholder: 'Static Date'
             }"></div>
-             <input type="text" data-bind="visible: dateType() === 'dynamic',value:dynamicDate" placeholder="Dynamic date"></input>
+            <div data-bind="visible: dateType() === 'dynamic', comboBox:{selectedValue: dynamicDate, options: drata.global.dateIntervalTypeAheads, optionsCaption: 'Dynamic interval'}">
+            </div>
         </div>
     </div>
 </script>
@@ -373,8 +374,8 @@
             <span data-bind="tooltip: {datakey: 'conditionValue'}" class="icon-question dtooltip dtooltip-aggregate-func">
                 </span>
 
-            <div data-bind=" ddComboBox :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, options:availableValues,optionsCaption:'value'}">
-                </div>
+            <div data-bind="dependableDdCombo :{selectedPrefix: valType , prefixOptions: drata.global.propertyTypes ,selectedValue: value, optionsCaption:'value'}">
+            </div>
         </div>
         <!-- /ko -->
         <!-- ko if: isComplex() || showComplex() -->
@@ -383,7 +384,7 @@
             </div>
         </div>
         <!-- /ko -->
-        <div class="right" style="width:40px">
+        <div>
              <span data-bind="tooltip: {datakey: 'complexCondition'}" class="icon-question dtooltip dtooltip-complexcondition">
                 </span>            
             <i class="icon-plus condition-action-complex" data-bind="click:toggleComplex"></i>

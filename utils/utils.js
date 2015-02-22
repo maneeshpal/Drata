@@ -114,11 +114,11 @@ var getMongoQuery = function(segment){
     var query = segment.group ? getMongoConditions(segment.group) : {};
     
     if(segment.dataFilter.dateProp){
-        query[segment.dataFilter.dateProp] = {};
-        if(segment.dataFilter.from){
+        query[segment.dataFilter.dateProp] = query[segment.dataFilter.dateProp] || {};
+        if(segment.dataFilter.from && !query[segment.dataFilter.dateProp]['$gte']){
             query[segment.dataFilter.dateProp]['$gte'] = getDateFromTimeframe(segment.dataFilter.from);
         }
-        if(segment.dataFilter.to){
+        if(segment.dataFilter.to && !query[segment.dataFilter.dateProp]['$lte']){
             query[segment.dataFilter.dateProp]['$lte'] = getDateFromTimeframe(segment.dataFilter.to);
         }
     }
@@ -130,6 +130,7 @@ var getMongoConditions = function(conditions){
     if(!conditions || conditions.length === 0)
 		return {};
     var result = getMongoCondition(conditions[0]);
+    console.log(JSON.stringify(result, null, '\t'));
     var fl = undefined;
     //result[fl] = [];
     for(var i=1;i<conditions.length;i++){
@@ -363,13 +364,15 @@ var getPercentageChange = function(arr, prop){
 
 var getSqlQuery = function(dbname, tableName, segment){
     function _conditionExpression(condition){
-        var expression = '', val;
+        var expression = '', val, op;
         if(condition.isComplex){
             return conditionsExpression(condition.groups);
         }
         else{
+            op = condition.operation;
             if(condition.operation === 'exists'){
-                val = '';    
+                op = 'is not';
+                val = 'null';  
             }
             else if(condition.valType === 'bool'){
                 val = condition.value === 'true' ? 1:0;
@@ -380,7 +383,7 @@ var getSqlQuery = function(dbname, tableName, segment){
             else{
                 val = format('\'{0}\'', condition.value || '');
             }
-            return format('{0} {1} {2}', selectionExpression(condition.selection), condition.operation, val);
+            return format('{0} {1} {2}', selectionExpression(condition.selection), op, val);
         }
     };
 

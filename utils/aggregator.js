@@ -147,13 +147,13 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
     if(!groupByConditions) return data;
 
     var selectionKey = getSelectionKeyName(selection);
-    console.log('selection keyname: ',selectionKey);
+    //console.log('selection keyname: ',selectionKey);
     var groupByCondition = groupByConditions.filter(function(cond){
         return cond.selection.selectedProp === selectionKey;
     });
     
     if(!groupByCondition) {
-        console.log('no groupByCondition');
+        //console.log('no groupByCondition');
         return data;
     }
     var cloneCondition = utils.clone(groupByCondition);
@@ -165,7 +165,7 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
         return processGroups(item, cloneCondition).value;   
     });
     
-    console.log('filtered :', fi);
+    //console.log('filtered :', fi);
     return fi;
 };
 
@@ -189,7 +189,7 @@ var groupByInterval = function(data, dataGroup, selection){
             });
         });
         //log this shit
-        console.log('original: ', ret);
+        //console.log('original: ', ret);
         //console.log('selection: ', selection);
         return filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
         //if trackchart, then real grouping happens if it is timeseries.

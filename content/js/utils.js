@@ -157,19 +157,19 @@
     
     var head = document.getElementsByTagName('head')[0];
         
-    var createTemplate = function (templateName, templateString, overrideExisting) {
-        if (document.getElementById(templateName) && !overrideExisting) return document.getElementById(templateName);
+    // var createTemplate = function (templateName, templateString, overrideExisting) {
+    //     if (document.getElementById(templateName) && !overrideExisting) return document.getElementById(templateName);
 
-        var el = document.createElement('script');
+    //     var el = document.createElement('script');
 
-        el.type = 'text/html';
-        el.id = templateName;
-        el.text = templateString;
-        var insertBeforeEl = head && head.getElementsByTagName('base')[0] || null;
-        document.body ? document.body.appendChild(el) : head.insertBefore(el, insertBeforeEl);
+    //     el.type = 'text/html';
+    //     el.id = templateName;
+    //     el.text = templateString;
+    //     var insertBeforeEl = head && head.getElementsByTagName('base')[0] || null;
+    //     document.body ? document.body.appendChild(el) : head.insertBefore(el, insertBeforeEl);
 
-        return el;
-    };
+    //     return el;
+    // };
 
     var hmsConv = {
         h: { label: 'hours', labelSingular: 'hour', value: 60 * 60 * 1000 },
@@ -551,7 +551,7 @@
         clone:clone,
         windowResize:windowResize,
         textToPixel : textToPixel,
-        createTemplate: createTemplate,
+        //createTemplate: createTemplate,
         flatten: flatten,
         parseTime: parseTime,
         applyOperation: applyOperation,

@@ -30,17 +30,6 @@
 
     ko.stringTemplateEngine = stringTemplateEngine;
 
-    ko.subscribable.fn.subscribeChanged = function (callback) {
-        var oldValue;
-        this.subscribe(function (_oldValue) {
-            oldValue = _oldValue;
-        }, this, 'beforeChange');
-
-        this.subscribe(function (newValue) {
-            callback(newValue, oldValue);
-        });
-    };
-
     var templateEngine = new ko.stringTemplateEngine();
     /********** KO TEMPLATES ******************/
     var comboTemplateStr = [
@@ -58,9 +47,10 @@
         '<div class="row collapse">',
             '<select class="combo-dd columns" data-bind="enable: enabled,value: selectedPrefix, options: prefixOptions">',
             '</select>',
-            '<div class="combo-txt columns" data-bind="template : {name: \'comboTemplate\', data : $data}">',
+            '<div class="combo-txt columns">',
+            comboTemplateStr,
             '</div>',
-        '</div>'            
+        '</div>'
     ].join('');
 
     var editLabelTemplateStr = [
@@ -104,11 +94,28 @@
     var dateTemplateStr = [
         '<div class="row collapse">',
             '<div class="small-10 columns">',
-                '<input type="text" id="datepicker" data-bind="value:selectedDate, placeholder: placeholder"></input>',
+                '<input type="text" id="datepicker" data-bind="value:selectedValue, placeholder: placeholder"></input>',
             '</div>',
             '<div class="small-2 columns" data-bind="click: showDatePicker">',
                 '<span class="postfix radius" style="z-index:1"><i class="general foundicon-calendar"></i></span>',
             '</div>',
+        '</div>'
+    ].join('');
+
+    var dependableddComboTemplateStr = [
+        '<div class="row collapse">',
+            '<select class="combo-dd columns" data-bind="enable: enabled,value: selectedPrefix, options: prefixOptions">',
+            '</select>',
+            '<!-- ko ifnot: isDate -->',
+            '<div class="combo-txt columns">',
+            comboTemplateStr,
+            '</div>',
+            '<!-- /ko -->',
+            '<!-- ko if: isDate -->',
+            '<div class="combo-dpicker columns">',
+            dateTemplateStr,
+            '</div>',
+            '<!-- /ko -->',
         '</div>'
     ].join('');
 
@@ -117,12 +124,13 @@
     templateEngine.addTemplate('editLabelTemplateStr', editLabelTemplateStr);
     templateEngine.addTemplate('checkboxDropdownTemplateStr', checkboxDropdownTemplateStr);
     templateEngine.addTemplate('dateTemplateStr', dateTemplateStr);
+    templateEngine.addTemplate('dependableddComboTemplateStr', dependableddComboTemplateStr);
 
     /********** KO TEMPLATES ******************/
     var DateTextBoxVM = function(config){
         var self = this, $elem, dp;
         
-        self.selectedDate = config.selectedDate;
+        self.selectedValue = config.selectedValue;
         self.placeholder = config.placeholder;
         self.enabled = config.enabled;
         var rnd = Math.floor(Math.random() * 1000);
@@ -142,7 +150,7 @@
             dp && dp.datepicker('show');
         };
 
-        self.accessComboElements = function(nodes){
+        self.initializeDatePicker = function(nodes){
             dp = $(nodes).find('#datepicker');
             dp.attr('id', 'datepicker' + rnd);
             dp.datepicker(options);
@@ -154,15 +162,40 @@
             var value = valueAccessor();
             var template = 'dateTemplateStr';
             var config = {
-                selectedDate : value.selectedDate|| ko.observable(),
-                placeholder: value.placeholder || 'Select Date',
+                selectedValue : value.selectedValue|| ko.observable(),
+                placeholder: value.placeholder || 'Select',
                 enabled: value.enabled === undefined ? true: value.enabled,
                 maxDate: value.maxDate
             };
             
             var dateTextBox = new DateTextBoxVM(config);
 
-            ko.renderTemplate(template, dateTextBox, { templateEngine: templateEngine, afterRender : dateTextBox.accessComboElements.bind(dateTextBox) }, element, 'replaceChildren');
+            ko.renderTemplate(template, dateTextBox, { templateEngine: templateEngine, afterRender : dateTextBox.initializeDatePicker.bind(dateTextBox) }, element, 'replaceChildren');
+
+            return { controlsDescendantBindings: true };
+        }
+    };
+
+    var dependableDdComboBindingHandler = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var template = 'dependableddComboTemplateStr';
+            var config = {
+                selectedValue : value.selectedValue|| ko.observable(),
+                element: element,
+                options: value.options || [],
+                selectedPrefix: value.selectedPrefix || ko.observable(),
+                prefixOptions : value.prefixOptions || ko.observableArray(),
+                optionsCaption: value.optionsCaption || 'Select..',
+                enabled: value.enabled === undefined ? true: value.enabled,
+                allowCustom : value.allowCustom === undefined ? true : value.allowCustom,
+                placeholder: value.placeholder || 'Select',
+                maxDate: value.maxDate
+            };
+            
+            var vm = new DependableDdComboVM(config);
+
+            ko.renderTemplate(template, vm, { templateEngine: templateEngine, afterRender : vm.afterRender.bind(vm) }, element, 'replaceChildren');
 
             return { controlsDescendantBindings: true };
         }
@@ -193,7 +226,6 @@
                     selExists = self.availableOptions().some(function(opt){
                         return opt.toLowerCase().indexOf(sel) > -1;
                     });
-                    if(!selExists) console.log('fdup', sel); 
                 }
                 
                 if(!selExists) {
@@ -295,11 +327,35 @@
 
     };
 
+    var DependableDdComboVM = function(config){
+        var self = this;
+        $.extend(self, new DdComboVM(config));
+        $.extend(self, new DateTextBoxVM(config));
+        
+        self.isDate = ko.computed(function(){
+            return self.selectedPrefix() === 'date';
+        });
+
+        self.selectedPrefix.subscribe(function(newValue){
+            if(newValue === 'bool'){
+                self.availableOptions(['true', 'false']);
+            }else if(newValue === 'date'){
+                self.initializeDatePicker(_nodes);
+                self.availableOptions([]);
+            }
+        });
+        var _nodes;
+        self.afterRender = function(nodes){
+            _nodes = nodes;
+            self.accessComboElements(nodes);
+            self.initializeDatePicker(nodes);
+        }
+    };
+
     var ddComboBindingHandler = {
         init: function (element, valueAccessor) {
             var value = valueAccessor();
             var template = 'ddComboTemplateStr';
-            drata.utils.createTemplate('comboTemplate', comboTemplateStr);
             var config = {
                 selectedValue : value.selectedValue|| ko.observable(),
                 element: element,
@@ -547,8 +603,10 @@
     ko.bindingHandlers.checkboxDropdown = checkboxDropdownBindingHandler;
     ko.bindingHandlers.tooltip = tooltip;
     ko.bindingHandlers.dateTextBox = dateTextBoxBindingHandler;
+    ko.bindingHandlers.dependableDdCombo = dependableDdComboBindingHandler;
 
     ko.virtualElements.allowedBindings.editLabel = true;
     ko.virtualElements.allowedBindings.sortableList = true;
     ko.virtualElements.allowedBindings.dateTextBox = true;
+
 })(ko, jQuery);

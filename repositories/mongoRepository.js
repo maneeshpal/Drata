@@ -72,6 +72,7 @@ exports.findCollection = function(datasource, database, collectionName, segment)
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         var query = utils.getMongoQuery(segment);
+        console.log(JSON.stringify(query, null, '\t'));
         var selectOnly = utils.getMongoProperties(segment);
         db.collection(collectionName, function(err, collection) {
             if(err){

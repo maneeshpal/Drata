@@ -574,24 +574,6 @@ var TimeFrameItem = function(timeframeType){
             }
         }
     });
-
-    // self.showDatePicker = function(){
-    //     dp && dp.datepicker('show');
-    // };
-
-    // self.setupDatePicker = function(elems){
-    //     var container = _.find(elems, function(e){return e.nodeType === 1});
-    //     dp = $(container).find("#datepicker" + self.timeframeType).datepicker({
-    //         defaultDate: "-1m",
-    //         changeMonth: true,
-    //         changeYear: true,
-    //         numberOfMonths: 1,
-    //         maxDate: new Date(),
-    //         onClose: function( selectedDate ) {
-    //             //$( "#to" ).datepicker( "option", "minDate", selectedDate );
-    //         }
-    //     });
-    // };
     
     self.getModel = function(){
         return self.dateType() === 'static' ? self.staticDate() : self.dynamicDate();
@@ -655,25 +637,18 @@ var Condition = function(options){
         return self.conditions().length > 0;
     });
 
-    var _valType = ko.observable('unknown');
-    self.valType = ko.computed({
-        read: function(){
-            if(self.selection.isComplex())
-                return;
+    self.valType = ko.observable('unknown');
 
-            var newType = drata.dashboard.propertyManager.getPropertyType(self.selection.selectedProp());
-            return newType? newType : _valType();
-        },
-        write: function(newValue){
-            _valType(newValue);
-            
-            //lets not set the property type
-            //if(self.selection.isComplex())
-            //    return;
-            //drata.dashboard.propertyManager.setPropertyType(self.selection.selectedProp(), newValue);
+    self.selection.selectedProp.subscribe(function(newValue){
+        if(!newValue || self.selection.isComplex()) {
+            self.valType('unknown');  
+        }
+        else {
+            var newType = drata.dashboard.propertyManager.getPropertyType(newValue);
+            newType && self.valType(newType);
         }
     });
-    
+
     self.availableValues = ko.computed(function(){
         if(self.valType() === 'bool'){
             return ['true', 'false'];
@@ -776,9 +751,9 @@ var Condition = function(options){
         var expression = '';
         if(!self.isComplex()){
             var operationIsExists = self.operation() === 'exists';
-            var valtypeIsString = self.valType() === 'string';
+            var wrapWithQuotes = (self.valType() === 'string' || self.valType() === 'date') && !operationIsExists;
 
-            expression = drata.utils.format('{0} {1} {2}{3}{2}', self.selection.expression(), self.operation(), (valtypeIsString && !operationIsExists ? '\'': ''), (operationIsExists ? '': self.value() || '__'));
+            expression = drata.utils.format('{0} {1} {2}{3}{2}', self.selection.expression(), self.operation(), (wrapWithQuotes ? '\'': ''), (operationIsExists ? '': self.value() || '__'));
             
         }
         else{
