@@ -1,5 +1,6 @@
 //var mongo = require('mongodb');
 var utils = require('../utils/utils');
+var queryGenerator = require('../utils/mongoquerygenerator');
 var aggregator = require('../utils/aggregator');
 var config = require('../routes/config.json');
 var baseMongoRepo = require('./baseMongoRepository');
@@ -69,35 +70,36 @@ exports.findProperties = function(datasource, database, collectionName){
 
 exports.findCollection = function(datasource, database, collectionName, segment) {
     var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
-    return getDbInstance.then(function(db){
+    return getDbInstance.then(function(db) {
         var defer = Q.defer();
-        var query = utils.getMongoQuery(segment);
-        var selectOnly = utils.getMongoProperties(segment);
+        var query = queryGenerator.getQuery(segment);
+        var selectOnly = queryGenerator.getProperties(segment);
         db.collection(collectionName, function(err, collection) {
-            if(err){
+            if(err) {
                 defer.reject({code: 500, message: 'Cannot access collection '+ collectionName, ex: err});
             }
-            else{
-                collection.find(query, selectOnly, {sort:segment.dataFilter.dateProp}).toArray(function(err, items) {
-                    if(err){
-                        defer.reject({code: 500, message: utils.format('Error executing Mongo query on [{0}].[{1}].[{2}]', datasource,database, collectionName), ex: err});
+            else {
+                collection.find(query, selectOnly).toArray(function(err, items) {
+                    if(err) {
+                        defer.reject({ code: 500, message: utils.format('Error executing Mongo query on [{0}].[{1}].[{2}]', datasource,database, collectionName), ex: err });
                     }
-                    else{
+                    else {
                         var ret = [];
-                        for(var i = 0; i < items.length; i++){
+                        for(var i = 0; i < items.length; i++) {
                             ret.push(utils.flatten(items[i]));
                         }
-                        try{
-                            if(segment.clientAggregation){
+                        try {
+                            if(segment.clientAggregation) {
                                 defer.resolve(ret);    
-                            }else{
+                            }
+                            else {
                                 var graphData = aggregator.getGraphData(segment, ret);
                                 defer.resolve(graphData);    
                             }
                             
                         }
-                        catch(e){
-                           defer.reject({code: 500, message: 'Error processing data. Check segmentation.', ex: err})
+                        catch(e) {
+                           defer.reject({ code: 500, message: 'Error processing data. Check segmentation.', ex: err });
                         }
                     }
                 });

@@ -565,7 +565,8 @@
         init: function(element, valueAccessor){
             var options = valueAccessor();
             var $elem = $(element);
-            $elem.click(function(){
+
+            $elem.click(function() {
                 if($elem.data('dropdown')){
                     return;
                 }
@@ -581,15 +582,11 @@
                     .html(drata.nsx.toolTipContent[options.datakey]);
                 $('body').append(contentElem);
             });
-            if(!drata.globalsettings.enableToolTips()){
-                $elem.hide();
-            }
-            drata.globalsettings.enableToolTips.subscribe(function(newValue){
-                if(!newValue) {
-                    $elem.hide();
-                }else{
-                    $elem.show();
-                }
+            
+            !drata.globalsettings.enableToolTips() && $elem.hide();
+
+            drata.globalsettings.enableToolTips.subscribe(function(show){
+                show ? $elem.show() : $elem.hide();
             });
         }
     };

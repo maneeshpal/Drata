@@ -615,7 +615,6 @@ var DataFilter = function(){
 
     self.expression = ko.computed(function(){
         return drata.utils.getDataFilterExpression(self.getModel());
-        
     }).extend({ throttle: 500 });
 };
 

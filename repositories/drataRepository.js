@@ -1,5 +1,6 @@
 var mongo = require('mongodb');
 var utils = require('../utils/utils');
+var queryGenerator = require('../utils/mongoquerygenerator');
 var socket = require('../routes/socket');
 var config = require('../routes/config.json');
 var BSON = mongo.BSONPure;
@@ -364,7 +365,7 @@ exports.getAllDashboards = function(req, res) {
 exports.getWidgets = function(req, res) {
     var promise = connectToCollection(widgetCollection).then(function(collection){
         var defer = Q.defer();
-        var q = utils.getwidgetListMongoQuery(req.body);
+        var q = queryGenerator.getwidgetListMongoQuery(req.body);
         //console.log(JSON.stringify(q));
         collection.find(q).toArray(function(err, result) {
             err ? defer.reject({code: 500, message: 'Error getting widgets'}) : defer.resolve(result);

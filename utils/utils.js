@@ -110,112 +110,6 @@ var symbolMap = {
     'exists': { mongo: '$exists', sql: 'is not null' }
 };
 
-var getMongoQuery = function(segment){
-    var query = segment.group ? getMongoConditions(segment.group) : {};
-    
-    if(segment.dataFilter.dateProp){
-        query[segment.dataFilter.dateProp] = query[segment.dataFilter.dateProp] || {};
-        if(segment.dataFilter.from && !query[segment.dataFilter.dateProp]['$gte']){
-            query[segment.dataFilter.dateProp]['$gte'] = getDateFromTimeframe(segment.dataFilter.from);
-        }
-        if(segment.dataFilter.to && !query[segment.dataFilter.dateProp]['$lte']){
-            query[segment.dataFilter.dateProp]['$lte'] = getDateFromTimeframe(segment.dataFilter.to);
-        }
-    }
-    
-    return query;
-};
-
-var getMongoConditions = function(conditions){
-    if(!conditions || conditions.length === 0)
-		return {};
-    var result = getMongoCondition(conditions[0]);
-    console.log(JSON.stringify(result, null, '\t'));
-    var fl = undefined;
-    //result[fl] = [];
-    for(var i=1;i<conditions.length;i++){
-        var c = conditions[i];
-        var logic = '$'+ c.logic;
-        if(logic !== fl){
-            var x = clone(result);
-            result = {};
-            result[logic] = [];
-            result[logic].push(x);
-        }
-        result[logic].push(getMongoCondition(c));
-        fl = logic;
-    }
-    return result;
-};
-
-var getwidgetListMongoQuery = function(model){
-    if(!model || Object.keys(model).length === 0) return {};
-        var q = {},x = {};
-        q['$and'] = [];
-        _.each(model, function(condition){
-            x = {};
-            x[condition.property] = {};
-            x[condition.property][condition.operator] = condition.value;
-            q['$and'].push(x);
-        })
-        return q;
-};
-
-var getMongoCondition = function(c){
-    if(!c.isComplex){
-        var a = {}, b = {}, val;
-        switch(c.valType){
-            case 'date':
-                val = new Date(c.value);
-            break;
-            case 'numeric':
-                val = +c.value;
-            break;
-            case 'bool':
-                val = c.value == 'true' || c.value == '1' || c.value === true;
-            break;
-            case 'string':
-                val = c.value + '';
-            break;
-            default:
-                val = c.value;
-        }
-        if(c.selection.isComplex){
-                a['$where'] = _mongoSelectExpression(c.selection, false) + ' ' + c.operation + ' ' + val;
-            }
-            else{
-                switch(c.operation){
-                    case '=':
-                        b = val;
-                        break;
-                    case 'exists':
-                        b[symbolMap[c.operation].mongo] = true;
-                        break;
-                    default :
-                    	b[symbolMap[c.operation].mongo] = val;
-                        break;
-                }
-                a[c.selection.selectedProp] = b;
-            }
-        return a;
-    }
-    else {
-       return getMongoConditions(c.groups);
-    }
-};
-
-var _mongoSelectExpression = function(selection, includeBracket){
-    var expression = '';
-    if(!selection.isComplex){
-        return 'obj.' + selection.selectedProp;
-    }
-    _.each(selection.groups, function(sel,index){
-        expression = expression + ((index === 0)? _mongoSelectExpression(sel, true) : ' ' + sel.logic + ' ' + _mongoSelectExpression(sel, true));
-    });
-    if(includeBracket) expression = '(' + expression + ')';
-    return expression;
-};
-
 var clone = function(obj) {
     // Handle the 3 simple types, and null or undefined
     if (null == obj || "object" != typeof obj) return obj;
@@ -300,15 +194,7 @@ var getDateFromTimeframe = function(timeframe){
     return new Date(+new Date() - ms);
 };
 
-var getMongoProperties = function(segment){
-    var ret = {};
-    var selectionProperties = getSelectionProperties(segment);
-    _.each(selectionProperties, function(sel){
-        ret[sel] = 1;
-    });
-    ret['_id'] = 0;
-    return ret;
-};
+
 
 var getSelectionProperties = function(segment){
     var sp = _getBaseSelectionProperties(segment.selection);
@@ -360,99 +246,6 @@ var getPercentageChange = function(arr, prop){
         prev = temp;
         return v;
     });
-};
-
-var getSqlQuery = function(dbname, tableName, segment){
-    
-    function _conditionExpression(condition){
-        var val;
-        if(condition.isComplex) {
-            return conditionsExpression(condition.groups);
-        }
-        else {
-            if(condition.operation === 'exists') {
-                val = '';  
-            }
-            else if(condition.valType === 'bool') {
-                val = condition.value === 'true' ? 1:0;
-            }
-            else if(condition.valType === 'numeric') {
-                val  = condition.value;
-            }
-            else if (condition.valTyoe === 'date'){
-                val = format('\'{0}\'', new Date(conditon.value).toISOString());
-            }
-            else {
-                val = format('\'{0}\'', condition.value || '');
-            }
-            return format('{0} {1} {2}', selectionExpression(condition.selection), symbolMap[condition.operation].sql, val);
-        }
-    };
-
-    function conditionsExpression(conditions){
-        var expression = '';
-        _.each(conditions, function(gr,index){
-            expression = expression + ((index === 0)? _conditionExpression(gr) : ' ' + gr.logic + ' ' + _conditionExpression(gr));
-        });
-        return !expression? '' : '(' + expression + ')';
-    };
-
-    function selectionExpression(selection){
-        var expression = '';
-        if(!selection.isComplex){
-            return selection.selectedProp ? selection.selectedProp : '__';
-        }
-        else{
-            return selectionsExpression(selection.groups);
-        }
-        
-    };
-
-    function selectionsExpression(selections, isTopLevel){
-        var expression='';
-        if(isTopLevel){
-            var expressions = [];
-            _.each(selections, function(gr,index){
-                expression = selectionExpression(gr);
-                if(gr.groupBy !== 'value'){
-                    expression = gr.groupBy + '(' + expression + ')';
-                }
-                expressions.push(expression);
-            });
-            return expressions.join(', ');
-        }
-        else{
-            _.each(selections, function(gr,index){
-                expression = expression + ((index === 0)? selectionExpression(gr) : ' ' + gr.logic + ' ' + selectionExpression(gr));
-            });
-            return '(' + expression + ')';
-        }
-    };
-
-    var selectionProperties = getSelectionProperties(segment);
-    var condition = conditionsExpression(segment.group);
-    
-    var returnQuery = format('select {0} from {1}', selectionProperties.join(','), tableName);
-    
-    if(segment.dataFilter.dateProp){
-        if(segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {1} between \'{2}\' and \'{3}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).toISOString(), getDateFromTimeframe(segment.dataFilter.to).toISOString());
-        }
-        else if(segment.dataFilter.from && !segment.dataFilter.to){
-            returnQuery = format('{0} where {1} > \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).toISOString());
-        }
-        else if(!segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {1} < \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).toISOString());
-        }
-    }
-    
-    var dataFilterExists = segment.dataFilter.dateProp && (segment.dataFilter.from || segment.dataFilter.to);
-    
-    if(condition.trim()){
-        returnQuery = format('{0} {1} {2}',returnQuery, (dataFilterExists ? 'and' : 'where'), condition);
-    }
-    //console.log(returnQuery);
-    return returnQuery;
 };
 
 var applyOperation = function(left, operation, right){
@@ -509,11 +302,7 @@ var applyOperation = function(left, operation, right){
 
 exports.applyOperation = applyOperation;
 exports.getUniqueProperties = getUniqueProperties;
-exports.getMongoQuery = getMongoQuery;
-exports.getSqlQuery = getSqlQuery;
 exports.flatten = flatten;
-exports.getMongoProperties = getMongoProperties;
-exports.getwidgetListMongoQuery = getwidgetListMongoQuery;
 exports.format = format;
 exports.percChange = percChange;
 exports.getPercentageChange = getPercentageChange;
@@ -521,3 +310,6 @@ exports.clone = clone;
 exports.parseTime = parseTime;
 exports.getType = getType;
 exports.firstDayOfWeek = firstDayOfWeek;
+exports.getSelectionProperties = getSelectionProperties;
+exports.symbolMap = symbolMap;
+exports.getDateFromTimeframe = getDateFromTimeframe;

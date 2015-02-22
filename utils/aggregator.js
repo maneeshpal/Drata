@@ -215,11 +215,13 @@ var groupByInterval = function(data, dataGroup, selection){
 
     return ret;
 };
-var filterData = function(data, segment){
-    var range = utils.getDateRange(segment.dataFilter);
-    
+var filterData = function(data, segment) {
     if(!data || !data.length || !segment.dataFilter) return data;
+    
     if (!segment.group || segment.group.length === 0) return data;
+    
+    var range = utils.getDateRange(segment.dataFilter);
+
     return data.filter(function(item) {
         if(item.timestamp < range.min || item.timestamp > range.max) return false;
         return processGroups(item, segment.group).value;
