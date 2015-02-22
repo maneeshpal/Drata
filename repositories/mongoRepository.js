@@ -72,7 +72,6 @@ exports.findCollection = function(datasource, database, collectionName, segment)
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         var query = utils.getMongoQuery(segment);
-        console.log(JSON.stringify(query, null, '\t'));
         var selectOnly = utils.getMongoProperties(segment);
         db.collection(collectionName, function(err, collection) {
             if(err){
@@ -98,7 +97,6 @@ exports.findCollection = function(datasource, database, collectionName, segment)
                             
                         }
                         catch(e){
-                            console.log(e);
                            defer.reject({code: 500, message: 'Error processing data. Check segmentation.', ex: err})
                         }
                     }
@@ -148,7 +146,7 @@ exports.pop = function() {
                 shippingPrice: Math.abs(y[0]) * 12
             }
         };
-        //console.log(dd.timestamp);
+        
         data.push(dd);
     }
     var getDbInstance = baseMongoRepo.dbInstance().serverName('drataDemoExternal').dbName('shopperstop')();

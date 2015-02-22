@@ -10,10 +10,9 @@
             },
             message: 'Invalid Date'
         };
+        
         ko.validation.rules['groupingInterval'] = {
             validator: function (val, options) {
-                // if(!options._required())
-                //     return true;
                 if(!val)
                     return true;
                 if(options.intervalType() === 'date'){
@@ -33,6 +32,17 @@
             },
             message : 'Invalid Interval'
         };
+
+        ko.validation.rules['dynamicInterval'] = {
+            validator: function (val, options) {
+                if(!val) {
+                    return true;
+                }
+                return !!drata.utils.parseTime(val).ms;
+            },
+            message : 'Invalid Interval'
+        };
+
 
         ko.validation.rules['numeric'] = {
             validator: function (val, options) {

@@ -552,11 +552,7 @@ var TimeFrameItem = function(timeframeType){
     self.dateType = ko.observable('static');
     self.timeframeType = timeframeType;
     self.dynamicDate.extend({
-        groupingInterval: {
-            intervalType: function(){
-                return 'date';
-            }
-        },
+        dynamicInterval: {},
         required: {
             message: 'Enter Interval',
             onlyIf: function(){

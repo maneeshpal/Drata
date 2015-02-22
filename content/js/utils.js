@@ -522,7 +522,8 @@
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
         timeframes : ['minute', 'hour', 'day', 'month', 'year'],
         uniqueClientId: parseInt(Math.random() * 100000000),
-        dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', 'week', 'month', 'quarter', 'year']
+        dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', 'week', 'month', 'quarter', 'year'],
+        timeframeIntervalExamples: ['60s', '5m', '5h', '1d','1w']
     });
 
     Date.prototype.format = function(f){

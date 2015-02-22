@@ -148,16 +148,16 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
     if(!groupByConditions) return data;
 
     var selectionKey = getSelectionKeyName(selection);
-    console.log('selection keyname: ',selectionKey);
+    
     var groupByCondition = groupByConditions.filter(function(cond){
         return cond.selection.selectedProp === selectionKey;
     });
     
     if(!groupByCondition) {
-        console.log('no groupByCondition');
         return data;
     }
-    var cloneCondition = drata.utils.clone(groupByCondition);
+    var cloneCondition = utils.clone(groupByCondition);
+    
     cloneCondition.forEach(function(c){
         c.selection.selectedProp = propertyName;
     });
@@ -166,7 +166,6 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
         return processGroups(item, cloneCondition).value;   
     });
     
-    console.log('filtered :', fi);
     return fi;
 };
 
@@ -189,11 +188,9 @@ var groupByInterval = function(data, dataGroup, selection){
                 y:  reduceData(gi,selection)
             });
         });
-        //log this shit
-        console.log('original: ', ret);
-        //console.log('selection: ', selection);
-        return filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
+        
         //if trackchart, then real grouping happens if it is timeseries.
+        return filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
     }
     else {
         _.each(data, function(item){
@@ -233,8 +230,9 @@ var filterData = function(data, segment){
 var getGraphData = function(segmentModel, inputData){
     if(segmentModel.selection.length === 0)
         throw "Selections required";
-    //this.propertyTypes = segmentModel.propertyTypes;
+    
     var returnData;
+    
     switch (segmentModel.chartType){
         case 'line':
         case 'area':
@@ -257,8 +255,7 @@ var getTrackCharData = function(segmentModel, inputData){
     if(segmentModel.dataGroup.hasGrouping){
         groupedData = _.groupBy(inputData, function(item){return item[segmentModel.dataGroup.groupByProp]});
     }
-    //console.log('data length: '+ inputData.length);
-    //console.log('first item in data:' + JSON.stringify(inputData[0], null, '\t'));
+    
     _.each(segmentModel.selection, function(sel) {
        var values;
         if(segmentModel.dataGroup.hasGrouping){

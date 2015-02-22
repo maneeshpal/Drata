@@ -101,13 +101,13 @@ var flatten = function(data) {
     return result;
  };
 
-var mongoSymbolMap = {
-    '<': '$lt',
-    '>': '$gt',
-    '<=': '$lte',
-    '>=': '$gte',
-    '!=': '$ne',
-    'exists': '$exists'
+var symbolMap = {
+    '<': { mongo: '$lt', sql: '<' },
+    '>': { mongo: '$gt', sql: '>' },
+    '<=': { mongo: '$lte', sql: '<=' },
+    '>=': { mongo: '$gte', sql: '>=' },
+    '!=': { mongo: '$ne', sql: '<>' },
+    'exists': { mongo: '$exists', sql: 'is not null' }
 };
 
 var getMongoQuery = function(segment){
@@ -189,10 +189,10 @@ var getMongoCondition = function(c){
                         b = val;
                         break;
                     case 'exists':
-                        b[mongoSymbolMap[c.operation]] = true;
+                        b[symbolMap[c.operation].mongo] = true;
                         break;
                     default :
-                    	b[mongoSymbolMap[c.operation]] = val;
+                    	b[symbolMap[c.operation].mongo] = val;
                         break;
                 }
                 a[c.selection.selectedProp] = b;
@@ -363,27 +363,29 @@ var getPercentageChange = function(arr, prop){
 };
 
 var getSqlQuery = function(dbname, tableName, segment){
+    
     function _conditionExpression(condition){
-        var expression = '', val, op;
-        if(condition.isComplex){
+        var val;
+        if(condition.isComplex) {
             return conditionsExpression(condition.groups);
         }
-        else{
-            op = condition.operation;
-            if(condition.operation === 'exists'){
-                op = 'is not';
-                val = 'null';  
+        else {
+            if(condition.operation === 'exists') {
+                val = '';  
             }
-            else if(condition.valType === 'bool'){
+            else if(condition.valType === 'bool') {
                 val = condition.value === 'true' ? 1:0;
             }
-            else if(condition.valType === 'numeric'){
+            else if(condition.valType === 'numeric') {
                 val  = condition.value;
             }
-            else{
+            else if (condition.valTyoe === 'date'){
+                val = format('\'{0}\'', new Date(conditon.value).toISOString());
+            }
+            else {
                 val = format('\'{0}\'', condition.value || '');
             }
-            return format('{0} {1} {2}', selectionExpression(condition.selection), op, val);
+            return format('{0} {1} {2}', selectionExpression(condition.selection), symbolMap[condition.operation].sql, val);
         }
     };
 
@@ -434,13 +436,13 @@ var getSqlQuery = function(dbname, tableName, segment){
     
     if(segment.dataFilter.dateProp){
         if(segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {1} between \'{2}\' and \'{3}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2} {3}:{4}:{5}'), getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2} {3}:{4}:{5}'));
+            returnQuery = format('{0} where {1} between \'{2}\' and \'{3}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).toISOString(), getDateFromTimeframe(segment.dataFilter.to).toISOString());
         }
         else if(segment.dataFilter.from && !segment.dataFilter.to){
-            returnQuery = format('{0} where {1} > \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).format('{0}-{1}-{2} {3}:{4}:{5}'));
+            returnQuery = format('{0} where {1} > \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.from).toISOString());
         }
         else if(!segment.dataFilter.from && segment.dataFilter.to){
-            returnQuery = format('{0} where {1} < \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).format('{0}-{1}-{2} {3}:{4}:{5}'));
+            returnQuery = format('{0} where {1} < \'{2}\'', returnQuery, segment.dataFilter.dateProp, getDateFromTimeframe(segment.dataFilter.to).toISOString());
         }
     }
     
