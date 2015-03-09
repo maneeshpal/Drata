@@ -84,3 +84,15 @@ select.error{
     }
 }
 /*end Group by conditions*/
+
+.chart-types .chart-icon {
+    display:block;
+    margin-bottom: 10px;
+}
+
+@media #{$medium-up} {
+ul.chart-types > li > a {
+    padding-left: 0;
+    padding-right: 0;
+}
+}

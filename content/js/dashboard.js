@@ -95,7 +95,9 @@
         self.displayIndex = ko.observable(widgetModel.displayIndex);
         self.pieKeys = ko.observableArray([]);
         self.selectedPieKey = ko.observable();
-        var _name = ko.observable(widgetModel.name || 'New widget'), _sizex = ko.observable(widgetModel.sizex), _sizey = ko.observable(widgetModel.sizey);
+        var _name = ko.observable(widgetModel.name || 'New widget'), 
+        _sizex = ko.observable(widgetModel.sizex), 
+        _sizey = ko.observable(widgetModel.sizey);
 
         self.name = ko.computed({
             read: function(){
@@ -110,6 +112,7 @@
 
         self.sizex = ko.computed({
             read: function(){
+                if(previewMode) return '4';
                 return _sizex();
             },
             write: function(newValue){
@@ -121,6 +124,7 @@
 
         self.sizey = ko.computed({
             read: function(){
+                if(previewMode) { return $(window).width() > 1024 ? 1 : 2 } ;
                 return _sizey();
             },
             write: function(newValue){
@@ -133,7 +137,7 @@
         // self.sizex = ko.observable(widgetModel.sizex || 4);
         // self.sizey = ko.observable(widgetModel.sizey || 2);
         self.widgetClass= ko.computed(function(){
-            if(previewMode) return 'widget-size-4';
+            //if(previewMode) return 'widget-size-4';
             return 'widget-size-' + self.sizex();
         });
 
@@ -170,7 +174,6 @@
         });
 
         self.widgetHeight = ko.computed(function(){
-            if(previewMode) return 300;
             var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
             wh = Math.max(200, wh);
             return wh;
@@ -285,8 +288,8 @@
         };
 
         self.getModel = function (argument) {
-            widgetModel.sizex = self.sizex();
-            widgetModel.sizey = self.sizey();
+            widgetModel.sizex = _sizex();
+            widgetModel.sizey = _sizey();
             widgetModel.displayIndex = self.displayIndex();
             widgetModel.name = self.name();
             if(content && content.getModel){

@@ -10,14 +10,13 @@
         self.dataSourceNames = ko.observableArray();
         self.databaseNames = ko.observableArray();
         self.database = ko.observable();
-        self.parseError = ko.observable();
         self.previewWidget = ko.observable();
 
         var cloneModel = {};
         
         self.name = ko.observable();
-        self.sizex = ko.observable("4");
-        self.sizey = ko.observable("1");
+        //self.sizex = ko.observable("4");
+        //self.sizey = ko.observable("1");
 
         self.dataSource.subscribe(function(newValue){
             if(!newValue){
@@ -95,11 +94,11 @@
             var isNew = !cloneModel._id;
 
             //im just setting them here.
-            cloneModel.sizex = self.sizex();
-            cloneModel.sizey = self.sizey();
             cloneModel.name = self.name() || 'New widget';
 
             if(isNew){
+                cloneModel.sizex = '2';
+                cloneModel.sizey = '2';
                 drata.pubsub.publish('widgetcreate', cloneModel);
             }
             else{
@@ -115,8 +114,8 @@
                 self.addUpdateBtnText('Save');
                 self.dataSource(undefined);
                 self.name(undefined);
-                self.sizex("4");
-                self.sizey("1");
+                //self.sizex("4");
+                //self.sizey("1");
                 self.previewWidget(undefined);
                 location.hash = '';
             }
@@ -127,15 +126,14 @@
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);
-            self.sizex(cloneModel.sizex);
-            self.sizey(cloneModel.sizey);
+            //self.sizex(cloneModel.sizex);
+            //self.sizey(cloneModel.sizey);
 
             self.addUpdateBtnText('Update Widget');
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
         };
 
         self.widgetCancel = function() {
-            self.parseError(undefined);
             self.onWidgetUpdate = undefined;
             self.onWidgetCancel = undefined;
             self.addUpdateBtnText('Add Widget');

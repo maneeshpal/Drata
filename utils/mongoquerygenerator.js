@@ -110,7 +110,7 @@ var _mongoSelectExpression = function(selection, includeBracket){
     return expression;
 };
 
-var getwidgetListMongoQuery = function(model){
+var getWidgetListMongoQuery = function(model){
     if(!model || Object.keys(model).length === 0) return {};
         var q = {},x = {}, condition;
         q['$and'] = [];
@@ -134,3 +134,4 @@ var getwidgetListMongoQuery = function(model){
 
 exports.getQuery = getQuery;
 exports.getProperties = getProperties;
+exports.getWidgetListMongoQuery = getWidgetListMongoQuery;

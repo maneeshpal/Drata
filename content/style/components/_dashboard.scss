@@ -195,17 +195,6 @@ ul.widget-nav-list li.action-icon{
   }
 }
 
-@media only screen and (max-width: 1530px) {
-  .mymodal-inner{
-    width:80%;
-  }
-}
-@media only screen and (max-width: 1024px) {
-  .mymodal-inner{
-    width:100%;
-  }
-}
-
 /******/
 
 span.error{
@@ -269,23 +258,7 @@ input.error {
   }
 /**end dashboard settings**/
 
-h3.view-heading {
-  font-weight: 300;
-  margin:20px 0;
-  text-align:center;
-}
-.preview-placeholder {
-  height: 89%;
-  border: 5px dashed #cccccc;
-  position: absolute;
-  right: 20px;
-  top: 25px;
-  width: 61.7%;
-  padding-top: 130px;
-  text-align: center;
-}
-
-.widget-editor, .widget-manager {
+.widget-manager {
   max-width:62rem;
   margin:0 auto;
 }

@@ -2,7 +2,7 @@
  ;(function(root) {
     var Labels = function(){
 
-        var _w, _h, _color, labelHeight = 16, labelSpacing = 14, _align, _dispatch = d3.dispatch(), _dims;
+        var _w, _h, _color, labelHeight = 16, labelSpacing = 18, _align, _dispatch = d3.dispatch(), _dims;
         
         function chart(selection) {
             selection.each(function(data) {
@@ -21,7 +21,7 @@
                 container
                     .selectAll('g.label-group')
                     .attr('transform', function(d, i){
-                        var len = drata.utils.textToPixel(d.key).width + labelSpacing;
+                        var len = drata.utils.textToPixel(d.key, 'font-size: 14px; font-family: arial;').width + labelSpacing;
                         totalLen += len;
                         if(prev + len >= wm) {
                             prev = 0;

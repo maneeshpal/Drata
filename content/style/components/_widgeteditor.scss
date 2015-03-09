@@ -1,0 +1,37 @@
+
+@import '../../foundation/scss/foundation/settings';
+
+h3.view-heading {
+  font-weight: 300;
+  margin:20px 0;
+  text-align:center;
+}
+.preview-placeholder {
+  border: 5px dashed #cccccc;
+  text-align: center;
+  display: table;
+  min-height: 300px;
+  width:100%;
+  .heading {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+@media #{$large-up} {
+  .preview-widget {
+    position:fixed;
+    bottom: -10px;
+    right:0;
+    .widget-wrapper {
+      background:transparent;
+      border: 1px dashed #ccc;
+    }
+  }
+}
+
+@media only screen and (max-width: 64em) {
+  .preview-widget .widgetContent, .preview-widget .numeric-chart {
+    height:400px !important;
+  }
+} 

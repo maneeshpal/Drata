@@ -514,7 +514,25 @@
         arithmeticOperations : ['+', '-', '*','/'],
         groupingOptions : ['value','count', 'sum', 'avg', 'min', 'max'],
         xAxisTypes : ['date','numeric','currency'],
-        chartTypes : ['line', 'area', 'scatter', 'pie','bar', 'numeric'],
+        chartTypes : [{
+            name: 'line', 
+            icon: 'icon-statistics'
+        }, { 
+            name: 'area', 
+            icon: 'icon-graph'
+        }, { 
+            name: 'scatter',
+            icon: 'icon-air' 
+        },{ 
+            name: 'pie', 
+            icon: 'icon-pie' 
+        }, { 
+            name: 'bar', 
+            icon: 'icon-bars2' 
+        }, { 
+            name: 'numeric', 
+            icon: 'icon-uniE650' 
+        }],
         trackingChartTypes: ['line', 'area', 'scatter','numeric'],
         comparisonChartTypes: ['bar', 'pie'],
         logics : ['and', 'or'],

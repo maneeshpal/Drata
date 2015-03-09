@@ -17,17 +17,19 @@
 </div>
 
 <div class="row">
-    <div class="medium-7 columns">
-            <label>Select Chart Type
-                <select data-bind="options: drata.global.chartTypes, value : chartType, optionsCaption: 'select chart Type'">
-                </select>
-            </label>
+    <div class="small-12 columns">
+        <ul class="button-group even-6 radius chart-types">
+          <!-- ko foreach: drata.global.chartTypes -->
+          <li><a class="button" data-bind="css: {'primary': $parent.chartType () === $data.name, 'secondary' : $parent.chartType() !== $data.name }, click: $parent.setChartType.bind($parent, $data.name)"><span class="chart-icon" data-bind="css: $data.icon"></span> <!-- ko text: $data.name --><!-- /ko --> </a></li>
+          <!-- /ko -->
+        </ul>
+            
         <!-- ko if: chartType()-->
             <!-- ko template: dataGroupTemplate -->
             <!-- /ko -->
         <!-- /ko -->
     </div>
-    <div class="medium-5 columns">
+    <div class="small-12 columns">
         <!-- ko template: { name: 'datafilter-template', data: dataFilter} -->
         <!-- /ko -->
     </div>
@@ -35,31 +37,30 @@
 
 <div class="row" data-bind="with: conditionGroup">
     <div class="large-12 columns">
-        <fieldset>
-            <legend>Conditions</legend>
-            <div class="row" data-bind="visible: conditions().length>0">
-                <div class="small-12 columns">
-                    <div class="keystroke expression" data-bind=" html:expression"></div>
-                    <span data-bind="tooltip: {datakey: 'conditionSummary'}" class="icon-question dtooltip dtooltip-expression"></span>
-                </div>
+        <h6><strong>Conditions</strong></h6>    
+        <div class="row" data-bind="visible: conditions().length > 0">
+            <div class="small-12 columns">
+                <div class="keystroke expression" data-bind=" html:expression"></div>
+                <span data-bind="tooltip: {datakey: 'conditionSummary'}" class="icon-question dtooltip dtooltip-expression"></span>
             </div>
-            
-            <!-- ko template: { name : 'condition-group-template'} -->
-            <!-- /ko -->
-        </fieldset>
+        </div>
+        
+        <!-- ko template: { name : 'condition-group-template'} -->
+        <!-- /ko -->
+    
     </div>
 </div>
 </script>
 
 <script type="text/html" id="timeframeItem-template">
     <div class="row collapse">
-        <div class="small-3 columns">
+        <div class="small-4 columns">
             <select data-bind="optionsCaption: 'Select Type', value: dateType">
                 <option>static</option>
                 <option>dynamic</option>
             </select>
         </div>
-        <div class="small-9 columns">
+        <div class="small-8 columns">
             <div data-bind="visible: dateType() === 'static', dateTextBox: {
                     selectedValue: staticDate,
                     maxDate: new Date(),
@@ -81,22 +82,27 @@
             </label>
         </div>
     </div>
-    
-    <label> From:
-        <!-- ko template: {
-            name: 'timeframeItem-template', 
-            data: from
-        } -->
-        <!-- /ko -->
-    </label>
 
-    <label> To:
-        <!-- ko template: {
-            name: 'timeframeItem-template', 
-            data: to
-        } -->
-        <!-- /ko -->
-    </label>
+    <div class="row">
+        <div class="small-12 medium-6 columns">
+            <label> From:
+                <!-- ko template: {
+                    name: 'timeframeItem-template', 
+                    data: from
+                } -->
+                <!-- /ko -->
+            </label>
+        </div>
+        <div class="small-12 medium-6 columns">
+            <label> To:
+                <!-- ko template: {
+                    name: 'timeframeItem-template', 
+                    data: to
+                } -->
+                <!-- /ko -->
+            </label>
+        </div>
+    </div>
 
     <div class="row">
         <div class="small-12 columns">
@@ -109,25 +115,23 @@
 <script type="text/html" id="selection-template">
 <div class="row">
     <div class="large-12 columns">
-        <fieldset>
-            <legend>Selections 
+        <h6><strong>Selections</strong>
             <span data-bind="tooltip: {datakey: 'selectionsInfo', size: 'medium'}" class="dtooltip icon-question"></span>
-            </legend>
-            <div class="keystroke expression" data-bind="html:$data.expression()"></div>
-            <div class="row">
-                <div class="small-12 columns">
-                    <div class="clearfix" style="position:relative">
-                        <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
-                        <div class="left" style="margin-right:2rem">
-                            <!-- ko template: {name: 'selectionGroupTemplate'} -->
-                            <!-- /ko -->
-                        </div>
+        </h6>
+        <div class="keystroke expression" data-bind="html:$data.expression()"></div>
+        <div class="row">
+            <div class="small-12 columns">
+                <div class="clearfix" style="position:relative">
+                    <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
+                    <div class="left" style="margin-right:2rem">
+                        <!-- ko template: {name: 'selectionGroupTemplate'} -->
                         <!-- /ko -->
-                        <a class="left" style="line-height:2rem" data-bind="click: addItem"><i class="icon-plus"></i> Add</a>
                     </div>
+                    <!-- /ko -->
+                    <a class="left" style="line-height:2rem" data-bind="click: addItem"><i class="icon-plus"></i> Add</a>
                 </div>
             </div>
-        </fieldset>
+        </div>
     </div>
 </div>
 </script>
@@ -206,15 +210,16 @@
     <!-- /ko -->
     <!-- /ko -->
 </script>
+
 <script type="text/html" id="groupbyconditions-template">
-    <fieldset class="groupby-condition">
-        <legend>GroupBy Filters
-        <span data-bind="tooltip: {datakey: 'groupbycondition'}" class="icon-question dtooltip"></span></legend>
-        <!-- ko template: {name: 'groupbycondition-template', foreach: groupByConditions} -->
-        <!-- /ko -->
-        <button class="tiny success add-condition" data-bind="click: addGroupByCondition">Add Grouping Filter</button>
-    </fieldset>
+    <h6><strong>Filter aggregations ?</strong>
+    <span data-bind="tooltip: {datakey: 'groupbycondition'}" class="icon-question dtooltip"></span>
+    </h6>
+    <!-- ko template: {name: 'groupbycondition-template', foreach: groupByConditions} -->
+    <!-- /ko -->
+    <button class="tiny success add-condition" data-bind="click: addGroupByCondition"><span class="icon-plus success"></span> Add Grouping Filter</button>
 </script>
+
 <script type="text/html" id="groupbycondition-template">
     <div class="row collapse">
         <div class="small-2 columns" data-bind="visible: $index() > 0">
@@ -361,16 +366,19 @@
 
 <script type="text/html" id="condition-template">
     <div class="row">
-        <div class="small-2 columns" data-bind="visible:$index() > 0">
+        <div class="small-3 small-offset-4 columns" data-bind="visible:$index() > 0">
             <select data-bind="options:drata.global.logics, value:logic"></select>
         </div>
+    </div>
+    <div class="row">
         <!-- ko if: !isComplex() && !showComplex() -->
-        <div class="small-3 columns"  data-bind="css : {'small-offset-2': $index() === 0},template: {name: 'selectionGroupTemplate', data: selection}">
+        <div class="small-4 columns"  data-bind=" 
+            template: { name: 'selectionGroupTemplate', data: selection }">
         </div>
         <div class="small-2 columns">
             <select data-bind="options:availableOperations, value:operation"></select>
         </div>
-        <div class="small-4 columns" data-bind="visible: operation() !== 'exists'">
+        <div class="small-5 columns" data-bind="visible: operation() !== 'exists'">
             <span data-bind="tooltip: {datakey: 'conditionValue'}" class="icon-question dtooltip dtooltip-aggregate-func">
                 </span>
 

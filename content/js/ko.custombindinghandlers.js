@@ -531,15 +531,16 @@
             $(element).html(txt);
             var w = $(element).width();
             var h = $(element).height();
+            if(!w || !h) return;
             //console.log('height: ' + h + '; width: ' + w);
-            var maxFontSize = 0;
+            var maxFontSize = 0, dimToUse = Math.min(w, h);
             function resize(){
-                var x = {width:0, height: 0}, f = parseInt(h * 9/10), l = 0;
+                var x = {width:0, height: 0}, f = parseInt( dimToUse * 9/10), l = 0;
                 do{
                     x = drata.utils.textToPixel(txt, 'font-size:' + f + 'px;');
                     //console.log(x);
                     //console.log('font: ' + f);
-                    f = f - 10;
+                    f = f - (x.width > w + 60 ? parseInt(( x.width - w )/3) : 10);
                     l++;
                 }
                 while((x.width > w - 20 || x.height > h) && l < 10);

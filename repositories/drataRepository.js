@@ -47,6 +47,9 @@ mongoClient.open(function(err, mongoClient) {
     }
 });
 
+var handleErrorResponse = function(err) {
+    this.send(err.code || 500, err.message || err.toString());
+}
 
 var findObject = function(collectionName, id){
     return getValidMongoId(id).then(function(objectId){
@@ -91,27 +94,21 @@ exports.redirectDemo = function(req, res){
     findDemoDashboard().then(function(demoDashboardModel){
         console.log(demoDashboardModel);
         res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.findDashboard = function(req, res) {
     getDashboard(req.params.dashboardId)
     .done(function(result){
         res.send(result);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.findWidget = function(req, res) {
     getWidget(req.params.widgetId)
     .done(function(result){
         res.send(result);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.findWidgetsOfDashboard = function(req, res) {
@@ -125,9 +122,7 @@ exports.findWidgetsOfDashboard = function(req, res) {
     });
     promise.done(function(result){
         res.send(result);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 //i messed up this method. need promises setup
@@ -197,10 +192,7 @@ exports.updateWidget = function(req, res){
     .then(function(){
         //console.log('updated widget');
         res.send(200);
-    }, function(err){
-        //console.log('error updating widget');
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 }
 
 exports.addWidget = function(req, res){
@@ -210,9 +202,7 @@ exports.addWidget = function(req, res){
     .then(function(newWidgetModel){
         //console.log('added widget');
         res.send(newWidgetModel);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 var deleteWidget = function(widgetId){
@@ -248,9 +238,7 @@ var deleteWidget = function(widgetId){
 exports.deleteWidget = function(req, res){
     deleteWidget(req.params.widgetId).then(function(result){
         res.send(200);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 var upsertDashboard = function(dashboardModel, allowDemo){
@@ -291,9 +279,7 @@ exports.upsertDashboard = function(req, res){
     upsertDashboard(req.body)
         .then(function(result){
             res.send(result);
-        }, function(err){
-            res.send(err.code, err.message);
-        });
+        }, handleErrorResponse.bind(res));
 };
 
 function removeCollection(collectionName){
@@ -312,9 +298,7 @@ exports.truncateData = function(req, res){
     var dt = removeCollection(tagCollection);
     Q.all([dp,dw,dt]).then(function(){
         res.send(200);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.generateDemoDashboard = function(req, res){
@@ -341,9 +325,7 @@ exports.generateDemoDashboard = function(req, res){
 
     promise.then(function(){
         res.send(200);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.getAllDashboards = function(req, res) {
@@ -357,16 +339,14 @@ exports.getAllDashboards = function(req, res) {
 
     promise.then(function(result){
         res.send(result);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.getWidgets = function(req, res) {
     var promise = connectToCollection(widgetCollection).then(function(collection){
         var defer = Q.defer();
-        var q = queryGenerator.getwidgetListMongoQuery(req.body);
-        //console.log(JSON.stringify(q));
+        var q = queryGenerator.getWidgetListMongoQuery(req.body);
+        console.log(JSON.stringify(q));
         collection.find(q).toArray(function(err, result) {
             err ? defer.reject({code: 500, message: 'Error getting widgets'}) : defer.resolve(result);
         });
@@ -375,9 +355,7 @@ exports.getWidgets = function(req, res) {
 
     promise.then(function(result){
         res.send(result);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.getAllTags = function(req, res){
@@ -391,9 +369,7 @@ exports.getAllTags = function(req, res){
 
     promise.then(function(result){
         res.send(result);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.getAllTagsOfDashboard = function(req, res){
@@ -407,9 +383,7 @@ exports.getAllTagsOfDashboard = function(req, res){
 
     promise.then(function(result){
         res.send(result);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 var addTag = function(tagModel, allowDemo){
@@ -438,9 +412,7 @@ var addTag = function(tagModel, allowDemo){
 exports.addTag = function(req, res){
     addTag(req.body).then(function(result){
         res.send(200);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 var removeTag = function(tagId){
@@ -458,9 +430,7 @@ var removeTag = function(tagId){
 exports.removeTag = function(req, res){
     removeTag(req.params.tagId).then(function(){
         res.send(200);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 var deleteAllTagsDashboard = function(dashboardId){
@@ -498,17 +468,13 @@ var deleteDashboard = function(dashboardId){
 exports.deleteAllTagsDashboard = function(req, res){
     deleteAllTagsDashboard(req.params.dashboardId).then(function(){
         res.send(200);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.deleteAllWidgetsDashboard = function(req, res){
     deleteAllWidgetsDashboard(req.params.dashboardId).then(function(){
         res.send(200);
-    },function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };
 
 exports.deleteDashboard = function(req, res){
@@ -518,7 +484,5 @@ exports.deleteDashboard = function(req, res){
         })
     }).then(function(result){
         res.send(200);
-    }, function(err){
-        res.send(err.code, err.message);
-    });
+    }, handleErrorResponse.bind(res));
 };

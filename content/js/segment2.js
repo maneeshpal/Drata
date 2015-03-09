@@ -19,7 +19,11 @@ var Segmentor = function(model){
     var compDataGroup, trackDataGroup, currentDataGroupTemplate;
     self.dataGroup = undefined;
     
-    self.initialize = function(model){
+    self.setChartType = function(chartType) {
+        self.chartType(chartType);
+    }
+
+    self.initialize = function(model) {
         model = model || {};
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
