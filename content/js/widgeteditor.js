@@ -96,12 +96,12 @@
             //im just setting them here.
             cloneModel.name = self.name() || 'New widget';
 
-            if(isNew){
+            if(isNew) {
                 cloneModel.sizex = '2';
                 cloneModel.sizey = '2';
                 drata.pubsub.publish('widgetcreate', cloneModel);
             }
-            else{
+            else {
                 drata.pubsub.publish('widgetupdate', cloneModel);   
             }
 

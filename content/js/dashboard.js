@@ -95,9 +95,15 @@
         self.displayIndex = ko.observable(widgetModel.displayIndex);
         self.pieKeys = ko.observableArray([]);
         self.selectedPieKey = ko.observable();
-        var _name = ko.observable(widgetModel.name || 'New widget'), 
-        _sizex = ko.observable(widgetModel.sizex), 
+        self.widgetHeight = ko.observable();
+        var _name = ko.observable(widgetModel.name || 'New widget'),
+        _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
+        
+        function setWidgetHeight () {
+            var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
+            self.widgetHeight(Math.max(200, wh));
+        };
 
         self.name = ko.computed({
             read: function(){
@@ -116,6 +122,7 @@
                 return _sizex();
             },
             write: function(newValue){
+                if(newValue === _sizex()) return;
                 _sizex(newValue);
                 self.update();
                 self.resizeContent();
@@ -124,20 +131,18 @@
 
         self.sizey = ko.computed({
             read: function(){
-                if(previewMode) { return $(window).width() > 1024 ? 1 : 2 } ;
+                if(previewMode) return '2';
                 return _sizey();
             },
             write: function(newValue){
+                if(newValue === _sizey()) return;
                 _sizey(newValue);
                 self.update();
                 self.resizeContent();
             }
         });
 
-        // self.sizex = ko.observable(widgetModel.sizex || 4);
-        // self.sizey = ko.observable(widgetModel.sizey || 2);
         self.widgetClass= ko.computed(function(){
-            //if(previewMode) return 'widget-size-4';
             return 'widget-size-' + self.sizex();
         });
 
@@ -151,32 +156,9 @@
         self.chartType = ko.observable(widgetModel.segmentModel.chartType);
         
         self.logoClass = ko.computed(function(){
-            switch(self.chartType()){
-                case 'line':
-                    return 'icon-statistics';
-                    break;
-                case 'area':
-                    return 'icon-graph';
-                    break;
-                case 'pie':
-                    return 'icon-pie';
-                    break;
-                case 'bar':
-                    return 'icon-bars2';
-                    break;
-                case 'scatter':
-                    return  'icon-air';
-                    break;
-                case 'numeric':
-                    return 'icon-uniE650';
-                    break;
-            }
-        });
-
-        self.widgetHeight = ko.computed(function(){
-            var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
-            wh = Math.max(200, wh);
-            return wh;
+            return drata.global.chartTypes.filter( function(c) {
+                return c.name === self.chartType();
+            })[0].icon;
         });
 
         self.update = function(){
@@ -240,7 +222,10 @@
             _t && clearTimeout(_t);
             if(!resize) return;
             if(!content || !content.resize || !!self.parseError()) return;
-            _t = setTimeout(content.resize, 500);
+            _t = setTimeout( function () {
+                previewMode && setWidgetHeight();
+                content.resize();
+            }, 500);
         };
 
         self.clearTimeouts = function(){
@@ -277,7 +262,7 @@
                 var pieKeys = dataToMap.map(function(dataItem, index){
                     return {label: dataItem.key, value: index};
                 });
-
+                
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
@@ -333,6 +318,11 @@
         self.displayIndex.subscribe(function(){
             self.update();
         });
+
+        _sizex.subscribe(setWidgetHeight)
+        _sizey.subscribe(setWidgetHeight);
+
+        setWidgetHeight();
 
         if(!previewMode){
             drata.nsx.dashboardSyncService.listenWidgetUpdated(widgetModel._id);

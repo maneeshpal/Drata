@@ -152,9 +152,8 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
         return cond.selection.selectedProp === selectionKey;
     });
     
-    if(!groupByCondition) {
-        return data;
-    }
+    if(!groupByCondition.length) return data;
+    
     var cloneCondition = utils.clone(groupByCondition);
     
     cloneCondition.forEach(function(c){

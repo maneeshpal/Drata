@@ -153,9 +153,8 @@ var filterGroupByConditions = function(data, groupByConditions, selection, prope
         return cond.selection.selectedProp === selectionKey;
     });
     
-    if(!groupByCondition) {
-        return data;
-    }
+    if(!groupByCondition.length) return data;
+    
     var cloneCondition = utils.clone(groupByCondition);
     
     cloneCondition.forEach(function(c){
@@ -190,7 +189,7 @@ var groupByInterval = function(data, dataGroup, selection){
         });
         
         //if trackchart, then real grouping happens if it is timeseries.
-        return filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
+        ret = filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
     }
     else {
         _.each(data, function(item){
@@ -216,18 +215,21 @@ var groupByInterval = function(data, dataGroup, selection){
 
     return ret;
 };
-var filterData = function(data, segment){
-    var range = utils.getDateRange(segment.dataFilter);
-    
+var filterData = function(data, segment) {
     if(!data || !data.length || !segment.dataFilter) return data;
+    
     if (!segment.group || segment.group.length === 0) return data;
+    
+    var range = utils.getDateRange(segment.dataFilter);
+
     return data.filter(function(item) {
         if(item.timestamp < range.min || item.timestamp > range.max) return false;
         return processGroups(item, segment.group).value;
     });
 };
 
-var getGraphData = function(segmentModel, inputData){
+var getGraphData = function(segmentModel, inputData) {
+
     if(segmentModel.selection.length === 0)
         throw "Selections required";
     
@@ -245,6 +247,7 @@ var getGraphData = function(segmentModel, inputData){
             returnData = getComparisonChartData(segmentModel, inputData);
             break;
     }
+
     return returnData;
 };
 

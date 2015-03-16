@@ -93,10 +93,10 @@
 
     var dateTemplateStr = [
         '<div class="row collapse">',
-            '<div class="small-10 columns">',
+            '<div class="small-9 columns">',
                 '<input type="text" id="datepicker" data-bind="value:selectedValue, placeholder: placeholder"></input>',
             '</div>',
-            '<div class="small-2 columns" data-bind="click: showDatePicker">',
+            '<div class="small-3 columns" data-bind="click: showDatePicker">',
                 '<span class="postfix radius" style="z-index:1"><i class="general foundicon-calendar"></i></span>',
             '</div>',
         '</div>'

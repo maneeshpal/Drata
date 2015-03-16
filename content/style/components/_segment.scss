@@ -85,10 +85,26 @@ select.error{
 }
 /*end Group by conditions*/
 
+
+/*chart types shown on segmentor*/
+.chart-types {
+    padding: 0 0.625rem;
+}
+.chart-types > li {
+    padding-left: 0;
+    padding-right: 0;
+    //0 0.625rem 1.25rem
+}
+
+
 .chart-types .chart-icon {
     display:block;
     margin-bottom: 10px;
 }
+.chart-types .chart-type {
+    display: block;
+}
+/*end chart types shown on segmentor*/
 
 @media #{$medium-up} {
 ul.chart-types > li > a {

@@ -18,9 +18,9 @@
 
 <div class="row">
     <div class="small-12 columns">
-        <ul class="button-group even-6 radius chart-types">
+        <ul class="small-block-grid-3 medium-block-grid-6 radius chart-types">
           <!-- ko foreach: drata.global.chartTypes -->
-          <li><a class="button" data-bind="css: {'primary': $parent.chartType () === $data.name, 'secondary' : $parent.chartType() !== $data.name }, click: $parent.setChartType.bind($parent, $data.name)"><span class="chart-icon" data-bind="css: $data.icon"></span> <!-- ko text: $data.name --><!-- /ko --> </a></li>
+          <li><a class="chart-type button" data-bind="css: {'primary': $parent.chartType () === $data.name, 'secondary' : $parent.chartType() !== $data.name }, click: $parent.setChartType.bind($parent, $data.name)"><span class="chart-icon" data-bind="css: $data.icon"></span> <!-- ko text: $data.name --><!-- /ko --> </a></li>
           <!-- /ko -->
         </ul>
             
@@ -225,7 +225,7 @@
         <div class="small-2 columns" data-bind="visible: $index() > 0">
             <select data-bind="options:drata.global.logics, value:logic"></select>
         </div>
-        <div class="small-5 columns" data-bind="css: {'small-offset-2': $index() === 0}">
+        <div class="small-4 columns" data-bind="css: {'small-offset-2': $index() === 0}">
             <select data-bind="options: selection.availableSelections, value:selection.selectedProp">
             </select>
         </div>
@@ -236,6 +236,8 @@
         <div class="small-3 columns">
             <input type="text" class="value" data-bind="value: value" placeholder="numeric value">
             </input>
+        </div>
+        <div class="small-1 columns text-right">
             <i class="icon-close condition-action-cancel" data-bind="click: $parent.removeGroupByCondition">
             </i>
         </div>
@@ -392,7 +394,7 @@
             </div>
         </div>
         <!-- /ko -->
-        <div style="position:relative">
+        <div>
             <span data-bind="tooltip: {datakey: 'complexCondition'}" class="icon-question dtooltip dtooltip-complexcondition">
                 </span>
             <i class="icon-plus condition-action-complex" data-bind="click:toggleComplex"></i>

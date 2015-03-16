@@ -21,7 +21,6 @@ h3.view-heading {
 @media #{$large-up} {
   .preview-widget {
     position:fixed;
-    bottom: -10px;
     right:0;
     .widget-wrapper {
       background:transparent;
@@ -29,9 +28,3 @@ h3.view-heading {
     }
   }
 }
-
-@media only screen and (max-width: 64em) {
-  .preview-widget .widgetContent, .preview-widget .numeric-chart {
-    height:400px !important;
-  }
-} 
