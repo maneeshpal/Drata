@@ -37,8 +37,8 @@ app.get('/dashboard', function(req, res){
   res.sendfile('dash.html');
 });
 
-app.get('/test', function(req, res){
-  res.sendfile('test.html');
+app.get('/tabular', function(req, res){
+  res.sendfile('tabular.html');
 });
 
 app.get('/', function(req, res){

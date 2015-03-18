@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Drata</title>
+        <meta name="viewport" content="width=device-width">
+        
+        <link rel="stylesheet" type="text/css" href="/style/app.css" />
+    </head>
+    <body>
+
+    <div class="row">
+        
+        <div class="small-12 columns">
+        <h1>Tabular</h1> 
+        <button class="small" id="btn1">line-interval</button>
+        <button class="small" id="btn2">line-interval-groupby</button>
+        </div>
+    </div>
+    
+    <div id="tabular">
+
+    <!-- ko foreach: tabulars -->
+        <div class="row tabular">
+            <div class="columns small-12">
+                Group: <!-- ko text: group --><!-- /ko -->, SubGroup: <!-- ko text: subGroup --><!-- /ko -->
+            </div>
+        </div>
+        <div class="row tabular">
+            <div class="columns small-6">
+                <!-- ko text: xAxisProp --><!-- /ko -->
+            </div>
+            <div class="columns small-6">
+                <!-- ko text: valType --><!-- /ko -->
+            </div>
+        </div>
+        <div class="row tabular">
+            <!-- ko foreach: values -->          
+            <div class="small-6 columns" data-bind="text: x"></div>
+            <div class="small-6 columns" data-bind="text: y"></div>
+            <!-- /ko -->
+        </div>     
+                
+    <!-- /ko -->
+
+        <div class="row tabular">
+            <!-- ko foreach: headers -->
+                <div class="columns" data-bind="css: $parent.getHeaderCss(), text: $data"></div>
+            <!-- /ko -->
+        </div>
+        <div class="row tabular">
+        <!-- ko foreach: data -->
+            <div class="small-12 columns" data-bind="text: $parent.selectionHeaders()[$index()]"></div>
+            <!-- ko foreach: values -->
+                <!-- ko foreach: values -->
+                    <div class="small-3 columns" data-bind="text: $parents[1].key"></div>
+                    <div class="small-3 columns" data-bind="text: $parent.key"></div>
+                    <div class="small-3 columns" data-bind="text: x"></div>
+                    <div class="small-3 columns" data-bind="text: y"></div>
+                <!-- /ko -->
+            <!-- /ko -->
+        <!-- /ko -->
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/dis/lib.js"></script>
+    <script type="text/javascript" src="/js/utils.js"></script>
+    
+    
+    <script type="text/javascript">
+        (function (root, $) {
+            
+            var Tabular = function (options) {
+                self.group = ko.observable(options.group);
+                self.subGroup = ko.observable(options.subGroup);
+                self.xAxisProp = ko.observable(options.xAxisProp);
+                self.valType = ko.observable(options.valType);
+                self.data = ko.observableArray(options.data);
+            }
+
+            var TabularMapper = function (model) {
+                var self = this;
+                self.headers = ko.observableArray();
+                self.selectionHeaders = ko.observableArray();
+                self.data = model.data;
+                self.groupBy = ko.observable(), self.hasDivideBy = ko.observable();
+
+                self.getHeaderCss = function () {
+                    return 'small-' + Math.floor(12/self.headers().length);
+                }
+
+                var h = [], s = model.segment;
+
+                s.selection.forEach(function (sel) {
+                    self.selectionHeaders.push( sel.isComplex ? sel.aliasName: sel.selectedProp);
+                })
+
+                if(s.dataGroup.hasGrouping) {
+                    self.groupBy(s.dataGroup.groupByProp);
+                }
+
+                if(s.dataGroup.hasDivideBy) {
+                    self.groupBy(s.dataGroup.hasDivideBy);
+                }
+
+                self.tabulars = ko.observableArray([]);
+                
+
+            }
+
+            var line_2_selections_interval = { 
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"price","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"discount","isComplex":false}],"dataGroup":{"hasGrouping":false,"timeseries":true,"timeseriesInterval":"quarter","xAxisProp":"timestamp","xAxisType":"date"},"group":[],"dataFilter":{"from":"2y","to":"5m","dateProp":"timestamp"},"chartType":"line"}'),
+
+                data: JSON.parse('[{"key":"xxx","values":[{"key":"avg_price","values":[{"x":1357020000000,"y":8500},{"x":1364792400000,"y":9788.888888888889},{"x":1372654800000,"y":9750},{"x":1380603600000,"y":8950},{"x":1388556000000,"y":8942.857142857143},{"x":1396328400000,"y":8962.5},{"x":1404190800000,"y":8314.285714285714},{"x":1412139600000,"y":7871.428571428572},{"x":1420092000000,"y":8133.333333333333}]},{"key":"avg_discount","values":[{"x":1357020000000,"y":15},{"x":1364792400000,"y":20.11111111111111},{"x":1372654800000,"y":16.75},{"x":1380603600000,"y":31.5},{"x":1388556000000,"y":40.857142857142854},{"x":1396328400000,"y":43},{"x":1404190800000,"y":55.57142857142857},{"x":1412139600000,"y":62},{"x":1420092000000,"y":52.166666666666664}]}]}]') };
+
+            var line_2_selections_interval_groupby = { 
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"price","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"discount","isComplex":false}],"dataGroup":{"groupByProp":"geography","hasGrouping":true,"timeseries":true,"timeseriesInterval":"1d","xAxisProp":"timestamp","xAxisType":"date"},"group":[],"dataFilter":{"from":"2y","to":"5m","dateProp":"timestamp"},"chartType":"line"}'), 
+
+                data : JSON.parse('[{"key":"sum_price","values":[{"key":"Minnesota","values":[{"x":1357020000000,"y":8500},{"x":1364792400000,"y":28300},{"x":1372654800000,"y":10600},{"x":1388556000000,"y":9600},{"x":1396328400000,"y":9300},{"x":1404190800000,"y":16600},{"x":1412139600000,"y":15400},{"x":1420092000000,"y":16600}]},{"key":"Alabama","values":[{"x":1364792400000,"y":8600},{"x":1372654800000,"y":48600},{"x":1380603600000,"y":9400},{"x":1388556000000,"y":16200},{"x":1396328400000,"y":17300},{"x":1404190800000,"y":8300},{"x":1412139600000,"y":16400},{"x":1420092000000,"y":8400}]},{"key":"texas","values":[{"x":1364792400000,"y":19500},{"x":1380603600000,"y":17500},{"x":1388556000000,"y":9100},{"x":1396328400000,"y":26600},{"x":1404190800000,"y":8800},{"x":1412139600000,"y":7300},{"x":1420092000000,"y":16000}]},{"key":"Misissipi","values":[{"x":1364792400000,"y":31700},{"x":1372654800000,"y":9800},{"x":1380603600000,"y":44700},{"x":1388556000000,"y":27700},{"x":1396328400000,"y":9200},{"x":1404190800000,"y":16000},{"x":1412139600000,"y":8300}]},{"key":"Arizona","values":[{"x":1372654800000,"y":9000},{"x":1396328400000,"y":9300},{"x":1404190800000,"y":8500},{"x":1412139600000,"y":7700},{"x":1420092000000,"y":7800}]}]},{"key":"avg_discount","values":[{"key":"Minnesota","values":[{"x":1357020000000,"y":15},{"x":1364792400000,"y":21.333333333333332},{"x":1372654800000,"y":14},{"x":1388556000000,"y":37},{"x":1396328400000,"y":39},{"x":1404190800000,"y":54.5},{"x":1412139600000,"y":63.5},{"x":1420092000000,"y":53.5}]},{"key":"Alabama","values":[{"x":1364792400000,"y":20},{"x":1372654800000,"y":17.2},{"x":1380603600000,"y":23},{"x":1388556000000,"y":44.5},{"x":1396328400000,"y":42.5},{"x":1404190800000,"y":54},{"x":1412139600000,"y":63},{"x":1420092000000,"y":50}]},{"key":"texas","values":[{"x":1364792400000,"y":20.5},{"x":1380603600000,"y":35},{"x":1388556000000,"y":41},{"x":1396328400000,"y":42},{"x":1404190800000,"y":57},{"x":1412139600000,"y":68},{"x":1420092000000,"y":53}]},{"key":"Misissipi","values":[{"x":1364792400000,"y":18.666666666666668},{"x":1372654800000,"y":13},{"x":1380603600000,"y":31.8},{"x":1388556000000,"y":39.666666666666664},{"x":1396328400000,"y":44},{"x":1404190800000,"y":56.5},{"x":1412139600000,"y":60}]},{"key":"Arizona","values":[{"x":1372654800000,"y":21},{"x":1396328400000,"y":50},{"x":1404190800000,"y":56},{"x":1412139600000,"y":53},{"x":1420092000000,"y":50}]}]}]') };
+            
+
+            ko.applyBindings(new TabularMapper(line_2_selections_interval_groupby), document.getElementById('tabular'));
+
+        })(this, jQuery);
+
+    </script>
+</body>
+</html>
