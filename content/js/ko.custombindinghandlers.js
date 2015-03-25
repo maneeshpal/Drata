@@ -378,6 +378,7 @@
     var CheckboxDropdownVM = function(config){
         var self = this;
         self.selectedOptions = ko.isObservable(config.selectedOptions) ? config.selectedOptions : ko.observableArray(config.selectedOptions);
+        self.overrideSelectionText = ko.isObservable(config.overrideSelectionText) ? config.overrideSelectionText : ko.observable(config.overrideSelectionText);
         self.options = ko.isObservable(config.options) ? config.options : ko.observableArray(config.options);
         self.optionsText = config.optionsText;
         self.optionsValue = config.optionsValue;
@@ -390,9 +391,13 @@
         self.enabled = ko.isObservable(config.enabled) ? config.enabled : ko.observable(config.enabled);
         var $elem, $combolist, $wrapper = $(config.element);
         
-        self.displayValuesList = ko.computed(function(){
+        self.displayValuesList = ko.computed(function() {
             if(self.selectedOptions().length === 0) return self.optionsCaption();
+
             var selectedOptions = self.selectedOptions();
+
+            if(self.overrideSelectionText()) return drata.utils.format(self.overrideSelectionText(), selectedOptions.length);
+
             var s = self.options().filter(function(i){
                 if(self.optionsValue){
                     return selectedOptions.indexOf(i[self.optionsValue]) > -1;
@@ -403,9 +408,9 @@
             })
 
             if(self.optionsText){
-                return s.map(function(item){return item[self.optionsText]}).join(', ');
+                s = s.map(function(item){return item[self.optionsText]});
             }
-            return a.join(', ');
+            return s.join(', ');
         });
 
         self.accessComboElements = function(nodes){
@@ -437,6 +442,7 @@
                 options: value.options,
                 optionsValue: value.optionsValue,
                 optionsText: value.optionsText,
+                overrideSelectionText: value.overrideSelectionText,
                 optionsCaption: value.optionsCaption,
                 enabled: value.enabled === undefined ? true: value.enabled
             };

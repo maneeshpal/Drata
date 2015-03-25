@@ -21,7 +21,7 @@
 
 	
 	var DashboardSyncService = function(){
-		var self = this;
+		var self = this, io = root.io;
 		function getWidgetFromDashboard(widgetId, dashboardId){
 			var currentDashboard = drata.cPanel.currentDashboard();
 		    if(!currentDashboard || (dashboardId && currentDashboard.getId() !== dashboardId)){
@@ -35,9 +35,9 @@
 
         	return widget.length > 0 ? widget[0] : undefined;
 		}
-		var socket = io.connect();
+		var socket = io && io.connect();
 		self.listenWidgetUpdated = function(widgetId){
-			socket.on('widgetupdated' + widgetId, function (data) {
+			socket && socket.on('widgetupdated' + widgetId, function (data) {
 	            var widget = getWidgetFromDashboard(data.widgetId, data.dashboardId);
 	            if(widget){
 	            	drata.nsx.notifier.notifyWidgetUpdated({
@@ -53,7 +53,7 @@
 		};
 
 		self.listenWidgetCreated = function(dashboardId){
-			socket.on('widgetcreated' + dashboardId, function (data) {
+			socket && socket.on('widgetcreated' + dashboardId, function (data) {
 	            var currentDashboard = drata.cPanel.currentDashboard();
 	            if(currentDashboard.getId() === data.dashboardId){
 	            	drata.nsx.notifier.notifyWidgetAdded({

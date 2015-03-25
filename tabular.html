@@ -6,6 +6,30 @@
         <meta name="viewport" content="width=device-width">
         
         <link rel="stylesheet" type="text/css" href="/style/app.css" />
+        <link rel="stylesheet" type="text/css" href="/style/dashboard.css" />
+        <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
+
+        <style>
+            .tabular {
+                font-size: .75rem;
+                border-left: 1px solid #ccc;
+            }
+            .tabular-body, .tabular-header,  .tabular-body-header {
+                padding:5px 0;
+                border-bottom: 1px dashed #ccc;
+            }
+            .tabular-body:last-child {
+                border-bottom: none;   
+            }
+            .tabular-body-header, .tabular-header {
+                font-weight:bold;
+            }
+            .tabular-header {
+                background: #f5f5f5;
+                border-bottom:1px solid #ccc;
+                border-top:1px solid #ccc;
+            }
+        </style>
     </head>
     <body>
 
@@ -19,77 +43,130 @@
     </div>
     
     <div id="tabular">
+        <!-- ko foreach: tabularWrapper -->
+         <div class="row">
+            <div class="small-3 columns">
+                <h6>Tabular View<small data-bind="text: name"></small></h6>    
+            </div>
+            <!-- ko if: dataKeys().length > 0 -->
 
-    <!-- ko foreach: tabulars -->
-        <div class="row tabular">
-            <div class="columns small-12">
-                Group: <!-- ko text: group --><!-- /ko -->, SubGroup: <!-- ko text: subGroup --><!-- /ko -->
+            <div class="small-9 columns">
+                <div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select Groups', overrideSelectionText: '{0} groups selected' }">
+                    </div>
             </div>
-        </div>
-        <div class="row tabular">
-            <div class="columns small-6">
-                <!-- ko text: xAxisProp --><!-- /ko -->
-            </div>
-            <div class="columns small-6">
-                <!-- ko text: valType --><!-- /ko -->
-            </div>
-        </div>
-        <div class="row tabular">
-            <!-- ko foreach: values -->          
-            <div class="small-6 columns" data-bind="text: x"></div>
-            <div class="small-6 columns" data-bind="text: y"></div>
-            <!-- /ko -->
-        </div>     
-                
-    <!-- /ko -->
-
-        <div class="row tabular">
-            <!-- ko foreach: headers -->
-                <div class="columns" data-bind="css: $parent.getHeaderCss(), text: $data"></div>
             <!-- /ko -->
         </div>
-        <div class="row tabular">
-        <!-- ko foreach: data -->
-            <div class="small-12 columns" data-bind="text: $parent.selectionHeaders()[$index()]"></div>
-            <!-- ko foreach: values -->
-                <!-- ko foreach: values -->
-                    <div class="small-3 columns" data-bind="text: $parents[1].key"></div>
-                    <div class="small-3 columns" data-bind="text: $parent.key"></div>
-                    <div class="small-3 columns" data-bind="text: x"></div>
-                    <div class="small-3 columns" data-bind="text: y"></div>
-                <!-- /ko -->
-            <!-- /ko -->
+            
+            <div class="row">
+            <!-- ko foreach: selectedTabulars -->
+                <div class="tabular large-6 columns">
+                    <div class="row tabular-header">
+                        <div class="columns small-12">
+                            Selection: <!-- ko text: group --><!-- /ko -->,
+                            <!-- ko if : subGroup -->  <!-- ko text: subGroupName --><!-- /ko -->: <!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->
+                             level: <!-- ko text: level --><!-- /ko -->
+                        </div>
+                       
+                    </div>
+                    <div class="row tabular-body-header">
+                        <div class="columns small-6">
+                            <span data-bind="text: xAxisProp"></span> 
+                            <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'key')"></span>
+                        </div>
+                        <div class="columns small-6">
+                            <span data-bind="text: valType"></span> 
+                            <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'value')"></span>
+                        </div>
+                   </div>  
+                    <!-- ko foreach: values -->
+                        <div class="row tabular-body">
+                                      
+                            <div class="small-6 columns" data-bind="text: fKey"></div>
+                            <div class="small-6 columns" data-bind="text: fValue"></div>
+                            
+                        </div>     
+                    <!-- /ko -->
+                 </div>
+            <!-- /ko -->   
+           </div>
         <!-- /ko -->
-        </div>
     </div>
 
     <script type="text/javascript" src="/dis/lib.js"></script>
-    <script type="text/javascript" src="/js/utils.js"></script>
-    
+    <script type="text/javascript" src="/dis/dashboard.js"></script>
+    <script type="text/html">
+        <div class="row tabular">
+                <!-- ko foreach: headers -->
+                    <div class="columns" data-bind="css: $parent.getHeaderCss(), text: $data"></div>
+                <!-- /ko -->
+            </div>
+            <div class="row tabular">
+            <!-- ko foreach: data -->
+                <div class="small-12 columns" data-bind="text: $parent.selectionHeaders()[$index()]"></div>
+                <!-- ko foreach: values -->
+                    <!-- ko foreach: values -->
+                        <div class="small-3 columns" data-bind="text: $parents[1].key"></div>
+                        <div class="small-3 columns" data-bind="text: $parent.key"></div>
+                        <!-- ko if : $parents[2].isTrackChart -->
+                        <div class="small-3 columns" data-bind="text: x"></div>
+                        <div class="small-3 columns" data-bind="text: y"></div>
+                        <!-- /ko -->
+                        <!-- ko ifnot : $parents[2].isTrackChart -->
+                        <div class="small-3 columns" data-bind="text: key"></div>
+                        <div class="small-3 columns" data-bind="text: value"></div>
+                        <!-- /ko -->
+                    <!-- /ko -->
+                <!-- /ko -->
+            <!-- /ko -->
+            </div>
+    </script>
     
     <script type="text/javascript">
         (function (root, $) {
             
             var Tabular = function (options) {
+                var self = this;
                 self.group = ko.observable(options.group);
                 self.subGroup = ko.observable(options.subGroup);
                 self.xAxisProp = ko.observable(options.xAxisProp);
                 self.valType = ko.observable(options.valType);
-                self.data = ko.observableArray(options.data);
+                self.values = ko.observableArray(options.values);
+                self.subGroupName = ko.observable(options.subGroupName);
+                self.dataKey = options.dataKey;
+                //debugging
+                self.level = options.level;
+                var sortOrder = { key: ko.observable(), value: ko.observable() };
+
+                self.sortData = function (prop) {
+                    sortOrder[prop](!sortOrder[prop]());
+                    self.values.sort(function (c, n) {
+                        return sortOrder[prop]() ? c[prop] < n[prop] : c[prop] > n[prop];
+                    })
+                };
             }
 
             var TabularMapper = function (model) {
                 var self = this;
                 self.headers = ko.observableArray();
                 self.selectionHeaders = ko.observableArray();
+                self.name = model.name;
                 self.data = model.data;
                 self.groupBy = ko.observable(), self.hasDivideBy = ko.observable();
+                self.tabulars = ko.observableArray([]);
+                var textFormat_x, textFormat_y, level, h = [], s = model.segment;
+                self.isTrackChart = drata.global.trackingChartTypes.indexOf(s.chartType) > -1;
+                self.dataKeys = ko.observableArray();
+                self.selectedDataKeys = ko.observableArray();
+                self.selectedTabulars = ko.computed(function () {
+                    if(self.dataKeys().length === 0) return self.tabulars();
+                    return self.tabulars().filter(function(t) {
+                        return self.selectedDataKeys.indexOf(t.dataKey) > -1;
+                    })
+                });
 
                 self.getHeaderCss = function () {
                     return 'small-' + Math.floor(12/self.headers().length);
                 }
-
-                var h = [], s = model.segment;
 
                 s.selection.forEach(function (sel) {
                     self.selectionHeaders.push( sel.isComplex ? sel.aliasName: sel.selectedProp);
@@ -102,24 +179,189 @@
                 if(s.dataGroup.hasDivideBy) {
                     self.groupBy(s.dataGroup.hasDivideBy);
                 }
-
-                self.tabulars = ko.observableArray([]);
                 
+                if (self.isTrackChart) {
+                    if(!s.dataGroup.timeseries && !s.dataGroup.hasGrouping) {
+                        level = 3;
+                    }
+                    else if(s.dataGroup.hasGrouping){
+                        level = 1;
+                    }
+                    else {
+                        level = 2;
+                    }
+                }
+                else {
+                    if (!s.dataGroup.hasGrouping) {
+                        level = 3;
+                    }
+                    else if (s.dataGroup.hasGrouping && !s.dataGroup.hasDivideBy) {
+                        level = 2;
+                    }
+                    else {
+                        level = 1;
+                    }
+                }
+                textFormat_y = drata.utils.getTextFormat({
+                    formatType: 'numeric'
+                });
+
+                if (self.isTrackChart) {
+                    textFormat_x = drata.utils.getTextFormat({
+                        formatType: s.dataGroup.xAxisType,
+                        formatSubType: s.dataGroup.timeseriesInterval
+                    });
+                    
+                    
+                    if(s.dataGroup.xAxisType === 'date') {
+                        model.data.forEach( function(item_level_1) {
+                            item_level_1.values.forEach( function(item_level_2) {
+                                item_level_2.values.forEach( function(dataPoint) {
+                                    dataPoint.x = new Date(dataPoint.x);
+                                })
+                            })
+                        })
+                    }
+                }
+
+                _.each(model.data, function (item_level_1, index_level_1) {
+                    _.each(item_level_1.values, function (item_level_2, index_level_2) {
+                        var t = {};
+                        
+                        if (self.isTrackChart) {
+                            t.valType = level >= 2 ? item_level_2.key : item_level_1.key;
+                            t.group = s.selection[(level >= 2 ? index_level_2 : index_level_1)].selectedProp;
+                            t.xAxisProp = s.dataGroup.xAxisProp;
+                        }
+                        else {
+                            if (level === 3) {
+                                t.valType = '';
+                                t.group = '';
+                                t.xAxisProp = '';
+                            }
+                            else {
+                                t.valType = level === 2 ? item_level_2.key : item_level_1.key;
+                                t.group = s.selection[((level === 2 ? index_level_2 : index_level_1))].selectedProp;    
+                                t.xAxisProp = level === 2 ? s.dataGroup.groupByProp : s.dataGroup.divideByProp;
+                            }
+                        }
+                        
+                        t.level = level;
+
+                        t.subGroup = level >= 2 ? '' : item_level_2.key;
+                        t.subGroupName = level >= 2 ? '' : s.dataGroup.groupByProp;
+                        
+                        t.values = self.isTrackChart ? 
+                        item_level_2.values.map(function(d) {
+                            return {
+                                fKey : textFormat_x(d.x),
+                                fValue: textFormat_y(d.y),
+                                key: d.x,
+                                value: d.y
+                            }
+                        }) :  
+                        item_level_2.values.map(function(d) {
+                            return {
+                                fKey : d.key,
+                                fValue: textFormat_y(d.value),
+                                key: d.key,
+                                value: d.value
+                            }
+                        });
+
+                        var k = [];
+                        t.group && k.push(t.group);
+                        t.subGroup && k.push(t.subGroup);
+                        if(k.length > 0) { 
+                            t.dataKey = k.join(' -> ');
+                            self.dataKeys.push(t.dataKey); 
+                        };
+                        
+                        self.tabulars.push(new Tabular(t));
+                    });
+                });
+                
+                self.selectedDataKeys(self.dataKeys().slice());
 
             }
 
+            var TabularWrapper = function (arr) {
+                self.tabularWrapper = [];
+
+                arr.forEach(function (x) {
+                    self.tabularWrapper.push(new TabularMapper(x));
+                })
+            }
+
             var line_2_selections_interval = { 
+                name: 'Level 2: line no groupby interval',
                 segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"price","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"discount","isComplex":false}],"dataGroup":{"hasGrouping":false,"timeseries":true,"timeseriesInterval":"quarter","xAxisProp":"timestamp","xAxisType":"date"},"group":[],"dataFilter":{"from":"2y","to":"5m","dateProp":"timestamp"},"chartType":"line"}'),
 
                 data: JSON.parse('[{"key":"xxx","values":[{"key":"avg_price","values":[{"x":1357020000000,"y":8500},{"x":1364792400000,"y":9788.888888888889},{"x":1372654800000,"y":9750},{"x":1380603600000,"y":8950},{"x":1388556000000,"y":8942.857142857143},{"x":1396328400000,"y":8962.5},{"x":1404190800000,"y":8314.285714285714},{"x":1412139600000,"y":7871.428571428572},{"x":1420092000000,"y":8133.333333333333}]},{"key":"avg_discount","values":[{"x":1357020000000,"y":15},{"x":1364792400000,"y":20.11111111111111},{"x":1372654800000,"y":16.75},{"x":1380603600000,"y":31.5},{"x":1388556000000,"y":40.857142857142854},{"x":1396328400000,"y":43},{"x":1404190800000,"y":55.57142857142857},{"x":1412139600000,"y":62},{"x":1420092000000,"y":52.166666666666664}]}]}]') };
 
             var line_2_selections_interval_groupby = { 
+                name: 'Level 1: line groupby interval',
                 segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"price","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"discount","isComplex":false}],"dataGroup":{"groupByProp":"geography","hasGrouping":true,"timeseries":true,"timeseriesInterval":"1d","xAxisProp":"timestamp","xAxisType":"date"},"group":[],"dataFilter":{"from":"2y","to":"5m","dateProp":"timestamp"},"chartType":"line"}'), 
 
                 data : JSON.parse('[{"key":"sum_price","values":[{"key":"Minnesota","values":[{"x":1357020000000,"y":8500},{"x":1364792400000,"y":28300},{"x":1372654800000,"y":10600},{"x":1388556000000,"y":9600},{"x":1396328400000,"y":9300},{"x":1404190800000,"y":16600},{"x":1412139600000,"y":15400},{"x":1420092000000,"y":16600}]},{"key":"Alabama","values":[{"x":1364792400000,"y":8600},{"x":1372654800000,"y":48600},{"x":1380603600000,"y":9400},{"x":1388556000000,"y":16200},{"x":1396328400000,"y":17300},{"x":1404190800000,"y":8300},{"x":1412139600000,"y":16400},{"x":1420092000000,"y":8400}]},{"key":"texas","values":[{"x":1364792400000,"y":19500},{"x":1380603600000,"y":17500},{"x":1388556000000,"y":9100},{"x":1396328400000,"y":26600},{"x":1404190800000,"y":8800},{"x":1412139600000,"y":7300},{"x":1420092000000,"y":16000}]},{"key":"Misissipi","values":[{"x":1364792400000,"y":31700},{"x":1372654800000,"y":9800},{"x":1380603600000,"y":44700},{"x":1388556000000,"y":27700},{"x":1396328400000,"y":9200},{"x":1404190800000,"y":16000},{"x":1412139600000,"y":8300}]},{"key":"Arizona","values":[{"x":1372654800000,"y":9000},{"x":1396328400000,"y":9300},{"x":1404190800000,"y":8500},{"x":1412139600000,"y":7700},{"x":1420092000000,"y":7800}]}]},{"key":"avg_discount","values":[{"key":"Minnesota","values":[{"x":1357020000000,"y":15},{"x":1364792400000,"y":21.333333333333332},{"x":1372654800000,"y":14},{"x":1388556000000,"y":37},{"x":1396328400000,"y":39},{"x":1404190800000,"y":54.5},{"x":1412139600000,"y":63.5},{"x":1420092000000,"y":53.5}]},{"key":"Alabama","values":[{"x":1364792400000,"y":20},{"x":1372654800000,"y":17.2},{"x":1380603600000,"y":23},{"x":1388556000000,"y":44.5},{"x":1396328400000,"y":42.5},{"x":1404190800000,"y":54},{"x":1412139600000,"y":63},{"x":1420092000000,"y":50}]},{"key":"texas","values":[{"x":1364792400000,"y":20.5},{"x":1380603600000,"y":35},{"x":1388556000000,"y":41},{"x":1396328400000,"y":42},{"x":1404190800000,"y":57},{"x":1412139600000,"y":68},{"x":1420092000000,"y":53}]},{"key":"Misissipi","values":[{"x":1364792400000,"y":18.666666666666668},{"x":1372654800000,"y":13},{"x":1380603600000,"y":31.8},{"x":1388556000000,"y":39.666666666666664},{"x":1396328400000,"y":44},{"x":1404190800000,"y":56.5},{"x":1412139600000,"y":60}]},{"key":"Arizona","values":[{"x":1372654800000,"y":21},{"x":1396328400000,"y":50},{"x":1404190800000,"y":56},{"x":1412139600000,"y":53},{"x":1420092000000,"y":50}]}]}]') };
             
 
-            ko.applyBindings(new TabularMapper(line_2_selections_interval_groupby), document.getElementById('tabular'));
+            var line_no_groupby_no_interval = {
+                name: 'level 3: Line 2 selections no groupby, no interval',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"UserID","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"SecretQuestionID","isComplex":false}],"dataGroup":{"hasGrouping":false,"timeseries":false,"xAxisProp":"DateCreated","xAxisType":"date"},"group":[{"groupType":"condition","groups":[],"logic":"and","selection":{"groupType":"selection","groups":[],"logic":"+","selectedProp":"UserID","isComplex":false,"perc":false},"isComplex":false,"operation":">","value":"2129724","valType":"numeric"}],"dataFilter":{"from":"3w","to":"1d","dateProp":"DateCreated"},"chartType":"line"}'),
+                data: JSON.parse('[{"key":"xxx","values":[{"key":"value_UserID","values":[{"x":1426786523000,"y":2129725},{"x":1426786582000,"y":2129726},{"x":1426786612000,"y":2129727},{"x":1426786879000,"y":2129728},{"x":1426786937000,"y":2129729},{"x":1426787049000,"y":2129730},{"x":1426788508000,"y":2129731},{"x":1426789056000,"y":2129732},{"x":1426789136000,"y":2129733}]},{"key":"value_SecretQuestionID","values":[{"x":1426786523000,"y":0},{"x":1426786582000,"y":0},{"x":1426786612000,"y":0},{"x":1426786879000,"y":0},{"x":1426786937000,"y":0},{"x":1426787049000,"y":0},{"x":1426788508000,"y":0},{"x":1426789056000,"y":0},{"x":1426789136000,"y":0}]}]}]')
+            }
+
+            var line_groupby_no_interval = {
+                name: 'Level 1: Line Groupby no interval',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"value","selectedProp":"price","isComplex":false,"perc":false}],"dataGroup":{"groupByProp":"geography","hasGrouping":true,"timeseries":false,"xAxisProp":"timestamp","xAxisType":"date"},"group":[{"groupType":"condition","groups":[],"logic":"and","selection":{"groupType":"selection","groups":[],"logic":"+","selectedProp":"price","isComplex":false,"perc":false},"isComplex":false,"operation":">","value":"10000","valType":"numeric"}],"dataFilter":{"from":"2y","to":"5m","dateProp":"timestamp"},"chartType":"line"}'),
+                data: JSON.parse('[{"key":"value_price","values":[{"key":"Misissipi","values":[{"x":1368640800000,"y":10500},{"x":1369587600000,"y":10400},{"x":1370538000000,"y":10800},{"x":1390305600000,"y":10100}]},{"key":"texas","values":[{"x":1371492000000,"y":10300}]},{"key":"Alabama","values":[{"x":1378270800000,"y":10500},{"x":1380240000000,"y":10300}]},{"key":"Minnesota","values":[{"x":1379253600000,"y":10600}]}]}]')
+
+            }
+
+            var bar_1_selection_groupby = {
+                name: 'Level 2: bar groupby no divideby',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"count","selectedProp":"PackageMatchID","isComplex":false,"perc":false}],"dataGroup":{"divideByIntervalType":"string","groupByInterval":"1w","groupByIntervalType":"date","groupByProp":"DateCreated","hasGrouping":true,"hasDivideBy":false,"groupByConditions":[{"logic":"and","operation":">","value":"100","isComplex":false,"valType":"numeric","selection":{"selectedProp":"count_PackageMatchID","isComplex":false,"logic":"+"}}]},"group":[],"dataFilter":{"from":"02/01/2015","to":"03/09/2015","dateProp":"DateCreated"},"chartType":"bar"}'),
+                data: JSON.parse(' [{"key":"xxx","groupLevel":"A","values":[{"key":"count_PackageMatchID","groupLevel":"B","values":[{"key":"4.Mar.2015 18:0","value":1376},{"key":"25.Feb.2015 18:0","value":2595},{"key":"18.Feb.2015 18:0","value":2528},{"key":"11.Feb.2015 18:0","value":2423},{"key":"4.Feb.2015 18:0","value":2820},{"key":"28.Jan.2015 18:0","value":1541}]}]}]')
+            }
+
+            var bar_2_selections_groupby_divideby = {
+                name: 'level 1: bar groupby divideby 2 selections',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"count","selectedProp":"PackageMatchID","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"avg","selectedProp":"PackageID","isComplex":false,"perc":false}],"dataGroup":{"divideByIntervalType":"bool","divideByProp":"Deleted","groupByIntervalType":"bool","groupByProp":"Accepted","hasGrouping":true,"hasDivideBy":true},"group":[],"dataFilter":{"from":"02/01/2015","to":"03/09/2015","dateProp":"DateCreated"},"chartType":"bar"}'),
+                data: JSON.parse('[{"key":"count_PackageMatchID","groupLevel":"A","values":[{"key":"true","groupLevel":"B","values":[{"key":"false","value":5249}]},{"key":"false","groupLevel":"B","values":[{"key":"false","value":5536},{"key":"true","value":2498}]}]},{"key":"avg_PackageID","groupLevel":"A","values":[{"key":"true","groupLevel":"B","values":[{"key":"false","value":2652896.408077729}]},{"key":"false","groupLevel":"B","values":[{"key":"false","value":2652879.870484104},{"key":"true","value":2652575.1244995994}]}]}]')
+            }
+
+            var bar_no_groupby_no_divideby = {
+                name: 'level 3: Bar No groupby no divideby',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"count","selectedProp":"PackageMatchID","isComplex":false,"perc":false}],"dataGroup":{"divideByIntervalType":"unknown","groupByIntervalType":"unknown","hasGrouping":false},"group":[],"dataFilter":{"from":"02/01/2015","to":"03/09/2015","dateProp":"DateCreated"},"chartType":"bar"}'),
+                data: JSON.parse('[{"key":"xxxx","groupLevel":"A","values":[{"key":"xxxx","groupLevel":"B","values":[{"key":"count_PackageMatchID","value":13283}]}]}]')
+            }
+
+            var bar_2_selections_no_groupby_no_divideby = {
+                name: 'Level 2: Bar no groupby no divideby 2 selections',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"count","selectedProp":"PackageMatchID","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"sum","selectedProp":"PackageID","isComplex":false,"perc":false}],"dataGroup":{"divideByIntervalType":"unknown","groupByIntervalType":"unknown","hasGrouping":false},"group":[],"dataFilter":{"from":"02/01/2015","to":"03/09/2015","dateProp":"DateCreated"},"chartType":"bar"}'),
+                data: JSON.parse('[{"key":"xxxx","groupLevel":"A","values":[{"key":"xxxx","groupLevel":"B","values":[{"key":"count_PackageMatchID","value":13283},{"key":"sum_PackageID","value":35237528870}]}]}]')
+            }
+
+            var bar_2_selections_groupby = {
+                name: 'Level 2: Bar Groupby no divideby 2 selections',
+                segment: JSON.parse('{"selection":[{"groupType":"selection","groups":[],"logic":"+","groupBy":"count","selectedProp":"PackageMatchID","isComplex":false,"perc":false},{"groupType":"selection","groups":[],"logic":"+","groupBy":"sum","selectedProp":"PackageID","isComplex":false,"perc":false}],"dataGroup":{"divideByIntervalType":"unknown","groupByIntervalType":"bool","groupByProp":"Accepted","hasGrouping":true,"groupByConditions":[{"logic":"and","operation":">","value":"100","isComplex":false,"valType":"numeric","selection":{"selectedProp":"count_PackageMatchID","isComplex":false,"logic":"+"}}]},"group":[],"dataFilter":{"from":"02/01/2015","to":"03/09/2015","dateProp":"DateCreated"},"chartType":"bar"}'),
+                data: JSON.parse('[{"key":"xxx","groupLevel":"A","values":[{"key":"count_PackageMatchID","groupLevel":"B","values":[{"key":"false","value":8034},{"key":"true","value":5249}]},{"key":"sum_PackageID","groupLevel":"B","values":[{"key":"false","value":21312475624},{"key":"true","value":13925053246}]}]}]')
+            }
+
+
+
+
+            var arr = [
+                        line_2_selections_interval,
+                        line_2_selections_interval_groupby,
+                        line_no_groupby_no_interval,
+                        line_groupby_no_interval,
+                        bar_2_selections_groupby_divideby,
+                        bar_2_selections_groupby,
+                        bar_2_selections_no_groupby_no_divideby
+                        ];
+            ko.applyBindings(new TabularWrapper(arr), document.getElementById('tabular'));
 
         })(this, jQuery);
 

@@ -504,10 +504,6 @@
             contentOptions.widgetUpdate && contentOptions.widgetUpdate();
         };
 
-        // self.backgroundChartType.subscribe(function(newValue){
-            
-        // });
-
         var drawChartBackground = function(){
             var data, xFormat = xtextFormat();
             firstArr = firstArr.map(function(i){

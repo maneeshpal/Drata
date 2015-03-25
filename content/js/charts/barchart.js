@@ -83,8 +83,11 @@
 
                 z.domain(duplKeys);
 
-                var labelKeys = duplKeys.map(function(key){
-                    return {key: key, disabled : disabledKeys.indexOf(key) > -1};
+                var labelKeys = duplKeys.map(function(key) {
+                    return { 
+                        key: key, 
+                        disabled : disabledKeys.indexOf(key) > -1
+                    };
                 });
 
                 dispatch.on("togglePath", function(d, i){
