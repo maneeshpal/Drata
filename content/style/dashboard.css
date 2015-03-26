@@ -66,11 +66,25 @@ ul.combolist li:hover {
 
 .chk-dd-label {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 1.5rem 0.5rem 0.5rem;
   border: 1px solid #cccccc;
   font-size: 0.875rem;
   /*margin-bottom: 1rem;*/
   line-height: 1.2rem; }
+
+.chk-dd.small .chk-dd-label {
+  padding: 0.2rem 1.5rem 0.2rem 0.2rem;
+  font-size: 0.75rem;
+  line-height: 1rem; }
+
+.chk-dd.small .chk-dd-arrow {
+  top: 5px; }
+
+.chk-dd.small ul.combolist {
+  top: 1.55rem; }
+
+.chk-dd.small ul.combolist li {
+  padding: 0 0 0 0.2rem; }
 
 .glow {
   box-shadow: 0 0 5px #999999;

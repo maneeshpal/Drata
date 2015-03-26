@@ -79,7 +79,7 @@
     ].join('');
 
     var checkboxDropdownTemplateStr = [
-        '<div class="chk-dd" style="position:relative">',
+        '<div class="chk-dd" style="position:relative" data-bind="css: renderType">',
             '<div id="lblSelectedValues" class="chk-dd-label" data-bind="text: displayValuesList"></div>',
             '<ul id="combolist" class="combolist no-bullet" style="display:none; margin-top:0" data-bind="foreach: options">',
                 '<li>',
@@ -383,7 +383,7 @@
         self.optionsText = config.optionsText;
         self.optionsValue = config.optionsValue;
         self.optionsCaption = ko.isObservable(config.optionsCaption) ? config.optionsCaption : ko.observable(config.optionsCaption);
-        
+        self.renderType = config.renderType || '';
         self.options.subscribe(function(){
             self.selectedOptions([]);
         });
@@ -444,7 +444,8 @@
                 optionsText: value.optionsText,
                 overrideSelectionText: value.overrideSelectionText,
                 optionsCaption: value.optionsCaption,
-                enabled: value.enabled === undefined ? true: value.enabled
+                enabled: value.enabled === undefined ? true: value.enabled,
+                renderType: value.renderType
             };
             
             var chkdd = new CheckboxDropdownVM(config);

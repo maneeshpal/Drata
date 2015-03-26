@@ -11,6 +11,10 @@
 
         <style>
             .tabular {
+
+            }
+
+            .tabular-wrapper {
                 font-size: .75rem;
                 border-left: 1px solid #ccc;
             }
@@ -42,53 +46,50 @@
         </div>
     </div>
     
-    <div id="tabular">
+    <div id="tabular" class="tabular">
         <!-- ko foreach: tabularWrapper -->
-         <div class="row">
-            <div class="small-3 columns">
-                <h6>Tabular View<small data-bind="text: name"></small></h6>    
+        <div class="row">
+            <div class="small-12 columns">
+                <!-- ko if: dataKeys().length > 0 -->
+                <div class="right" data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select Groups', overrideSelectionText: '{0} groups selected', renderType: 'small' }">
+                </div>
+                <!-- /ko -->
+                <h6>Tabular View</h6>    
             </div>
-            <!-- ko if: dataKeys().length > 0 -->
-
-            <div class="small-9 columns">
-                <div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: 'Select Groups', overrideSelectionText: '{0} groups selected' }">
-                    </div>
-            </div>
-            <!-- /ko -->
         </div>
             
-            <div class="row">
-            <!-- ko foreach: selectedTabulars -->
-                <div class="tabular large-6 columns">
-                    <div class="row tabular-header">
-                        <div class="columns small-12">
-                            Selection: <!-- ko text: group --><!-- /ko -->,
-                            <!-- ko if : subGroup -->  <!-- ko text: subGroupName --><!-- /ko -->: <!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->
-                             level: <!-- ko text: level --><!-- /ko -->
-                        </div>
-                       
+        <div class="row">
+        <!-- ko foreach: selectedTabulars -->
+            <div class="tabular-wrapper medium-6 columns">
+                <div class="row tabular-header">
+                    <div class="columns small-12">
+                        Selection: <!-- ko text: group --><!-- /ko -->,
+                        <!-- ko if : subGroup -->  <!-- ko text: subGroupName --><!-- /ko -->: <!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->
+                         level: <!-- ko text: level --><!-- /ko -->
                     </div>
-                    <div class="row tabular-body-header">
-                        <div class="columns small-6">
-                            <span data-bind="text: xAxisProp"></span> 
-                            <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'key')"></span>
-                        </div>
-                        <div class="columns small-6">
-                            <span data-bind="text: valType"></span> 
-                            <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'value')"></span>
-                        </div>
-                   </div>  
-                    <!-- ko foreach: values -->
-                        <div class="row tabular-body">
-                                      
-                            <div class="small-6 columns" data-bind="text: fKey"></div>
-                            <div class="small-6 columns" data-bind="text: fValue"></div>
-                            
-                        </div>     
-                    <!-- /ko -->
-                 </div>
-            <!-- /ko -->   
-           </div>
+                   
+                </div>
+                <div class="row tabular-body-header">
+                    <div class="columns small-6">
+                        <span data-bind="text: xAxisProp"></span> 
+                        <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'key')"></span>
+                    </div>
+                    <div class="columns small-6">
+                        <span data-bind="text: valType"></span> 
+                        <span class="icon-arrow-down" data-bind="click: sortData.bind($data, 'value')"></span>
+                    </div>
+               </div>  
+                <!-- ko foreach: values -->
+                    <div class="row tabular-body">
+                                  
+                        <div class="small-6 columns" data-bind="text: fKey"></div>
+                        <div class="small-6 columns" data-bind="text: fValue"></div>
+                        
+                    </div>     
+                <!-- /ko -->
+            </div>
+        <!-- /ko -->   
+       </div>
         <!-- /ko -->
     </div>
 

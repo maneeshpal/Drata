@@ -73,20 +73,34 @@ ul.combolist li:hover {
 .chk-dd{
     position: relative;
 }
-.chk-dd .chk-dd-arrow{
+.chk-dd .chk-dd-arrow {
     position:absolute; 
     top: 10px; 
     right:6px
 }
-.chk-dd-label{
+.chk-dd-label {
     width:100%;
-    padding:.5rem;
+    padding:.5rem 1.5rem .5rem .5rem;
     border:1px solid #ccc;
     font-size: 0.875rem;
     /*margin-bottom: 1rem;*/
     line-height: 1.2rem;
 }
+.chk-dd.small .chk-dd-label {
+    padding: .2rem 1.5rem .2rem .2rem;
+    font-size: .75rem;
+    line-height: 1rem;
+}
 
+.chk-dd.small .chk-dd-arrow {
+    top: 5px; 
+}
+.chk-dd.small ul.combolist {
+    top: 1.55rem;
+}
+.chk-dd.small ul.combolist li {
+    padding: 0 0 0 .2rem;
+}
 
 .glow {
     box-shadow: 0 0 5px #999999;
