@@ -11,6 +11,9 @@
         self.databaseNames = ko.observableArray();
         self.database = ko.observable();
         self.previewWidget = ko.observable();
+        self.segment = new Segmentor();
+        self.segmentModel = ko.observable();
+        self.chartData = ko.observable();
 
         var cloneModel = {};
         
@@ -72,7 +75,6 @@
             self.dataSourceNames(resp);
         });
 
-        self.segment = new Segmentor();
         self.notifyWidget = function () {
             cloneModel.segmentModel = self.segment.getModel();
             
@@ -126,12 +128,22 @@
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);
+            self.segmentModel(cloneModel.segmentModel);
             //self.sizex(cloneModel.sizex);
             //self.sizey(cloneModel.sizey);
-
+            self.chartData(undefined);
             self.addUpdateBtnText('Update Widget');
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
+            self.previewWidget().widgetLoaded.subscribe(function(newValue) {
+                if(newValue) {
+                    self.chartData(self.previewWidget().getCurrentData());
+                }
+            })
         };
+
+        // drata.pubsub.subscribe('widgeteditorTabularData', function(p) {
+        //     self.chartData(p.data);
+        // });
 
         self.widgetCancel = function() {
             self.onWidgetUpdate = undefined;

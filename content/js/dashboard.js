@@ -96,6 +96,7 @@
         self.pieKeys = ko.observableArray([]);
         self.selectedPieKey = ko.observable();
         self.widgetHeight = ko.observable();
+        self.widgetLoaded = ko.observable();
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
@@ -234,6 +235,7 @@
         };
 
         self.loadWidget = function(wm){
+            self.widgetLoaded(false);
             self.widgetLoading(true);
             if(wm) widgetModel = wm;
             var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
@@ -251,6 +253,11 @@
                 segment: widgetModel.segmentModel
             }).then(function(response){
                 chartData = response;
+
+                // drata.pubsub.publish('widgeteditorTabularData', {
+                //     data: chartData
+                // });
+
                 var dataToMap;
                 if(widgetModel.segmentModel.chartType === 'pie'){
                     dataToMap = chartData[0].values;
@@ -265,11 +272,16 @@
                 
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
+                self.widgetLoaded(true);
                 drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
             }, function(error){
                 self.widgetLoading(false);
                 self.parseError(error.responseText);
             });
+        };
+
+        self.getCurrentData = function() {
+            return chartData.slice();
         };
 
         self.getModel = function (argument) {

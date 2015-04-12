@@ -57,7 +57,8 @@ ul.combolist li:hover {
 
 /*dd checkbox list*/
 .chk-dd {
-  position: relative; }
+  position: relative;
+  cursor: pointer; }
 
 .chk-dd .chk-dd-arrow {
   position: absolute;
@@ -831,6 +832,9 @@ h3.view-heading {
     display: table-cell;
     vertical-align: middle; }
 
+.preview-widget .widget-outer {
+  padding: 0.5rem 0; }
+
 @media only screen and (min-width:64.063em) {
   .preview-widget {
     position: fixed;
@@ -976,3 +980,23 @@ body.campfire {
   body.campfire ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: #0d0d0d; }
+
+
+.tabular-wrapper {
+  font-size: 0.75rem;
+  border-left: 1px solid #cccccc; }
+
+.tabular-body, .tabular-header, .tabular-body-header {
+  padding: 5px 0;
+  border-bottom: 1px dashed #cccccc; }
+
+.tabular-body:last-child {
+  border-bottom: none; }
+
+.tabular-body-header, .tabular-header {
+  font-weight: bold; }
+
+.tabular-header {
+  background: whitesmoke;
+  border-bottom: 1px solid #cccccc;
+  border-top: 1px solid #cccccc; }

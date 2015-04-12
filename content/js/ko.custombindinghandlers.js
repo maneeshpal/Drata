@@ -80,14 +80,14 @@
 
     var checkboxDropdownTemplateStr = [
         '<div class="chk-dd" style="position:relative" data-bind="css: renderType">',
-            '<div id="lblSelectedValues" class="chk-dd-label" data-bind="text: displayValuesList"></div>',
+            '<div id="lblSelectedValues" class="chk-dd-label" data-bind="text: displayValuesList, click: handlelabelClick"></div>',
             '<ul id="combolist" class="combolist no-bullet" style="display:none; margin-top:0" data-bind="foreach: options">',
                 '<li>',
                     '<input type="checkbox" data-bind="attr:{\'id\': \'chkdd\' + $index()}, checkedValue: $parent.optionsValue ? $data[$parent.optionsValue] : $data, checked: $parent.selectedOptions" />',
                     '<label data-bind="attr:{\'for\': \'chkdd\'+ $index()}, text: $parent.optionsText ? $data[$parent.optionsText] : $data"></label>',
                 '</li>',
             '</ul>',
-            '<span class="chk-dd-arrow icon-arrow-down5"></span>',
+            '<span class="chk-dd-arrow icon-arrow-down5" data-bind="click: handlelabelClick"></span>',
         '</div>'
     ].join('');
 
@@ -119,12 +119,57 @@
         '</div>'
     ].join('');
 
+    var tabularTemplateStr = [
+        '<div class="row collapse">',
+            '<div class="small-12 columns">',
+                '<!-- ko if: dataKeys().length > 0 -->',
+                '<div class="right" data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Select Groups\', overrideSelectionText: \'{0} groups selected\', renderType: \'small\' }">',
+                '</div>',
+                '<!-- /ko -->',
+                '<h6>Tabular View</h6>',
+            '</div>',
+        '</div>',
+            
+        '<div class="row collapse">',
+        '<!-- ko foreach: selectedTabulars -->',
+            '<div class="tabular-wrapper small-12 columns">',
+                '<div class="row tabular-header">',
+                    '<div class="columns small-12">',
+                        'Selection: <!-- ko text: group --><!-- /ko -->,',
+                        '<!-- ko if : subGroup -->',
+                        '<!-- ko text: subGroupName --><!-- /ko -->:', 
+                        '<!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->',
+                        'level: <!-- ko text: level --><!-- /ko -->',
+                    '</div>',
+                '</div>',
+                '<div class="row tabular-body-header">',
+                    '<div class="columns small-6">',
+                        '<span data-bind="text: xAxisProp"></span>',
+                        '<span class="icon-arrow-down" data-bind="click: sortData.bind($data, \'key\')"></span>',
+                    '</div>',
+                    '<div class="columns small-6">',
+                        '<span data-bind="text: valType"></span>',
+                        '<span class="icon-arrow-down" data-bind="click: sortData.bind($data, \'value\')"></span>',
+                    '</div>',
+                '</div>',
+                '<!-- ko foreach: values -->',
+                    '<div class="row tabular-body">',
+                        '<div class="small-6 columns" data-bind="text: fKey"></div>',
+                        '<div class="small-6 columns" data-bind="text: fValue"></div>',
+                    '</div>',
+                '<!-- /ko -->',
+            '</div>',
+        '<!-- /ko -->',   
+        '</div>'
+    ].join('');
+
     templateEngine.addTemplate('comboTemplateStr', comboTemplateStr);
     templateEngine.addTemplate('ddComboTemplateStr', ddComboTemplateStr);
     templateEngine.addTemplate('editLabelTemplateStr', editLabelTemplateStr);
     templateEngine.addTemplate('checkboxDropdownTemplateStr', checkboxDropdownTemplateStr);
     templateEngine.addTemplate('dateTemplateStr', dateTemplateStr);
     templateEngine.addTemplate('dependableddComboTemplateStr', dependableddComboTemplateStr);
+    templateEngine.addTemplate('tabularTemplateStr', tabularTemplateStr);
 
     /********** KO TEMPLATES ******************/
     var DateTextBoxVM = function(config){
@@ -413,22 +458,21 @@
             return s.join(', ');
         });
 
+        self.handlelabelClick = function () {
+            $combolist.show();
+            $elem.addClass('glow');
+            $(document).on('click.comboSelections', function(){
+                if(!$.contains($wrapper[0], arguments[0].target)){
+                    $combolist.hide();
+                    $(document).off('.comboSelections');
+                    $elem.removeClass('glow');
+                }
+            });
+        };
+
         self.accessComboElements = function(nodes){
-            //var toplevelNode = nodes[0];
             $elem = $(nodes).find('#lblSelectedValues');
             $combolist =  $(nodes).find('#combolist');
-            
-            $elem.click(function(){
-                $combolist.show();
-                $elem.addClass('glow');
-                $(document).on('click.comboSelections', function(){
-                    if(!$.contains($wrapper[0], arguments[0].target)){
-                        $combolist.hide();
-                        $(document).off('.comboSelections');
-                        $elem.removeClass('glow');
-                    }
-                });
-            });
         };
     };
 
@@ -599,6 +643,192 @@
         }
     };
 
+    var Tabular = function (options) {
+        var self = this;
+        self.group = ko.observable(options.group);
+        self.subGroup = ko.observable(options.subGroup);
+        self.xAxisProp = ko.observable(options.xAxisProp);
+        self.valType = ko.observable(options.valType);
+        self.values = ko.observableArray(options.values);
+        self.subGroupName = ko.observable(options.subGroupName);
+        self.dataKey = options.dataKey;
+        //debugging
+        self.level = options.level;
+        var sortOrder = { key: ko.observable(), value: ko.observable() };
+
+        self.sortData = function (prop) {
+            sortOrder[prop](!sortOrder[prop]());
+            self.values.sort(function (c, n) {
+                return sortOrder[prop]() ? c[prop] < n[prop] : c[prop] > n[prop];
+            })
+        };
+    }
+
+    var TabularMapper = function (model) {
+        var self = this;
+        self.headers = ko.observableArray();
+        self.selectionHeaders = ko.observableArray();
+        self.name = model.name;
+        self.data = ko.isObservable(model.data) ? model.data: ko.observable(data);
+        self.segment = ko.isObservable(model.segment) ? model.segment: ko.observable(segment);
+        self.groupBy = ko.observable(), self.hasDivideBy = ko.observable();
+        self.tabulars = ko.observableArray([]);
+        self.dataKeys = ko.observableArray();
+        self.selectedDataKeys = ko.observableArray();
+        self.isTrackChart; //no clue why i did this
+
+        self.selectedTabulars = ko.computed(function () {
+            if(self.dataKeys().length === 0) return self.tabulars();
+            return self.tabulars().filter(function(t) {
+                return self.selectedDataKeys.indexOf(t.dataKey) > -1;
+            })
+        });
+
+        self.getHeaderCss = function () {
+            return 'small-' + Math.floor(12/self.headers().length);
+        }
+
+        function init(data, segment) {
+            var segment = self.segment();
+            var data = self.data();
+            
+            if(!segment || !data || data.length === 0) return;
+
+            var textFormat_x, textFormat_y, level, h = [];
+            self.isTrackChart = drata.global.trackingChartTypes.indexOf(segment.chartType) > -1;
+            segment.selection.forEach(function (sel) {
+                self.selectionHeaders.push( sel.isComplex ? sel.aliasName: sel.selectedProp);
+            })
+
+            if(segment.dataGroup.hasGrouping) {
+                self.groupBy(segment.dataGroup.groupByProp);
+            }
+
+            if(segment.dataGroup.hasDivideBy) {
+                self.groupBy(segment.dataGroup.hasDivideBy);
+            }
+            
+            if (self.isTrackChart) {
+                if(!segment.dataGroup.timeseries && !segment.dataGroup.hasGrouping) {
+                    level = 3;
+                }
+                else if(segment.dataGroup.hasGrouping){
+                    level = 1;
+                }
+                else {
+                    level = 2;
+                }
+            }
+            else {
+                if (!segment.dataGroup.hasGrouping) {
+                    level = 3;
+                }
+                else if (segment.dataGroup.hasGrouping && !segment.dataGroup.hasDivideBy) {
+                    level = 2;
+                }
+                else {
+                    level = 1;
+                }
+            }
+            textFormat_y = drata.utils.getTextFormat({
+                formatType: 'numeric'
+            });
+
+            if (self.isTrackChart) {
+                textFormat_x = drata.utils.getTextFormat({
+                    formatType: segment.dataGroup.xAxisType,
+                    formatSubType: segment.dataGroup.timeseriesInterval
+                });
+                
+                if(segment.dataGroup.xAxisType === 'date') {
+                    data.forEach( function(item_level_1) {
+                        item_level_1.values.forEach( function(item_level_2) {
+                            item_level_2.values.forEach( function(dataPoint) {
+                                dataPoint.x = new Date(dataPoint.x);
+                            })
+                        })
+                    })
+                }
+            }
+
+            _.each(data, function (item_level_1, index_level_1) {
+                _.each(item_level_1.values, function (item_level_2, index_level_2) {
+                    var t = {};
+                    
+                    if (self.isTrackChart) {
+                        t.valType = level >= 2 ? item_level_2.key : item_level_1.key;
+                        t.group = segment.selection[(level >= 2 ? index_level_2 : index_level_1)].selectedProp;
+                        t.xAxisProp = segment.dataGroup.xAxisProp;
+                    }
+                    else {
+                        if (level === 3) {
+                            t.valType = '';
+                            t.group = '';
+                            t.xAxisProp = '';
+                        }
+                        else {
+                            t.valType = level === 2 ? item_level_2.key : item_level_1.key;
+                            t.group = segment.selection[((level === 2 ? index_level_2 : index_level_1))].selectedProp;    
+                            t.xAxisProp = level === 2 ? segment.dataGroup.groupByProp : segment.dataGroup.divideByProp;
+                        }
+                    }
+                    
+                    t.level = level;
+
+                    t.subGroup = level >= 2 ? '' : item_level_2.key;
+                    t.subGroupName = level >= 2 ? '' : segment.dataGroup.groupByProp;
+                    
+                    t.values = self.isTrackChart ? 
+                    item_level_2.values.map(function(d) {
+                        return {
+                            fKey : textFormat_x(d.x),
+                            fValue: textFormat_y(d.y),
+                            key: d.x,
+                            value: d.y
+                        }
+                    }) :  
+                    item_level_2.values.map(function(d) {
+                        return {
+                            fKey : d.key,
+                            fValue: textFormat_y(d.value),
+                            key: d.key,
+                            value: d.value
+                        }
+                    });
+
+                    var k = [];
+                    t.group && k.push(t.group);
+                    t.subGroup && k.push(t.subGroup);
+                    if(k.length > 0) { 
+                        t.dataKey = k.join(' -> ');
+                        self.dataKeys.push(t.dataKey); 
+                    };
+                    
+                    self.tabulars.push(new Tabular(t));
+                });
+            });
+
+            self.selectedDataKeys(self.dataKeys().slice());
+
+        }
+        init();
+        self.data.subscribe(init);
+        self.segment.subscribe(init);
+    }
+
+    var tabularMapperBindingHandler = {
+        init: function (element, valueAccessor) {
+            var value = valueAccessor();
+            var template = 'tabularTemplateStr';
+            
+            var vm = new TabularMapper(value);
+
+            ko.renderTemplate(template, vm, { templateEngine: templateEngine }, element, 'replaceChildren');
+
+            return { controlsDescendantBindings: true };
+        }
+    };
+
     ko.bindingHandlers.slideVisible = slideVisibleBindingHandler;
     ko.bindingHandlers.comboBox = comboBindingHandler;
     ko.bindingHandlers.ddComboBox = ddComboBindingHandler;
@@ -609,9 +839,11 @@
     ko.bindingHandlers.tooltip = tooltip;
     ko.bindingHandlers.dateTextBox = dateTextBoxBindingHandler;
     ko.bindingHandlers.dependableDdCombo = dependableDdComboBindingHandler;
+    ko.bindingHandlers.tabular = tabularMapperBindingHandler;
 
     ko.virtualElements.allowedBindings.editLabel = true;
     ko.virtualElements.allowedBindings.sortableList = true;
     ko.virtualElements.allowedBindings.dateTextBox = true;
+    ko.virtualElements.allowedBindings.tabular = true;
 
 })(ko, jQuery);

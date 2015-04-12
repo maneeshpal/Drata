@@ -17,6 +17,9 @@ h3.view-heading {
     vertical-align: middle;
   }
 }
+.preview-widget .widget-outer {
+  padding: .5rem 0;
+}
 
 @media #{$large-up} {
   .preview-widget {
