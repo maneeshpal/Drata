@@ -139,7 +139,6 @@
                         '<!-- ko if : subGroup -->',
                         '<!-- ko text: subGroupName --><!-- /ko -->:', 
                         '<!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->',
-                        'level: <!-- ko text: level --><!-- /ko -->',
                     '</div>',
                 '</div>',
                 '<div class="row tabular-body-header">',
@@ -653,7 +652,7 @@
         self.subGroupName = ko.observable(options.subGroupName);
         self.dataKey = options.dataKey;
         //debugging
-        self.level = options.level;
+        //self.level = options.level;
         var sortOrder = { key: ko.observable(), value: ko.observable() };
 
         self.sortData = function (prop) {
@@ -675,8 +674,7 @@
         self.tabulars = ko.observableArray([]);
         self.dataKeys = ko.observableArray();
         self.selectedDataKeys = ko.observableArray();
-        self.isTrackChart; //no clue why i did this
-
+        
         self.selectedTabulars = ko.computed(function () {
             if(self.dataKeys().length === 0) return self.tabulars();
             return self.tabulars().filter(function(t) {
@@ -684,15 +682,15 @@
             })
         });
 
-        self.getHeaderCss = function () {
-            return 'small-' + Math.floor(12/self.headers().length);
-        }
-
         function init(data, segment) {
             var segment = self.segment();
             var data = self.data();
             
-            if(!segment || !data || data.length === 0) return;
+            if(!segment || !data || data.length === 0) {
+                self.tabulars([]);
+                self.dataKeys([]);
+                return;
+            }
 
             var textFormat_x, textFormat_y, level, h = [];
             self.isTrackChart = drata.global.trackingChartTypes.indexOf(segment.chartType) > -1;

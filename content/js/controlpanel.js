@@ -391,7 +391,7 @@
 
 	var WidgetManager = function(model, options){
 	    this.widgetList = ko.observableArray();
-	    this.bindWidgets = function(model){
+	    this.bindWidgets = function(model) {
 	        drata.apiClient.getWidgets(model).then(function(response){
 	            this.widgetList(ko.utils.arrayMap(
 	                response,
@@ -406,7 +406,7 @@
 	    
 	    this.chosenWidgets = ko.observableArray();
 
-	    this.addWidgets= function(){
+	    this.addWidgets= function() {
 	        var chosenWidgets = this.chosenWidgets();
 	        _.each(chosenWidgets, function(w){
 	            console.log('cloning widget');
@@ -473,6 +473,7 @@
 		            defer.resolve(this.widgetList());
 		        }.bind(this));	
 	    	}
+	    	return defer.promise();
 	    };
 
 	    this.toggleExtendedDetails = ko.observable(false);
@@ -639,19 +640,19 @@
 	            var _id = response._id;
 	            var tagList = self.tags.tagList(), chosenWidgets = self.chosenWidgets();
 	            var i = 0, c = tagList.length + chosenWidgets.length;
+	            function redirect()  {
+	            	window.location.href = '/dashboard/'+ _id;
+	            }
 	            if(c === 0){
-	                window.location.href = '/dashboard/'+ _id;
+	             	redirect();   
 	            }
 	            else{
-	                var respCounter = function(){
-	                    i++;
-	                    if(i === c) window.location.href = '/dashboard/'+ _id;
-	                }.bind(this);
+	                var prs = [];
 
 	                _.each(tagList, function(t){
 	                    t.dashboardId = _id;
 	                    delete t.dateCreated;
-	                    drata.apiClient.addTag(t).then(respCounter);
+	                    prs.push(drata.apiClient.addTag(t));
 	                });
 	                
 	                _.each(chosenWidgets, function(w){
@@ -660,8 +661,9 @@
 	                    delete widgetModel.dateCreated;
 	                    delete widgetModel.dateUpdated;
 	                    delete widgetModel._id;
-	                    drata.apiClient.upsertWidget(widgetModel).then(respCounter);
+	                    prs.push(drata.apiClient.addWidget(widgetModel));
 	                });
+	                $.when.apply($, prs).then(redirect);
 	            }
 	            
 	        }.bind(this));

@@ -253,7 +253,11 @@
                 segment: widgetModel.segmentModel
             }).then(function(response){
                 chartData = response;
-
+                if(!response || response.length === 0) {
+                    self.widgetLoading(false);
+                    self.parseError('No data found');
+                    return;
+                }
                 // drata.pubsub.publish('widgeteditorTabularData', {
                 //     data: chartData
                 // });

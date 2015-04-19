@@ -12,7 +12,7 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {m: {l:40, r:10, t:10, b:30}};
+        var dims = {m: {l:60, r:10, t:10, b:30}};
         
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
@@ -45,7 +45,7 @@
                 z.domain(data.map(function(d){return d.key}));
                 
                 chart.resize = function() { 
-                    dims = {m: {l:40, r:10, t:30, b:30}};
+                    dims = {m: {l:60, r:10, t:30, b:30}};
                     container
                     .transition().duration(500)
                     .call(chart);
