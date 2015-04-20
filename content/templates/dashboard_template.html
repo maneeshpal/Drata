@@ -23,16 +23,16 @@
     <div class="widget-outer" data-bind="attr: {'data-index': displayIndex()},css: widgetClass">
         <div class="widget-wrapper">
             <div class="row collapse widget-nav handle">
-                <span class="widget-logo" data-bind="css: logoClass"></span>
+                <span class="widget-logo fa" data-bind="css: logoClass"></span>
                 <div class="title" data-bind="editLabel: {title: name}">
                 </div>
                 <div class="actions">
                     <ul class="widget-nav-list">
                         <li data-bind="visible: !previewMode" class="action-icon edit-widget">
-                            <i data-bind="click:editWidget" class="icon-pencil"></i>
+                            <i data-bind="click:editWidget" class="fa fa-pencil"></i>
                         </li>
                         <li data-bind="visible: !previewMode" class="action-icon remove-widget">
-                            <i data-bind="click:$parent.deleteWidget" class="icon-cancel-circle"></i>
+                            <i data-bind="click:$parent.deleteWidget" class="fa fa-times-circle"></i>
                         </li>
                     </ul>
                 </div>
@@ -115,7 +115,7 @@
                         <!-- /ko -->
                         <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
                             <!-- ko text: totalPerChange --><!-- /ko -->%
-                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': totalPerChange() > 0, 'alert foundicon-down-arrow': totalPerChange() < 0}"></i>
+                            <span class="fa" data-bind="css: { 'success fa-arrow-up': totalPerChange() > 0, 'alert fa-arrow-down': totalPerChange() < 0}"></i>
                         </label>
                     </div>
 
@@ -126,7 +126,7 @@
                         <!-- /ko -->
                         <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
                             <!-- ko text: latestDp().perc --><!-- /ko -->%
-                            <i class="general" data-bind="css: { 'success foundicon-up-arrow': latestDp().perc > 0, 'alert foundicon-down-arrow': latestDp().perc < 0}"></i>
+                            <span class="fa" data-bind="css: { 'success fa-arrow-up': latestDp().perc > 0, 'alert fa-arrow-down': latestDp().perc < 0}"></span>
                         </label>
                     </div>
                 </div>
@@ -138,10 +138,10 @@
         </div>
         <div class="small-4 columns">
             <div style="padding:.5rem" >
-                <span class="icon-statistics" data-bind="css: {'primary': backgroundChartType() === 'line'}, click: setChartBackground.bind($data, 'line')"></span>
-                <span class="icon-graph" data-bind="css: {'primary': backgroundChartType() === 'area'}, click: setChartBackground.bind($data, 'area')"></span>
-                <span class="icon-pie" data-bind="css: {'primary': backgroundChartType() === 'pie'}, click: setChartBackground.bind($data, 'pie')"></span>
-                <span class="icon-bars2" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
+                <span class="fa fa-line-chart" data-bind="css: {'primary': backgroundChartType() === 'line'}, click: setChartBackground.bind($data, 'line')"></span>
+                <span class="fa fa-area-chart" data-bind="css: {'primary': backgroundChartType() === 'area'}, click: setChartBackground.bind($data, 'area')"></span>
+                <span class="fa fa-pie-chart" data-bind="css: {'primary': backgroundChartType() === 'pie'}, click: setChartBackground.bind($data, 'pie')"></span>
+                <span class="fa fa-bar-chart" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
             </div>
             <ul class="no-bullet stacked-heading" data-bind="style: { 
                 height: ($parent.widgetHeight() - 30) + 'px' },
@@ -153,7 +153,7 @@
                         <!-- /ko -->:
                         <!-- ko text: perc -->
                          <!-- /ko -->%
-                        <i class="general" data-bind="css: { 'foundicon-up-arrow': perc > 0, 'foundicon-down-arrow': perc < 0}"></i>
+                        <i class="fa" data-bind="css: { 'fa-arrow-up': perc > 0, 'fa-arrow-down': perc < 0}"></i>
                     </label>
                 </li>
             </ul>
@@ -165,19 +165,19 @@
     <!-- ko foreach: untaggedList -->
         <li>
             <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
-                <span class="icon-grid-alt"></span> 
+                <span class="fa fa-th-large"></span> 
                 <!-- ko text: dashboardName -->
                 <!-- /ko --> 
             </a>
         </li>
     <!-- /ko -->
 
-    <li><label><span class="icon-folder-open"></span> Tags</label>
+    <li><label><span class="fa fa-folder-open"></span> Tags</label>
     </li>
     <!-- ko foreach: taggedList -->
         <li class="has-dropdown not-click">
             <a>
-                <span class="icon-folder-open"></span>
+                <span class="fa fa-folder-open"></span>
                 <!-- ko text: tagName --><!-- /ko --> 
             </a>
             <ul class="dropdown">
@@ -185,7 +185,7 @@
                 <!-- ko foreach: dashboards -->
                     <li>
                         <a data-bind="attr : {'href': '/dashboard/' + $data.dashboardId }">
-                            <span class="icon-grid-alt"></span> 
+                            <span class="fa fa-th-large"></span> 
                             <!-- ko text: dashboardName -->
                             <!-- /ko --> 
                         </a>

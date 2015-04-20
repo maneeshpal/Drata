@@ -94,8 +94,10 @@ ul.combolist li:hover {
 }
 
 .chk-dd.small .chk-dd-arrow {
-    top: 5px; 
+    top: 5px;
+    font-size:12px;
 }
+
 .chk-dd.small ul.combolist {
     top: 1.55rem;
 }
@@ -126,7 +128,7 @@ ul.combolist li:hover {
     width: 350px;
 }
 
-[class^="icon-"].complexcombo-toggle, [class*=" icon-"].complexcombo-toggle{
+[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle{
     position: absolute;
     right: 16px;
     top: 9px;    

@@ -67,7 +67,6 @@ var findObject = function(collectionName, id){
 };
 
 var getDashboard = function(dashboardId){
-    console.log('finding dashboard');
     return findObject(dashboardCollection, dashboardId);
 };
 
@@ -92,7 +91,6 @@ var findDemoDashboard = function(){
 }
 exports.redirectDemo = function(req, res){
     findDemoDashboard().then(function(demoDashboardModel){
-        console.log(demoDashboardModel);
         res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
     }, handleErrorResponse.bind(res));
 };
@@ -156,10 +154,8 @@ var updateWidget = function(widgetModel, allowDemo){
 };
 
 var addWidget = function(widgetModel, allowDemo){
-    console.log('addwidget method entered');
     return connectToCollection(widgetCollection).then(function(collection){
         return getDashboard(widgetModel.dashboardId).then(function(result){
-            console.log('got dashboard');
             var defer = Q.defer();
             if(result.demo && !allowDemo){
                 widgetModel._id = new mongo.ObjectID();
@@ -173,7 +169,6 @@ var addWidget = function(widgetModel, allowDemo){
                 delete widgetModel._id; //just in case
                 delete widgetModel.isDemo; // just incase, a user clones a demo widget to a different dashboard.
                 collection.save(widgetModel, {safe:true}, function(err, result) {
-                    //console.log('saved widget');
                     err ? defer.reject({code: 500, message: 'cannot create widget'}) : defer.resolve(result);
                 }); 
             }
@@ -187,20 +182,16 @@ exports.updateWidget = function(req, res){
     if(!widgetModel._id){
         res.send(404);
     }
-    //console.log('updating widget');
     updateWidget(widgetModel)
     .then(function(){
-        //console.log('updated widget');
         res.send(200);
     }, handleErrorResponse.bind(res));
 }
 
 exports.addWidget = function(req, res){
     var widgetModel = req.body;
-    //console.log('adding widget');
     addWidget(widgetModel)
     .then(function(newWidgetModel){
-        //console.log('added widget');
         res.send(newWidgetModel);
     }, handleErrorResponse.bind(res));
 };
@@ -267,6 +258,7 @@ var upsertDashboard = function(dashboardModel, allowDemo){
             var defer = Q.defer();
             dashboardModel.dateCreated = new Date();
             dashboardModel.dateUpdated = new Date();
+            console.log(JSON.stringify(dashboardModel, null, '\t'));
             collection.save(dashboardModel, {safe:true}, function(err, result) {
                 err ? defer.reject({code: 500, message: 'Dashboard cannot be created'}) : defer.resolve(result);
             });
@@ -304,20 +296,15 @@ exports.truncateData = function(req, res){
 exports.generateDemoDashboard = function(req, res){
     var demoData = utils.clone(demoDashboardData);
     var promise = upsertDashboard(demoData.dashboard, true).then(function(dashboardModel){
-        console.log('demo dashboard generated');
         var wPromises = [];
         var dashboardId = dashboardModel._id.toString();
         
         _.each(demoData.widgets, function(widgetModel){
-            console.log('iterating through widget models');
             widgetModel.dashboardId = dashboardId;
-            //addWidget(widgetModel).then(xx);
             wPromises.push(addWidget(widgetModel, true));
-            console.log('demo widget generated');
         });
         _.each(demoData.tags, function(tagModel){
             tagModel.dashboardId = dashboardId;
-            //addTag(tagModel).then(xx);
             wPromises.push(addTag(tagModel, true));
         });
         return Q.all(wPromises);
@@ -346,7 +333,6 @@ exports.getWidgets = function(req, res) {
     var promise = connectToCollection(widgetCollection).then(function(collection){
         var defer = Q.defer();
         var q = queryGenerator.getWidgetListMongoQuery(req.body);
-        console.log(JSON.stringify(q));
         collection.find(q).toArray(function(err, result) {
             err ? defer.reject({code: 500, message: 'Error getting widgets'}) : defer.resolve(result);
         });

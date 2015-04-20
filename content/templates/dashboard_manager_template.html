@@ -34,7 +34,7 @@
         <div class="small-4 columns">
             <a data-bind="click: cloneDashboard">clone</a>&nbsp; <a data-bind="click:$parent.deleteDashboard.bind($parent)">remove</a>
         </div>
-        <i class="general" style="position:absolute; top:17px;left:12px" data-bind="{click: viewDetails,css: {'foundicon-plus': !toggleExtendedDetails(), 'foundicon-minus': toggleExtendedDetails}}"></i> 
+        <i class="fa" style="position:absolute; top:17px;left:12px" data-bind="{click: viewDetails,css: {'fa-plus': !toggleExtendedDetails(), 'fa-minus': toggleExtendedDetails}}"></i> 
     </div>
     <!-- ko if: toggleExtendedDetails -->
     <div class="row fancytable">
@@ -55,11 +55,11 @@
             <strong>Tags:</strong>
             <!-- ko foreach: tagList -->
                 <span class="label success tiny tag">
-                    <i class="general foundicon-remove" data-bind="click:$parent.removeTag"></i>
+                    <i class="fa fa-trash-o" data-bind="click:$parent.removeTag"></i>
                     <!--ko text: tagName --><!-- /ko --> 
                 </span>
             <!-- /ko -->
-             <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="general foundicon-plus"></i> Add Tag</a>
+             <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="fa fa-plus"></i> Add Tag</a>
         </div>
     </div>
     <div class="row">
@@ -68,10 +68,10 @@
                 <div class="small-8 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
                 </div>
                 <div class="small-2 columns">
-                    <a data-bind="click:addTag" class="button postfix success"><i class="general foundicon-checkmark"></i></a>
+                    <a data-bind="click:addTag" class="button postfix success"><i class="fa fa-check"></i></a>
                 </div>
                 <div class="small-2 columns">
-                    <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="general foundicon-remove"></i></a>
+                    <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="fa fa-trash-o"></i></a>
                 </div>
             </div>
         </div>
@@ -127,7 +127,7 @@
         <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.chosenWidgets" style="margin-bottom:0"></input> &nbsp;
         <!-- /ko -->
         <span data-bind="text:name,click: toggleExtendedDetails"></span> &nbsp;
-        <i class="general" data-bind=" click: toggleExtendedDetails, css: {'foundicon-plus': !viewDetails(), 'foundicon-minus': viewDetails}"></i>
+        <i class="fa" data-bind=" click: toggleExtendedDetails, css: {'fa-plus': !viewDetails(), 'fa-minus': viewDetails}"></i>
     </td>
     <td> <!-- ko text:chartType --> <!--/ko --> </td>
     <td> <!-- ko text:selectedDataKey --> <!--/ko --> </td>
@@ -166,7 +166,7 @@
             <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:name" />
         </div>
         <div class="small-4 columns">
-            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="general foundicon-plus"></i>&nbsp;Add</a>
+            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="fa fa-plus"></i>&nbsp;Add</a>
         </div>
     </div>
     <!-- ko if: widgetList().length>0 -->

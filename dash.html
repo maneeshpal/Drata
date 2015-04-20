@@ -8,9 +8,7 @@
     <link rel="stylesheet" type="text/css" href="/style/smoothness/jquery-ui-1.10.4.custom.min.css" />
 
     <link rel="stylesheet" type="text/css" href="/style/dashboard.css" />
-    <link rel="stylesheet" type="text/css" href="/style/fonts/general_foundicons.css" />
-    <link rel="stylesheet" type="text/css" href="/style/fonts/icomoon.css" />
-
+    <link rel="stylesheet" type="text/css" href="/style/fonts/font-awesome.min.css" />
 </head>
 <body data-bind="css: theme">
 
@@ -29,7 +27,7 @@
             <ul class="right">
                 <li class="divider"></li>
                 <li class="has-dropdown dashboard-settings">
-                    <a data-dropdown="dashboard_settings" data-options="align:bottom"><i class="icon-cog"></i></a>
+                    <a data-dropdown="dashboard_settings" data-options="align:bottom"><i class="fa fa-cog"></i></a>
                     <ul class="dropdown">
                         <li class="theme">
                             <label>Theme &nbsp;
@@ -50,13 +48,13 @@
                 <li class="divider"></li>
                 <li class="has-form">
                     <a class="button" data-bind="click:drata.dashboard.widgetEditor.preview">
-                        <i class="general foundicon-graph"></i>&nbsp;Preview</a>
+                        <i class="fa fa-line-chart"></i>&nbsp;Preview</a>
                 </li>
                 <!-- ko if: $parent.currentDashboard() -->
                 <li class="divider"></li>
                 <li class="has-form">
                     <a class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
-                        <i class="general foundicon-plus"></i>
+                        <i class="fa fa-plus"></i>
                         <!-- ko text:drata.dashboard.widgetEditor.addUpdateBtnText -->
                         <!-- /ko -->
                     </a>
@@ -69,17 +67,17 @@
             <ul class="left">
                 <li class="divider"></li>
                 <li class="has-dropdown">
-                    <a><span class="icon-grid-alt"></span>
+                    <a><span class="fa fa-th-large"></span>
                     <!-- ko text: currentDashboardName() -->
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
                         <li class="has-form">
-                            <a href="#manage" class="button"><i class="general foundicon-tools"></i>&nbsp;Manage Dashboards</a>
+                            <a href="#manage" class="button"><i class="fa fa-wrench"></i>&nbsp;Manage Dashboards</a>
                         </li>
                         <!-- ko template : {name: 'dashboard-menu-template'} --><!--/ko-->
                         
                         <li class="has-form">
-                            <a href="#create" class="button secondary"><i class="general foundicon-tools"></i>&nbsp;Create Dashboard</a>
+                            <a href="#create" class="button secondary"><i class="fa fa-wrench"></i>&nbsp;Create Dashboard</a>
                         </li>
                     </ul>
                 </li>
@@ -87,13 +85,13 @@
                 <li class="divider"></li>
                 
                 <li class="has-dropdown not-click">
-                    <a><span class="icon-grid"></span> Widgets</a>
+                    <a><span class="fa fa-list-alt"></span> Widgets</a>
                     <ul class="dropdown">
                         <li class="has-form">
-                        <a href="#editwidget" class="button"><i class="general foundicon-tools"></i>&nbsp;Create New Widget</a>
+                        <a href="#editwidget" class="button"><i class="fa fa-wrench"></i>&nbsp;Create New Widget</a>
                         </li>
                         <li class="has-form">
-                        <a href="#managewidgets" class="button"><i class="general foundicon-tools"></i>&nbsp;Clone Existing Widget</a>
+                        <a href="#managewidgets" class="button"><i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget</a>
                         </li>
                     </ul>
 
@@ -103,7 +101,7 @@
                 <li class="divider"></li>
                 <li class="top-bar-text">
                     <!--ko text: $parent.displayMode().displayText --><!--/ko -->
-                    &nbsp;<i class="icon-cancel-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></i>
+                    &nbsp;<i class="fa fa-times-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></i>
                 </li>
                 <!-- /ko -->
                 <li class="divider"></li>

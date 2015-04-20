@@ -128,10 +128,8 @@
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);
-            self.segmentModel(cloneModel.segmentModel);
-            //self.sizex(cloneModel.sizex);
-            //self.sizey(cloneModel.sizey);
             self.chartData(undefined);
+            self.segmentModel(cloneModel.segmentModel);
             self.addUpdateBtnText('Update Widget');
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
             self.previewWidget().widgetLoaded.subscribe(function(newValue) {

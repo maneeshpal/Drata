@@ -516,22 +516,22 @@
         xAxisTypes : ['date','numeric','currency'],
         chartTypes : [{
             name: 'line', 
-            icon: 'icon-statistics'
+            icon: 'fa-line-chart'
         }, { 
-            name: 'area', 
-            icon: 'icon-graph'
+            name: 'area',
+            icon: 'fa-area-chart'
         }, { 
             name: 'scatter',
-            icon: 'icon-air' 
+            icon: 'fa-sliders' 
         },{ 
             name: 'pie', 
-            icon: 'icon-pie' 
+            icon: 'fa-pie-chart' 
         }, { 
-            name: 'bar', 
-            icon: 'icon-bars2' 
+            name: 'bar',
+            icon: 'fa-bar-chart' 
         }, { 
-            name: 'numeric', 
-            icon: 'icon-uniE650' 
+            name: 'numeric',
+            icon: 'fa-th-list' 
         }],
         trackingChartTypes: ['line', 'area', 'scatter','numeric'],
         comparisonChartTypes: ['bar', 'pie'],

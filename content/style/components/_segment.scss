@@ -27,19 +27,19 @@ select.error{
 
 /*selections*/
 
-[class^="icon-"].selection-action, [class*=" icon-"].selection-action {
+[class^="fa-"].selection-action, [class*=" fa-"].selection-action {
     color: #ccc;
     line-height: 2rem;
     right:-6px;
     position: absolute;
 }
 
-[class^="icon-"].condition-action-complex, [class*=" icon-"].condition-action-complex {
+[class^="fa-"].condition-action-complex, [class*=" fa-"].condition-action-complex {
     line-height: 2rem;
     color: $primary-color;
 }
 
-[class^="icon-"].condition-action-cancel, [class*=" icon-"].condition-action-cancel {
+[class^="fa-"].condition-action-cancel, [class*=" fa-"].condition-action-cancel {
     line-height: 2rem;
     color: $alert-color;
 }

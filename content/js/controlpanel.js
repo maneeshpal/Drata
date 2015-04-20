@@ -639,23 +639,23 @@
 	        drata.apiClient.upsertDashboard(dashboardModel).then(function(response){
 	            var _id = response._id;
 	            var tagList = self.tags.tagList(), chosenWidgets = self.chosenWidgets();
-	            var i = 0, c = tagList.length + chosenWidgets.length;
+	            
 	            function redirect()  {
 	            	window.location.href = '/dashboard/'+ _id;
 	            }
-	            if(c === 0){
+	            if(!tagList.length && !chosenWidgets.length){
 	             	redirect();   
 	            }
 	            else{
 	                var prs = [];
 
-	                _.each(tagList, function(t){
+	                tagList.forEach(function(t) {
 	                    t.dashboardId = _id;
 	                    delete t.dateCreated;
 	                    prs.push(drata.apiClient.addTag(t));
 	                });
 	                
-	                _.each(chosenWidgets, function(w){
+	                chosenWidgets.forEach(function(w) {
 	                    var widgetModel = w.getModel();
 	                    widgetModel.dashboardId = _id;
 	                    delete widgetModel.dateCreated;
@@ -663,6 +663,7 @@
 	                    delete widgetModel._id;
 	                    prs.push(drata.apiClient.addWidget(widgetModel));
 	                });
+
 	                $.when.apply($, prs).then(redirect);
 	            }
 	            

@@ -79,7 +79,8 @@ ul.combolist li:hover {
   line-height: 1rem; }
 
 .chk-dd.small .chk-dd-arrow {
-  top: 5px; }
+  top: 5px;
+  font-size: 12px; }
 
 .chk-dd.small ul.combolist {
   top: 1.55rem; }
@@ -105,7 +106,7 @@ ul.combolist li:hover {
   padding: 0 0.9375rem;
   width: 350px; }
 
-[class^="icon-"].complexcombo-toggle, [class*=" icon-"].complexcombo-toggle {
+[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle {
   position: absolute;
   right: 16px;
   top: 9px;
@@ -353,7 +354,7 @@ polyline {
   height: 30px; }
   .widget-nav .title {
     line-height: 2rem;
-    margin: 0 72px 0 20px;
+    margin: 0 72px 0 25px;
     overflow: hidden;
     float: left; }
   .widget-nav .actions {
@@ -448,7 +449,7 @@ input.error {
   border: 1px solid #f04124; }
 
 /******/
-[class^="icon-"].primary, [class*=" icon-"].primary {
+[class^="fa-"].primary, [class*=" fa-"].primary {
   color: #008cba; }
 
 /*topbar*/
@@ -588,17 +589,17 @@ select.error {
   margin-top: 0.5rem; }
 
 /*selections*/
-[class^="icon-"].selection-action, [class*=" icon-"].selection-action {
+[class^="fa-"].selection-action, [class*=" fa-"].selection-action {
   color: #cccccc;
   line-height: 2rem;
   right: -6px;
   position: absolute; }
 
-[class^="icon-"].condition-action-complex, [class*=" icon-"].condition-action-complex {
+[class^="fa-"].condition-action-complex, [class*=" fa-"].condition-action-complex {
   line-height: 2rem;
   color: #008cba; }
 
-[class^="icon-"].condition-action-cancel, [class*=" icon-"].condition-action-cancel {
+[class^="fa-"].condition-action-cancel, [class*=" fa-"].condition-action-cancel {
   line-height: 2rem;
   color: #f04124; }
 

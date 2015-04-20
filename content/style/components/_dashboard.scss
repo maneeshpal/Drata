@@ -87,7 +87,7 @@
 
   .title {
     line-height: 2rem;
-    margin: 0 72px 0 20px;
+    margin: 0 72px 0 25px;
     overflow: hidden;
     float: left;
   }
@@ -213,7 +213,7 @@ input.error {
 }
 /******/
 
-[class^="icon-"].primary, [class*=" icon-"].primary{
+[class^="fa-"].primary, [class*=" fa-"].primary {
   color:#008cba;
 }
 /*topbar*/

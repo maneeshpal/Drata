@@ -4,7 +4,7 @@
         <!-- ko if: previewWidget() -->
             <div class="medium-12 large-7 large-push-5 columns preview-widget">
                 <!-- ko template: { name: 'widget-template', data:previewWidget(), afterRender:loadWidget } --><!-- /ko -->
-                <div class="row collapse">
+                <div class="row collapse" data-bind="if : chartData() && chartData().length > 0">
                     <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { height: (($(window).height()- 145) / 2) + 'px' }, tabular: {segment: segmentModel, data: chartData }"></div>
                 </div>
             </div>
@@ -27,19 +27,19 @@
             <div class="row">
                 <div class="small-4 columns">
                     <label>Server
-                    <span data-bind="tooltip: {datakey: 'servername'}" class="icon-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'servername'}" class="fa fa-question dtooltip"></span>
                         <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
                         </label>
                 </div>
                 <div class="small-4 columns">
                     <label>Database
-                    <span data-bind="tooltip: {datakey: 'databasename'}" class="icon-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'databasename'}" class="fa fa-question dtooltip"></span>
                         <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
                         </label>
                 </div>
                 <div class="small-4 columns">
                     <label>Collection Name
-                    <span data-bind="tooltip: {datakey: 'collectionname'}" class="icon-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'collectionname'}" class="fa fa-question dtooltip"></span>
                         <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
                         </label>
                 </div>
