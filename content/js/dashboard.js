@@ -258,9 +258,6 @@
                     self.parseError('No data found');
                     return;
                 }
-                // drata.pubsub.publish('widgeteditorTabularData', {
-                //     data: chartData
-                // });
 
                 var dataToMap;
                 if(widgetModel.segmentModel.chartType === 'pie'){
@@ -285,7 +282,7 @@
         };
 
         self.getCurrentData = function() {
-            return chartData.slice();
+            return !self.parseError() && chartData.slice();
         };
 
         self.getModel = function (argument) {

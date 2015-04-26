@@ -139,10 +139,6 @@
             })
         };
 
-        // drata.pubsub.subscribe('widgeteditorTabularData', function(p) {
-        //     self.chartData(p.data);
-        // });
-
         self.widgetCancel = function() {
             self.onWidgetUpdate = undefined;
             self.onWidgetCancel = undefined;
