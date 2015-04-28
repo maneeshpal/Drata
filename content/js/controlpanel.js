@@ -167,7 +167,7 @@
 			managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
 			create: {name: 'create', hash: 'create', displayText: 'Create Dashboard'},
 			dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
-			defaultview: {name: 'defaultview', hash: '', displayText: 'Create or Manage Dashboards'}
+			defaultview: {name: 'defaultview', hash: '', displayText: 'Create/Manage'}
 		};
 
     	var currentDashboardId = window.location.pathname.split('/')[2];

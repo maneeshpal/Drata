@@ -541,7 +541,25 @@
         timeframes : ['minute', 'hour', 'day', 'month', 'year'],
         uniqueClientId: parseInt(Math.random() * 100000000),
         dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', 'week', 'month', 'quarter', 'year'],
-        timeframeIntervalExamples: ['60s', '5m', '5h', '1d','1w']
+        timeframeIntervalExamples: ['60s', '5m', '5h', '1d','1w'],
+        sortTypes: { 
+            numeric: { 
+                asc: 'fa-sort-numeric-asc', 
+                desc: 'fa-sort-numeric-desc'
+            },
+            alpha: { 
+                asc: 'fa-sort-alpha-asc', 
+                desc: 'fa-sort-alpha-desc'
+            },
+            generic: { 
+                asc: 'fa-sort-asc', 
+                desc: 'fa-sort-desc'
+            },
+            amount: { 
+                asc: 'fa-sort-amount-asc', 
+                desc: 'fa-sort-amount-desc'
+            }
+        }
     });
 
     Date.prototype.format = function(f){

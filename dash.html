@@ -47,14 +47,12 @@
                 <!-- ko if: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-form">
-                    <a class="button" data-bind="click:drata.dashboard.widgetEditor.preview">
-                        <i class="fa fa-line-chart"></i>&nbsp;Preview</a>
+                    <a class="button secondary" data-bind="click:drata.dashboard.widgetEditor.preview">Preview</a>
                 </li>
                 <!-- ko if: $parent.currentDashboard() -->
                 <li class="divider"></li>
                 <li class="has-form">
                     <a class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
-                        <i class="fa fa-plus"></i>
                         <!-- ko text:drata.dashboard.widgetEditor.addUpdateBtnText -->
                         <!-- /ko -->
                     </a>

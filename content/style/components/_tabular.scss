@@ -6,6 +6,7 @@
 .tabular-wrapper {
     font-size: .75rem;
     border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 .tabular-body, .tabular-header,  .tabular-body-header {
     padding:5px 0;
@@ -18,7 +19,6 @@
     font-weight:bold;
 }
 .tabular-header {
-    background: #f5f5f5;
     border-bottom:1px solid #ccc;
     border-top:1px solid #ccc;
 }

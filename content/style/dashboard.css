@@ -640,6 +640,12 @@ select.error {
   padding-left: 0;
   padding-right: 0; }
 
+.chart-types > li .button {
+  border-left: 1px solid gainsboro; }
+
+.chart-types > li:first-child .button {
+  border-left: none; }
+
 .chart-types .chart-icon {
   display: block;
   margin-bottom: 10px; }
@@ -981,11 +987,20 @@ body.campfire {
   body.campfire ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: #0d0d0d; }
+  body.campfire .tabular-wrapper, body.campfire .tabular-header, body.campfire .tabular-body, body.campfire .tabular-body-header {
+    border-color: #595959; }
+  body.campfire .chart-type.button {
+    background-color: #595959; }
+  body.campfire .chart-types > li .button {
+    border-left: 1px solid #2d2d2d; }
+  body.campfire .chart-types > li:first-child .button {
+    border-left: none; }
 
 
 .tabular-wrapper {
   font-size: 0.75rem;
-  border-left: 1px solid #cccccc; }
+  border-left: 1px solid #cccccc;
+  border-right: 1px solid #cccccc; }
 
 .tabular-body, .tabular-header, .tabular-body-header {
   padding: 5px 0;
@@ -998,6 +1013,5 @@ body.campfire {
   font-weight: bold; }
 
 .tabular-header {
-  background: whitesmoke;
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc; }

@@ -130,7 +130,7 @@
             self.name(cloneModel.name);
             self.chartData(undefined);
             self.segmentModel(cloneModel.segmentModel);
-            self.addUpdateBtnText('Update Widget');
+            self.addUpdateBtnText('Update');
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
             self.previewWidget().widgetLoaded.subscribe(function(newValue) {
                 if(newValue) {

@@ -215,6 +215,22 @@ body.campfire {
 	}
 	@include txt_placeholder($medium);
 	@include fancyscrollbar($superdark, $dark);
+
+	//tabular
+	.tabular-wrapper, .tabular-header, .tabular-body,  .tabular-body-header  {
+		border-color: $medium;
+	}
+	//end tabular
+
+	.chart-type.button {
+		background-color: $medium;
+	}
+	.chart-types > li .button {
+		border-left: 1px solid $dark2;
+	}
+	.chart-types > li:first-child .button {
+		border-left: none;
+	}
 }
 
 

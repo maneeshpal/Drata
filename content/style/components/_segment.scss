@@ -90,12 +90,19 @@ select.error{
 .chart-types {
     padding: 0 0.625rem;
 }
+
 .chart-types > li {
     padding-left: 0;
     padding-right: 0;
-    //0 0.625rem 1.25rem
 }
 
+.chart-types > li .button {
+    border-left:1px solid #DCDCDC;
+}
+
+.chart-types > li:first-child .button {
+    border-left: none;
+}
 
 .chart-types .chart-icon {
     display:block;

@@ -123,10 +123,12 @@
         '<div class="row collapse">',
             '<div class="small-12 columns">',
                 '<!-- ko if: dataKeys().length > 0 -->',
-                '<div class="right" data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Select Groups\', overrideSelectionText: \'{0} groups selected\', renderType: \'small\' }">',
+                '<div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Tabular View\', overrideSelectionText: \'Tabular View. {0} groups selected\'}">',
                 '</div>',
                 '<!-- /ko -->',
+                '<!-- ko ifnot: dataKeys().length > 0 -->',
                 '<h6>Tabular View</h6>',
+                '<!-- /ko -->',
             '</div>',
         '</div>',
             
@@ -143,12 +145,12 @@
                 '</div>',
                 '<div class="row tabular-body-header">',
                     '<div class="columns small-6">',
-                        '<span data-bind="text: xAxisProp"></span>',
-                        '<span class="fa fa-arrow-down" data-bind="click: sortData.bind($data, \'key\')"></span>',
+                        '<span data-bind="text: xAxisProp"></span>&nbsp;',
+                        '<span class="fa" data-bind="css: sortDirectionKey, click: sortData.bind($data, \'key\')"></span>',
                     '</div>',
                     '<div class="columns small-6">',
-                        '<span data-bind="text: valType"></span>',
-                        '<span class="fa fa-arrow-down" data-bind="click: sortData.bind($data, \'value\')"></span>',
+                        '<span data-bind="text: valType"></span>&nbsp;',
+                        '<span class="fa" data-bind="css: sortDirectionValue, click: sortData.bind($data, \'value\')"></span>',
                     '</div>',
                 '</div>',
                 '<!-- ko foreach: values -->',
@@ -654,13 +656,29 @@
         //debugging
         //self.level = options.level;
         var sortOrder = { key: ko.observable(), value: ko.observable() };
-
+        
         self.sortData = function (prop) {
-            sortOrder[prop](!sortOrder[prop]());
+            var sorted = sortOrder[prop]();
+            prop === 'key' ? sortOrder.value(undefined): sortOrder.key(undefined);
+
+            sortOrder[prop](!sorted);
             self.values.sort(function (c, n) {
-                return sortOrder[prop]() ? c[prop] < n[prop] : c[prop] > n[prop];
+                return sorted ? c[prop] < n[prop] : c[prop] > n[prop];
             })
         };
+
+        function sortDirection(prop) {
+            var sortType = prop === 'key'? 'amount': 'numeric',
+                sortOder = sortOrder[prop]() ? 'asc': 'desc';
+            return sortOrder[prop]() === undefined ? 'fa-unsorted': drata.global.sortTypes[sortType][sortOder];
+        }
+
+        self.sortDirectionKey = ko.computed(function() {
+            return sortDirection('key');
+        })
+        self.sortDirectionValue = ko.computed(function() {
+            return sortDirection('value');
+        })
     }
 
     var TabularMapper = function (model) {
