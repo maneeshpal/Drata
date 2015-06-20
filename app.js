@@ -17,8 +17,6 @@ var serverNames = config.dataSources.map(function(d){
     return d.alias;
 });
 
-
-
 app.configure(function () {
     //app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
     //app.use(express.bodyParser());

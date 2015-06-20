@@ -123,13 +123,7 @@ exports.findWidgetsOfDashboard = function(req, res) {
     }, handleErrorResponse.bind(res));
 };
 
-//i messed up this method. need promises setup
-//also no method is calling updatewidget with allowdemo param.
-//how am i not updating demo widget ?
-//for demo widget update, the dashbord is demo, so, since allowdemo is underfined,
-//i am handling the logic correctly.
-// just get rid of allowdemo, it is good.
-var updateWidget = function(widgetModel, allowDemo){
+var updateWidget = function(widgetModel){
     return getValidMongoId(widgetModel._id).then(function(widgetObjectId){
         return connectToCollection(widgetCollection).then(function(collection){
             return getDashboard(widgetModel.dashboardId).then(function(result){
@@ -278,11 +272,14 @@ function removeCollection(collectionName){
     return connectToCollection(collectionName).then(function(collection){    
         var defer = Q.defer();
         collection.remove({}, function(err, result) {
-            err ? defer.reject({code: 500, message: utils.format('Collection cannot be removed. {0}', collectionName)}) : defer.resolve(result);
+            err ? defer.reject({
+                code: 500, 
+                message: utils.format('Collection cannot be removed. {0}', collectionName)
+            }) : defer.resolve(result);
         });
         return defer.promise;
     });
-}
+};
 
 exports.truncateData = function(req, res){
     var dp = removeCollection(dashboardCollection);
@@ -402,15 +399,26 @@ exports.addTag = function(req, res){
 };
 
 var removeTag = function(tagId){
-    return getValidMongoId(tagId).then(function(tagObjectId){
-        return connectToCollection(tagCollection).then(function(collection){
+    return findObject(tagCollection, tagId).then(function (tag) {
+        return getDashboard(tag.dashboardId).then(function ( dashboard ) {
             var defer = Q.defer();
-            collection.remove({_id : tagObjectId}, {safe:true,justOne:true}, function(err, result) {
-                err ? defer.reject({code: 500, message: utils.format('Error removing tag. Id: {0}', tagId)}) : defer.resolve(result);
-            });
+            if(dashboard.demo){
+                defer.resolve();
+            }
+            else {
+                return getValidMongoId(tagId).then(function(tagObjectId){
+                    return connectToCollection(tagCollection).then(function(collection){
+                        var defer = Q.defer();
+                        collection.remove({_id : tagObjectId}, {safe:true,justOne:true}, function(err, result) {
+                            err ? defer.reject({code: 500, message: utils.format('Error removing tag. Id: {0}', tagId)}) : defer.resolve(result);
+                        });
+                        return defer.promise;
+                    });
+                });
+            }
             return defer.promise;
-        });
-    });
+        })
+    })
 };
 
 exports.removeTag = function(req, res){

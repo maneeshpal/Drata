@@ -110,7 +110,7 @@ exports.findCollection = function(datasource, database, collectionName, segment)
 };
 
 exports.pop = function() {
-    var maxProps = 10;
+    var maxProps = 10000;
     var data= [];
     var y = [0,0,0,0,0,0,0];
     var ordernumber = 1;
@@ -161,7 +161,7 @@ exports.pop = function() {
             else{
                 collection.insert(data, {safe:true}, function(err, result) {
                     if(err){
-                        defer.reject({code: 500, message: 'something went wrong'});
+                        defer.reject({code: 500, message: err});
                     }
                     else{
                         defer.resolve({message: 'shoppercheckout collection populated successfully'});  

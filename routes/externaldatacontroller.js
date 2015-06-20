@@ -70,9 +70,12 @@ exports.findProperties = function(req, res){
 exports.findCollection = function(req, res){
     getInstance(req.params.datasource).then(function(instance){
         return instance.findCollection(req.params.datasource, req.params.dbname, req.params.collectionName, req.body);
+    },function( error ) {
+        res.send(error.code, error.message);
     }).done(function(result){
         res.send(result);
     },function(error){
         res.send(error.code, 'Message: ' + error.message + '; Debug: ' + JSON.stringify(error.ex));
     });
 };
+

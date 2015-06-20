@@ -11,7 +11,7 @@
     "mssql": "^1.1.1",
     "socket.io": "^1.0.6",
     "q": "^1.0.1",
-    "mongodb": "^1.4.2",
+    "mongodb": "^1.4.38",
     "underscore": "^1.6.0"
   },
   "devDependencies": {
