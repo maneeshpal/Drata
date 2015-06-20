@@ -101,6 +101,8 @@
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
         
+        var content, chartType = drata.global.chartType;
+
         function setWidgetHeight () {
             var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
             self.widgetHeight(Math.max(200, wh));
@@ -157,9 +159,7 @@
         self.chartType = ko.observable(widgetModel.segmentModel.chartType);
         
         self.logoClass = ko.computed(function(){
-            return drata.global.chartTypes.filter( function(c) {
-                return c.name === self.chartType();
-            })[0].icon;
+            return drata.global.chartIcon[self.chartType()];
         });
 
         self.update = function(){
@@ -171,29 +171,28 @@
             });
         };
 
-        var content;
         self.contentTemplate = ko.computed(function(){
             var contentOptions = {
                 index : index,
                 widgetUpdate : self.update.bind(self)
             }
             switch(self.chartType()){
-                case 'line':
+                case chartType.line:
                     content = new LineContent(contentOptions);
                     break;
-                case 'area':
+                case chartType.area:
                     content = new AreaContent(contentOptions);
                     break;
-                case 'pie':
+                case chartType.pie:
                     content = new PieContent(contentOptions);
                     break;
-                case 'bar':
+                case chartType.bar:
                     content = new BarContent(contentOptions);
                     break;
-                case 'scatter':
+                case chartType.scatter:
                     content = new ScatterContent(contentOptions);
                     break;
-                case 'numeric':
+                case chartType.trend:
                     content = new NumericContent(contentOptions);
                     break;
             }
@@ -518,7 +517,7 @@
         };
 
         var drawChartBackground = function(){
-            var data, xFormat = xtextFormat();
+            var data, xFormat = xtextFormat(), chartType = drata.global.chartType;
             firstArr = firstArr.map(function(i){
                 delete i.key;
                 return i;
@@ -526,21 +525,21 @@
 
             switch(self.backgroundChartType())
             {
-                case 'line':
+                case chartType.line:
                     chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
                     data = [{
                         key: self.currentDataKey(),
                         values: firstArr.slice()
                     }];
                 break;
-                case 'area':
+                case chartType.area:
                     chart = drata.charts.areaChart().drawLabels(false).includeDataMarkers(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
                     data = [{
                         key: self.currentDataKey(),
                         values: firstArr.slice()
                     }];
                 break;
-                case 'bar':
+                case chartType.bar:
                     data = [{
                         key: self.currentDataKey(),
                         values: firstArr.map(function(dp){
@@ -552,7 +551,7 @@
                     }];
                     chart = drata.charts.barChart().drawLabels(false).drawXAxis(false).drawYAxis(false);
                     break; 
-                case 'pie':
+                case chartType.pie:
                     data = {
                         key: self.currentDataKey(),
                         values: firstArr.map(function(dp){

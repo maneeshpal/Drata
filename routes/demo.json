@@ -134,7 +134,7 @@
 		            "to" : "1y",
 		            "dateProp" : "timestamp"
 		        },
-		        "chartType" : "numeric"
+		        "chartType" : "trend"
 		    },
 		    "sizex" : "6",
 		    "sizey" : "2",

@@ -509,32 +509,62 @@
         return q;
     };
 
+    var chartMappings = [
+    {
+        name: 'line',
+        label: 'line',
+        icon: 'fa-line-chart',
+        type: 'track'
+    }, {
+        name: 'area',
+        label: 'area',
+        icon: 'fa-area-chart',
+        type: 'track'
+    }, {
+        name: 'scatter',
+        label: 'scatter',
+        icon: 'fa-sliders',
+        type: 'track'
+    }, {
+        name: 'pie',
+        label: 'pie',
+        icon: 'fa-pie-chart',
+        type: 'comparison'
+    }, {
+        name: 'bar',
+        label: 'bar',
+        icon: 'fa-bar-chart',
+        type: 'comparison'
+    }, {
+        name: 'trend',
+        label: 'trend',
+        icon: 'fa-th-list',
+        type: 'track'
+    }];
+
+    var chartType = {}, chartIconMapping = {};
+    chartMappings.forEach(function (mapping) {
+        chartType[mapping.name] = mapping.label;
+        chartIconMapping[mapping.name] = mapping.icon;
+    })
+
+    var getChartTypes = function(type) {
+        return chartMappings.filter( function(mapping) {
+            return mapping.type === type;
+        }).map( function (trackingChart) {
+            return trackingChart.label
+        });
+    }
+
     drata.ns('global').extend({
         conditionalOperations : ['>', '<', '>=','<=', '=', '!=','exists','like', 'not like'],
         arithmeticOperations : ['+', '-', '*','/'],
         groupingOptions : ['value','count', 'sum', 'avg', 'min', 'max'],
         xAxisTypes : ['date','numeric','currency'],
-        chartTypes : [{
-            name: 'line', 
-            icon: 'fa-line-chart'
-        }, { 
-            name: 'area',
-            icon: 'fa-area-chart'
-        }, { 
-            name: 'scatter',
-            icon: 'fa-sliders' 
-        },{ 
-            name: 'pie', 
-            icon: 'fa-pie-chart' 
-        }, { 
-            name: 'bar',
-            icon: 'fa-bar-chart' 
-        }, { 
-            name: 'numeric',
-            icon: 'fa-th-list' 
-        }],
-        trackingChartTypes: ['line', 'area', 'scatter','numeric'],
-        comparisonChartTypes: ['bar', 'pie'],
+        chartType: chartType,
+        chartIcon: chartIconMapping,
+        trackingChartTypes: getChartTypes('track'),
+        comparisonChartTypes: getChartTypes('comparison'),
         logics : ['and', 'or'],
         propertyTypes: ['string', 'date', 'bool', 'numeric', 'unknown'],
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],

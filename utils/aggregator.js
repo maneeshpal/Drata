@@ -238,7 +238,7 @@ var getGraphData = function(segmentModel, inputData) {
         case 'line':
         case 'area':
         case 'scatter':
-        case 'numeric':
+        case 'trend':
             returnData = getTrackCharData(segmentModel, inputData);
             break;
         case 'pie':
