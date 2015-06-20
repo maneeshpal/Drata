@@ -563,6 +563,7 @@
         xAxisTypes : ['date','numeric','currency'],
         chartType: chartType,
         chartIcon: chartIconMapping,
+        chartMappings: chartMappings,
         trackingChartTypes: getChartTypes('track'),
         comparisonChartTypes: getChartTypes('comparison'),
         logics : ['and', 'or'],

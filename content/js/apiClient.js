@@ -188,8 +188,6 @@
         var url = apiExternalRoot + drata.utils.format('{0}/{1}/{2}', model.dataSource, model.database, model.collectionName);
         
         _perform('POST', url, postData).then(function(re){
-            console.log(JSON.stringify(re));
-            console.log(JSON.stringify(re, null, '\t'));
            defer.resolve(clientAggregation ? drata.exports.getGraphData(postData, re) : re);
         }, function(err){
             defer.reject(err);

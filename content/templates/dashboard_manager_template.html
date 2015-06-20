@@ -89,9 +89,9 @@
         <div class="small-12 columns">
             <span>Filter by Chart Type: </span>
                 <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
-                <!-- ko foreach: drata.global.chartTypes -->
-                <input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data.name, checked: $parent.chosenChartTypes" />
-                    <label data-bind="attr:{'for': 'chk_chartType'+ $index()}, text: $data.name"></label>
+                <!-- ko foreach: drata.global.chartMappings -->
+                <input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data.label, checked: $parent.chosenChartTypes" />
+                    <label data-bind="attr:{'for': 'chk_chartType'+ $index()}, text: $data.label"></label>
                 <!-- /ko -->
                 <button class="tiny" data-bind="enable: chosenWidgets().length > 0, click: addWidgets">Add to dashboard</button>
             
