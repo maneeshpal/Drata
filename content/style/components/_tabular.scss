@@ -1,19 +1,23 @@
 
 .tabular {
-
+	margin-bottom: 20px;
+	background-color: #fff;
 }
 
 .tabular-wrapper {
     font-size: .75rem;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
+    margin-bottom: 20px;
+    background-color: #fff;
 }
+
 .tabular-body, .tabular-header,  .tabular-body-header {
     padding:5px 0;
     border-bottom: 1px dashed #ccc;
 }
 .tabular-body:last-child {
-    border-bottom: none;   
+    border-bottom: 1px solid #ccc; 
 }
 .tabular-body-header, .tabular-header {
     font-weight:bold;

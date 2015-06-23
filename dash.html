@@ -160,6 +160,13 @@
     <!-- ko template: {name: 'notifications-template', data: drata.nsx.notifier} -->
     <!-- /ko -->
 
+    <div class="form-error fixed" data-bind="visible: formErrors().length > 0" style="display:none">
+        <h6 class="heading"><span style="color:#f04124" class="fa fa-exclamation-triangle"> </span>Form Errors</h6>
+        <ul class="square" data-bind="foreach:formErrors">
+            <li data-bind="html: $data"></li>
+        </ul>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/dis/lib.js"></script>
     <script type="text/javascript" src="/dis/dashboard.js"></script>

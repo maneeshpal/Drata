@@ -582,8 +582,13 @@ select.error {
 
 .form-error {
   background-color: #edc4bd;
-  border: 1px solid #f04124;
-  padding: 0 1.125rem; }
+  padding: 0 1rem;
+  top: 45px;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0px 1px 1px #404040;
+  max-height: 90px;
+  overflow-y: scroll;
+  overflow-x: hidden; }
 
 .form-error .heading {
   margin-top: 0.5rem; }
@@ -996,18 +1001,23 @@ body.campfire {
   body.campfire .chart-types > li:first-child .button {
     border-left: none; }
 
+.tabular {
+  margin-bottom: 20px;
+  background-color: white; }
 
 .tabular-wrapper {
   font-size: 0.75rem;
   border-left: 1px solid #cccccc;
-  border-right: 1px solid #cccccc; }
+  border-right: 1px solid #cccccc;
+  margin-bottom: 20px;
+  background-color: white; }
 
 .tabular-body, .tabular-header, .tabular-body-header {
   padding: 5px 0;
   border-bottom: 1px dashed #cccccc; }
 
 .tabular-body:last-child {
-  border-bottom: none; }
+  border-bottom: 1px solid #cccccc; }
 
 .tabular-body-header, .tabular-header {
   font-weight: bold; }

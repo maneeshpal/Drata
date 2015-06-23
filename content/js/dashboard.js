@@ -89,14 +89,13 @@
 
     var Widget = function(widgetModel, index, previewMode){
         var self = this;
-        var chartData;
+        var chartData, resizeToken;
         self.previewMode = previewMode;
         self.widgetId = 'widget'+index;
         self.displayIndex = ko.observable(widgetModel.displayIndex);
         self.pieKeys = ko.observableArray([]);
         self.selectedPieKey = ko.observable();
         self.widgetHeight = ko.observable();
-        self.widgetLoaded = ko.observable();
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
@@ -216,11 +215,10 @@
             }
         };
 
-        var _t = undefined, resize = true;
+        var _t = undefined;
 
         self.resizeContent = function(){
             _t && clearTimeout(_t);
-            if(!resize) return;
             if(!content || !content.resize || !!self.parseError()) return;
             _t = setTimeout( function () {
                 previewMode && setWidgetHeight();
@@ -229,12 +227,18 @@
         };
 
         self.clearTimeouts = function(){
-            resize = false;
             _t && clearTimeout(_t);
+            drata.pubsub.unsubscribe(resizeToken);
+
         };
 
+        var displayErrorMessage = function (message) {
+            self.widgetLoading(false);
+            self.parseError(message);
+            drata.pubsub.publish('previewWidgetLoaded', undefined);
+        }
+
         self.loadWidget = function(wm){
-            self.widgetLoaded(false);
             self.widgetLoading(true);
             if(wm) widgetModel = wm;
             var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
@@ -252,31 +256,34 @@
                 segment: widgetModel.segmentModel
             }).then(function(response){
                 chartData = response;
-                if(!response || response.length === 0) {
-                    self.widgetLoading(false);
-                    self.parseError('No data found');
-                    return;
-                }
-
+                
                 var dataToMap;
-                if(widgetModel.segmentModel.chartType === 'pie'){
+                if(widgetModel.segmentModel.chartType === 'pie' 
+                    && chartData 
+                    && chartData.length > 0 ) {
                     dataToMap = chartData[0].values;
                 }
                 else
                 {
                     dataToMap = chartData;
                 }
+
+                if(!dataToMap || dataToMap.length === 0 ) {
+                    displayErrorMessage('No Data found');
+                    return;
+                }
+
                 var pieKeys = dataToMap.map(function(dataItem, index){
                     return {label: dataItem.key, value: index};
                 });
                 
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
-                self.widgetLoaded(true);
-                drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
+                
+                previewMode && drata.pubsub.publish('previewWidgetLoaded', chartData);
+                resizeToken = drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
             }, function(error){
-                self.widgetLoading(false);
-                self.parseError(error.responseText);
+                displayErrorMessage(error);
             });
         };
 
@@ -311,17 +318,6 @@
             }
         });
         
-        // self.updatePosition = function(){
-        //     var model = {
-        //         sizex : self.sizex(),
-        //         sizey: self.sizey(),
-        //         name: self.name(),
-        //         displayIndex: self.displayIndex(),
-        //         _id: widgetModel._id
-        //     };
-        //     drata.apiClient.updateWidget(model);
-        // };
-
         self.remove = function(){
             self.clearTimeouts();
             drata.apiClient.deleteWidget(widgetModel._id);

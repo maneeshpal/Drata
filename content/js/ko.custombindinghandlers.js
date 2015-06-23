@@ -120,7 +120,7 @@
     ].join('');
 
     var tabularTemplateStr = [
-        '<div class="row collapse">',
+        '<div class="row collapse tabular">',
             '<div class="small-12 columns">',
                 '<!-- ko if: dataKeys().length > 0 -->',
                 '<div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Tabular View\', overrideSelectionText: \'Tabular View. {0} groups selected\'}">',

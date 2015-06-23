@@ -77,14 +77,14 @@
 <div id="setup" class="feature-section easytosetup row">
     <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>Easy to Setup</h3>
-    <p class="content">Drata is easy to setup and get going. In fact, it would not take more than a few minutes to configure if you have Node, MongoDB, and git up and running. All the other dependancies are downloaded via Node Package Manager (npm).</p>
+    <p class="content">Drata is easy to setup and get going. In fact, it would not take more than a few minutes to configure if you have Node, MongoDB, and git up and running.</p>
     </div>
 </div>
 
 <div id="minimal" class="feature-section trackingcode row">
     <div class="small-12 large-10 large-centered columns">
     <h3 class="heading"><div class="vis"><svg></svg></div>No Extra Coding Needed</h3>
-    <p class="content">Drata is a data warehousing tool that runs on your local network and connects to your database instance to pull analytics. There is no need to use any copy-paste scripts on your webpages, or any additional logging in your code behind files.</p>
+    <p class="content">Drata is a data warehousing tool that runs on your local network and connects to your database instance to pull analytics. So, there is no need to use any copy-paste scripts on your webpages, or any additional logging in your application code.</p>
     </div>
 </div>
 
@@ -97,8 +97,8 @@
 
 <div id="opensource" class="feature-section row">
     <div class="small-12 large-10 large-centered columns">
-    <h3 class="heading"><div class="vis"><svg></svg></div>Proudly Open Source</h3>
-    <p class="content">Drata embraces open source software. It is free for anyone to use and modify to their needs. More info..</p>
+    <h3 class="heading"><div class="vis"><svg></svg></div>Open Source</h3>
+    <p class="content">MIT license. Drata embraces open source software. It is free for anyone to use and modify to their needs.</p>
     </div>
 </div>
 
@@ -111,7 +111,7 @@
 
 <div class="row footer">
     <div class="medium-8 medium-centered small-12 columns">
-        Drata is developed out of <span class="fa fa-heart-o"></span> for visualizations by Maneeshpal Bandlamudi
+        Drata is developed out of <span style="color:red" class="fa fa-heart-o"></span> for visualizations by Maneeshpal Bandlamudi
     </div>
 </div>
     
@@ -124,9 +124,6 @@
     
     <script type="text/javascript">
         (function (root, $) {
-            //var mainheader = $('#slideBgWrapper');
-            // var minh = Math.max(600, $(window).height() - 68, mainheader.height());
-            // mainheader.attr('style', 'min-height:' + minh + 'px');
             var data = {
                 key : 'homepage',
                 values : [{
@@ -153,7 +150,7 @@
                     value: 25,
                     index: 4,
                     heading: 'Visualizations',
-                    content: 'All the visualizations are custom built on top of D3 js, adhering to reusable chart components principles. More animations and affects can be added only limited by your imagination and javascript skills. <br /> <a class="button primary large radius"> Live Demo</a>'
+                    content: 'All the visualizations are custom built on top of D3 js, adhering to reusable chart components principles. More animations and affects can be added only limited by your imagination. <br /> <a class="button primary large radius" href="/demo"> Live Demo</a>'
                 }]
             }
             var chart2  = drata.charts.pieChart().drawOuterLabels(false).drawDataKey(false).rotateArcs(true).arcExpand(0).keyLabels(false).innerRadius(10).drawPolyLines(false);

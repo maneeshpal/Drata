@@ -15,6 +15,11 @@
             validator: function (val, options) {
                 if(!val)
                     return true;
+
+                if(options.onlyIf2 && typeof options.onlyIf2 === 'function' && !options.onlyIf2() ) {
+                    return true;
+                }
+                
                 if(options.intervalType() === 'date'){
                     if(['month', 'year', 'quarter', 'week'].indexOf(val) > -1){
                         return true;
@@ -38,6 +43,11 @@
                 if(!val) {
                     return true;
                 }
+                
+                if(options.onlyIf && typeof options.onlyIf === 'function' && !options.onlyIf() ) {
+                    return true;
+                }
+
                 return !!drata.utils.parseTime(val).ms;
             },
             message : 'Invalid Interval'

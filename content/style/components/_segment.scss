@@ -16,9 +16,14 @@ select.error{
 }
 
 .form-error{
-    background-color: #EDC4BD;
-    border:1px solid #f04124;
-    padding:0 1.125rem;
+    background-color: #edc4bd;
+    padding: 0 1rem;
+    top: 45px;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0px 1px 1px #404040;
+    max-height: 90px;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .form-error .heading{

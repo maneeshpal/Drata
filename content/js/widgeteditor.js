@@ -15,7 +15,7 @@
         self.segmentModel = ko.observable();
         self.chartData = ko.observable();
 
-        var cloneModel = {};
+        var cloneModel = {}, previewWidgetLoadedToken;
         
         self.name = ko.observable();
         //self.sizex = ko.observable("4");
@@ -75,7 +75,21 @@
             self.dataSourceNames(resp);
         });
 
+        var validateWidgetEditor = function () {
+            var errors = ko.validation.group(self, {deep:false});
+            if(errors().length > 0){
+                errors.showAllMessages();
+            }
+
+            drata.pubsub.publish('formErrors', {
+                keepExistingErrors: true,
+                errors: errors()
+            });
+            return errors().length === 0;
+        }
+
         self.notifyWidget = function () {
+            if(!validateWidgetEditor()) return;
             cloneModel.segmentModel = self.segment.getModel();
             
             if(!cloneModel.segmentModel)
@@ -109,7 +123,7 @@
 
             //no point of closing widget, when there is no dashboard
             //loaded on page.
-            if(drata.cPanel.currentDashboard()){
+            if(drata.cPanel.currentDashboard()) {
                 cloneModel = {};
                 self.onWidgetUpdate = undefined;
                 self.onWidgetCancel = undefined;
@@ -132,11 +146,9 @@
             self.segmentModel(cloneModel.segmentModel);
             self.addUpdateBtnText('Update');
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
-            self.previewWidget().widgetLoaded.subscribe(function(newValue) {
-                if(newValue) {
-                    self.chartData(self.previewWidget().getCurrentData());
-                }
-            })
+            previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, chartData) {
+                self.chartData(chartData);
+            });
         };
 
         self.widgetCancel = function() {
@@ -150,9 +162,11 @@
             if(w) w.clearTimeouts();
             self.previewWidget(undefined);
             cloneModel = {};
+            drata.pubsub.unsubscribe(previewWidgetLoadedToken);
         };
 
-        self.preview = function(){
+        self.preview = function() {
+            if(!validateWidgetEditor()) return;
             var model = self.segment.getModel();
             if(!model) return;
             self.previewWidget(new drata.dashboard.widget({
@@ -172,6 +186,29 @@
         };
 
         drata.pubsub.subscribe('widgetedit', self.attach);
+        self.dataSource.extend({
+            required: { 
+                message : 'Select a DataSource'
+            }
+        });
+
+        self.database.extend({
+            required: { 
+                message : 'Select Database',
+                onlyIf : function(){
+                    return self.dataSource.isValid();
+                }
+            }
+        });
+
+        self.selectedDataKey.extend({
+            required: { 
+                message : 'Select Collection Name',
+                onlyIf : function(){
+                    return self.dataSource.isValid() && self.database.isValid();
+                }
+            }
+        })
     };
     root.drata.ns('dashboard').extend({
         widgetEditor: new WidgetEditor()

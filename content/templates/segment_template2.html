@@ -1,16 +1,5 @@
 <script type="text/html" id="segment-template">
 
-<div class="row" data-bind="visible: formErrors().length > 0">
-    <div class="large-12 columns">
-    <div class="form-error">
-        <h6 class="heading"><span style="color:#f04124" class="fa fa-exclamation-triangle"> </span>Form Errors</h6>
-        <ul class="square" data-bind="foreach:formErrors">
-            <li data-bind="html: $data"></li>
-        </ul>
-        </div>
-    </div>
-</div>
-
 <div style="min-width:300px">
     <!-- ko template: {name: 'selection-template', data: selectionGroup} -->
     <!-- /ko -->

@@ -10,7 +10,7 @@ var Segmentor = function(model){
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition'});
     self.selectionGroup = new SelectionGroup({ level: self.level});
-    self.formErrors = ko.observableArray();
+    //self.formErrors = ko.observableArray();
     
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
@@ -28,10 +28,13 @@ var Segmentor = function(model){
         self.conditionGroup.prefill(model.group || []);
         self.selectionGroup.prefill(model.selection || []);
         self.dataFilter.prefill(model.dataFilter || {});
-        self.chartType(model.chartType);
+        self.chartType(model.chartType || drata.global.chartType.line);
         self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
-        self.chartType.isModified(false);
-        self.formErrors([]);
+        
+        drata.pubsub.publish('formErrors', {
+            keepExistingErrors: false,
+            errors: []
+        })
     };
     
     self.dataGroupTemplate = ko.computed(function(){
@@ -50,8 +53,7 @@ var Segmentor = function(model){
     });
     
     self.getModel = function(){
-        if(!self.isValidSegment()) return;
-        return self.getM();
+        return runSegmentValidation();
     };
     self.getM = function(){
         return {
@@ -184,8 +186,13 @@ var Segmentor = function(model){
         return errors;
     };
 
-    self.isValidSegment = function(){
-        self.formErrors([]);
+    var runSegmentValidation = function(){
+        drata.pubsub.publish('formErrors', {
+            keepExistingErrors: false,
+            errors: []
+        });
+
+        var errors = [];
         var selerrors = ko.validation.group(self.selectionGroup, {deep:true});
         var conditions = self.conditionGroup.conditions();
         var dataFilterErrors = ko.validation.group(self.dataFilter, {deep:true});
@@ -197,37 +204,54 @@ var Segmentor = function(model){
                 isValid = false;
             }
         }
-        if(!isValid) self.formErrors.push('Conditions have errors.');
+        
+        if(!isValid) errors.push('Conditions have errors.');
+
         if(selerrors().length > 0 ){
-            isValid = false;
             selerrors.showAllMessages();
-            self.formErrors.push('Selections have errors.');
+            errors.push('Selections have errors.');
         }
-        if(topLevelErrors().length > 0){
-            isValid = false;
+
+        if(topLevelErrors().length > 0) {
             topLevelErrors.showAllMessages();
-            self.formErrors(self.formErrors().concat(topLevelErrors()));
+            errors = errors.concat(topLevelErrors());
         }
-        if(dataFilterErrors().length > 0){
-            isValid = false;
+
+        if(dataFilterErrors().length > 0) {
             dataFilterErrors.showAllMessages();
-            self.formErrors.push('Errors with date range');
+            errors.push('Errors with date range');
         }
+
         if(self.dataGroup){
             var dataGroupErrors = ko.validation.group(self.dataGroup, {deep:true});
             if(dataGroupErrors().length > 0) {
-                isValid = false;
                 dataGroupErrors.showAllMessages();
-                self.formErrors(self.formErrors().concat(dataGroupErrors()));
+                errors = errors.concat(dataGroupErrors());
             }
         }
+
         var logicErrors = self.getQueryErrors();
-        if(logicErrors.length > 0){
-            isValid  = false;
-            self.formErrors(self.formErrors().concat(logicErrors));
+        if(logicErrors.length > 0) {
+            errors = errors.concat(logicErrors);
         }
 
-        return isValid;
+        if(errors.length === 0) {
+            return self.getM();
+        } 
+        else {
+            
+            drata.pubsub.publish('formErrors', {
+                keepExistingErrors: true,
+                errors: errors
+            });
+
+            var errElems = $('span.error:visible');
+            if(errElems.length > 0) {
+                $('html, body').animate({
+                    scrollTop: $(errElems[0]).offset().top - 100 || 0
+                }, 500);
+            }
+        }
     };
     self.chartType.extend({
         required: {'message': 'Select Chart Type'}
@@ -378,12 +402,18 @@ var TrackDataGroup = function(){
 
     self.timeseriesInterval.extend({
         groupingInterval: {
-            intervalType : function(){
+            intervalType : function () {
                 return self.xAxisType();
+            },
+            onlyIf2: function () {
+                return self.timeseries();
             }
         },
-        onlyIf : function(){
-            return self.timeseries();
+        required: { 
+            message : 'Enter Interval',
+            onlyIf: function () {
+                return self.timeseries();
+            }
         }
     });
 
@@ -530,6 +560,9 @@ var ComparisonDataGroup = function(options){
         groupingInterval: {
             intervalType : function(){
                 return self.groupByIntervalType();
+            },
+            onlyIf2: function(){
+                return self.needsGroupByInterval();
             }
         }
     });
@@ -544,6 +577,9 @@ var ComparisonDataGroup = function(options){
         groupingInterval: {
             intervalType : function(){
                 return self.divideByIntervalType();
+            },
+            onlyIf2: function(){
+                return self.needsDivideByInterval();
             }
         }
     });
@@ -556,7 +592,12 @@ var TimeFrameItem = function(timeframeType){
     self.dateType = ko.observable('static');
     self.timeframeType = timeframeType;
     self.dynamicDate.extend({
-        dynamicInterval: {},
+        dynamicInterval: {
+            a: 1,
+            onlyIf: function(){
+                return self.dateType() === 'dynamic';
+            }
+        },
         required: {
             message: 'Enter Interval',
             onlyIf: function(){
@@ -566,7 +607,11 @@ var TimeFrameItem = function(timeframeType){
     });
 
     self.staticDate.extend({
-        validDataFilterDate: {},
+        validDataFilterDate: {
+            onlyIf: function(){
+                return self.dateType() === 'static';
+            }
+        },
         required: {
             message: 'Enter Date',
             onlyIf: function(){

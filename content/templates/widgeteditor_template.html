@@ -4,9 +4,11 @@
         <!-- ko if: previewWidget() -->
             <div class="medium-12 large-7 large-push-5 columns preview-widget">
                 <!-- ko template: { name: 'widget-template', data:previewWidget(), afterRender:loadWidget } --><!-- /ko -->
-                <div class="row collapse" data-bind="if : chartData() && chartData().length > 0">
-                    <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { height: (($(window).height()- 145) / 2) + 'px' }, tabular: {segment: segmentModel, data: chartData }"></div>
+                <!-- ko if: chartData() -->
+                <div class="row collapse" style="margin-bottom: 20px;">
+                    <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { minHeight: '100px', maxHeight: (($(window).height()- 145) / 2) + 'px' }, tabular: { segment: segmentModel, data: chartData }"></div>
                 </div>
+                <!-- /ko -->
             </div>
         <!-- /ko -->
         <!-- ko ifnot: previewWidget() -->

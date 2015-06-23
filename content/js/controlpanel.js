@@ -134,6 +134,20 @@
 			drata.pubsub.publish('themechanged', newValue);
 		});
 
+		self.formErrors = ko.observableArray();
+
+		drata.pubsub.subscribe('formErrors', function (eventName, message) {
+			if(!drata.utils.isArray(message.errors)) {
+				message.errors = [message.errors];
+			}
+			if( message.keepExistingErrors ) {
+				self.formErrors(self.formErrors().concat(message.errors));
+			}
+			else {
+				self.formErrors(message.errors);
+			}
+		});
+
         self.removeTag = function(tag){
         	var tagToRemove = drata.models.tagList().filter(function(t){
         		return t.tagName === tag.tagName && t.dashboardId === tag.dashboardId;
@@ -269,6 +283,10 @@
         drata.utils.windowResize(function(){
         	resizeWidgets();
         	if(self.isDashboardView()) resized = false;
+        });
+
+        currentView.subscribe(function () {
+        	self.formErrors([]);
         });
 	};
 
