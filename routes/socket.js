@@ -6,14 +6,14 @@ exports.initialize = function(server){
     io.sockets.on('connection', function (socket) {
         console.log('socket connected successfully');
         socket.on('widgetupdated', function (data) {
-            !config.demo && socket.broadcast.emit('widgetupdated' + data.widgetId, data);
+            config.broadcastDashboardUpdates && socket.broadcast.emit('widgetupdated' + data.widgetId, data);
         });
 
         socket.on('widgetcreated', function (data) {
-            !config.demo && socket.broadcast.emit('widgetcreated' + data.dashboardId, data);
+            config.broadcastDashboardUpdates && socket.broadcast.emit('widgetcreated' + data.dashboardId, data);
         });
         socket.on('widgetremoved', function (data) {
-            !config.demo && socket.broadcast.emit('widgetremoved' + data.widgetId, data);
+            config.broadcastDashboardUpdates && socket.broadcast.emit('widgetremoved' + data.widgetId, data);
         });
 	});
 }

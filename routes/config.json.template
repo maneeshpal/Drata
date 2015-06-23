@@ -1,6 +1,6 @@
 
 {
-	"demo" : true,
+	"broadcastDashboardUpdates" : true,
 	"dataSources" : [{
 		"alias" : "drataDemoExternal",
 		"serverName": "localhost",
