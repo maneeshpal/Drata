@@ -78,6 +78,23 @@ exports.setIO = function(socketio){
     io = socketio;
 };
 
+var findDemoDashboard = function(){
+    return connectToCollection(dashboardCollection).then(function(collection){
+        var defer = Q.defer();
+        collection.findOne({
+            'demo' : true
+        }, function(err, result) {
+            (err || !result) ? defer.reject({code: 404, message: 'cannot find document'}): defer.resolve(result);
+        });
+        return defer.promise;
+    });
+}
+exports.redirectDemo = function(req, res){
+    findDemoDashboard().then(function(demoDashboardModel){
+        res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
+    }, handleErrorResponse.bind(res));
+};
+
 exports.findDashboard = function(req, res) {
     getDashboard(req.params.dashboardId)
     .done(function(result){
@@ -110,35 +127,45 @@ var updateWidget = function(widgetModel){
     return getValidMongoId(widgetModel._id).then(function(widgetObjectId){
         return connectToCollection(widgetCollection).then(function(collection){
             return getDashboard(widgetModel.dashboardId).then(function(result){
-                
-                return getWidget(widgetModel._id).then(function(result){
+                if(!result.demo){
+                    return getWidget(widgetModel._id).then(function(result){
+                        var defer = Q.defer();
+                        widgetModel._id = widgetObjectId;
+                        widgetModel.dateUpdated = new Date();
+                        collection.save(widgetModel, {safe:true}, function(err, result) {
+                            err ? defer.reject({code: 500, message: 'cannot update widget'}) : defer.resolve();
+                        });
+                        return defer.promise;
+                    });    
+                }else{
                     var defer = Q.defer();
-                    widgetModel._id = widgetObjectId;
-                    widgetModel.dateUpdated = new Date();
-                    collection.save(widgetModel, {safe:true}, function(err, result) {
-                        err ? defer.reject({code: 500, message: 'cannot update widget'}) : defer.resolve();
-                    });
+                    defer.resolve();
                     return defer.promise;
-                });    
-
+                }
             });
         });
     });
 };
 
-var addWidget = function(widgetModel){
+var addWidget = function(widgetModel, allowDemo){
     return connectToCollection(widgetCollection).then(function(collection){
         return getDashboard(widgetModel.dashboardId).then(function(result){
             var defer = Q.defer();
-            
-            widgetModel.dateCreated = new Date();
-            widgetModel.dateUpdated = new Date();
-            
-            delete widgetModel._id; //just in case
-            collection.save(widgetModel, {safe:true}, function(err, result) {
-                err ? defer.reject({code: 500, message: 'cannot create widget'}) : defer.resolve(result);
-            });
-            
+            if(result.demo && !allowDemo){
+                widgetModel._id = new mongo.ObjectID();
+                widgetModel.isDemo = true;
+                defer.resolve(widgetModel);
+            }
+            else {
+                widgetModel.dateCreated = new Date();
+                widgetModel.dateUpdated = new Date();
+                
+                delete widgetModel._id; //just in case
+                delete widgetModel.demo; // just incase, a user clones a demo widget to a different dashboard.
+                collection.save(widgetModel, {safe:true}, function(err, result) {
+                    err ? defer.reject({code: 500, message: 'cannot create widget'}) : defer.resolve(result);
+                }); 
+            }
             return defer.promise;
         });
     });
@@ -167,19 +194,26 @@ var deleteWidget = function(widgetId){
     return connectToCollection(widgetCollection).then(function(collection){
         return getWidget(widgetId).then(function(w){
             return getDashboard(w.dashboardId).then(function(d){
-            
-                //delete the widget
-                return getValidMongoId(widgetId).then(function(widgetObjectId){
-                    var defer = Q.defer();
-                    collection.remove({_id : widgetObjectId}, {safe:true,justOne:true}, function(err, result) {
-                        err ? defer.reject({
-                            code: 500, 
-                            message: utils.format('Widget cannot be deleted. Id: {0}', widgetId)
-                        }) : defer.resolve(result);
-                    });
-                    return defer.promise;
-                });
                 
+                if(d.demo){
+                    var defer = Q.defer();
+                    defer.resolve();
+                    return defer.promise;
+                }
+                else
+                {
+                    //delete the widget
+                    return getValidMongoId(widgetId).then(function(widgetObjectId){
+                        var defer = Q.defer();
+                        collection.remove({_id : widgetObjectId}, {safe:true,justOne:true}, function(err, result) {
+                            err ? defer.reject({
+                                code: 500, 
+                                message: utils.format('Widget cannot be deleted. Id: {0}', widgetId)
+                            }) : defer.resolve(result);
+                        });
+                        return defer.promise;
+                    });
+                }
             });
         });
     });
@@ -192,21 +226,26 @@ exports.deleteWidget = function(req, res){
     }, handleErrorResponse.bind(res));
 };
 
-var upsertDashboard = function(dashboardModel){
+var upsertDashboard = function(dashboardModel, allowDemo){
     return connectToCollection(dashboardCollection).then(function(collection){
         if(dashboardModel._id){
             return getDashboard(dashboardModel._id).then(function(d){
-                
-                return getValidMongoId(dashboardModel._id).then(function(dashboardObjectId){
+                if(d.demo && !allowDemo){
                     var defer = Q.defer();
-                    dashboardModel._id = dashboardObjectId;
-                    dashboardModel.dateUpdated = new Date();
-                    collection.save(dashboardModel, {safe:true}, function(err, result) {
-                        err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id)}) : defer.resolve(result);
-                    });
+                    defer.resolve();
                     return defer.promise;
-                });
-                
+                }
+                else{
+                    return getValidMongoId(dashboardModel._id).then(function(dashboardObjectId){
+                        var defer = Q.defer();
+                        dashboardModel._id = dashboardObjectId;
+                        dashboardModel.dateUpdated = new Date();
+                        collection.save(dashboardModel, {safe:true}, function(err, result) {
+                            err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id)}) : defer.resolve(result);
+                        });
+                        return defer.promise;
+                    });
+                }
             });
         }
         else{
@@ -253,8 +292,6 @@ exports.truncateData = function(req, res){
 
 exports.generateDemoDashboard = function(req, res){
     var demoData = utils.clone(demoDashboardData);
-    demoData.dashboard.name = demoData.dashboard.name + '-' + Math.floor(Math.random() * 1000);
-
     var promise = upsertDashboard(demoData.dashboard, true).then(function(dashboardModel){
         var wPromises = [];
         var dashboardId = dashboardModel._id.toString();
@@ -334,19 +371,24 @@ exports.getAllTagsOfDashboard = function(req, res){
     }, handleErrorResponse.bind(res));
 };
 
-var addTag = function(tagModel){
+var addTag = function(tagModel, allowDemo){
     return connectToCollection(tagCollection).then(function(collection){
         return getDashboard(tagModel.dashboardId).then(function(result){
             var defer = Q.defer();
-            collection.update({
-                tagName: tagModel.tagName,
-                dashboardId: tagModel.dashboardId
-            },
-            tagModel,
-            { upsert: true },
-            function(err, result){
-                err ? defer.reject({code: 500, message: utils.format('Dashboard not found. Id: {0}', tagModel.dashboardId)}) : defer.resolve(result);
-            });
+            if(result.demo && !allowDemo){
+                defer.resolve();
+            }
+            else{
+                collection.update({
+                    tagName: tagModel.tagName,
+                    dashboardId: tagModel.dashboardId
+                },
+                tagModel,
+                { upsert: true },
+                function(err, result){
+                    err ? defer.reject({code: 500, message: utils.format('Dashboard not found. Id: {0}', tagModel.dashboardId)}) : defer.resolve(result);
+                });    
+            }
             return defer.promise;
         });
     });
@@ -362,17 +404,20 @@ var removeTag = function(tagId){
     return findObject(tagCollection, tagId).then(function (tag) {
         return getDashboard(tag.dashboardId).then(function ( dashboard ) {
             var defer = Q.defer();
-            
-            return getValidMongoId(tagId).then(function(tagObjectId){
-                return connectToCollection(tagCollection).then(function(collection){
-                    var defer = Q.defer();
-                    collection.remove({_id : tagObjectId}, {safe:true,justOne:true}, function(err, result) {
-                        err ? defer.reject({code: 500, message: utils.format('Error removing tag. Id: {0}', tagId)}) : defer.resolve(result);
+            if(dashboard.demo){
+                defer.resolve();
+            }
+            else {
+                return getValidMongoId(tagId).then(function(tagObjectId){
+                    return connectToCollection(tagCollection).then(function(collection){
+                        var defer = Q.defer();
+                        collection.remove({_id : tagObjectId}, {safe:true,justOne:true}, function(err, result) {
+                            err ? defer.reject({code: 500, message: utils.format('Error removing tag. Id: {0}', tagId)}) : defer.resolve(result);
+                        });
+                        return defer.promise;
                     });
-                    return defer.promise;
                 });
-            });
-            
+            }
             return defer.promise;
         })
     })
@@ -408,7 +453,7 @@ var deleteDashboard = function(dashboardId){
     return getValidMongoId(dashboardId).then(function(dashboardObjectId){
         return connectToCollection(dashboardCollection).then(function(collection){
             var defer = Q.defer();
-            collection.remove({ _id : dashboardObjectId }, { safe:true, justOne:true }, function(err, result) {
+            collection.remove({_id : dashboardObjectId, $or : [{demo:{$exists: false}}, {demo : false}]}, {safe:true,justOne:true}, function(err, result) {
                 err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be deleted. Id: {0}', dashboardId)}) : defer.resolve(result);
             });
             return defer.promise;
