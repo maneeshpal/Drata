@@ -1,0 +1,43 @@
+
+.edit-label .title-display{
+    display: block;
+    height: 25px;
+    line-height: 25px;
+}
+.edit-label input {
+    height: 25px;
+    background: transparent;
+}
+.edit-label .postfix {
+    height: 25px;
+    line-height: 25px;
+}
+
+.edit-label .title-display span, .edit-label .title-display a{
+    line-height: 1.5rem;
+    height:1.5rem;
+}
+
+.edit-label .title-display i{
+    line-height: 1rem;
+    height:1rem;
+}
+
+.edit-label.edit .title-display{
+    display: none;
+}
+ .edit-label .title-edit{
+    display: none;
+ }
+.edit-label .title-edit input{ 
+    margin-bottom: 0;
+ }
+ .edit-label.edit .title-edit{
+    display: block;
+ }
+ .title-display .edit-icon{
+    display: none;
+ }
+ .title-display:hover .edit-icon{
+    display:inline;
+ }

@@ -174,7 +174,7 @@
         return _perform('GET', url);
     };
     
-    var getData = function(model){
+    var getData = function(model) {
         var defer = $.Deferred();
         var clientAggregation = false;
         var postData = {
@@ -192,7 +192,7 @@
         }, function(err){
             defer.reject(err);
         });
-    
+
         return defer.promise();
     };
 

@@ -611,6 +611,26 @@
         return new Date(_x.toDateString());
     };
 
+    var timer = {
+        start: function(callback, ms) {
+            return setInterval(callback, ms);
+        },
+        stop: function(t) {
+            clearInterval(t);
+        }
+    };
+
+    var getHms = function getHms(s) {
+        var sec = +s % 60;
+        var total_min = (+s - sec) /60;
+        var  min =  total_min % 60;
+        var hour = (total_min-min) / 60;
+        hour = hour < 10 ? '0' + hour : hour;
+        min = min < 10 ? '0' + min : min;
+        sec = sec < 10 ? '0' + sec : sec;
+        return hour +':'+ min+ ':' + sec;
+    };
+
     drata.ns('utils').extend({
         format: format,
         toArray:toArray,
@@ -636,7 +656,9 @@
         getDataFilterExpression: getDataFilterExpression,
         formatNumber: formatNumber,
         isArray: isArray,
-        firstDayOfWeek: firstDayOfWeek
+        firstDayOfWeek: firstDayOfWeek,
+        timer: timer,
+        getHms: getHms
     });
 })(this);
 

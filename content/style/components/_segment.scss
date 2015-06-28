@@ -24,6 +24,8 @@ select.error{
     max-height: 90px;
     overflow-y: scroll;
     overflow-x: hidden;
+    z-index: 98;
+    color: #222;
 }
 
 .form-error .heading{

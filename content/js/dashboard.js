@@ -87,6 +87,58 @@
         self.loadDashboard(dashboardId);
     };
 
+    var AutoRefresh = function(model) {
+        var self = this;
+        model = +model || 0;
+        self.seconds = ko.observable(+model);
+        self._seconds = ko.observable(+model);
+        var _counter = ko.observable(0);
+
+        self.formattedTime = ko.computed(function() {
+            return drata.utils.getHms(_counter());
+        });
+
+        self.enterTimeframe = ko.observable();
+        
+        self.turnedOn = ko.computed(function() {
+            return +self.seconds() > 0 && !self.enterTimeframe();
+        });
+
+        var _t, _callback;
+        
+        var countDown = function() {
+            _counter(self._seconds());
+            _t = drata.utils.timer.start(function() {
+                var c = _counter();
+                if(c === 0) {
+                    _callback && _callback();
+                    //start spinner
+                    _t && drata.utils.timer.stop(_t);
+                }
+                else {
+                    _counter(c - 1);
+                }
+            }, 1000);
+        };
+
+        self.startTimer = function() {
+            var sec = +self._seconds();
+            self.enterTimeframe(false);
+            self.seconds(sec);
+            sec > 0 && countDown();
+        };
+
+        self.whenTime = function(callback) {
+            _callback = callback;
+        };
+
+        self.enteringTimeframe = function() {
+            self.enterTimeframe(true);
+            _t && drata.utils.timer.stop(_t);
+            _counter(0);
+        };
+    };
+
     var Widget = function(widgetModel, index, previewMode){
         var self = this;
         var chartData, resizeToken;
@@ -96,6 +148,7 @@
         self.pieKeys = ko.observableArray([]);
         self.selectedPieKey = ko.observable();
         self.widgetHeight = ko.observable();
+        self.autoRefresh = new AutoRefresh(widgetModel.refresh);
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
@@ -103,7 +156,7 @@
         var content, chartType = drata.global.chartType;
 
         function setWidgetHeight () {
-            var wh = ($(window).height()- 45 - (45 * self.sizey())) / self.sizey();
+            var wh = ($(window).height()- 45 - (75 * self.sizey())) / self.sizey();
             self.widgetHeight(Math.max(200, wh));
         };
 
@@ -148,7 +201,7 @@
             return 'widget-size-' + self.sizex();
         });
 
-        self.getId = function(){
+        self.getId = function() {
             return widgetModel._id;
         };
 
@@ -166,7 +219,7 @@
             var m = self.getModel();
             if(!m._id) return;
             drata.apiClient.updateWidget(m).then(function(resp){
-
+                
             });
         };
 
@@ -229,26 +282,15 @@
         self.clearTimeouts = function(){
             _t && clearTimeout(_t);
             drata.pubsub.unsubscribe(resizeToken);
-
         };
 
         var displayErrorMessage = function (message) {
             self.widgetLoading(false);
             self.parseError(message);
-            drata.pubsub.publish('previewWidgetLoaded', undefined);
+            previewMode && drata.pubsub.publish('previewWidgetLoaded', undefined);
         }
 
-        self.loadWidget = function(wm){
-            self.widgetLoading(true);
-            if(wm) widgetModel = wm;
-            var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
-            _sizex(widgetModel.sizex);
-            _sizey(widgetModel.sizey);
-            _name(widgetModel.name);
-            resizeContent && self.resizeContent();
-            self.parseError(undefined);
-            self.chartType(widgetModel.segmentModel.chartType);
-            
+        var getData = function () {
             drata.apiClient.getData({
                 dataSource: widgetModel.dataSource, 
                 database: widgetModel.database, 
@@ -267,24 +309,55 @@
                 {
                     dataToMap = chartData;
                 }
-
+                previewMode && console.log(chartData);
                 if(!dataToMap || dataToMap.length === 0 ) {
                     displayErrorMessage('No Data found');
                     return;
                 }
 
-                var pieKeys = dataToMap.map(function(dataItem, index){
-                    return {label: dataItem.key, value: index};
-                });
+                var pieKeys = [];
+
+                if(widgetModel.segmentModel.chartType === 'pie') {
+                    chartData.forEach(function(chartItem, chart_index) {
+                        chartItem.values.forEach(function(dataItem, dataitem_index) {
+                            pieKeys.push({ 
+                                label: chartItem.key +' -> '+ dataItem.key, 
+                                value: dataitem_index,
+                                chartIndex: chart_index
+                            })
+                        })
+                    });    
+                }
+                else {
+                    pieKeys = dataToMap.map(function(dataItem, index){
+                        return {label: dataItem.key, value: index};
+                    });
+                }
                 
                 self.pieKeys(pieKeys);
                 self.widgetLoading(false);
                 
-                previewMode && drata.pubsub.publish('previewWidgetLoaded', chartData);
+                previewMode && drata.pubsub.publish('previewWidgetLoaded', { data: chartData, segment: widgetModel.segmentModel });
                 resizeToken = drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
+                
+                self.autoRefresh.startTimer();
+
             }, function(error){
                 displayErrorMessage(error);
             });
+        };
+
+        self.loadWidget = function(wm){
+            self.widgetLoading(true);
+            if(wm) widgetModel = wm;
+            var resizeContent = widgetModel.sizex !== _sizex() || widgetModel.sizey !== _sizey();
+            _sizex(widgetModel.sizex);
+            _sizey(widgetModel.sizey);
+            _name(widgetModel.name);
+            resizeContent && self.resizeContent();
+            self.parseError(undefined);
+            self.chartType(widgetModel.segmentModel.chartType);
+            getData();
         };
 
         self.getCurrentData = function() {
@@ -296,24 +369,39 @@
             widgetModel.sizey = _sizey();
             widgetModel.displayIndex = self.displayIndex();
             widgetModel.name = self.name();
+            
             if(content && content.getModel){
                 widgetModel.contentModel = content.getModel();
             }
             
+            if(self.autoRefresh.turnedOn()) {
+                widgetModel.refresh = +self.autoRefresh.seconds();
+            }
+            else {
+                delete widgetModel.refresh;
+            }
+
             return widgetModel;
         };
         
         self.selectedPieKey.subscribe(function(newValue){
             if(!newValue) return;
-            if((widgetModel.segmentModel.chartType === 'pie' &&  chartData[0].values.length === 0) ||
-                chartData[newValue.value].values.length === 0){
-                self.parseError('No data found');
+            if( widgetModel.segmentModel.chartType === 'pie' ) {
+                if( chartData[0].values.length === 0 ||
+                    chartData[0].values[newValue.value].values.length === 0 ) {
+                    displayErrorMessage('No data found');
+                    return;
+                }
+            }
+            else if ( !chartData[newValue.value] || !chartData[newValue.value].values || chartData[newValue.value].values.length === 0 ) {
+                displayErrorMessage('No data found');
                 return;
             }
 
-            if(widgetModel.segmentModel.chartType === 'pie'){
-                content && content.change && content.change(chartData[0], widgetModel.segmentModel, widgetModel.contentModel, newValue);
-            }else{
+            if(widgetModel.segmentModel.chartType === 'pie') {
+                content && content.change && content.change(chartData[newValue.chartIndex].values[newValue.value], widgetModel.segmentModel, widgetModel.contentModel);
+            }
+            else {
                 content && content.change && content.change(chartData[newValue.value], widgetModel.segmentModel, widgetModel.contentModel);
             }
         });
@@ -336,6 +424,10 @@
             drata.nsx.dashboardSyncService.listenWidgetUpdated(widgetModel._id);
             drata.nsx.dashboardSyncService.listenWidgetRemoved(widgetModel._id);
         }
+
+        self.autoRefresh.seconds.subscribe(self.update.bind(self));
+
+        self.autoRefresh.whenTime(getData);
     };
 
     var LineContent = function(contentOptions){
@@ -671,16 +763,17 @@
         self.drawChart = function(_data){
             chart = drata.charts.pieChart();
             d3.select('#'+self.widgetContentId + ' svg')
-                .datum(_data.values[0])
+                .datum(_data)
                 .call(chart);
         };
+
         self.resize = function(){
             chart && chart.resize && chart.resize();
         };
         
-        self.change = function(_data, _segmentModel, _contentModel, pieKey){
+        self.change = function(_data, _segmentModel, _contentModel){
             if(chart){
-                chart.change && chart.change(_data.values[pieKey.value]);
+                chart.change && chart.change(_data);
             }else{
                 self.drawChart(_data, _segmentModel);
             }

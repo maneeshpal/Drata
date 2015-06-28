@@ -6,6 +6,7 @@ h3.view-heading {
   margin:20px 0;
   text-align:center;
 }
+
 .preview-placeholder {
   border: 5px dashed #cccccc;
   text-align: center;
@@ -17,8 +18,36 @@ h3.view-heading {
     vertical-align: middle;
   }
 }
+
 .preview-widget .widget-outer {
   padding: .5rem 0;
+}
+
+.tabular-data {
+  transition: all .5s;
+  overflow-y: hidden;
+  max-height: 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.row.collapse.tabular-data { //this is hacky. please forgive me
+  margin-bottom: 20px;
+}
+
+.chk-tabular {
+  visibility: hidden;
+  position: absolute;
+}
+
+.chk-tabular:checked + .tabular-data {
+  max-height: 1000px;
+}
+
+.toggle-tabular {
+  margin:10px 0;
+  font-size: 1rem;
+  color: #008cba;
+  display: inline-block;
 }
 
 @media #{$large-up} {
@@ -29,5 +58,11 @@ h3.view-heading {
       background:transparent;
       border: 1px dashed #ccc;
     }
+  }
+  .tabular-data {
+    max-height: 1000px;
+  }
+  label.toggle-tabular {
+    display: none;
   }
 }
