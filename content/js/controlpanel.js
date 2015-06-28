@@ -107,11 +107,6 @@
 	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
 			drata.apiClient.addWidget(widgetModel).then(function(response){
                 console.log('widget created in db');
-                // if(response && response._id) {
-                // 	widgetModel = response;
-                // }else{
-                // 	widgetModel._id = 'demo';
-                // }
 	            currentDashboard.addWidget(response);
 	        });
 		});
@@ -199,7 +194,7 @@
 	    		break;
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
-	    			if(c[1] && c[1]!== 'demo'){
+	    			if(c[1]){
 	    				drata.apiClient.getWidget(c[1]).then(function(response){
     						drata.pubsub.publish('widgetedit', {
 					            widgetModel: response
@@ -461,6 +456,35 @@
 
 	    filterModel.subscribe(this.bindWidgets.bind(this), this);
 	    this.bindWidgets();
+
+	    var self = this;
+	    //making sure that any updates of widget can be immediately reflected
+	    //on widget manager.
+	    drata.pubsub.subscribe('widgetupdate', function(eventName, widgetModel){
+			if(!widgetModel._id) return;
+			var widgetToUpdate = self.widgetList().filter(function(w) {
+				return w._id === widgetModel._id;
+			})[0];
+			if(widgetToUpdate) {
+				self.widgetList.remove(widgetToUpdate);
+				self.widgetList.push(new WidgetItem(widgetModel, {chooseWidgets: true})); 
+			}
+		});
+	    //lets remove the widget from widget manager view, so that no one 
+	    //can try add it to any dashboard.
+		drata.pubsub.subscribe('widgetremoved', function(eventName, widgetId){
+			if(!widgetId) return;
+			var widgetToRemove = self.widgetList().filter(function(w) {
+				return w._id === widgetId;
+			})[0];
+
+			if(widgetToRemove) {
+				self.widgetList.remove(widgetToRemove);
+			}
+		});
+
+		//lets not worry about subscribing to widget create event.
+		//users can refresh the page to see that.
 	};
 
 	var DashboardItem = function(model, options){
@@ -474,7 +498,7 @@
 	    this.widgetList = ko.observableArray();
 	    this.tagList = new TagList({dashboardId: model._id, name: this.name});
 	    
-	    this.bindWidgets = function(){
+	    this.bindWidgets = function() {
 	    	var defer = $.Deferred();
 	    	if(widgetsBound) {
 	    		defer.resolve(this.widgetList());

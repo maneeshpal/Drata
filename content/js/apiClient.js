@@ -82,6 +82,7 @@
             socket.emit('widgetremoved', {
                 widgetId : widgetId
             });
+            drata.pubsub.publish('widgetremoved', widgetId);
         });
         return promise;
     };
