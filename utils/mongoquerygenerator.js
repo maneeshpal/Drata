@@ -17,7 +17,7 @@ var getProperties = function(segment){
 var getQuery = function(segment){
     var query = segment.group ? getMongoConditions(segment.group) : {};
     
-    if(segment.dataFilter.dateProp){
+    if(segment.dataFilter && segment.dataFilter.dateProp){
         query[segment.dataFilter.dateProp] = query[segment.dataFilter.dateProp] || {};
         if(segment.dataFilter.from && !query[segment.dataFilter.dateProp]['$gte']){
             query[segment.dataFilter.dateProp]['$gte'] = utils.getDateFromTimeframe(segment.dataFilter.from);

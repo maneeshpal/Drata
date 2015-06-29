@@ -55,7 +55,7 @@
                     maxDate: new Date(),
                     placeholder: 'Static Date'
             }"></div>
-            <div data-bind="visible: dateType() === 'dynamic', comboBox:{selectedValue: dynamicDate, options: drata.global.timeframeIntervalExamples, optionsCaption: 'Dynamic interval'}">
+            <div data-bind="visible: dateType() === 'dynamic', comboBox:{selectedValue: dynamicDate, options: drata.global.dateIntervalTypeAheads, optionsCaption: 'Dynamic interval'}">
             </div>
         </div>
     </div>
@@ -179,7 +179,7 @@
             <label><input style="margin-bottom:0" type="checkbox" data-bind="checked:timeseries" />
             Interval
             <span data-bind="tooltip: {datakey: 'interval'}"  class="fa fa-question dtooltip"></span></label>
-            <div data-bind="comboBox:{enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval'}">
+            <div data-bind="comboBox:{ enabled:timeseries, selectedValue: timeseriesInterval, options: intervalOptions, optionsCaption: 'Interval' }">
             </div>
         </div>
     </div>

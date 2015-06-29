@@ -593,13 +593,6 @@ var TimeFrameItem = function(timeframeType){
     self.timeframeType = timeframeType;
     self.dynamicDate.extend({
         dynamicInterval: {
-            a: 1,
-            onlyIf: function(){
-                return self.dateType() === 'dynamic';
-            }
-        },
-        required: {
-            message: 'Enter Interval',
             onlyIf: function(){
                 return self.dateType() === 'dynamic';
             }
@@ -608,12 +601,6 @@ var TimeFrameItem = function(timeframeType){
 
     self.staticDate.extend({
         validDataFilterDate: {
-            onlyIf: function(){
-                return self.dateType() === 'static';
-            }
-        },
-        required: {
-            message: 'Enter Date',
             onlyIf: function(){
                 return self.dateType() === 'static';
             }
@@ -642,12 +629,14 @@ var TimeFrameItem = function(timeframeType){
 
 var DataFilter = function(){
     var self = this;
+    self.dateProp = ko.observable();
     self.from = new TimeFrameItem('from');
     self.to = new TimeFrameItem('to');
-    self.dateProp = ko.observable().extend({
-        required: {message: 'Enter your Date Property'}
-    });
-    self.getModel = function(){
+    
+
+    self.getModel = function() {
+        if(!self.dateProp()) return;
+        
         return {
             from : self.from.getModel(),
             to: self.to.getModel(),
@@ -663,8 +652,45 @@ var DataFilter = function(){
     };
 
     self.expression = ko.computed(function(){
-        return drata.utils.getDataFilterExpression(self.getModel());
+        var model = self.getModel();
+        return model ? drata.utils.getDataFilterExpression(model) : 'No Data Filter selected';
     }).extend({ throttle: 500 });
+
+    self.from.dynamicDate.extend({
+        required: {
+            message: 'Enter Interval',
+            onlyIf: function(){
+                return self.from.dateType() === 'dynamic' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.from.staticDate.extend({
+        required: {
+            message: 'Enter Date',
+            onlyIf: function(){
+                return self.from.dateType() === 'static' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.to.dynamicDate.extend({
+        required: {
+            message: 'Enter Interval',
+            onlyIf: function(){
+                return self.to.dateType() === 'dynamic' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.to.staticDate.extend({
+        required: {
+            message: 'Enter Date',
+            onlyIf: function(){
+                return self.to.dateType() === 'static' && !!self.dateProp();
+            }
+        }
+    });
 };
 
 var Condition = function(options){
