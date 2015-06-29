@@ -241,9 +241,6 @@
                 case chartType.bar:
                     content = new BarContent(contentOptions);
                     break;
-                case chartType.scatter:
-                    content = new ScatterContent(contentOptions);
-                    break;
                 case chartType.trend:
                     content = new NumericContent(contentOptions);
                     break;
@@ -677,31 +674,6 @@
                 backgroundChartType : self.backgroundChartType()
             }
         }
-    };
-
-    var ScatterContent = function(contentOptions){
-        var self = this;
-        self.widgetContentId = 'widgetContent'+ contentOptions.index;
-        self.template = 'content-template';
-        var chart;
-        self.drawChart = function(_data, segmentModel){
-            chart = drata.charts.scatterPlot().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval);
-            
-            d3.select('#'+self.widgetContentId +' svg')
-                .datum(_data.values)
-                .call(chart);
-            return chart;
-        };
-        self.resize = function(){
-            chart && chart.resize && chart.resize();
-        };
-        self.change = function(_data, _segmentModel){
-            if(chart){
-                chart.change && chart.xAxisType(_segmentModel.dataGroup.xAxisType).dateInterval(_segmentModel.dataGroup.timeseriesInterval).change(_data.values);
-            }else{
-                self.drawChart(_data, _segmentModel);
-            }
-        };
     };
 
     var BarContent = function(contentOptions){

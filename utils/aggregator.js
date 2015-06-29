@@ -5,8 +5,6 @@ var utils = require('./utils');
 
 var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-/*copy from utils frontend*/
-/*end copy from utils frontend*/
     
 var divideDataByInterval = function(params){
     var val, groupBy;
@@ -237,7 +235,6 @@ var getGraphData = function(segmentModel, inputData) {
     switch (segmentModel.chartType){
         case 'line':
         case 'area':
-        case 'scatter':
         case 'trend':
             returnData = getTrackCharData(segmentModel, inputData);
             break;

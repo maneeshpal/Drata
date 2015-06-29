@@ -521,11 +521,6 @@
         icon: 'fa-area-chart',
         type: 'track'
     }, {
-        name: 'scatter',
-        label: 'scatter',
-        icon: 'fa-sliders',
-        type: 'track'
-    }, {
         name: 'pie',
         label: 'pie',
         icon: 'fa-pie-chart',

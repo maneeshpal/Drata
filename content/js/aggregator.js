@@ -1,4 +1,7 @@
-
+//this is client side version of aggregation.
+//used for debugging the core of data segmentation in drata client side
+//any changes to utils/aggregator.js should be reflected here.
+//DONOT make any changes here that arent in utils/aggregator.js
 //var _ = require('underscore');
 
 var utils = drata.utils;
@@ -6,8 +9,6 @@ drata.exports = {};
 var exports = drata.exports;
 var numericOperations = ['>', '<', '<=', '>=', '+', '-', '*', '/'];
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-/*copy from utils frontend*/
-/*end copy from utils frontend*/
     
 var divideDataByInterval = function(params){
     var val, groupBy;
@@ -238,8 +239,7 @@ var getGraphData = function(segmentModel, inputData) {
     switch (segmentModel.chartType){
         case 'line':
         case 'area':
-        case 'scatter':
-        case 'numeric':
+        case 'trend':
             returnData = getTrackCharData(segmentModel, inputData);
             break;
         case 'pie':
