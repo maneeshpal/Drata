@@ -434,7 +434,10 @@
         var chart, chartData;
         
         self.drawChart = function(_data, segmentModel){
-            chart = drata.charts.lineChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true);
+            chart = drata.charts.lineChart()
+                .xAxisType(segmentModel.dataGroup.xAxisType)
+                .dateInterval(segmentModel.dataGroup.timeseriesInterval)
+                .includeDataMarkers(segmentModel.chartOptions.includeDataMarkers);
             d3.select('#'+self.widgetContentId +' svg')
                 .datum(_data.values)
                 .call(chart);
@@ -449,7 +452,8 @@
                 chart.change && chart
                     .xAxisType(_segmentModel.dataGroup.xAxisType)
                     .dateInterval(_segmentModel.dataGroup.timeseriesInterval)
-                    .includeDataMarkers(true).change(_data.values);
+                    .includeDataMarkers(_segmentModel.chartOptions.includeDataMarkers)
+                    .change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }
@@ -611,14 +615,28 @@
             switch(self.backgroundChartType())
             {
                 case chartType.line:
-                    chart = drata.charts.lineChart().drawLabels(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
+                    chart = drata.charts.lineChart()
+                        .drawLabels(false)
+                        .xAxisType(segmentModel.dataGroup.xAxisType)
+                        .includeDataMarkers(segmentModel.chartOptions.includeDataMarkers)
+                        .dateInterval(segmentModel.dataGroup.timeseriesInterval)
+                        .drawXAxis(false)
+                        .drawYAxis(true);
+
                     data = [{
                         key: self.currentDataKey(),
                         values: firstArr.slice()
                     }];
                 break;
                 case chartType.area:
-                    chart = drata.charts.areaChart().drawLabels(false).includeDataMarkers(false).xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).drawXAxis(false).drawYAxis(true);
+                    chart = drata.charts.areaChart()
+                        .drawLabels(false)
+                        .includeDataMarkers(segmentModel.chartOptions.includeDataMarkers)
+                        .xAxisType(segmentModel.dataGroup.xAxisType)
+                        .dateInterval(segmentModel.dataGroup.timeseriesInterval)
+                        .drawXAxis(false)
+                        .drawYAxis(true);
+
                     data = [{
                         key: self.currentDataKey(),
                         values: firstArr.slice()
@@ -634,7 +652,11 @@
                             }
                         })
                     }];
-                    chart = drata.charts.barChart().drawLabels(false).drawXAxis(false).drawYAxis(false);
+                    chart = drata.charts.barChart()
+                        .showToolTips(segmentModel.chartOptions.includeDataMarkers)
+                        .drawLabels(false)
+                        .drawXAxis(false)
+                        .drawYAxis(false);
                     break; 
                 case chartType.pie:
                     data = {
@@ -646,7 +668,9 @@
                             }
                         })
                     }
-                    chart = drata.charts.pieChart().drawOuterLabels(false).drawPolyLines(false);
+                    chart = drata.charts.pieChart()
+                        .drawOuterLabels(false)
+                        .drawPolyLines(false); //lets just not draw tooltips. it wont fit.
                     break;
             }
 
@@ -683,8 +707,10 @@
         self.contentType = 'bar';
         var chart;
 
-        self.drawChart = function(_data){
-            chart = drata.charts.barChart().showBarLabels(true);
+        self.drawChart = function(_data, _segmentModel){
+            chart = drata.charts.barChart()
+            .showBarLabels(true)
+            .showToolTips(_segmentModel.chartOptions.includeDataMarkers);
             d3.select('#'+self.widgetContentId +' svg')
                 .datum(_data.values)
                 .call(chart);
@@ -695,7 +721,10 @@
         };
         self.change = function(_data, _segmentModel){
             if(chart){
-                chart.change && chart.change(_data.values);
+                chart.change && 
+                chart
+                .showToolTips(_segmentModel.chartOptions.includeDataMarkers)
+                .change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }
@@ -708,7 +737,10 @@
         self.template = 'content-template';
         var chart;
         self.drawChart = function(_data, segmentModel){
-            chart = drata.charts.areaChart().xAxisType(segmentModel.dataGroup.xAxisType).dateInterval(segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true);
+            chart = drata.charts.areaChart()
+                .xAxisType(segmentModel.dataGroup.xAxisType)
+                .dateInterval(segmentModel.dataGroup.timeseriesInterval)
+                .includeDataMarkers(segmentModel.chartOptions.includeDataMarkers);
             d3.select('#'+self.widgetContentId +' svg')
                 .datum(_data.values)
                 .call(chart);
@@ -718,7 +750,10 @@
         };
         self.change = function(_data, _segmentModel){
             if(chart){
-                chart.change && chart.xAxisType(_segmentModel.dataGroup.xAxisType).dateInterval(_segmentModel.dataGroup.timeseriesInterval).includeDataMarkers(true).change(_data.values);
+                chart.change && chart.xAxisType(_segmentModel.dataGroup.xAxisType)
+                .dateInterval(_segmentModel.dataGroup.timeseriesInterval)
+                .includeDataMarkers(_segmentModel.chartOptions.includeDataMarkers)
+                .change(_data.values);
             }else{
                 self.drawChart(_data, _segmentModel);
             }
@@ -732,8 +767,9 @@
         self.template = 'content-template';
         var chart;
         
-        self.drawChart = function(_data){
-            chart = drata.charts.pieChart();
+        self.drawChart = function(_data, _segmentModel){
+            chart = drata.charts.pieChart()
+                .drawPolyLines(_segmentModel.chartOptions.includeDataMarkers);
             d3.select('#'+self.widgetContentId + ' svg')
                 .datum(_data)
                 .call(chart);
@@ -745,7 +781,9 @@
         
         self.change = function(_data, _segmentModel, _contentModel){
             if(chart){
-                chart.change && chart.change(_data);
+                chart.change && chart
+                    .drawPolyLines(_segmentModel.chartOptions.includeDataMarkers)
+                    .change(_data);
             }else{
                 self.drawChart(_data, _segmentModel);
             }

@@ -10,8 +10,7 @@ var Segmentor = function(model){
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition'});
     self.selectionGroup = new SelectionGroup({ level: self.level});
-    //self.formErrors = ko.observableArray();
-    
+    self.chartOptions = new ChartOptions();
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
     self.chartType = ko.observable();
@@ -30,7 +29,8 @@ var Segmentor = function(model){
         self.dataFilter.prefill(model.dataFilter || {});
         self.chartType(model.chartType || drata.global.chartType.line);
         self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
-        
+        self.chartOptions.prefill(model.chartOptions || {});
+
         drata.pubsub.publish('formErrors', {
             keepExistingErrors: false,
             errors: []
@@ -61,7 +61,8 @@ var Segmentor = function(model){
             dataGroup: self.dataGroup ? self.dataGroup.getModel(): undefined,
             group: self.conditionGroup.getModel(),
             dataFilter: self.dataFilter.getModel(),
-            chartType: self.chartType()
+            chartType: self.chartType(),
+            chartOptions: self.chartOptions.getModel()
         };
     };
 
@@ -257,6 +258,17 @@ var Segmentor = function(model){
         required: {'message': 'Select Chart Type'}
     });
 
+};
+
+var ChartOptions = function(m) {
+    var self = this;
+    self.includeDataMarkers = ko.observable();
+    self.prefill = function(m) {
+        self.includeDataMarkers(m.includeDataMarkers === undefined ? true : m.includeDataMarkers);
+    }
+    self.getModel = function() {
+        return ko.toJS(self);
+    }
 };
 
 var GroupBySelection = function(m){

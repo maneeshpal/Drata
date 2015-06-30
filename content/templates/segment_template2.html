@@ -39,6 +39,15 @@
     
     </div>
 </div>
+
+<div class="row" data-bind="with: chartOptions">
+    <div class="large-12 columns">
+        <h6><strong>Chart Options</strong></h6>    
+        <div class="small-12 columns">
+            <label>Include Chart ToolTips <input data-bind="checked: includeDataMarkers" type="checkbox"></input></label>
+        </div>
+    </div>
+</div>
 </script>
 
 <script type="text/html" id="timeframeItem-template">

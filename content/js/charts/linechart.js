@@ -123,7 +123,6 @@
                     labelContainer.datum(data).call(labels);    
                 }
                 
-                
                 xAxis.drawAxis(_drawXAxis);
                 yAxis.drawAxis(_drawYAxis);
 
@@ -149,8 +148,9 @@
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     .call(lines);
 
+                gWrapperEnter.append("g").attr("class", "dot-group");
+                    
                 if(_dataMarkers){
-                    gWrapperEnter.append("g").attr("class", "dot-group");
                     var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                         return yScale(d.y);
                     }).color(z).dispatch(dispatch).xAxisTickFormat(xAxisTickFormat);
@@ -159,6 +159,9 @@
                         .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                         .datum(data)
                         .call(dots);   
+                }
+                else {
+                    gWrapper.select('g.dot-group').selectAll('g.dot-line-group').remove();
                 }
                 
                 gWrapper.exit().remove();

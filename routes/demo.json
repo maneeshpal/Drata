@@ -58,7 +58,10 @@
 		            "to" : "11/05/2014",
 		            "dateProp" : "timestamp"
 		        },
-		        "chartType" : "line"
+		        "chartType" : "line",
+		        "chartOptions" : {
+		        	"includeDataMarkers": true
+		        }
 		    },
 		    "sizex" : "2",
 		    "sizey" : "2",
@@ -97,7 +100,10 @@
 		            "to" : "6d",
 		            "dateProp" : "timestamp"
 		        },
-		        "chartType" : "bar"
+		        "chartType" : "bar",
+		        "chartOptions" : {
+		        	"includeDataMarkers": true
+		        }
 		    },
 		    "sizex" : "2",
 		    "sizey" : "2",
@@ -134,7 +140,10 @@
 		            "to" : "1y",
 		            "dateProp" : "timestamp"
 		        },
-		        "chartType" : "trend"
+		        "chartType" : "trend",
+		        "chartOptions" : {
+		        	"includeDataMarkers": true
+		        }
 		    },
 		    "sizex" : "6",
 		    "sizey" : "2",
@@ -175,7 +184,10 @@
 		            "to" : "11/29/2014",
 		            "dateProp" : "timestamp"
 		        },
-		        "chartType" : "pie"
+		        "chartType" : "pie",
+		        "chartOptions" : {
+		        	"includeDataMarkers": true
+		        }
 		    },
 		    "sizex" : "5",
 		    "sizey" : "2",

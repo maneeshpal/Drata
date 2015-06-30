@@ -384,6 +384,10 @@
                         .exit().transition().delay(1000)
                         .remove();
                 }
+                else {
+                    gWrapper.select('g.polyline-group').selectAll('polyline').remove();
+                    gWrapper.select('g.polytext-group').selectAll('text').remove();
+                }
             });
             
             return chart;

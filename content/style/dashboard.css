@@ -445,13 +445,16 @@ input.error {
   border-radius: 5px 5px 0 0;
   font-size: 0.9rem; }
 
+.top-bar-section .dropdown li.has-form .button {
+  height: auto;
+  line-height: 1rem; }
+
 /*end topbar */
 /**dashboard settings**/
-.dashboard-settings li.theme label {
-  background: #262626; }
 .dashboard-settings li.theme select {
   width: 100px;
-  margin-left: 5px; }
+  margin-bottom: 8px;
+  top: 0; }
 
 /**end dashboard settings**/
 .widget-manager {
@@ -646,7 +649,7 @@ select.error {
   display: block; }
 
 /*end chart types shown on segmentor*/
-@media only screen and (min-width:40.063em) {
+@media only screen and (min-width:40.0625em) {
   ul.chart-types > li > a {
     padding-left: 0;
     padding-right: 0; } }
@@ -801,8 +804,8 @@ span.dtooltip {
   z-index: 10; }
 span.dtooltip-aggregate-func {
   position: absolute;
-  left: -4px;
-  top: 10px; }
+  left: 24px;
+  top: -1px; }
 span.dtooltip-selection-prop {
   position: absolute;
   right: 32px;
@@ -856,7 +859,7 @@ h3.view-heading {
   color: #008cba;
   display: inline-block; }
 
-@media only screen and (min-width:64.063em) {
+@media only screen and (min-width:64.0625em) {
   .preview-widget {
     position: fixed;
     right: 0; }
