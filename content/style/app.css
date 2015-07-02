@@ -2582,6 +2582,108 @@ label.error {
       .sub-nav dt.active a:hover, .sub-nav dd.active a:hover, .sub-nav li.active a:hover {
         background: #007ba0; }
 
+.switch {
+  border: none;
+  margin-bottom: 1.5rem;
+  outline: 0;
+  padding: 0;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
+  .switch label {
+    background: #dddddd;
+    color: transparent;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 1rem;
+    position: relative;
+    text-indent: 100%;
+    width: 4rem;
+    height: 2rem;
+    transition: left 0.15s ease-out; }
+  .switch input {
+    left: 10px;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    top: 9px; }
+    .switch input + label {
+      margin-left: 0;
+      margin-right: 0; }
+  .switch label:after {
+    background: white;
+    content: "";
+    display: block;
+    height: 1.5rem;
+    left: 0.25rem;
+    position: absolute;
+    top: 0.25rem;
+    width: 1.5rem;
+    -webkit-transition: left 0.15s ease-out;
+    -moz-transition: left 0.15s ease-out;
+    -o-transition: translate3d(0, 0, 0);
+    transition: left 0.15s ease-out;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0); }
+  .switch input:checked + label {
+    background: #008cba; }
+  .switch input:checked + label:after {
+    left: 2.25rem; }
+  .switch label {
+    height: 2rem;
+    width: 4rem; }
+  .switch label:after {
+    height: 1.5rem;
+    width: 1.5rem; }
+  .switch input:checked + label:after {
+    left: 2.25rem; }
+  .switch label {
+    color: transparent;
+    background: #dddddd; }
+  .switch label:after {
+    background: white; }
+  .switch input:checked + label {
+    background: #008cba; }
+  .switch.large label {
+    height: 2.5rem;
+    width: 5rem; }
+  .switch.large label:after {
+    height: 2rem;
+    width: 2rem; }
+  .switch.large input:checked + label:after {
+    left: 2.75rem; }
+  .switch.small label {
+    height: 1.75rem;
+    width: 3.5rem; }
+  .switch.small label:after {
+    height: 1.25rem;
+    width: 1.25rem; }
+  .switch.small input:checked + label:after {
+    left: 2rem; }
+  .switch.tiny label {
+    height: 1.5rem;
+    width: 3rem; }
+  .switch.tiny label:after {
+    height: 1rem;
+    width: 1rem; }
+  .switch.tiny input:checked + label:after {
+    left: 1.75rem; }
+  .switch.radius label {
+    border-radius: 4px; }
+  .switch.radius label:after {
+    border-radius: 3px; }
+  .switch.round {
+    border-radius: 1000px; }
+    .switch.round label {
+      border-radius: 2rem; }
+    .switch.round label:after {
+      border-radius: 2rem; }
+
 table {
   background: white;
   border: solid 1px #dddddd;

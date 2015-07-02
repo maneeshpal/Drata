@@ -106,12 +106,6 @@ ul.combolist li:hover {
   padding: 0 0.9375rem;
   width: 350px; }
 
-[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle {
-  position: absolute;
-  right: 16px;
-  top: 9px;
-  color: #43ac6a; }
-
 .combolist.complexcombo ul.combolist {
   /*position:static;*/
   width: 197px; }
@@ -586,9 +580,19 @@ select.error {
 /*selections*/
 [class^="fa-"].selection-action, [class*=" fa-"].selection-action {
   color: #cccccc;
-  line-height: 2rem;
+  line-height: 2.1rem;
   right: -6px;
-  position: absolute; }
+  top: 0;
+  position: absolute;
+  font-size: 1.2rem; }
+
+[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle {
+  position: absolute;
+  right: 20px;
+  top: 0;
+  line-height: 2.1rem;
+  color: #43ac6a;
+  font-size: 1.2rem; }
 
 [class^="fa-"].condition-action-complex, [class*=" fa-"].condition-action-complex {
   line-height: 2rem;
@@ -649,6 +653,23 @@ select.error {
   display: block; }
 
 /*end chart types shown on segmentor*/
+.selection-switch {
+  display: inline-block; }
+
+.selection-switch .switch-label {
+  line-height: 2rem;
+  display: inline-block;
+  float: right;
+  margin-left: 5px; }
+
+.selection-switch .switch {
+  margin-top: 5px;
+  margin-bottom: 1rem;
+  display: inline-block; }
+
+.selection-switch + .selection-switch {
+  margin-left: 10px; }
+
 @media only screen and (min-width:40.0625em) {
   ul.chart-types > li > a {
     padding-left: 0;
@@ -808,8 +829,8 @@ span.dtooltip-aggregate-func {
   top: -1px; }
 span.dtooltip-selection-prop {
   position: absolute;
-  right: 32px;
-  top: 10px; }
+  right: 20px;
+  top: -11px; }
 span.dtooltip-expression {
   right: 19px;
   top: 4px;

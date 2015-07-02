@@ -128,12 +128,6 @@ ul.combolist li:hover {
     width: 350px;
 }
 
-[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle{
-    position: absolute;
-    right: 16px;
-    top: 9px;    
-    color:$success-color;
-}
 
 .combolist.complexcombo ul.combolist{
     /*position:static;*/

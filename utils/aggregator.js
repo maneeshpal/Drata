@@ -57,16 +57,16 @@ var calc = function(left, operation, right, type){
     var hasError = (numericOperations.indexOf(operation) > -1 && (isNaN(+left) || isNaN(+right)));
     var result;
     
-    if(!hasError){
+    if(!hasError) {
         result = utils.applyOperation(left, operation, right);
     }
 
     if(hasError || isNaN(result)){
         if(numericOperations.indexOf(operation) > -1){
-            throw 'Invalid arithmetic operation: <strong>( '  + left + ' ' + operation + ' ' + right + ' )</strong>';
+            throw new Error('Invalid arithmetic operation: <strong>( '  + left + ' ' + operation + ' ' + right + ' )</strong>');
         }
         else{
-            throw "There seems to be issue with your data. Please check your Selections."
+            throw new Error("There seems to be issue with your data. Please check your Selections.");
         }
     }
     return result;
@@ -129,6 +129,7 @@ var processGroup = function(obj, group){
     }
     return boolValue;
 };
+
 var processDataGroups = function(groupedData, dataGroup, selection){
     var returnGroups = [];
     _.each(groupedData, function(dataItem, groupName){
@@ -189,7 +190,12 @@ var groupByInterval = function(data, dataGroup, selection){
         ret = filterGroupByConditions(ret, dataGroup.groupByConditions, selection, 'y');
     }
     else {
-        _.each(data, function(item){
+        //uniq
+        if(selection.isDistinct) {
+            data = getDistinctData(data, selection);
+        }
+
+        _.each(data, function(item) {
             yValue = processGroup(item,selection).value;
 
             if(item.hasOwnProperty(selection.selectedProp) || selection.isComplex) {
@@ -236,7 +242,7 @@ var getGraphData = function(segmentModel, inputData) {
         case 'line':
         case 'area':
         case 'trend':
-            returnData = getTrackCharData(segmentModel, inputData);
+            returnData = getTrackChartData(segmentModel, inputData);
             break;
         case 'pie':
         case 'bar':
@@ -247,7 +253,7 @@ var getGraphData = function(segmentModel, inputData) {
     return returnData;
 };
 
-var getTrackCharData = function(segmentModel, inputData){
+var getTrackChartData = function(segmentModel, inputData){
     var result = [];
     var groupCounter = 0;
     var groupedData;
@@ -259,6 +265,7 @@ var getTrackCharData = function(segmentModel, inputData){
        var values;
         if(segmentModel.dataGroup.hasGrouping){
             values = processDataGroups(groupedData, segmentModel.dataGroup, sel);
+            //groupbyinterval
         }
         else {
             values = groupByInterval(inputData, segmentModel.dataGroup, sel);
@@ -280,11 +287,38 @@ var getTrackCharData = function(segmentModel, inputData){
     }
     
 };
+
+var getDistinctData = function(data, selection) {
+    
+    if(!selection.isDistinct) {
+        return data;
+    }
+    
+    var selectedProp = selection.selectedProp;
+
+    if(selection.isComplex) {
+        selectedProp = selection.aliasName + Math.floor(Math.random() * 1000);
+        data = data.map(function(item) {
+            item[selectedProp] = processGroup(item, selection).value;
+            return item;
+        });
+    }
+
+    return _.uniq(data, function(item) {
+        return item[selectedProp];
+    });
+};
+
 var reduceData = function(objArray, selection){
     //var isComplex = selection.groupType !== undefined;
     if(selection.isComplex && selection.groupBy === 'count')
         throw new Error("Count Not allowed for complex selections");
-
+    
+    //uniq
+    if(selection.isDistinct) {
+        objArray = getDistinctData(objArray, selection);
+    }
+    
     var ret = _.reduce(objArray, function(previous, current){ 
         var numval;
         if(selection.isComplex){ //complex selection. so we need to process it.
@@ -306,7 +340,7 @@ var reduceData = function(objArray, selection){
             numval = +current[selection.selectedProp] || 0;
         }
         else{
-            throw new Error('For this visualization, you need Your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>');
+            throw new Error('For this visualization, your selections should have <em>sum</em>,<em>count</em> or <em>avg</em>');
         }
         return previous + numval; 
     }, (!selection.isComplex && objArray.length > 0 && (selection.groupBy === 'min' || selection.groupBy === 'max'))? +objArray[0][selection.selectedProp] : 0);
@@ -381,7 +415,6 @@ var getComparisonChartData = function(segmentModel, inputData){
                     var val = reduceData(groupedDataItem,sel);
                     groupName = formattingTypes[segmentModel.dataGroup.groupByIntervalType](groupName, segmentModel.dataGroup.groupByInterval);
                     
-                    //val >= 0 && 
                     result.push({
                         key: groupName,
                         value: val
@@ -409,9 +442,9 @@ var getComparisonChartData = function(segmentModel, inputData){
                 values: response
             });
         }
-        else{
+        else {
             topLevelResponse = [];
-            _.each(segmentModel.selection, function(sel){
+            _.each(segmentModel.selection, function(sel) {
                 response = [];
                 _.each(groupedData, function(groupedDataItem, groupName){
                     var propCounts;
@@ -431,7 +464,7 @@ var getComparisonChartData = function(segmentModel, inputData){
                         intervalType: segmentModel.dataGroup.divideByIntervalType
                     });
 
-                    _.each(divData, function(value, name){
+                    _.each(divData, function(value, name) {
                         name = formattingTypes[segmentModel.dataGroup.divideByIntervalType](name, segmentModel.dataGroup.divideByInterval);
                         result.push({
                             key: name,

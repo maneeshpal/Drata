@@ -117,19 +117,21 @@
             <span data-bind="tooltip: {datakey: 'selectionsInfo', size: 'medium'}" class="dtooltip fa fa-question"></span>
         </h6>
         <div class="keystroke expression" data-bind="html:$data.expression()"></div>
-        <div class="row">
-            <div class="small-12 columns">
-                <div class="clearfix" style="position:relative">
-                    <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
-                    <div class="left" style="margin-right:2rem">
-                        <!-- ko template: {name: 'selectionGroupTemplate'} -->
-                        <!-- /ko -->
-                    </div>
+            <div class="row" style="position:relative">
+                <!-- ko foreach: items, afterAdd: afterAdd, beforeRemove: beforeRemove -->
+                <div class="small-12 columns">
+                    <!-- ko template: {name: 'selectionGroupTemplate'} -->
                     <!-- /ko -->
-                    <a class="left" style="line-height:2rem" data-bind="click: addItem"><i class="fa fa-plus"></i> Add</a>
+                </div>
+                <!-- /ko -->
+            </div>
+
+            <div class="row">
+                <div class="small-12 columns">
+                    <button class="tiny success" data-bind="click: addItem"><i class="fa fa-plus"></i> Add Selection</button>
                 </div>
             </div>
-        </div>
+           
     </div>
 </div>
 </script>
@@ -243,34 +245,62 @@
 </script>
 
 <script type="text/html" id="selectionGroupTemplate">
-        <div class="row" style="position:relative" data-bind="attr:{style: (renderType === 'topCondition')?'position:relative' : 'position:relative;width:270px'}">
+        <div class="row" style="position:relative">
             <!-- ko if: renderType === 'topSelection' -->
                 <!-- ko if : $index() === 0 -->
                 <span data-bind="tooltip: {datakey: 'aggregationFunction'}" class="fa fa-question-circle dtooltip dtooltip-aggregate-func">
                 </span>
                 <!-- /ko -->
-                <div class="small-12 columns">
+                <div class="medium-6 small-10 columns">
                    <div data-bind="ddComboBox :{selectedPrefix: groupBy , prefixOptions: drata.global.groupingOptions, selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                     </div>
+                    <i class="complexcombo-toggle fa" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex">
+                    </i>
                     
+                    <!-- ko if : $index() === 0 -->
+                    <span data-bind="tooltip: {datakey: 'selectionProperty'}" class="fa fa-question-circle dtooltip dtooltip-selection-prop"></span>
+                    <!-- /ko -->
+                    
+                     <i class="fa fa-times-circle selection-action alert" data-bind="click: $parent.removeItem">
+                    </i>
                     <!-- ko if: isComplex() -->
                     <span class="complex-overlay top-selection" data-bind="click: toggleComplex">
-                        <span data-bind="html : aliasName() ? aliasName() : 'Complex Selection. <em> edit</em>'"></span>
+                        <span data-bind="html : aliasName() ? aliasName() : 'Complex Selection'"></span>
                     </span>
                      <!-- /ko -->
                 </div>
-                <i class="complexcombo-toggle fa" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex">
-                </i>
-                <!-- ko if : $index() === 0 -->
-                <span data-bind="tooltip: {datakey: 'selectionProperty'}" class="fa fa-question-circle dtooltip dtooltip-selection-prop"></span>
-                <!-- /ko -->
+
+                <div class="end medium-6 small-12 columns">
+                    <!-- ko if: $parent.showPercentChange -->
+                    <label class="selection-switch">
+                        <div class="switch tiny">
+                          <input type="checkbox" data-bind="checked: perc, attr:{ id :  'perc'+$index() }">
+                          <label data-bind="attr:{ for :  'perc'+$index() }"></label>
+                        </div>
+                        <span class="switch-label">% change</span>
+                    </label>
+                    <!-- ko if : $index() === 0 -->
+                    &nbsp;
+                    <span data-bind="tooltip: {datakey: 'percentChange'}" class="fa fa-question-circle dtooltip"></span>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                    <!-- ko if: $parent.showDistinct -->
+                    <label class="selection-switch">
+                        <div class="switch tiny">
+                          <input id="exampleRadioSwitch1" type="checkbox" data-bind="checked: isDistinct, attr:{ id :  'distinct'+$index() }">
+                          <label data-bind="attr:{ for :  'distinct'+$index() }"></label>
+                        </div>
+                        <span class="switch-label">distinct</span>
+                    </label>
+                    <!-- /ko -->
+                </div>
             <!-- /ko -->
             <!-- ko if: renderType === 'topCondition' -->
                 <!-- ko if: !isComplex() -->
                 
                  <div class="small-12 columns" data-bind="comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
-                <span class="complexcombo-toggle fa" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex" style="right:-5px">
+                <span class="complexcombo-toggle fa" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex" style="right: 20px">
                 </span>
                  <!-- /ko -->
                 <!-- ko if: isComplex() -->
@@ -289,32 +319,24 @@
                 <!-- ko if: !isComplex() -->
                 <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0},comboBox :{selectedValue: selectedProp, options: drata.dashboard.propertyManager.allProperties,optionsCaption:'choose Property',enabled: hideComplex}">
                 </div>
-                <span class="complexcombo-toggle fa" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex">
+                <span class="complexcombo-toggle fa" style="right: 50px" data-bind="css:{'fa-plus': !showComplex() , 'fa-minus' : showComplex}, click:toggleComplex">
                 </span>
                 <!-- /ko -->
+
+                <i class="fa fa-times-circle selection-action alert" style="right:15px" data-bind="click: $parent.removeSelection">
+                </i>
+                
                 <!-- ko if: isComplex() -->
-                    <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0}">
-                        <div data-alert class="complex-overlay" data-bind="click: toggleComplex">
-                           <span data-bind="html : aliasName() ? aliasName() : 'Complex Selection. <em> edit</em>'"></span>
-                        </div>
+                <div class="small-8 columns" data-bind="css:{'small-offset-3': $index() === 0}">
+                    <div data-alert class="complex-overlay" data-bind="click: toggleComplex">
+                       <span data-bind="html : aliasName() ? aliasName() : 'Complex Selection. <em> edit</em>'"></span>
                     </div>
+                </div>
                 <!-- /ko -->
+                
             <!-- /ko -->
-            <!-- ko if:renderType !== 'topCondition' -->
-           <i class="fa fa-times selection-action alert" data-bind="click: function(vm){if(renderType === 'childSelection'){$parent.removeSelection(vm)}else{$parent.removeItem(vm)}} ">
-            </i>
-           <!-- /ko -->
+            
         </div>
-        <!-- ko if: showPercentChange -->
-        <div class="clearfix" style="position:relative; top:-1rem">
-            <div class="left">
-                <label><input type="checkbox" data-bind="checked: perc"></input> % Chng</label>
-            </div>
-            <!-- ko if : $index() === 0 -->
-                &nbsp;<span data-bind="tooltip: {datakey: 'percentChange'}" class="fa fa-question-circle dtooltip"></span>
-                <!-- /ko -->
-        </div>
-        <!-- /ko -->     
     <div>   
         <div id="complexWrapper" class="complexcombo" data-bind="slideVisible: showComplex()">
             <div class="row">

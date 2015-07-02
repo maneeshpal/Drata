@@ -1,20 +1,18 @@
 
 var Segmentor = function(model){
     var self = this;
-    //self.propertyTypes = {};
-
+    self.chartType = ko.observable();
     self.properties = ko.observableArray();
 
     self.level = 0;
     self.temp = ko.observable();
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition'});
-    self.selectionGroup = new SelectionGroup({ level: self.level});
+    self.selectionGroup = new SelectionGroup({ level: self.level, chartTypeRef : self.chartType });
     self.chartOptions = new ChartOptions();
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
-    self.chartType = ko.observable();
-
+    
     var compDataGroup, trackDataGroup, currentDataGroupTemplate;
     self.dataGroup = undefined;
     
@@ -968,6 +966,7 @@ var ConditionGroup = function(options){
 
 var Selection = function(options){
     var self = this;
+    self.showDistinct = false;
     self.level = options.level;
     self.renderType = options.renderType;
     self.logic = ko.observable('+');
@@ -975,6 +974,7 @@ var Selection = function(options){
     self.aliasName = ko.observable();
     self.groupBy = ko.observable();
     self.perc = ko.observable();
+    self.isDistinct = ko.observable();
     self.selectedProp = ko.observable();
     self.addSelection = function(){
         self.selections.push(new Selection({level:options.level+1, renderType: 'childSelection'}));
@@ -984,14 +984,9 @@ var Selection = function(options){
        self.selections.remove(selection);
     };
 
-    self.showPercentChange = ko.computed(function(){
-        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.dashboard.widgetEditor.segment.chartType()) > -1){
-            return true;
-        }
-        else{
-            self.perc(false);
-            return false;
-        }
+    //making sure that only top level selection can have percentage change functionality.
+    self.showPercentChange = ko.computed(function() {
+        return false;
     });
 
     self.isComplex = ko.computed(function(){
@@ -1059,6 +1054,7 @@ var Selection = function(options){
         self.logic(m.logic || '+');
         self.groupBy(m.groupBy);
         self.perc(m.perc);
+        self.isDistinct(m.isDistinct);
         self.selectedProp(m.selectedProp);
         self.selections(ko.utils.arrayMap(
             m.groups,
@@ -1081,7 +1077,8 @@ var Selection = function(options){
             groupBy: self.groupBy(),
             selectedProp: self.selectedProp(),
             isComplex : self.isComplex(),
-            perc: self.perc()
+            isDistinct: self.isDistinct(),
+            perc: options.renderType === 'topSelection' ? self.perc() : false
         };
     };
     self.expression = ko.computed(function(){
@@ -1120,6 +1117,7 @@ var Selection = function(options){
 
 var SelectionGroup = function(options){
     var self = this;
+    self.showDistinct = true;
     self.items = ko.observableArray();
     self.addItem = function(){
         self.items.push(new Selection({ level: options.level+1, model: undefined, renderType: 'topSelection' }));
@@ -1168,12 +1166,19 @@ var SelectionGroup = function(options){
         var innerGroups = self.items();
         _.each(innerGroups, function(gr,index){
             exp = gr.expression();
+            
             if(gr.groupBy() !== 'value'){
                 exp = drata.utils.format(gr.isComplex() ? '<em>{0}</em>{1}' : '<em>{0}</em>({1})', gr.groupBy(), exp); 
             }
+
             expressions.push(exp);
         });
         
         return 'Select ' + expressions.join(', ');
+    });
+
+    self.showPercentChange = ko.computed(function() {
+        var ct = options.chartTypeRef();
+        return ct === drata.global.chartType.line || ct === drata.global.chartType.area;
     });
 };
