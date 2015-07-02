@@ -225,3 +225,4 @@ content/dis/
 *.sublime-project
 *.sublime-workspace
 test.html
+*.orig
