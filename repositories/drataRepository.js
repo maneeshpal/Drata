@@ -253,7 +253,6 @@ var upsertDashboard = function(dashboardModel, allowDemo){
             var defer = Q.defer();
             dashboardModel.dateCreated = new Date();
             dashboardModel.dateUpdated = new Date();
-            console.log(JSON.stringify(dashboardModel, null, '\t'));
             collection.save(dashboardModel, {safe:true}, function(err, result) {
                 err ? defer.reject({code: 500, message: 'Dashboard cannot be created'}) : defer.resolve(result);
             });
@@ -430,23 +429,41 @@ exports.removeTag = function(req, res){
     }, handleErrorResponse.bind(res));
 };
 
-var deleteAllTagsDashboard = function(dashboardId){
-    return connectToCollection(tagCollection).then(function(collection){
-        var defer = Q.defer();
-        collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
-            err ? defer.reject({code: 500, message: utils.format('Error deleting all tags of dashboard. Id: {0}', req.params.dashboardId)}) : defer.resolve(result);
-        });
-        return defer.promise;
+var deleteAllTagsDashboard = function(dashboardId) {
+    return getDashboard(dashboardId).then(function(result) {
+        if(result.demo){
+            var defer = Q.defer();
+            defer.resolve();
+            return defer.promise;
+        }
+        else {
+            return connectToCollection(tagCollection).then(function(collection){
+                var defer = Q.defer();
+                collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
+                    err ? defer.reject({code: 500, message: utils.format('Error deleting all tags of dashboard. Id: {0}', req.params.dashboardId)}) : defer.resolve(result);
+                });
+                return defer.promise;
+            });
+        }
     });
 };
 
-var deleteAllWidgetsDashboard = function(dashboardId){
-    return connectToCollection(widgetCollection).then(function(collection){
-        var defer = Q.defer();
-        collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
-            err ? defer.reject({code: 500, message: utils.format('Error deleting all widgets of dashboard. Id: {0}', dashboardId)}) : defer.resolve(result);
-        });
-        return defer.promise;
+var deleteAllWidgetsDashboard = function(dashboardId) {
+    return getDashboard(dashboardId).then(function(result) {
+        if(result.demo){
+            var defer = Q.defer();
+            defer.resolve();
+            return defer.promise;
+        }
+        else {
+            return connectToCollection(widgetCollection).then(function(collection){
+                var defer = Q.defer();
+                collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
+                    err ? defer.reject({code: 500, message: utils.format('Error deleting all widgets of dashboard. Id: {0}', dashboardId)}) : defer.resolve(result);
+                });
+                return defer.promise;
+            });
+        }
     });
 };
 

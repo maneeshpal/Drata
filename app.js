@@ -69,7 +69,7 @@ app.post('/api/dashboard', drataRepository.upsertDashboard);
 //update dashboard
 app.put('/api/dashboard', drataRepository.upsertDashboard);
 
-//update dashboard
+//delete dashboard
 app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);
 
 //update widget
