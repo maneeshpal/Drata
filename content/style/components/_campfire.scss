@@ -3,7 +3,7 @@
 @import "dratamixins";
 
 body.campfire {
-	background:$dark;
+	background-color:$superdark;
 	.dashboard {
 		background: $superdark;
 	}
@@ -15,11 +15,11 @@ body.campfire {
 	.widget-wrapper{
 		background: $dark;
 	}
-	.widget-nav{
+	.widget-nav, .widget-footer{
 		border-color: $medium;
 	}
 
-	.widget-editor .widget-wrapper{
+	.widget-editor, .widget-editor .widget-wrapper{
 		background: $dark;
 		border-color: $medium;
 	}
@@ -167,10 +167,6 @@ body.campfire {
 	}
 	//end widget manager
 
-	.form-error {
-		background-color: $kindadark;
-		color:#ccc;
-	}
 	.dr-modal {
 		background-color: $medium;
 		border-color:$dark;
@@ -219,6 +215,9 @@ body.campfire {
 	//tabular
 	.tabular-wrapper, .tabular-header, .tabular-body,  .tabular-body-header  {
 		border-color: $medium;
+	}
+	.tabular-wrapper {
+		background-color: $dark;
 	}
 	//end tabular
 

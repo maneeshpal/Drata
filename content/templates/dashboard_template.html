@@ -24,46 +24,19 @@
         <div class="widget-wrapper">
             <div class="row collapse widget-nav handle">
                 <span class="widget-logo fa" data-bind="css: logoClass"></span>
+                
                 <div class="title" data-bind="editLabel: {title: name}">
                 </div>
+
                 <div class="actions">
                     <ul class="widget-nav-list">
                         <li data-bind="visible: !previewMode" class="action-icon edit-widget">
                             <i data-bind="click:editWidget" class="fa fa-pencil"></i>
                         </li>
                         <li data-bind="visible: !previewMode" class="action-icon remove-widget">
-                            <i data-bind="click:$parent.deleteWidget" class="fa fa-times-circle"></i>
+                        <i data-bind="click:$parent.deleteWidget" class="fa fa-times-circle"></i>
                         </li>
                     </ul>
-                </div>
-                <div class="clearfix widget-actions handle" data-bind="visible: !previewMode">
-                    <div class="left">
-                        <label>w:
-                            <select data-bind="value:sizex" class="widget-select-option">
-                                <option value="1">25%</option>
-                                <option value="5">33.3%</option>
-                                <option value="2">50%</option>
-                                <option value="6">66.6%</option>
-                                <option value="3">75%</option>
-                                <option value="4">100%</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div class="left">
-                        <label>h:
-                            <select data-bind="value:sizey" class="widget-select-option">
-                                <option value="3">33.3%</option>
-                                <option value="2">50%</option>
-                                <option value="1.5">66%</option>
-                                <option value="1">100%</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div class="left" data-bind="visible:pieKeys().length > 1">
-                        <label>show:
-                        <select class="widget-select-option" data-bind="value:selectedPieKey,options: pieKeys, optionsText: 'label'"/>
-                        </label>
-                    </div>
                 </div>
             </div>
 
@@ -75,7 +48,47 @@
                 <!-- ko template: contentTemplate() -->
                 <!-- /ko -->
             </div>
-            
+
+            <div class="clearfix widget-footer">
+                <!-- ko if: !previewMode -->
+                <div class="left">
+                    w: <select data-bind="value:sizex" class="widget-select-option and-dimension">
+                            <option value="1">25%</option>
+                            <option value="5">33.3%</option>
+                            <option value="2">50%</option>
+                            <option value="6">66.6%</option>
+                            <option value="3">75%</option>
+                            <option value="4">100%</option>
+                        </select>
+                </div>
+                <div class="left">
+                    h: <select data-bind="value:sizey" class="widget-select-option and-dimension">
+                            <option value="3">33.3%</option>
+                            <option value="2">50%</option>
+                            <option value="1.5">66%</option>
+                            <option value="1">100%</option>
+                        </select>
+                </div>
+                <!-- /ko -->
+                <div class="left">
+                    <select class="widget-select-option" data-bind="visible: pieKeys().length > 1, value:selectedPieKey,options: pieKeys, optionsText: 'label'">
+                    </select>
+                </div>
+
+                <div class="auto-refresh" data-bind="with: autoRefresh">
+                    <!-- ko if: turnedOn() -->
+                        <!-- ko text: formattedTime() --><!-- /ko -->
+                    <!-- /ko -->
+
+                    <!-- ko if: enterTimeframe -->
+                        <input class="timeframe" data-bind="value: _seconds" type="text"></input>
+                        <button class="timeframe secondary tiny" data-bind="click: startTimer">ok</button>
+                    <!-- /ko -->
+
+                    <span class="fa fa-refresh refresh-chart" data-bind="css: {'and-on': turnedOn() }, click: enteringTimeframe"></span>
+                </div>
+
+            </div>
         </div>
     </div>
 </script>
@@ -144,7 +157,7 @@
                 <span class="fa fa-bar-chart" data-bind="css: {'primary': backgroundChartType() === 'bar'}, click: setChartBackground.bind($data, 'bar')"></span>
             </div>
             <ul class="no-bullet stacked-heading" data-bind="style: { 
-                height: ($parent.widgetHeight() - 30) + 'px' },
+                height: ($parent.widgetHeight() - 40) + 'px' },
             foreach: remainingDataPoints">
                 <li>
                     <div data-bind="text: xLabel"></div>

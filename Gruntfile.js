@@ -81,11 +81,11 @@ module.exports = function(grunt) {
       options: {
         // the banner is inserted at the top of the output
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n',
-        preserveComments: true
+        preserveComments: false
       },
       dist: {
         files: {
-          'content/dis/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+          'content/dis/<%= pkg.name %>.min.js': ['<%= concat.dashboard.dest %>','<%= concat.charts.dest %>']
         }
       }
     }

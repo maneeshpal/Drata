@@ -193,7 +193,12 @@
                         .on('mouseout', tip.hide)
                         .call(tip);
                     }
-
+                    else {
+                        rects
+                        .on('mouseover', null)
+                        .on('mouseout', null);
+                    }
+                    
                     rects
                         .style("fill", function(d) { 
                             return z(d.key); 

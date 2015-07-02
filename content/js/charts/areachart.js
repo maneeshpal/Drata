@@ -156,9 +156,9 @@
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     .call(area);
 
-                if(_dataMarkers){
-                    gWrapperEnter.append("g").attr("class", "dot-group");
+                gWrapperEnter.append("g").attr("class", "dot-group");
 
+                if(_dataMarkers) {
                     var dots = drata.models.dots().xScale(xScale).yScale(function(d){
                         return yScale(d.y);
                     }).color(z).dispatch(dispatch).xAxisTickFormat(xAxisTickFormat);
@@ -168,7 +168,10 @@
                         .datum(data)
                         .call(dots);   
                 }
-                
+                else {
+                    gWrapper.select('g.dot-group').selectAll('g.dot-line-group').remove();
+                }
+
                 gWrapper.exit().remove();
             });
             return chart;

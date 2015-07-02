@@ -82,6 +82,7 @@
             socket.emit('widgetremoved', {
                 widgetId : widgetId
             });
+            drata.pubsub.publish('widgetremoved', widgetId);
         });
         return promise;
     };
@@ -174,7 +175,7 @@
         return _perform('GET', url);
     };
     
-    var getData = function(model){
+    var getData = function(model) {
         var defer = $.Deferred();
         var clientAggregation = false;
         var postData = {
@@ -192,7 +193,7 @@
         }, function(err){
             defer.reject(err);
         });
-    
+
         return defer.promise();
     };
 

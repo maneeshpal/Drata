@@ -106,12 +106,6 @@ ul.combolist li:hover {
   padding: 0 0.9375rem;
   width: 350px; }
 
-[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle {
-  position: absolute;
-  right: 16px;
-  top: 9px;
-  color: #43ac6a; }
-
 .combolist.complexcombo ul.combolist {
   /*position:static;*/
   width: 197px; }
@@ -147,48 +141,6 @@ ul.combolist li:hover {
   background-color: #74bfdd; }
 
 /*-------End Complex combo---------*/
-/*-------Edit Label---------*/
-.edit-label .title-display {
-  display: block;
-  height: 1.5rem; }
-
-.edit-label input {
-  height: 1.8rem;
-  background: transparent; }
-
-.edit-label .postfix {
-  height: 1.8rem; }
-
-.edit-label .postfix i {
-  top: -4px; }
-
-.edit-label .title-display span, .edit-label .title-display a {
-  line-height: 1.5rem;
-  height: 1.5rem; }
-
-.edit-label .title-display i {
-  line-height: 1rem;
-  height: 1rem; }
-
-.edit-label.edit .title-display {
-  display: none; }
-
-.edit-label .title-edit {
-  display: none; }
-
-.edit-label .title-edit input {
-  margin-bottom: 0; }
-
-.edit-label.edit .title-edit {
-  display: block; }
-
-.title-display .edit-icon {
-  display: none; }
-
-.title-display:hover .edit-icon {
-  display: inline; }
-
-/*-------Edit Label---------*/
 text {
   font: 13px arial; }
 
@@ -368,21 +320,19 @@ polyline {
     position: absolute;
     left: 5px;
     top: 7px; }
-  .widget-nav ul.widget-nav-list {
-    margin: 0;
-    border: none; }
   .widget-nav:hover .widget-actions {
     opacity: 1; }
 
 ul.widget-nav-list {
+  margin: 0;
+  border: none;
   list-style: none; }
 
 ul.widget-nav-list li {
   list-style: none;
   float: left;
   display: block;
-  line-height: 2rem;
-  xborder-left: 1px solid #cccccc; }
+  line-height: 2rem; }
 
 ul.widget-nav-list li.divider:after {
   content: '.';
@@ -390,6 +340,42 @@ ul.widget-nav-list li.divider:after {
 
 ul.widget-nav-list li.action-icon {
   padding: 0 5px; }
+
+.widget-footer {
+  border-top: 1px dashed #cccccc;
+  height: 30px;
+  line-height: 25px;
+  color: #a6a6a6; }
+
+.auto-refresh {
+  float: right; }
+
+.auto-refresh input.timeframe, .auto-refresh button.timeframe {
+  margin: 0;
+  height: 25px;
+  padding: 5px;
+  display: inline-block;
+  line-height: 15px; }
+.auto-refresh input.timeframe {
+  width: 50px; }
+.auto-refresh button.timeframe {
+  border: 1px solid #cccccc;
+  border-left: 0;
+  margin-left: -5px;
+  width: 30px; }
+
+.refresh-chart.and-on {
+  color: #008cba; }
+
+.widget-select-option {
+  max-width: 200px;
+  height: 23px;
+  margin: 3px 5px 0 0;
+  padding: 0 5px;
+  background-color: white; }
+
+.widget-select-option.and-dimension {
+  width: 55px; }
 
 .widget-actions {
   position: absolute;
@@ -399,13 +385,6 @@ ul.widget-nav-list li.action-icon {
   transition: all 0.5s;
   background: white;
   padding: 2px 10px; }
-  .widget-actions .widget-select-option {
-    margin-bottom: 0;
-    max-width: 120px;
-    width: auto;
-    margin-right: 5px;
-    height: 1.8rem;
-    padding: 0 5px; }
 
 .widget-wrapper {
   width: 100%;
@@ -460,13 +439,16 @@ input.error {
   border-radius: 5px 5px 0 0;
   font-size: 0.9rem; }
 
+.top-bar-section .dropdown li.has-form .button {
+  height: auto;
+  line-height: 1rem; }
+
 /*end topbar */
 /**dashboard settings**/
-.dashboard-settings li.theme label {
-  background: #262626; }
 .dashboard-settings li.theme select {
   width: 100px;
-  margin-left: 5px; }
+  margin-bottom: 8px;
+  top: 0; }
 
 /**end dashboard settings**/
 .widget-manager {
@@ -588,7 +570,9 @@ select.error {
   box-shadow: 0px 1px 1px #404040;
   max-height: 90px;
   overflow-y: scroll;
-  overflow-x: hidden; }
+  overflow-x: hidden;
+  z-index: 98;
+  color: #222222; }
 
 .form-error .heading {
   margin-top: 0.5rem; }
@@ -596,9 +580,19 @@ select.error {
 /*selections*/
 [class^="fa-"].selection-action, [class*=" fa-"].selection-action {
   color: #cccccc;
-  line-height: 2rem;
+  line-height: 2.1rem;
   right: -6px;
-  position: absolute; }
+  top: 0;
+  position: absolute;
+  font-size: 1.2rem; }
+
+[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle {
+  position: absolute;
+  right: 20px;
+  top: 0;
+  line-height: 2.1rem;
+  color: #43ac6a;
+  font-size: 1.2rem; }
 
 [class^="fa-"].condition-action-complex, [class*=" fa-"].condition-action-complex {
   line-height: 2rem;
@@ -659,7 +653,24 @@ select.error {
   display: block; }
 
 /*end chart types shown on segmentor*/
-@media only screen and (min-width:40.063em) {
+.selection-switch {
+  display: inline-block; }
+
+.selection-switch .switch-label {
+  line-height: 2rem;
+  display: inline-block;
+  float: right;
+  margin-left: 5px; }
+
+.selection-switch .switch {
+  margin-top: 5px;
+  margin-bottom: 1rem;
+  display: inline-block; }
+
+.selection-switch + .selection-switch {
+  margin-left: 10px; }
+
+@media only screen and (min-width:40.0625em) {
   ul.chart-types > li > a {
     padding-left: 0;
     padding-right: 0; } }
@@ -814,12 +825,12 @@ span.dtooltip {
   z-index: 10; }
 span.dtooltip-aggregate-func {
   position: absolute;
-  left: -4px;
-  top: 10px; }
+  left: 24px;
+  top: -1px; }
 span.dtooltip-selection-prop {
   position: absolute;
-  right: 32px;
-  top: 10px; }
+  right: 20px;
+  top: -11px; }
 span.dtooltip-expression {
   right: 19px;
   top: 4px;
@@ -847,16 +858,42 @@ h3.view-heading {
 .preview-widget .widget-outer {
   padding: 0.5rem 0; }
 
-@media only screen and (min-width:64.063em) {
+.tabular-data {
+  transition: all 0.5s;
+  overflow-y: hidden;
+  max-height: 0;
+  border-bottom: 1px solid #cccccc; }
+
+.row.collapse.tabular-data {
+  margin-bottom: 20px; }
+
+.chk-tabular {
+  visibility: hidden;
+  position: absolute; }
+
+.chk-tabular:checked + .tabular-data {
+  max-height: 1000px; }
+
+.toggle-tabular {
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #008cba;
+  display: inline-block; }
+
+@media only screen and (min-width:64.0625em) {
   .preview-widget {
     position: fixed;
     right: 0; }
     .preview-widget .widget-wrapper {
       background: transparent;
-      border: 1px dashed #cccccc; } }
+      border: 1px dashed #cccccc; }
+  .tabular-data {
+    max-height: 1000px; }
+  label.toggle-tabular {
+    display: none; } }
 
 body.campfire {
-  background: #262626;
+  background-color: #0d0d0d;
   color: #a6a6a6; }
   body.campfire .dashboard {
     background: #0d0d0d; }
@@ -864,9 +901,9 @@ body.campfire {
     color: #a6a6a6; }
   body.campfire .widget-wrapper {
     background: #262626; }
-  body.campfire .widget-nav {
+  body.campfire .widget-nav, body.campfire .widget-footer {
     border-color: #595959; }
-  body.campfire .widget-editor .widget-wrapper {
+  body.campfire .widget-editor, body.campfire .widget-editor .widget-wrapper {
     background: #262626;
     border-color: #595959; }
   body.campfire .chk-dd-label {
@@ -950,9 +987,6 @@ body.campfire {
       background-color: #404040; }
     body.campfire .row.fancytable.content:last-child {
       border-color: #404040; }
-  body.campfire .form-error {
-    background-color: #404040;
-    color: #cccccc; }
   body.campfire .dr-modal {
     background-color: #595959;
     border-color: #262626;
@@ -994,6 +1028,8 @@ body.campfire {
     background: #0d0d0d; }
   body.campfire .tabular-wrapper, body.campfire .tabular-header, body.campfire .tabular-body, body.campfire .tabular-body-header {
     border-color: #595959; }
+  body.campfire .tabular-wrapper {
+    background-color: #262626; }
   body.campfire .chart-type.button {
     background-color: #595959; }
   body.campfire .chart-types > li .button {
@@ -1001,23 +1037,15 @@ body.campfire {
   body.campfire .chart-types > li:first-child .button {
     border-left: none; }
 
-.tabular {
-  margin-bottom: 20px;
-  background-color: white; }
+
 
 .tabular-wrapper {
   font-size: 0.75rem;
-  border-left: 1px solid #cccccc;
   border-right: 1px solid #cccccc;
-  margin-bottom: 20px;
-  background-color: white; }
+  border-left: 1px solid #cccccc; }
 
 .tabular-body, .tabular-header, .tabular-body-header {
-  padding: 5px 0;
-  border-bottom: 1px dashed #cccccc; }
-
-.tabular-body:last-child {
-  border-bottom: 1px solid #cccccc; }
+  padding: 5px 0; }
 
 .tabular-body-header, .tabular-header {
   font-weight: bold; }
@@ -1025,3 +1053,42 @@ body.campfire {
 .tabular-header {
   border-bottom: 1px solid #cccccc;
   border-top: 1px solid #cccccc; }
+
+.edit-label .title-display {
+  display: block;
+  height: 25px;
+  line-height: 25px; }
+
+.edit-label input {
+  height: 25px;
+  background: transparent; }
+
+.edit-label .postfix {
+  height: 25px;
+  line-height: 25px; }
+
+.edit-label .title-display span, .edit-label .title-display a {
+  line-height: 1.5rem;
+  height: 1.5rem; }
+
+.edit-label .title-display i {
+  line-height: 1rem;
+  height: 1rem; }
+
+.edit-label.edit .title-display {
+  display: none; }
+
+.edit-label .title-edit {
+  display: none; }
+
+.edit-label .title-edit input {
+  margin-bottom: 0; }
+
+.edit-label.edit .title-edit {
+  display: block; }
+
+.title-display .edit-icon {
+  display: none; }
+
+.title-display:hover .edit-icon {
+  display: inline; }

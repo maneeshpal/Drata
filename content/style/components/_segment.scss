@@ -24,6 +24,8 @@ select.error{
     max-height: 90px;
     overflow-y: scroll;
     overflow-x: hidden;
+    z-index: 98;
+    color: #222;
 }
 
 .form-error .heading{
@@ -34,9 +36,19 @@ select.error{
 
 [class^="fa-"].selection-action, [class*=" fa-"].selection-action {
     color: #ccc;
-    line-height: 2rem;
+    line-height: 2.1rem;
     right:-6px;
+    top: 0;
     position: absolute;
+    font-size: 1.2rem;
+}
+[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle{
+    position: absolute;
+    right: 20px;
+    top: 0;
+    line-height: 2.1rem;
+    color:$success-color;
+    font-size: 1.2rem;
 }
 
 [class^="fa-"].condition-action-complex, [class*=" fa-"].condition-action-complex {
@@ -117,6 +129,26 @@ select.error{
     display: block;
 }
 /*end chart types shown on segmentor*/
+
+.selection-switch {
+    display: inline-block;
+}
+
+.selection-switch .switch-label {
+    line-height: 2rem;
+    display: inline-block;
+    float: right;
+    margin-left: 5px;
+}
+
+.selection-switch .switch {
+    margin-top: 5px;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+.selection-switch + .selection-switch {
+    margin-left: 10px;
+}
 
 @media #{$medium-up} {
 ul.chart-types > li > a {

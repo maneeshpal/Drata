@@ -1,21 +1,18 @@
 
 var Segmentor = function(model){
     var self = this;
-    //self.propertyTypes = {};
-
+    self.chartType = ko.observable();
     self.properties = ko.observableArray();
 
     self.level = 0;
     self.temp = ko.observable();
     self.outputData = ko.observable();
     self.conditionGroup = new ConditionGroup({ level: self.level + 1, model: undefined, renderType: 'Condition'});
-    self.selectionGroup = new SelectionGroup({ level: self.level});
-    //self.formErrors = ko.observableArray();
-    
+    self.selectionGroup = new SelectionGroup({ level: self.level, chartTypeRef : self.chartType });
+    self.chartOptions = new ChartOptions();
     self.groupData = ko.observable();
     self.dataFilter = new DataFilter();
-    self.chartType = ko.observable();
-
+    
     var compDataGroup, trackDataGroup, currentDataGroupTemplate;
     self.dataGroup = undefined;
     
@@ -30,7 +27,8 @@ var Segmentor = function(model){
         self.dataFilter.prefill(model.dataFilter || {});
         self.chartType(model.chartType || drata.global.chartType.line);
         self.dataGroup && self.dataGroup.setProps(model.dataGroup || {});
-        
+        self.chartOptions.prefill(model.chartOptions || {});
+
         drata.pubsub.publish('formErrors', {
             keepExistingErrors: false,
             errors: []
@@ -61,7 +59,8 @@ var Segmentor = function(model){
             dataGroup: self.dataGroup ? self.dataGroup.getModel(): undefined,
             group: self.conditionGroup.getModel(),
             dataFilter: self.dataFilter.getModel(),
-            chartType: self.chartType()
+            chartType: self.chartType(),
+            chartOptions: self.chartOptions.getModel()
         };
     };
 
@@ -257,6 +256,17 @@ var Segmentor = function(model){
         required: {'message': 'Select Chart Type'}
     });
 
+};
+
+var ChartOptions = function(m) {
+    var self = this;
+    self.includeDataMarkers = ko.observable();
+    self.prefill = function(m) {
+        self.includeDataMarkers(m.includeDataMarkers === undefined ? true : m.includeDataMarkers);
+    }
+    self.getModel = function() {
+        return ko.toJS(self);
+    }
 };
 
 var GroupBySelection = function(m){
@@ -593,13 +603,6 @@ var TimeFrameItem = function(timeframeType){
     self.timeframeType = timeframeType;
     self.dynamicDate.extend({
         dynamicInterval: {
-            a: 1,
-            onlyIf: function(){
-                return self.dateType() === 'dynamic';
-            }
-        },
-        required: {
-            message: 'Enter Interval',
             onlyIf: function(){
                 return self.dateType() === 'dynamic';
             }
@@ -608,12 +611,6 @@ var TimeFrameItem = function(timeframeType){
 
     self.staticDate.extend({
         validDataFilterDate: {
-            onlyIf: function(){
-                return self.dateType() === 'static';
-            }
-        },
-        required: {
-            message: 'Enter Date',
             onlyIf: function(){
                 return self.dateType() === 'static';
             }
@@ -642,12 +639,14 @@ var TimeFrameItem = function(timeframeType){
 
 var DataFilter = function(){
     var self = this;
+    self.dateProp = ko.observable();
     self.from = new TimeFrameItem('from');
     self.to = new TimeFrameItem('to');
-    self.dateProp = ko.observable().extend({
-        required: {message: 'Enter your Date Property'}
-    });
-    self.getModel = function(){
+    
+
+    self.getModel = function() {
+        if(!self.dateProp()) return;
+        
         return {
             from : self.from.getModel(),
             to: self.to.getModel(),
@@ -663,8 +662,45 @@ var DataFilter = function(){
     };
 
     self.expression = ko.computed(function(){
-        return drata.utils.getDataFilterExpression(self.getModel());
+        var model = self.getModel();
+        return model ? drata.utils.getDataFilterExpression(model) : 'No Data Filter selected';
     }).extend({ throttle: 500 });
+
+    self.from.dynamicDate.extend({
+        required: {
+            message: 'Enter Interval',
+            onlyIf: function(){
+                return self.from.dateType() === 'dynamic' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.from.staticDate.extend({
+        required: {
+            message: 'Enter Date',
+            onlyIf: function(){
+                return self.from.dateType() === 'static' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.to.dynamicDate.extend({
+        required: {
+            message: 'Enter Interval',
+            onlyIf: function(){
+                return self.to.dateType() === 'dynamic' && !!self.dateProp();
+            }
+        }
+    });
+
+    self.to.staticDate.extend({
+        required: {
+            message: 'Enter Date',
+            onlyIf: function(){
+                return self.to.dateType() === 'static' && !!self.dateProp();
+            }
+        }
+    });
 };
 
 var Condition = function(options){
@@ -930,6 +966,7 @@ var ConditionGroup = function(options){
 
 var Selection = function(options){
     var self = this;
+    self.showDistinct = false;
     self.level = options.level;
     self.renderType = options.renderType;
     self.logic = ko.observable('+');
@@ -937,6 +974,7 @@ var Selection = function(options){
     self.aliasName = ko.observable();
     self.groupBy = ko.observable();
     self.perc = ko.observable();
+    self.isDistinct = ko.observable();
     self.selectedProp = ko.observable();
     self.addSelection = function(){
         self.selections.push(new Selection({level:options.level+1, renderType: 'childSelection'}));
@@ -946,14 +984,9 @@ var Selection = function(options){
        self.selections.remove(selection);
     };
 
-    self.showPercentChange = ko.computed(function(){
-        if(self.renderType === 'topSelection' && drata.global.trackingChartTypes.indexOf(drata.dashboard.widgetEditor.segment.chartType()) > -1){
-            return true;
-        }
-        else{
-            self.perc(false);
-            return false;
-        }
+    //making sure that only top level selection can have percentage change functionality.
+    self.showPercentChange = ko.computed(function() {
+        return false;
     });
 
     self.isComplex = ko.computed(function(){
@@ -1021,6 +1054,7 @@ var Selection = function(options){
         self.logic(m.logic || '+');
         self.groupBy(m.groupBy);
         self.perc(m.perc);
+        self.isDistinct(m.isDistinct);
         self.selectedProp(m.selectedProp);
         self.selections(ko.utils.arrayMap(
             m.groups,
@@ -1043,7 +1077,8 @@ var Selection = function(options){
             groupBy: self.groupBy(),
             selectedProp: self.selectedProp(),
             isComplex : self.isComplex(),
-            perc: self.perc()
+            isDistinct: self.isDistinct(),
+            perc: options.renderType === 'topSelection' ? self.perc() : false
         };
     };
     self.expression = ko.computed(function(){
@@ -1082,6 +1117,7 @@ var Selection = function(options){
 
 var SelectionGroup = function(options){
     var self = this;
+    self.showDistinct = true;
     self.items = ko.observableArray();
     self.addItem = function(){
         self.items.push(new Selection({ level: options.level+1, model: undefined, renderType: 'topSelection' }));
@@ -1130,12 +1166,19 @@ var SelectionGroup = function(options){
         var innerGroups = self.items();
         _.each(innerGroups, function(gr,index){
             exp = gr.expression();
+            
             if(gr.groupBy() !== 'value'){
                 exp = drata.utils.format(gr.isComplex() ? '<em>{0}</em>{1}' : '<em>{0}</em>({1})', gr.groupBy(), exp); 
             }
+
             expressions.push(exp);
         });
         
         return 'Select ' + expressions.join(', ');
+    });
+
+    self.showPercentChange = ko.computed(function() {
+        var ct = options.chartTypeRef();
+        return ct === drata.global.chartType.line || ct === drata.global.chartType.area;
     });
 };

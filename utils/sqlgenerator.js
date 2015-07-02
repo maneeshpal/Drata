@@ -72,7 +72,7 @@ exports.getSqlQuery = function(dbname, tableName, segment){
     
     var returnQuery = utils.format('select {0} from {1}', selectionProperties.join(','), tableName);
     
-    if(segment.dataFilter.dateProp) {
+    if(segment.dataFilter && segment.dataFilter.dateProp) {
         if(segment.dataFilter.from && segment.dataFilter.to) {
             returnQuery = utils.format('{0} where {1} between \'{2}\' and \'{3}\'', returnQuery, segment.dataFilter.dateProp, utils.getDateFromTimeframe(segment.dataFilter.from).toISOString(), utils.getDateFromTimeframe(segment.dataFilter.to).toISOString());
         }
@@ -84,7 +84,7 @@ exports.getSqlQuery = function(dbname, tableName, segment){
         }
     }
     
-    var dataFilterExists = segment.dataFilter.dateProp && (segment.dataFilter.from || segment.dataFilter.to);
+    var dataFilterExists = segment.dataFilter && segment.dataFilter.dateProp && (segment.dataFilter.from || segment.dataFilter.to);
     
     if(condition.trim()) {
         returnQuery = utils.format('{0} {1} {2}',returnQuery, (dataFilterExists ? 'and' : 'where'), condition);

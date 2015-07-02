@@ -98,11 +98,6 @@
                 if(!_drawAxis) return;
 
                 var xis = container.call(axis);
-                // if(_axisType === 'x'){
-                //     console.log(axisLabelLength);
-                //     console.log(_dims.w);    
-                // }
-                
 
                 var angle = (_dims.w < 250)? -60 : -30;
                 if(_axisType === 'x' && _axisTicType === 'date' && axisLabelLength + 100 > _dims.w){

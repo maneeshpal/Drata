@@ -12,8 +12,11 @@
         self.database = ko.observable();
         self.previewWidget = ko.observable();
         self.segment = new Segmentor();
-        self.segmentModel = ko.observable();
-        self.chartData = ko.observable();
+        //self.segmentModel = ko.observable();
+        //self.chartData = ko.observable();
+        self.showTabular = ko.observable();
+
+        self.tabularModel = ko.observable();
 
         var cloneModel = {}, previewWidgetLoadedToken;
         
@@ -139,16 +142,18 @@
 
         self.attach = function (event,options) {
             self.dataSource(undefined);
+            self.tabularModel(undefined);
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);
-            self.chartData(undefined);
-            self.segmentModel(cloneModel.segmentModel);
             self.addUpdateBtnText('Update');
-            self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
-            previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, chartData) {
-                self.chartData(chartData);
+            previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, model) {
+                self.tabularModel({
+                    segment: model.segment,
+                    data: model.data
+                })
             });
+            self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
         };
 
         self.widgetCancel = function() {
@@ -163,9 +168,11 @@
             self.previewWidget(undefined);
             cloneModel = {};
             drata.pubsub.unsubscribe(previewWidgetLoadedToken);
+            self.tabularModel(undefined);
         };
 
         self.preview = function() {
+            //self.tabularModel(undefined);
             if(!validateWidgetEditor()) return;
             var model = self.segment.getModel();
             if(!model) return;

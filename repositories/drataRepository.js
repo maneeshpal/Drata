@@ -229,22 +229,23 @@ exports.deleteWidget = function(req, res){
 var upsertDashboard = function(dashboardModel, allowDemo){
     return connectToCollection(dashboardCollection).then(function(collection){
         if(dashboardModel._id){
-            return getDashboard(dashboardModel._id).then(function(d){
+            return getDashboard(dashboardModel._id).then(function(d) {
                 if(d.demo && !allowDemo){
                     var defer = Q.defer();
                     defer.resolve();
                     return defer.promise;
                 }
                 else{
-                    return getValidMongoId(dashboardModel._id).then(function(dashboardObjectId){
-                        var defer = Q.defer();
-                        dashboardModel._id = dashboardObjectId;
-                        dashboardModel.dateUpdated = new Date();
-                        collection.save(dashboardModel, {safe:true}, function(err, result) {
-                            err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id)}) : defer.resolve(result);
-                        });
-                        return defer.promise;
-                    });
+                var defer = Q.defer();
+                d.dateUpdated = new Date();
+                d.name = dashboardModel.name;
+                d.theme = dashboardModel.theme;
+
+                collection.save(d, {safe:true}, function(err, result) {
+                    err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id)}) : defer.resolve(result);
+                });
+
+                return defer.promise;
                 }
             });
         }

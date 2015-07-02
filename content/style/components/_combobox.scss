@@ -128,12 +128,6 @@ ul.combolist li:hover {
     width: 350px;
 }
 
-[class^="fa-"].complexcombo-toggle, [class*=" fa-"].complexcombo-toggle{
-    position: absolute;
-    right: 16px;
-    top: 9px;    
-    color:$success-color;
-}
 
 .combolist.complexcombo ul.combolist{
     /*position:static;*/
@@ -177,47 +171,3 @@ ul.combolist li:hover {
 }
 
 /*-------End Complex combo---------*/
-
-/*-------Edit Label---------*/
-.edit-label .title-display{
-    display: block;
-    height:1.5rem;
-}
-.edit-label input {
-    height:1.8rem;
-    background: transparent;
-}
-.edit-label .postfix {
-    height: 1.8rem;
-}
-.edit-label .postfix i {
-    top: -4px;
-}
-
-.edit-label .title-display span, .edit-label .title-display a{
-    line-height: 1.5rem;
-    height:1.5rem;
-}
-.edit-label .title-display i{
-    line-height: 1rem;
-    height:1rem;
-}
-.edit-label.edit .title-display{
-    display: none;
-}
- .edit-label .title-edit{
-    display: none;
- }
-.edit-label .title-edit input{ 
-    margin-bottom: 0;
- }
- .edit-label.edit .title-edit{
-    display: block;
- }
- .title-display .edit-icon{
-    display: none;
- }
- .title-display:hover .edit-icon{
-    display:inline;
- }
- /*-------Edit Label---------*/

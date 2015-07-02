@@ -120,47 +120,49 @@
     ].join('');
 
     var tabularTemplateStr = [
-        '<div class="row collapse tabular">',
-            '<div class="small-12 columns">',
-                '<!-- ko if: dataKeys().length > 0 -->',
-                '<div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Tabular View\', overrideSelectionText: \'Tabular View. {0} groups selected\'}">',
+        '<div class="tabular">',
+            '<div class="row collapse">',
+                '<div class="small-12 columns">',
+                    '<!-- ko if: dataKeys().length > 0 -->',
+                    '<div data-bind="checkboxDropdown: { options:dataKeys, selectedOptions: selectedDataKeys,optionsCaption: \'Tabular View\', overrideSelectionText: \'Tabular View. {0} groups selected\'}">',
+                    '</div>',
+                    '<!-- /ko -->',
+                    '<!-- ko ifnot: dataKeys().length > 0 -->',
+                    '<h6>Tabular View</h6>',
+                    '<!-- /ko -->',
                 '</div>',
-                '<!-- /ko -->',
-                '<!-- ko ifnot: dataKeys().length > 0 -->',
-                '<h6>Tabular View</h6>',
-                '<!-- /ko -->',
             '</div>',
-        '</div>',
-            
-        '<div class="row collapse">',
-        '<!-- ko foreach: selectedTabulars -->',
-            '<div class="tabular-wrapper small-12 columns">',
-                '<div class="row tabular-header">',
-                    '<div class="columns small-12">',
-                        'Selection: <!-- ko text: group --><!-- /ko -->,',
-                        '<!-- ko if : subGroup -->',
-                        '<!-- ko text: subGroupName --><!-- /ko -->:', 
-                        '<!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->',
+                
+            '<div class="row collapse">',
+            '<!-- ko foreach: selectedTabulars -->',
+                '<div class="tabular-wrapper small-12 columns">',
+                    '<div class="row tabular-header">',
+                        '<div class="columns small-12">',
+                            'Selection: <!-- ko text: group --><!-- /ko -->,',
+                            '<!-- ko if : subGroup -->',
+                            '<!-- ko text: subGroupName --><!-- /ko -->:', 
+                            '<!-- ko text: subGroup --><!-- /ko --> <!-- /ko -->',
+                        '</div>',
                     '</div>',
+                    '<div class="row tabular-body-header">',
+                        '<div class="columns small-6">',
+                            '<span data-bind="text: xAxisProp"></span>&nbsp;',
+                            '<span class="fa" data-bind="css: sortDirectionKey, click: sortData.bind($data, \'key\')"></span>',
+                        '</div>',
+                        '<div class="columns small-6">',
+                            '<span data-bind="text: valType"></span>&nbsp;',
+                            '<span class="fa" data-bind="css: sortDirectionValue, click: sortData.bind($data, \'value\')"></span>',
+                        '</div>',
+                    '</div>',
+                    '<!-- ko foreach: values -->',
+                        '<div class="row tabular-body">',
+                            '<div class="small-6 columns" data-bind="text: fKey"></div>',
+                            '<div class="small-6 columns" data-bind="text: fValue"></div>',
+                        '</div>',
+                    '<!-- /ko -->',
                 '</div>',
-                '<div class="row tabular-body-header">',
-                    '<div class="columns small-6">',
-                        '<span data-bind="text: xAxisProp"></span>&nbsp;',
-                        '<span class="fa" data-bind="css: sortDirectionKey, click: sortData.bind($data, \'key\')"></span>',
-                    '</div>',
-                    '<div class="columns small-6">',
-                        '<span data-bind="text: valType"></span>&nbsp;',
-                        '<span class="fa" data-bind="css: sortDirectionValue, click: sortData.bind($data, \'value\')"></span>',
-                    '</div>',
-                '</div>',
-                '<!-- ko foreach: values -->',
-                    '<div class="row tabular-body">',
-                        '<div class="small-6 columns" data-bind="text: fKey"></div>',
-                        '<div class="small-6 columns" data-bind="text: fValue"></div>',
-                    '</div>',
-                '<!-- /ko -->',
+            '<!-- /ko -->',   
             '</div>',
-        '<!-- /ko -->',   
         '</div>'
     ].join('');
 
@@ -686,8 +688,9 @@
         self.headers = ko.observableArray();
         self.selectionHeaders = ko.observableArray();
         self.name = model.name;
-        self.data = ko.isObservable(model.data) ? model.data: ko.observable(data);
-        self.segment = ko.isObservable(model.segment) ? model.segment: ko.observable(segment);
+        //self.data = ko.isObservable(model.data) ? model.data: ko.observable(data);
+        //self.segment = ko.isObservable(model.segment) ? model.segment: ko.observable(segment);
+        self.tabularData = ko.isObservable(model) ? model : ko.observable(model);
         self.groupBy = ko.observable(), self.hasDivideBy = ko.observable();
         self.tabulars = ko.observableArray([]);
         self.dataKeys = ko.observableArray();
@@ -700,13 +703,17 @@
             })
         });
 
-        function init(data, segment) {
-            var segment = self.segment();
-            var data = self.data();
+        function init(tabularModel) {
+            self.tabulars([]);
+            self.dataKeys([]);
+            
+            if(!tabularModel) {
+                return;
+            }
+            var segment = tabularModel.segment;
+            var data = tabularModel.data;
             
             if(!segment || !data || data.length === 0) {
-                self.tabulars([]);
-                self.dataKeys([]);
                 return;
             }
 
@@ -827,9 +834,8 @@
             self.selectedDataKeys(self.dataKeys().slice());
 
         }
-        init();
-        self.data.subscribe(init);
-        self.segment.subscribe(init);
+        init(self.tabularData());
+        self.tabularData.subscribe(init);
     }
 
     var tabularMapperBindingHandler = {

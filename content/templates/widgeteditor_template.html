@@ -1,12 +1,25 @@
 <script type="text/html" id="widgeteditor-template">
 
-    <div class="row" style="position:relative; margin-top:1.5rem">
+    <div class="row" style="position:relative; padding-top:1rem">
         <!-- ko if: previewWidget() -->
             <div class="medium-12 large-7 large-push-5 columns preview-widget">
                 <!-- ko template: { name: 'widget-template', data:previewWidget(), afterRender:loadWidget } --><!-- /ko -->
-                <!-- ko if: chartData() -->
-                <div class="row collapse" style="margin-bottom: 20px;">
-                    <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { minHeight: '100px', maxHeight: (($(window).height()- 145) / 2) + 'px' }, tabular: { segment: segmentModel, data: chartData }"></div>
+                <!-- ko if: tabularModel() -->
+                <div class="row collapse">
+                    <div class="small-12 columns">
+                        <label class="toggle-tabular" for="chkTabular">
+                            <!-- ko if: showTabular() -->
+                            Hide Tabular data <span class="fa fa-chevron-circle-up"></span>
+                            <!-- /ko -->
+                            <!-- ko ifnot: showTabular() -->
+                            View Tabular data <span class="fa fa-chevron-circle-down"></span>
+                            <!-- /ko -->
+                        </label>
+                    </div>
+                </div>
+                <input type="checkbox" data-bind="checked: showTabular" class="chk-tabular" id="chkTabular"></input>
+                <div class="row collapse tabular-data">
+                    <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { minHeight: '100px', maxHeight: (($(window).height()- 145) / 2) + 'px' }, tabular: tabularModel"></div>
                 </div>
                 <!-- /ko -->
             </div>
@@ -29,19 +42,19 @@
             <div class="row">
                 <div class="small-4 columns">
                     <label>Server
-                    <span data-bind="tooltip: {datakey: 'servername'}" class="fa fa-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'servername'}" class="fa fa-question-circle dtooltip"></span>
                         <select data-bind="options:dataSourceNames, optionsCaption: 'choose datasource', value:dataSource"></select>
                         </label>
                 </div>
                 <div class="small-4 columns">
                     <label>Database
-                    <span data-bind="tooltip: {datakey: 'databasename'}" class="fa fa-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'databasename'}" class="fa fa-question-circle dtooltip"></span>
                         <select data-bind="options:databaseNames, optionsCaption: 'choose database', value:database"></select>
                         </label>
                 </div>
                 <div class="small-4 columns">
                     <label>Collection Name
-                    <span data-bind="tooltip: {datakey: 'collectionname'}" class="fa fa-question dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'collectionname'}" class="fa fa-question-circle dtooltip"></span>
                         <select data-bind="options:dataKeys, optionsCaption: 'choose collection', value:selectedDataKey"></select>
                         </label>
                 </div>

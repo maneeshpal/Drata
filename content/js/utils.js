@@ -521,11 +521,6 @@
         icon: 'fa-area-chart',
         type: 'track'
     }, {
-        name: 'scatter',
-        label: 'scatter',
-        icon: 'fa-sliders',
-        type: 'track'
-    }, {
         name: 'pie',
         label: 'pie',
         icon: 'fa-pie-chart',
@@ -571,8 +566,7 @@
         numericOperations: ['>', '<', '<=', '>=', '+', '-', '*', '/'],
         timeframes : ['minute', 'hour', 'day', 'month', 'year'],
         uniqueClientId: parseInt(Math.random() * 100000000),
-        dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', 'week', 'month', 'quarter', 'year'],
-        timeframeIntervalExamples: ['60s', '5m', '5h', '1d','1w'],
+        dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', '1y', 'week', 'month', 'quarter', 'year'],
         sortTypes: { 
             numeric: { 
                 asc: 'fa-sort-numeric-asc', 
@@ -611,6 +605,26 @@
         return new Date(_x.toDateString());
     };
 
+    var timer = {
+        start: function(callback, ms) {
+            return setInterval(callback, ms);
+        },
+        stop: function(t) {
+            clearInterval(t);
+        }
+    };
+
+    var getHms = function getHms(s) {
+        var sec = +s % 60;
+        var total_min = (+s - sec) /60;
+        var  min =  total_min % 60;
+        var hour = (total_min-min) / 60;
+        hour = hour < 10 ? '0' + hour : hour;
+        min = min < 10 ? '0' + min : min;
+        sec = sec < 10 ? '0' + sec : sec;
+        return hour +':'+ min+ ':' + sec;
+    };
+
     drata.ns('utils').extend({
         format: format,
         toArray:toArray,
@@ -636,7 +650,9 @@
         getDataFilterExpression: getDataFilterExpression,
         formatNumber: formatNumber,
         isArray: isArray,
-        firstDayOfWeek: firstDayOfWeek
+        firstDayOfWeek: firstDayOfWeek,
+        timer: timer,
+        getHms: getHms
     });
 })(this);
 
