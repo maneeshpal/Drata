@@ -2,29 +2,30 @@ text{
     font: 13px arial;
 }
 .axis {
-    path{
-        stroke:#ccc;
+    path, line {
+        stroke:#eee;
         fill:none;
         shape-rendering: crispEdges;
     }
-    line {
-        stroke:#ccc;
-        stroke-opacity: .2;
-        fill:none;
-        shape-rendering: crispEdges;
-    }
-    path.domain{
-        display: none;
-    } 
+    
     text{
         fill: #1f77b4;
     }  
+}
+
+.x.axis .tick line {
+    stroke: #ccc;
+}
+
+.y.axis path.domain {
+    display: none;
 }
 
 .line-group .line{
     fill:none;
     stroke-width:2;
 }
+
 .label-group {
     cursor:pointer;
 }
@@ -90,9 +91,7 @@ polyline{
     top: 100%;
     left: 0;
 }
-.rect-bar{
-    
-}
+
 .rect-bar:hover{
     opacity: .8;
 }

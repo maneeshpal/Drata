@@ -104,7 +104,7 @@
 			widgetModel.dashboardId = currentDashboard.getId();
 	        delete widgetModel.dateCreated;
 	        delete widgetModel._id;
-	        widgetModel.displayIndex = currentDashboard.widgets().length + 1;
+	        widgetModel.displayIndex = currentDashboard.widgets().length;
 			drata.apiClient.addWidget(widgetModel).then(function(response){
                 console.log('widget created in db');
 	            currentDashboard.addWidget(response);

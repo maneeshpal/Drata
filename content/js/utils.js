@@ -306,19 +306,69 @@
     };
 
     var intervalFormats = {
-        month : {format: '%b %Y', mb: 40, ml: 60},
-        year: {format: '%Y', mb: 30, ml: 30},
-        day: {format: '%Y %b %d', mb: 50, ml: 60},
-        hours: {format: '%Y %b %d %H:%M', mb: 70, ml: 70},
-        get: function(range){
-            if(!range) return this.day;
-            var msDay = 172800000, msMonth = 7776000000, msYear = 31536000000;
-            var interval = range[1] - range[0];
-            if(interval <= msDay){
-                // 3 days
-                return this.hours;
+        month : { 
+            format: '%b %Y', 
+            mb: 45,
+            tickFormat: d3.time.format('%b %Y')
+        },
+        year: {
+            format: '%Y',
+            mb: 30,
+            tickFormat: d3.time.format('%Y')
+        },
+        day: {
+            format: '%Y %b %d', 
+            mb: 60,
+            tickFormat: d3.time.format('%Y %b %d')
+        },
+        hours: {
+            format: '%Y %b %d %H:%M', 
+            mb: 80,
+            tickFormat: d3.time.format('%Y %b %d %H:%M'),
+            ml: 90
+        },
+        numeric: {
+            tickFormat: d3.format('.3s'),
+            mb: 40
+        },
+        currency: {
+            tickFormat: function(d) {
+                return '$' + d3.format('.2s')(d);
             }
-            return this.day;
+        },
+        week: {
+            format: '%Y %b %d', 
+            mb: 60,
+            tickFormat: d3.time.format('%Y %b %d')
+        },
+        quarter: {
+            tickFormat: function(d){
+                return d.getFullYear() + ' Q ' + (Math.floor(d.getMonth() / 3) + 1);
+            },
+            mb: 45 
+        },
+        get: function( options ) {
+            
+            if(intervalFormats[options.formatType]) {
+                return intervalFormats[options.formatType];
+            }
+
+            if(options.formatType === 'date' && intervalFormats[options.dateInterval]) {
+                return intervalFormats[options.dateInterval];
+            }
+
+            if(!options.range) return intervalFormats.day;
+            
+            var msDay = 172800000, 
+                msMonth = 7776000000, 
+                msYear = 31536000000;
+
+            var interval = options.range[1] - options.range[0];
+            
+            return interval <= msDay ? intervalFormats.hours : intervalFormats.day;
+        },
+        getTickFormat: function( options ) {
+            return this.get(options).tickFormat;
         }
     };
 
@@ -348,41 +398,7 @@
     var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 
     var getTextFormat = function(type){
-        var tickFormat;
-        switch(type.formatType){
-            case 'numeric':
-                tickFormat = d3.format('.3s');
-                break;
-            case 'currency':
-                tickFormat = function(d) {
-                    var f = d3.format('.2s');
-                    return '$' + f(d);
-                };
-                break;
-            case 'date':
-                switch(type.formatSubType){
-                    case 'week': //lets just use the day format for weeks.
-                        tickFormat = d3.time.format(intervalFormats.day.format);
-                        break;
-                    case 'month':
-                        tickFormat = d3.time.format(intervalFormats.month.format);
-                        break;
-                    case 'quarter':
-                        tickFormat = function(d){
-                            return d.getFullYear() + ' Q ' + (Math.floor(d.getMonth() / 3) + 1);
-                        }
-                        break;
-                    case 'year':
-                        tickFormat = d3.time.format(intervalFormats.year.format);
-                        break;
-                    default:
-                        intFormat = intervalFormats.get(type.domain);
-                        
-                        tickFormat = d3.time.format(intFormat.format);
-                }
-                break;
-        }
-        return tickFormat;
+        return intervalFormats.get(type.domain, type.formatSubType, type.formatType);
     };
 
     var getUniqueProperties = function(data){
@@ -398,7 +414,6 @@
                     propertyTypes[property] = [];
                 }
                 propertyTypes[property].push(getType(dataValue[property]));
-                //(dataValue.hasOwnProperty(property) && returnArr.indexOf(property) === -1) && returnArr.push(property);
             }
         };
         var uniqueTypes = [];
@@ -592,6 +607,7 @@
     };
 
     var getDataFilterExpression = function(dataFilter){
+        if(!dataFilter) return '';
         var exp = '{0} to {1}';
         var fromExp = (+new Date(dataFilter.from)) ? dataFilter.from : parseTime(dataFilter.from).expression + ' since current time';
         var toExp = (+new Date(dataFilter.to)) ? dataFilter.to : parseTime(dataFilter.to).expression + ' since current time';

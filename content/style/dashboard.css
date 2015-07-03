@@ -144,19 +144,18 @@ ul.combolist li:hover {
 text {
   font: 13px arial; }
 
-.axis path {
-  stroke: #cccccc;
+.axis path, .axis line {
+  stroke: #eeeeee;
   fill: none;
   shape-rendering: crispEdges; }
-.axis line {
-  stroke: #cccccc;
-  stroke-opacity: 0.2;
-  fill: none;
-  shape-rendering: crispEdges; }
-.axis path.domain {
-  display: none; }
 .axis text {
   fill: #1f77b4; }
+
+.x.axis .tick line {
+  stroke: #cccccc; }
+
+.y.axis path.domain {
+  display: none; }
 
 .line-group .line {
   fill: none;
@@ -219,7 +218,6 @@ polyline {
   margin: -2px 0 0 0;
   top: 100%;
   left: 0; }
-
 
 .rect-bar:hover {
   opacity: 0.8; }

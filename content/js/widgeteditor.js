@@ -116,7 +116,7 @@
             cloneModel.name = self.name() || 'New widget';
 
             if(isNew) {
-                cloneModel.sizex = '2';
+                cloneModel.sizex = '4';
                 cloneModel.sizey = '2';
                 drata.pubsub.publish('widgetcreate', cloneModel);
             }
@@ -148,7 +148,7 @@
             self.name(cloneModel.name);
             self.addUpdateBtnText('Update');
             previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, model) {
-                self.tabularModel({
+                self.tabularModel(model && {
                     segment: model.segment,
                     data: model.data
                 })
