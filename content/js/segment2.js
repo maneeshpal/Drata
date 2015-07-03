@@ -656,7 +656,6 @@ var DataFilter = function(){
 
     self.prefill = function(model){
         self.dateProp(model.dateProp);
-        if(!model.dateProp) self.dateProp.isModified(false);
         self.from.prefill(model.from);
         self.to.prefill(model.to);
     };
