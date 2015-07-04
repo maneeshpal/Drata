@@ -12,7 +12,9 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {m: {l:50, r:10, t:10, b: 80}};
+        var getDefaultDims = function() {
+            return { m: { l:50, r:10, t:10, b: 80 } };
+        }
         
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
@@ -31,8 +33,8 @@
         };
 
         function chart(selection) {
-            console.log('line chart drawn');
             selection.each(function(data) {
+                var dims = getDefaultDims();
                 var container = d3.select(this);
                 _yticks > 0 && yAxis.ticks(_yticks);
                 
@@ -144,7 +146,7 @@
                 if(_drawLabels){
                     labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
                 }
-
+                console.log(dims.m);
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     //.transition().duration(500)

@@ -12,7 +12,9 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {m: {l:50, r:10, t:10, b: 80}};
+        var getDefaultDims = function() {
+            return { m: { l:50, r:10, t:10, b: 80 } };
+        }
         
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
@@ -32,7 +34,7 @@
 
         function chart(selection) {
             selection.each(function(data) {
-                console.log('area chart drawn');
+                var dims = getDefaultDims();
                 var container = d3.select(this);
                 _yticks > 0 && yAxis.ticks(_yticks);
                 
