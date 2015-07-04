@@ -149,6 +149,8 @@
         self.selectedPieKey = ko.observable();
         self.widgetHeight = ko.observable();
         self.autoRefresh = new AutoRefresh(widgetModel.refresh);
+        self.showTabularData = ko.observable(previewMode ? undefined: widgetModel.showTabularData);
+        self.tabularModel = ko.observable();
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
@@ -166,7 +168,7 @@
             },
             write: function(newValue){
                 _name(newValue);
-                self.update();
+                self.updateWidgetViewOptions();
             }
         });
 
@@ -178,7 +180,7 @@
             write: function(newValue){
                 if(newValue === _sizex()) return;
                 _sizex(newValue);
-                self.update();
+                self.updateWidgetViewOptions();
                 self.resizeContent();
             }
         });
@@ -191,7 +193,7 @@
             write: function(newValue){
                 if(newValue === _sizey()) return;
                 _sizey(newValue);
-                self.update();
+                self.updateWidgetViewOptions();
                 self.resizeContent();
             }
         });
@@ -215,9 +217,20 @@
 
         self.update = function(){
             if(previewMode) return;
+            console.log('widget updated');
             var m = self.getModel();
             if(!m._id) return;
             drata.apiClient.updateWidget(m).then(function(resp){
+                
+            });
+        };
+
+        self.updateWidgetViewOptions = function(){
+            if(previewMode) return;
+            console.log('widget view options updated');
+            var m = self.getViewOptionsModel();
+            if(!m._id) return;
+            drata.apiClient.updateWidgetViewOptions(m).then(function(resp){
                 
             });
         };
@@ -284,6 +297,7 @@
             self.widgetLoading(false);
             self.parseError(message);
             previewMode && drata.pubsub.publish('previewWidgetLoaded', undefined);
+            self.tabularModel(undefined);
         }
 
         var getData = function () {
@@ -336,6 +350,8 @@
                 previewMode && drata.pubsub.publish('previewWidgetLoaded', { data: chartData, segment: widgetModel.segmentModel });
                 resizeToken = drata.pubsub.subscribe('resizewidgets',self.resizeContent.bind(self));
                 
+                self.tabularModel({ data: chartData, segment: widgetModel.segmentModel });
+
                 self.autoRefresh.startTimer();
 
             }, function(error){
@@ -350,6 +366,7 @@
             _sizex(widgetModel.sizex);
             _sizey(widgetModel.sizey);
             _name(widgetModel.name);
+            !previewMode && self.showTabularData(widgetModel.showTabularData);
             resizeContent && self.resizeContent();
             self.parseError(undefined);
             self.chartType(widgetModel.segmentModel.chartType);
@@ -365,6 +382,7 @@
             widgetModel.sizey = _sizey();
             widgetModel.displayIndex = self.displayIndex();
             widgetModel.name = _name();
+            widgetModel.showTabularData = self.showTabularData();
             
             if(content && content.getModel){
                 widgetModel.contentModel = content.getModel();
@@ -380,6 +398,18 @@
             return widgetModel;
         };
         
+        self.getViewOptionsModel = function (argument) {
+            return {
+                _id: widgetModel._id,
+                sizex: _sizex(),
+                sizey: _sizey(),
+                displayIndex: self.displayIndex(),
+                showTabularData: self.showTabularData(),
+                name: _name(),
+                refresh: +self.autoRefresh.seconds() || 0,
+            }
+        };
+
         self.selectedPieKey.subscribe(function(newValue){
             if(!newValue) return;
             if( widgetModel.segmentModel.chartType === 'pie' ) {
@@ -407,13 +437,11 @@
             drata.apiClient.deleteWidget(widgetModel._id);
         };
 
-        self.displayIndex.subscribe(function(){
-            self.update();
-        });
+        self.displayIndex.subscribe(self.updateWidgetViewOptions.bind(self));
 
         _sizex.subscribe(setWidgetHeight)
         _sizey.subscribe(setWidgetHeight);
-
+        self.showTabularData.subscribe(self.updateWidgetViewOptions.bind(self));
         setWidgetHeight();
 
         if(!previewMode){
@@ -421,9 +449,15 @@
             drata.nsx.dashboardSyncService.listenWidgetRemoved(widgetModel._id);
         }
 
-        self.autoRefresh.seconds.subscribe(self.update.bind(self));
+        self.autoRefresh.seconds.subscribe(self.updateWidgetViewOptions.bind(self));
 
         self.autoRefresh.whenTime(getData);
+        self.toggleTabularData = function() {
+            self.showTabularData(!self.showTabularData());
+            if(!self.showTabularData()) {
+                self.resizeContent();
+            }
+        }
     };
 
     var LineContent = function(contentOptions){

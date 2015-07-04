@@ -72,6 +72,7 @@ app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);
 
 //update widget
 app.put('/api/widget', drataRepository.updateWidget);
+app.put('/api/widgetviewoptions', drataRepository.updateWidgetViewOptions);
 //create widget
 app.post('/api/widget', drataRepository.addWidget);
 //delete widget

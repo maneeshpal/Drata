@@ -166,7 +166,12 @@ ul.widget-nav-list li.action-icon{
   }
 }
 
-.refresh-chart.and-on {
+span.widget-switch {
+  line-height: 2rem;
+  margin: 0 5px;
+}
+
+.widget-switch.and-on {
   color: #008cba;
 }
 

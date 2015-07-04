@@ -44,11 +44,26 @@
                 <div data-bind="html: parseError, style : { height : widgetHeight() + 'px', paddingTop : (+widgetHeight()/2 -10) + 'px', textAlign: 'center' }"></div>
             </div>
 
-            <div data-bind="if: !parseError(), css : {'loading': widgetLoading}">
+            <!-- ko if: !parseError() -->
+            <div data-bind="visible: !showTabularData(), css : {'loading': widgetLoading}">
                 <!-- ko template: contentTemplate() -->
                 <!-- /ko -->
             </div>
 
+            <div data-bind="visible: showTabularData(),
+                css : { 
+                    'loading': widgetLoading 
+                }">
+                    <div data-bind="style: { 
+                            height : widgetHeight() + 'px'
+                        },
+                        tabular: {
+                            dataModel: tabularModel,
+                            maxHeight: widgetHeight
+                        }">
+                    </div>
+            </div>
+            <!-- /ko -->
             <div class="clearfix widget-footer">
                 <!-- ko if: !previewMode -->
                 <div class="left">
@@ -69,6 +84,7 @@
                             <option value="1">100%</option>
                         </select>
                 </div>
+                <span class="fa fa-table widget-switch" data-bind="css: {'and-on': showTabularData() }, click: toggleTabularData"></span>
                 <!-- /ko -->
                 <div class="left">
                     <select class="widget-select-option" data-bind="visible: pieKeys().length > 1, value:selectedPieKey,options: pieKeys, optionsText: 'label'">
@@ -85,7 +101,7 @@
                         <button class="timeframe secondary tiny" data-bind="click: startTimer">ok</button>
                     <!-- /ko -->
 
-                    <span class="fa fa-refresh refresh-chart" data-bind="css: {'and-on': turnedOn() }, click: enteringTimeframe"></span>
+                    <span class="fa fa-refresh widget-switch" data-bind="css: {'and-on': turnedOn() }, click: enteringTimeframe"></span>
                 </div>
 
             </div>

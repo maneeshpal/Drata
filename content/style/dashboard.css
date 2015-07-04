@@ -362,7 +362,11 @@ ul.widget-nav-list li.action-icon {
   margin-left: -5px;
   width: 30px; }
 
-.refresh-chart.and-on {
+span.widget-switch {
+  line-height: 2rem;
+  margin: 0 5px; }
+
+.widget-switch.and-on {
   color: #008cba; }
 
 .widget-select-option {
@@ -862,7 +866,7 @@ h3.view-heading {
   max-height: 0;
   border-bottom: 1px solid #cccccc; }
 
-.row.collapse.tabular-data {
+.tabular-data {
   margin-bottom: 20px; }
 
 .chk-tabular {
@@ -1036,11 +1040,15 @@ body.campfire {
     border-left: none; }
 
 
+.tabular-content {
+  overflow-y: scroll;
+  border-left: 1px solid #cccccc;
+  padding: 0 0.9375rem;
+  border-right: 1px solid #cccccc; }
+
 
 .tabular-wrapper {
-  font-size: 0.75rem;
-  border-right: 1px solid #cccccc;
-  border-left: 1px solid #cccccc; }
+  font-size: 0.75rem; }
 
 .tabular-body, .tabular-header, .tabular-body-header {
   padding: 5px 0; }

@@ -132,10 +132,9 @@
                     '<!-- /ko -->',
                 '</div>',
             '</div>',
-                
-            '<div class="row collapse">',
+            '<div class="tabular-content clearfix" data-bind="style: { maxHeight: (maxHeight() - 37) + \'px\' }">',
             '<!-- ko foreach: selectedTabulars -->',
-                '<div class="tabular-wrapper small-12 columns">',
+                '<div class="tabular-wrapper">',
                     '<div class="row tabular-header">',
                         '<div class="columns small-12">',
                             'Selection: <!-- ko text: group --><!-- /ko -->,',
@@ -683,16 +682,15 @@
         self.sortDirectionValue = ko.computed(function() {
             return sortDirection('value');
         })
-    }
+    };
 
     var TabularMapper = function (model) {
         var self = this;
         self.headers = ko.observableArray();
         self.selectionHeaders = ko.observableArray();
         self.name = model.name;
-        //self.data = ko.isObservable(model.data) ? model.data: ko.observable(data);
-        //self.segment = ko.isObservable(model.segment) ? model.segment: ko.observable(segment);
-        self.tabularData = ko.isObservable(model) ? model : ko.observable(model);
+        self.maxHeight = ko.isObservable(model.maxHeight) ? model.maxHeight: ko.observable(model.maxHeight);
+        self.tabularData = ko.isObservable(model.dataModel) ? model.dataModel : ko.observable(model.dataModel);
         self.groupBy = ko.observable(), self.hasDivideBy = ko.observable();
         self.tabulars = ko.observableArray([]);
         self.dataKeys = ko.observableArray();

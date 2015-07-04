@@ -48,8 +48,7 @@
 
                 z.domain(data.map(function(d){return d.key}));
                 
-                chart.resize = function() { 
-                    //dims = {m: {l:50, r:10, t:30, b: 80}};
+                chart.resize = function() {
                     container
                     .transition().duration(500)
                     .call(chart);
@@ -146,7 +145,6 @@
                 if(_drawLabels){
                     labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
                 }
-                console.log(dims.m);
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     //.transition().duration(500)

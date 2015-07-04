@@ -126,6 +126,26 @@ var updateWidget = function(widgetModel){
     });
 };
 
+var updateWidgetViewOptions = function(widgetModel){
+    return getWidget(widgetModel._id).then(function(widget) {
+        return connectToCollection(widgetCollection).then(function(collection) {
+            var defer = Q.defer();
+            widget.dateUpdated = new Date();
+            widget.sizex = widgetModel.sizex;
+            widget.sizey = widgetModel.sizey;
+            widget.displayIndex = widgetModel.displayIndex;
+            widget.showTabularData = widgetModel.showTabularData;
+            widget.name = widgetModel.name;
+            widget.refresh = widgetModel.refresh;
+
+            collection.save(widget, {safe:true}, function(err, result) {
+                err ? defer.reject({code: 500, message: 'cannot update widget view options'}) : defer.resolve();
+            });
+        return defer.promise;
+        });
+    });
+};
+
 var addWidget = function(widgetModel){
     return connectToCollection(widgetCollection).then(function(collection){
         return getDashboard(widgetModel.dashboardId).then(function(result){
@@ -151,6 +171,17 @@ exports.updateWidget = function(req, res){
     }
     updateWidget(widgetModel)
     .then(function(){
+        res.send(200);
+    }, handleErrorResponse.bind(res));
+}
+
+exports.updateWidgetViewOptions = function(req, res) {
+    var widgetModel = req.body;
+    if(!widgetModel._id){
+        res.send(404);
+    }
+    updateWidgetViewOptions(widgetModel)
+    .then(function() {
         res.send(200);
     }, handleErrorResponse.bind(res));
 }
