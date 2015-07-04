@@ -45,8 +45,15 @@ body.campfire {
 		}
 		line {
 			stroke: $kindadark;
-			stroke-opacity: .6;
 		}
+	}
+	
+	.x.axis path {
+		stroke: $light;
+	}
+
+	.x.axis .tick line {
+		stroke: $light;
 	}
 	.d3-tip {
 		background: #fff;
@@ -213,7 +220,7 @@ body.campfire {
 	@include fancyscrollbar($superdark, $dark);
 
 	//tabular
-	.tabular-wrapper, .tabular-header, .tabular-body,  .tabular-body-header  {
+	.tabular-data, .tabular-content, .tabular-header, .tabular-body,  .tabular-body-header  {
 		border-color: $medium;
 	}
 	.tabular-wrapper {
@@ -229,6 +236,9 @@ body.campfire {
 	}
 	.chart-types > li:first-child .button {
 		border-left: none;
+	}
+	.switch input:not(:checked) + label {
+		background-color: $medium;
 	}
 }
 

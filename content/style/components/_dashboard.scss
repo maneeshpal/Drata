@@ -200,7 +200,11 @@ span.widget-switch {
   width:100%;
   background-color: #fff;
   position: relative;
-  
+  .chk-dd-label {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
   &:hover {
     .action-icon{
       opacity:1;

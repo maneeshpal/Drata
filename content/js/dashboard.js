@@ -149,7 +149,7 @@
         self.selectedPieKey = ko.observable();
         self.widgetHeight = ko.observable();
         self.autoRefresh = new AutoRefresh(widgetModel.refresh);
-        self.showTabularData = ko.observable(previewMode ? undefined: widgetModel.showTabularData);
+        self.showTabularData = ko.observable(widgetModel.showTabularData);
         self.tabularModel = ko.observable();
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
@@ -355,7 +355,7 @@
                 self.autoRefresh.startTimer();
 
             }, function(error){
-                displayErrorMessage(error);
+                displayErrorMessage(error.responseText);
             });
         };
 
@@ -366,7 +366,7 @@
             _sizex(widgetModel.sizex);
             _sizey(widgetModel.sizey);
             _name(widgetModel.name);
-            !previewMode && self.showTabularData(widgetModel.showTabularData);
+            self.showTabularData(widgetModel.showTabularData);
             resizeContent && self.resizeContent();
             self.parseError(undefined);
             self.chartType(widgetModel.segmentModel.chartType);

@@ -45,12 +45,12 @@
             </div>
 
             <!-- ko if: !parseError() -->
-            <div data-bind="visible: !showTabularData(), css : {'loading': widgetLoading}">
+            <div data-bind="visible: !showTabularData() || previewMode, css : {'loading': widgetLoading}">
                 <!-- ko template: contentTemplate() -->
                 <!-- /ko -->
             </div>
 
-            <div data-bind="visible: showTabularData(),
+            <div data-bind="visible: showTabularData() && !previewMode,
                 css : { 
                     'loading': widgetLoading 
                 }">

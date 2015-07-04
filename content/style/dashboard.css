@@ -392,6 +392,10 @@ span.widget-switch {
   width: 100%;
   background-color: white;
   position: relative; }
+  .widget-wrapper .chk-dd-label {
+    border-top: none;
+    border-left: none;
+    border-right: none; }
   .widget-wrapper:hover .action-icon {
     opacity: 1; }
   .widget-wrapper .action-icon {
@@ -917,8 +921,11 @@ body.campfire {
   body.campfire .axis text {
     fill: #737373; }
   body.campfire .axis line {
-    stroke: #404040;
-    stroke-opacity: 0.6; }
+    stroke: #404040; }
+  body.campfire .x.axis path {
+    stroke: #737373; }
+  body.campfire .x.axis .tick line {
+    stroke: #737373; }
   body.campfire .d3-tip {
     background: white;
     color: #404040;
@@ -1028,7 +1035,7 @@ body.campfire {
   body.campfire ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: #0d0d0d; }
-  body.campfire .tabular-wrapper, body.campfire .tabular-header, body.campfire .tabular-body, body.campfire .tabular-body-header {
+  body.campfire .tabular-data, body.campfire .tabular-content, body.campfire .tabular-header, body.campfire .tabular-body, body.campfire .tabular-body-header {
     border-color: #595959; }
   body.campfire .tabular-wrapper {
     background-color: #262626; }
@@ -1038,7 +1045,11 @@ body.campfire {
     border-left: 1px solid #2d2d2d; }
   body.campfire .chart-types > li:first-child .button {
     border-left: none; }
+  body.campfire .switch input:not(:checked) + label {
+    background-color: #595959; }
 
+.tabular {
+  min-height: 200px; }
 
 .tabular-content {
   overflow-y: scroll;

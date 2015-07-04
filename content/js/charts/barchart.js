@@ -4,16 +4,22 @@
  ;(function(root) {
     
     var BarChart = function(){
-        var z = d3.scale.category10();
+        var z = d3.scale.category10(),
+            dispatch = d3.dispatch('togglePath'),
+            disabledItems = 0,
+            _showBarLabels = false, 
+            _drawLabels = true, 
+            _drawYAxis = true, 
+            _drawXAxis = true, 
+            _showToolTips = true,
+            _dims = { m: { t:60, r:10, b:30, l:40 } },
+            x0 = d3.scale.ordinal(),
+            x1 = d3.scale.ordinal(),
+            y = d3.scale.linear();
+
         var getDefaultDims = function() {
-            return { m: { t:60, r:10, b:30, l:40 } };
+            return drata.utils.clone(_dims);
         }
-        var dispatch = d3.dispatch('togglePath');
-        var disabledItems = 0;
-        var _showBarLabels = false, _drawLabels = true, _drawYAxis = true, _drawXAxis = true, _showToolTips = true;
-        var x0 = d3.scale.ordinal();
-        var x1 = d3.scale.ordinal();
-        var y = d3.scale.linear();
         
         var tip = d3.tip && d3.tip()
             .attr('class', 'd3-tip')
@@ -280,8 +286,8 @@
             return chart;
         };
         chart.dims = function(value){
-            if (!arguments.length) return dims;
-            dims = value;
+            if (!arguments.length) return _dims;
+            _dims = value;
             return chart;
         };
         chart.showToolTips = function(value){

@@ -18,9 +18,7 @@
                     </div>
                 </div>
                 <input type="checkbox" data-bind="checked: showTabular" class="chk-tabular" id="chkTabular"></input>
-                    <div class="tabular-data" data-bind="style: { 
-                            minHeight: '100px' 
-                        }, tabular: { 
+                    <div class="tabular-data" data-bind="tabular: { 
                             dataModel: tabularModel, 
                             maxHeight: ($(window).height()- 145) / 2 
                         }"></div>
