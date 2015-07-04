@@ -166,7 +166,12 @@ ul.widget-nav-list li.action-icon{
   }
 }
 
-.refresh-chart.and-on {
+span.widget-switch {
+  line-height: 2rem;
+  margin: 0 5px;
+}
+
+.widget-switch.and-on {
   color: #008cba;
 }
 
@@ -195,7 +200,11 @@ ul.widget-nav-list li.action-icon{
   width:100%;
   background-color: #fff;
   position: relative;
-  
+  .chk-dd-label {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
   &:hover {
     .action-icon{
       opacity:1;

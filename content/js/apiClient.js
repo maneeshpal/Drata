@@ -75,6 +75,17 @@
         return promise;
     };
 
+    var updateWidgetViewOptions = function(model){
+        var promise = _perform('PUT', apiRoot + 'widgetviewoptions',model);
+        promise.done(function(response){
+            socket.emit('widgetupdated', {
+                widgetId : model._id, 
+                dashboardId: model.dashboardId
+            });
+        });
+        return promise;
+    };
+
     var deleteWidget = function(widgetId){
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
         var promise = _perform('DELETE',url);
@@ -205,6 +216,7 @@
         getWidgets: getWidgets,
         addWidget: addWidget,
         updateWidget: updateWidget,
+        updateWidgetViewOptions: updateWidgetViewOptions,
         deleteWidget:deleteWidget,
         upsertDashboard: upsertDashboard,
         deleteDashboard: deleteDashboard,

@@ -18,9 +18,10 @@
                     </div>
                 </div>
                 <input type="checkbox" data-bind="checked: showTabular" class="chk-tabular" id="chkTabular"></input>
-                <div class="row collapse tabular-data">
-                    <div class="small-12 columns" style="overflow-y:scroll" data-bind="style: { minHeight: '100px', maxHeight: (($(window).height()- 145) / 2) + 'px' }, tabular: tabularModel"></div>
-                </div>
+                    <div class="tabular-data" data-bind="tabular: { 
+                            dataModel: tabularModel, 
+                            maxHeight: ($(window).height()- 145) / 2 
+                        }"></div>
                 <!-- /ko -->
             </div>
         <!-- /ko -->

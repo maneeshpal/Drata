@@ -1,5 +1,13 @@
 
 .tabular {
+	min-height: 200px;
+}
+
+.tabular-content {
+	overflow-y: scroll;
+	border-left: 1px solid #cccccc;
+	padding: 0 0.9375rem;
+	border-right: 1px solid #cccccc;
 }
 
 .tabular .chk-dd {
@@ -8,8 +16,6 @@
 
 .tabular-wrapper {
     font-size: .75rem;
-    border-right:1px solid #ccc;
-    border-left:1px solid #ccc;
 }
 
 .tabular-body, .tabular-header,  .tabular-body-header {
