@@ -509,18 +509,20 @@
         this.href = ko.isObservable(config.href) ? config.href: ko.observable(config.href);
         this.overrideTitle = ko.observable();
         this.editTitle = function(){
-            //temp = this.title();
             this.editingTitle(true);
             this.overrideTitle(ko.unwrap(this.title));
             return false;
         }
-        this.cancelEdit = function(){
-            //this.title(temp);
+        this.cancelEdit = function() {
             this.editingTitle(false);
         }
-        this.acceptEdit = function(){
-            this.editingTitle(false);
-            this.title(this.overrideTitle());
+        this.acceptEdit = function() {
+            //textbox not losing focus. so the value is still old.
+            //so added a timeout.
+            setTimeout(function() {
+                this.editingTitle(false);
+                this.title(this.overrideTitle());
+            }.bind(this), 1);
         }
     };
 
@@ -753,14 +755,15 @@
                     level = 1;
                 }
             }
-            textFormat_y = drata.utils.getTextFormat({
+            
+            textFormat_y = drata.utils.intervalFormats.getTickFormat({
                 formatType: 'numeric'
             });
 
             if (self.isTrackChart) {
-                textFormat_x = drata.utils.getTextFormat({
+                textFormat_x = drata.utils.intervalFormats.getTickFormat({
                     formatType: segment.dataGroup.xAxisType,
-                    formatSubType: segment.dataGroup.timeseriesInterval
+                    dateInterval: segment.dataGroup.timeseriesInterval
                 });
                 
                 if(segment.dataGroup.xAxisType === 'date') {

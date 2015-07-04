@@ -5,8 +5,9 @@
     
     var BarChart = function(){
         var z = d3.scale.category10();
-        var dims = {m: {t:60, r:10, b:30, l:40}};
-        var _dims = dims;
+        var getDefaultDims = function() {
+            return { m: { t:60, r:10, b:30, l:40 } };
+        }
         var dispatch = d3.dispatch('togglePath');
         var disabledItems = 0;
         var _showBarLabels = false, _drawLabels = true, _drawYAxis = true, _drawXAxis = true, _showToolTips = true;
@@ -50,10 +51,9 @@
 
         function chart(selection){
             selection.each(function(data) {
-                console.log('bar chart drawn');
+                var dims = getDefaultDims();
                 var container = d3.select(this);
                 chart.resize = function() {
-                    dims = _dims;
                     container
                     .transition()
                     .duration(1000)
@@ -282,7 +282,6 @@
         chart.dims = function(value){
             if (!arguments.length) return dims;
             dims = value;
-            _dims = value;
             return chart;
         };
         chart.showToolTips = function(value){

@@ -6,7 +6,10 @@
         var arc2 = d3.svg.arc();
 
         var z = d3.scale.category20();
-        var dims = {m: {l:10, r:10, t:10, b:30}};
+        var getDefaultDims = function() {
+            return { m: { l:10, r:10, t:10, b:30 } };
+        }
+        
         var pie = d3.layout.pie();
 
         var _drawOuterLabels = true, _textFillColor = '#fff', _drawDataKey = true, _innerRadius = 0, _keyLabels = false, _rotateArcs = false, _arcExpand = 0, _drawPolyLines = true;
@@ -37,17 +40,16 @@
         function chart(selection){
             //console.log('pie chart drawn');
             selection.each(function(data) {
+                var dims = getDefaultDims();
                 var container = d3.select(this);
                 //console.log(data.key);
                 var itemCount = data.values.length;
-                if(!_drawDataKey){
+                
+                if(!_drawDataKey) {
                     dims.m.b = 10
                 }
+                
                 chart.resize = function() { 
-                    dims = {m: {l:10, r:10, t:10, b:30}};
-                    if(!_drawDataKey){
-                        dims.m.b = 10
-                    }
                     container
                     .transition()
                     .duration(1000)

@@ -167,7 +167,6 @@
             write: function(newValue){
                 _name(newValue);
                 self.update();
-                //self.resizeContent();
             }
         });
 
@@ -365,7 +364,7 @@
             widgetModel.sizex = _sizex();
             widgetModel.sizey = _sizey();
             widgetModel.displayIndex = self.displayIndex();
-            widgetModel.name = self.name();
+            widgetModel.name = _name();
             
             if(content && content.getModel){
                 widgetModel.contentModel = content.getModel();
@@ -478,15 +477,16 @@
         
         var combinedObj = {}, currentIndexes = [];
         var firstArr = [];
+
         var xtextFormat = function(){
-            return drata.utils.getTextFormat({
+            return drata.utils.intervalFormats.getTickFormat({
                 formatType: segmentModel.dataGroup.xAxisType,
-                formatSubType: segmentModel.dataGroup.timeseriesInterval
+                dateInterval: segmentModel.dataGroup.timeseriesInterval
             });
         };
 
         var ytextFormat = function(){
-            return drata.utils.getTextFormat({
+            return drata.utils.intervalFormats.getTickFormat({
                 formatType: 'numeric'
             });
         };

@@ -12,7 +12,9 @@
             .ticks(5);
      
         var z = d3.scale.category20();
-        var dims = {m: {l:60, r:10, t:10, b:30}};
+        var getDefaultDims = function() {
+            return { m: { l:50, r:10, t:10, b: 80 } };
+        }
         
         var getMin = function(data, prop){
             return d3.min(data, function(d) { 
@@ -31,10 +33,11 @@
         };
 
         function chart(selection) {
-            console.log('line chart drawn');
             selection.each(function(data) {
+                var dims = getDefaultDims();
                 var container = d3.select(this);
                 _yticks > 0 && yAxis.ticks(_yticks);
+                
                 if(_xAxisType === 'date'){
                     _.each(data, function(item){
                         _.each(item.values, function(dataPoint){
@@ -42,10 +45,11 @@
                         });
                     });
                 }
+
                 z.domain(data.map(function(d){return d.key}));
                 
                 chart.resize = function() { 
-                    dims = {m: {l:60, r:10, t:30, b:30}};
+                    //dims = {m: {l:50, r:10, t:30, b: 80}};
                     container
                     .transition().duration(500)
                     .call(chart);
@@ -79,14 +83,23 @@
                 var xDomain = [getMin(data, 'x'),getMax(data, 'x')];
                 var yDomain = [getMin(data, 'y'),getMax(data, 'y')];
 
-                var xAxisTickFormat = drata.utils.getTextFormat({
+                var xAxisFormat = drata.utils.intervalFormats.get({
                     formatType: _xAxisType,
-                    formatSubType: _dateInterval,
-                    domain: xDomain
+                    dateInterval: _dateInterval,
+                    range: xDomain
                 });
                 
-                xAxis.axisTicType(_xAxisType).dateInterval(_dateInterval).domain(xDomain).dims(dims).includeGridLines(false);
-                yAxis.axisTicType('numeric').dims(dims).domain(yDomain).includeGridLines(true);
+                var yAxisTickFormat = drata.utils.intervalFormats.getTickFormat({
+                    formatType: 'numeric',
+                    range: yDomain
+                });
+                
+                var xAxisTickFormat = xAxisFormat.tickFormat;
+                dims.m.b = xAxisFormat.mb || dims.m.b;
+                dims.m.l = xAxisFormat.ml || dims.m.l;
+
+                xAxis.axisTicType(_xAxisType).tickFormat(xAxisTickFormat).domain(xDomain).dims(dims).includeGridLines(false);
+                yAxis.axisTicType('numeric').tickFormat(yAxisTickFormat).dims(dims).domain(yDomain).includeGridLines(true);
                 
                 var dispatch = d3.dispatch('togglePath', 'showToolTip', 'hideToolTip');
 
@@ -133,7 +146,7 @@
                 if(_drawLabels){
                     labelContainer.attr("transform", "translate(" + (dims.m.l + 10) +")");
                 }
-
+                console.log(dims.m);
                 gWrapper.select('g.y.axis')
                     .attr("transform", "translate(" + dims.m.l +"," + dims.m.t + ")")
                     //.transition().duration(500)
