@@ -64,13 +64,13 @@
                 '<div class="small-8 columns">',
                     '<input type="text" data-bind="value: overrideTitle"></input>',
                 '</div>',
-                '<div class="small-2 columns" data-bind="click: acceptEdit">',
-                    '<span class="postfix">',
+                '<div class="small-2 columns">',
+                    '<span class="postfix" data-bind="click: acceptEdit">',
                         '<i class="fa fa-check"></i>',
                     '</span>',
                 '</div>',
-                '<div class="small-2 columns" data-bind="click: cancelEdit">',
-                    '<span class="postfix">',
+                '<div class="small-2 columns">',
+                    '<span class="postfix" data-bind="click: cancelEdit">',
                         '<i class="fa fa-times"></i>',
                     '</span>',
                 '</div>',
@@ -510,7 +510,7 @@
         this.editTitle = function(){
             this.editingTitle(true);
             this.overrideTitle(ko.unwrap(this.title));
-            return false;
+            //return false;
         }
         this.cancelEdit = function() {
             this.editingTitle(false);
@@ -666,8 +666,8 @@
 
             sortOrder[prop](!sorted);
             self.values.sort(function (c, n) {
-                return sorted ? c[prop] < n[prop] : c[prop] > n[prop];
-            })
+                return sorted ? n[prop] - c[prop] : c[prop] - n[prop];
+            });
         };
 
         function sortDirection(prop) {

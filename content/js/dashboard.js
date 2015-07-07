@@ -319,7 +319,7 @@
                 {
                     dataToMap = chartData;
                 }
-                previewMode && console.log(chartData);
+                
                 if(!dataToMap || dataToMap.length === 0 ) {
                     displayErrorMessage('No Data found');
                     return;
@@ -395,7 +395,7 @@
                 delete widgetModel.refresh;
             }
 
-            return widgetModel;
+            return drata.utils.clone(widgetModel);
         };
         
         self.getViewOptionsModel = function (argument) {
