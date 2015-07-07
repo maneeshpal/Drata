@@ -7,7 +7,7 @@
         text-shadow: 5px 0px 10px #404040;
     }
     .sub-heading{
-        font-size:1rem;
+        font-size:.8rem;
         margin-bottom:.5rem;
         color:#6f6f6f;
     }
@@ -15,7 +15,9 @@
     svg {
         opacity: .5;
     }
-
+    .datakey {
+        margin: 10px;
+    }
     .axis{ 
         path, line{
             display: none;

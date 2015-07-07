@@ -503,7 +503,7 @@
         self.dataKeys = ko.observableArray();
         self.selectedDataKeys = ko.observableArray();
         self.latestDp = ko.observable();
-        self.lastButOneDp = ko.observable();
+        self.dataKey = ko.observable();
         self.initialDp = ko.observable();
         self.currentDataKey = ko.observable('');
         
@@ -540,8 +540,8 @@
             for(var i = 0; i < incoming.length; i++){
                 currentIndexes.push(incoming[i]);
                 _.each(chartData[incoming[i]].values, function(dp){
-                    if(!combinedObj[dp.x]) combinedObj[dp.x] = 0;
-                    combinedObj[dp.x] += dp.y;  
+                    if(!combinedObj[+dp.x]) combinedObj[+dp.x] = 0;
+                    combinedObj[+dp.x] += dp.y;  
                 });
             }
 
@@ -549,7 +549,7 @@
                 currentIndexes.splice(currentIndexes.indexOf(outgoing[i]), 1);
                 _.each(chartData[outgoing[i]].values, function(dp){
                     //if(!combinedObj[dp.x]) combinedObj[dp.x] = 0;
-                    combinedObj[dp.x] -= dp.y;
+                    combinedObj[+dp.x] -= dp.y;
                     //if(combinedObj[dp.x] === 0) delete combinedObj[dp.x];
                 });
             }
@@ -599,6 +599,7 @@
         var uniqueXvalues;
         self.drawChart = function(_data, _segmentModel, _contentModel){
             chartData = _data.values;
+            self.dataKey(_data.key);
             segmentModel = _segmentModel;
             self.backgroundChartType(_contentModel && _contentModel.backgroundChartType ?  _contentModel.backgroundChartType : 'area');
             self.dataKeys(chartData.map(function(item, index){
@@ -626,10 +627,10 @@
             });
 
             self.initialDp(rdp[0]);
-            self.latestDp(rdp.pop());
+            self.latestDp(rdp[rdp.length - 1]);
 
             self.remainingDataPoints(rdp.reverse());
-            self.lastButOneDp(rdp[0]);
+            //self.lastButOneDp(rdp[0]);
             //self.latestDp(rdp[0]);
         };
 
@@ -690,7 +691,8 @@
                         .showToolTips(segmentModel.chartOptions.includeDataMarkers)
                         .drawLabels(false)
                         .drawXAxis(false)
-                        .drawYAxis(false);
+                        .drawYAxis(false)
+                        .dims({m: {t:20, r:0, b:0, l:0}});
                     break; 
                 case chartType.pie:
                     data = {

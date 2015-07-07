@@ -121,15 +121,15 @@
         <div class="small-8 columns">
             <div class="row collapse">
                 <div class="small-6 columns">
+                    <label class="datakey" data-bind="text: dataKey">sum_price</label>
                     <div data-bind="style: {
-                        height: (($parent.widgetHeight() - 120)) + 'px',
-                        lineHeight: (($parent.widgetHeight() - 100)) + 'px',
+                        height: (($parent.widgetHeight() -120)) + 'px',
                         zIndex: ($parent.widgetHeight() * 0.3 * 9/10) + 'px' 
                         }, resizeText: mainHeading">
                     </div>
                 </div>
                 <div class="small-6 columns">
-                    <div data-bind="attr :{id: widgetContentId}, style: { height: (($parent.widgetHeight() - 120)) + 'px'}">
+                    <div data-bind="attr :{id: widgetContentId}, style: { height: (($parent.widgetHeight() - 80)) + 'px'}">
                         <svg></svg>
                     </div>                    
                 </div>
@@ -145,17 +145,6 @@
                         <label class="label radius" data-bind="css: { 'success': totalPerChange() > 0, 'alert': totalPerChange() < 0, 'secondary' :  totalPerChange() === 0 }">
                             <!-- ko text: totalPerChange --><!-- /ko -->%
                             <span class="fa" data-bind="css: { 'success fa-arrow-up': totalPerChange() > 0, 'alert fa-arrow-down': totalPerChange() < 0}"></i>
-                        </label>
-                    </div>
-
-                    <div data-bind="if: lastButOneDp() && latestDp()" class="sub-heading">
-                        <!-- ko text: lastButOneDp().xLabel -->
-                        <!-- /ko --> -
-                        <!-- ko text: latestDp().xLabel -->
-                        <!-- /ko -->
-                        <label class="label radius" data-bind="css: { 'success': latestDp().perc > 0, 'alert': latestDp().perc < 0, 'secondary' :  latestDp().perc === 0 }">
-                            <!-- ko text: latestDp().perc --><!-- /ko -->%
-                            <span class="fa" data-bind="css: { 'success fa-arrow-up': latestDp().perc > 0, 'alert fa-arrow-down': latestDp().perc < 0}"></span>
                         </label>
                     </div>
                 </div>

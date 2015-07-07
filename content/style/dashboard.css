@@ -684,11 +684,13 @@ select.error {
 .numeric-chart .main-heading {
   text-shadow: 5px 0px 10px #404040; }
 .numeric-chart .sub-heading {
-  font-size: 1rem;
+  font-size: 0.8rem;
   margin-bottom: 0.5rem;
   color: #6f6f6f; }
 .numeric-chart svg {
   opacity: 0.5; }
+.numeric-chart .datakey {
+  margin: 10px; }
 .numeric-chart .axis path, .numeric-chart .axis line {
   display: none; }
 .numeric-chart ul.stacked-heading {
