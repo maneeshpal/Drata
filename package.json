@@ -12,7 +12,8 @@
     "socket.io": "^1.0.6",
     "q": "^1.0.1",
     "mongodb": "^1.4.38",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "ua-parser-js": "^0.7.7"
   },
   "devDependencies": {
     "grunt": "~0.4.1",

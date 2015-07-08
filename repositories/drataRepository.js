@@ -8,7 +8,9 @@ var _ = require('underscore');
 var Q = require('q');
 var demoDashboardData = require('../routes/demo.json');
 
-var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
+var tagCollection = 'tags', 
+    widgetCollection = 'widget', 
+    dashboardCollection = 'dashboard';
 
 var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
