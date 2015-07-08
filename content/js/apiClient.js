@@ -102,10 +102,9 @@
         return _perform('PUT', apiRoot + 'dashboard',model);
     };
 
-    var deleteDashboard = function(dashboardId){
+    var deleteDashboard = function(dashboardId) {
         var url = apiRoot + drata.utils.format('dashboard/{0}', dashboardId);
         return _perform('DELETE',url);
-        //console.log(JSON.stringify(model, null, '\t'));
     };
 
     var getAllDashboards = function(){

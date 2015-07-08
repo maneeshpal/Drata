@@ -18,8 +18,7 @@ var serverNames = config.dataSources.map(function(d){
 });
 
 app.configure(function () {
-    //app.use(express.logger('dev'));     /* 'default', 'short', 'tiny', 'dev' */
-    //app.use(express.bodyParser());
+    //app.use(logger);
     app.use(express.json());
     app.use(express.urlencoded());
     app.use(express.static(path.join(__dirname, 'content')));
@@ -62,6 +61,7 @@ app.delete('/api/dashboard/:dashboardId/widgets', drataRepository.deleteAllWidge
 app.get('/api/dashboards', drataRepository.getAllDashboards);
 app.get('/api/truncatedata', drataRepository.truncateData);
 app.get('/api/generateDemoDashboard', drataRepository.generateDemoDashboard);
+app.get('/api/cleanup', drataRepository.cleanupNonDemoDashboards);
 app.post('/api/widgets', drataRepository.getWidgets);
 //update dashboard
 app.post('/api/dashboard', drataRepository.upsertDashboard);
@@ -103,5 +103,14 @@ var server = http.createServer(app);
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+setTimeout(function() {
+  drataRepository
+    .cleanupNonDemoDashboards()
+    .then(function(response) {
+      console.log('removing dashboards', response);
+    });
+}, 300000);
+
 skt.initialize(server);
 

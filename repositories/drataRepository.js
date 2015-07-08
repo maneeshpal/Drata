@@ -359,6 +359,44 @@ exports.getAllDashboards = function(req, res) {
     }, handleErrorResponse.bind(res));
 };
 
+exports.cleanupNonDemoDashboards = function(req, res) {
+    var promise = connectToCollection(dashboardCollection).then(function(collection){
+        var defer = Q.defer();
+        
+        var cutoff = new Date();
+        cutoff.setHours(cutoff.getHours() - 4);
+        
+        var query = {
+            dateCreated : {
+                $lte : cutoff
+            },
+            $or : [{
+                demo: { 
+                    $exists: false
+                }
+            }, {
+                demo : false
+            }]
+        };
+
+        collection.remove(query, function(err, result) {
+            err ? defer.reject({ code: 500, message: utils.format('Error cleanup') }) : defer.resolve(result);
+        });
+        return defer.promise;
+    });
+
+    //sorry for the fucked up conditional response. normally i 
+    //would never do this...but last minute stupid scheduler 
+    // job to cleanup dashboards on demo
+    if(res) {
+        promise.then(function(result) {
+            res.send(200);
+        }, handleErrorResponse.bind(res));
+    } else {
+        return promise;
+    }
+};
+
 exports.getWidgets = function(req, res) {
     var promise = connectToCollection(widgetCollection).then(function(collection){
         var defer = Q.defer();
