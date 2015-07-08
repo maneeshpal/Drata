@@ -440,7 +440,7 @@
         logmsg : false
     });
 
-    var _conditionExpression = function(condition){
+    var conditionExpression = function(condition){
         var expression = '';
         if(condition.isComplex){
             return conditionsExpression(condition.groups);
@@ -453,7 +453,7 @@
     var conditionsExpression = function(conditions){
         var expression = '';
         _.each(conditions, function(gr,index){
-            expression = expression + ((index === 0)? _conditionExpression(gr) : ' ' + gr.logic + ' ' + _conditionExpression(gr));
+            expression = expression + ((index === 0)? conditionExpression(gr) : ' ' + gr.logic + ' ' + conditionExpression(gr));
         });
         return !expression? '' : '(' + expression + ')';
     };
@@ -649,7 +649,6 @@
         clone:clone,
         windowResize:windowResize,
         textToPixel : textToPixel,
-        //createTemplate: createTemplate,
         flatten: flatten,
         parseTime: parseTime,
         applyOperation: applyOperation,
@@ -658,6 +657,7 @@
         formatDate: formatDate,
         selectionsExpression: selectionsExpression,
         conditionsExpression: conditionsExpression,
+        conditionExpression: conditionExpression,
         onTemplateLoad: onTemplateLoad,
         intervalFormats: intervalFormats,
         getTextFormat: getTextFormat,

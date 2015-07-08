@@ -98,6 +98,7 @@
 		});
 
 		drata.pubsub.subscribe('widgetcreate', function(eventName, widgetModel){
+			//widgetModel = drata.utils.clone(widgetModel);
 			var currentDashboard = drata.cPanel.currentDashboard();
 			if(!currentDashboard) return;
 
@@ -283,6 +284,7 @@
         currentView.subscribe(function () {
         	self.formErrors([]);
         });
+
 	};
 
 	var DashboardManager = function(){
@@ -763,6 +765,11 @@
 	    });
 
 	    self.currentDashboardName = ko.observable('Dashboards');
+
+	    self.createWidget = function() {
+	    	drata.dashboard.widgetEditor.widgetCancel();
+        	location.hash= 'editwidget';
+        }
 	};
 
 	root.drata.ns('dashboard').extend({

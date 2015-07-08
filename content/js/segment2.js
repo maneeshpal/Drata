@@ -827,23 +827,7 @@ var Condition = function(options){
     };
 
     self.expression = ko.computed(function(){
-        var expression = '';
-        if(!self.isComplex()){
-            var operationIsExists = self.operation() === 'exists';
-            var wrapWithQuotes = (self.valType() === 'string' || self.valType() === 'date') && !operationIsExists;
-
-            expression = drata.utils.format('{0} {1} {2}{3}{2}', self.selection.expression(), self.operation(), (wrapWithQuotes ? '\'': ''), (operationIsExists ? '': self.value() || '__'));
-            
-        }
-        else{
-            var innerGroups = self.conditions();
-            _.each(innerGroups, function(gr,index){
-                expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
-            });
-            expression = '(' + expression + ')';
-        }
-        
-        return expression;
+        return drata.utils.conditionExpression(self.getModel());
     });
 
     self.complexConditionSummary = ko.computed(function(){
@@ -953,13 +937,7 @@ var ConditionGroup = function(options){
     };
 
     self.expression = ko.computed(function(){
-        var expression = '';
-        var innerGroups = self.conditions();
-        _.each(innerGroups, function(gr,index){
-            expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
-        });
-        
-        return expression;
+        return drata.utils.conditionsExpression(self.getModel());
     });
 };
 
@@ -1080,19 +1058,6 @@ var Selection = function(options){
             perc: options.renderType === 'topSelection' ? self.perc() : false
         };
     };
-    self.expression = ko.computed(function(){
-        var expression = '';
-        if(!self.isComplex()){
-            return self.selectedProp() ? self.selectedProp() : '__';
-        }
-        
-        var innerGroups = self.selections();
-        _.each(innerGroups, function(gr,index){
-            expression = expression + ((index === 0)? gr.expression() : ' ' + gr.logic() + ' ' + gr.expression());
-        });
-        expression = '(' + expression + ')';
-        return expression;
-    });
 
     self.selectedProp.extend({
         required:{
@@ -1161,19 +1126,7 @@ var SelectionGroup = function(options){
     };
     
     self.expression = ko.computed(function(){
-        var expressions = [], exp;
-        var innerGroups = self.items();
-        _.each(innerGroups, function(gr,index){
-            exp = gr.expression();
-            
-            if(gr.groupBy() !== 'value'){
-                exp = drata.utils.format(gr.isComplex() ? '<em>{0}</em>{1}' : '<em>{0}</em>({1})', gr.groupBy(), exp); 
-            }
-
-            expressions.push(exp);
-        });
-        
-        return 'Select ' + expressions.join(', ');
+        return 'Select ' + drata.utils.selectionsExpression(self.getModel(), true);
     });
 
     self.showPercentChange = ko.computed(function() {

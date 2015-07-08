@@ -17,10 +17,6 @@
             x1 = d3.scale.ordinal(),
             y = d3.scale.linear();
 
-        var getDefaultDims = function() {
-            return drata.utils.clone(_dims);
-        }
-        
         var tip = d3.tip && d3.tip()
             .attr('class', 'd3-tip')
             .offset([-10, 0])
@@ -57,7 +53,7 @@
 
         function chart(selection){
             selection.each(function(data) {
-                var dims = getDefaultDims();
+                var dims = drata.utils.clone(_dims);
                 var container = d3.select(this);
                 chart.resize = function() {
                     container

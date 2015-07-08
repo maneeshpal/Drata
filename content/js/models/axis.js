@@ -38,12 +38,12 @@
                 if(_axisType === 'y') {
                     _scale.range([hm, 0]);
                     if(_gl) tickSize = -wm;
-                    //axis.ticks(Math.ceil(hm/50));
+                    axis.ticks(Math.ceil(hm/50));
                 }
                 else {
                     _scale.range([0, wm]);
                     if(_gl) tickSize = hm;
-                    //axis.ticks(Math.ceil(wm/50));
+                    axis.ticks(Math.ceil(wm/50));
                 }
                 
                 if(_ticks > 0){
