@@ -10,14 +10,19 @@ var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.se
 
 var openConnection = function() {
     var defer = Q.defer();
-    mongoClient.open(function(err, mongoClient) {
-        if(!err){
-            var db = mongoClient.db(config.drataInternal.databaseName);
-            defer.resolve(db);
-        }else{
-            defer.reject('cannot open connection');
-        }
-    });
+    if(!config.logRequests) {
+        defer.reject('logging turned off');
+    }
+    else {
+        mongoClient.open(function(err, mongoClient) {
+            if(!err){
+                var db = mongoClient.db(config.drataInternal.databaseName);
+                defer.resolve(db);
+            }else{
+                defer.reject('cannot open connection');
+            }
+        });
+    }
     return defer.promise;
 }
 
@@ -38,9 +43,11 @@ var connectToCollection = function(name) {
         });
 };
 
+var requestLogConnection = connectToCollection('requestlog');
 
 var getLoggingInformation = function(req) {
     return {
+        dateLogged: new Date(),
         url: req.url,
         ipAddress: req.headers['x-forwarded-for'] || 
             req.connection.remoteAddress || 
@@ -51,9 +58,7 @@ var getLoggingInformation = function(req) {
 };
 
 exports.logRequest = function(req) {
-    if(!config.logRequests) return;
-    
-    var promise = connectToCollection('requestlog').then(function(collection) {
+    var promise = requestLogConnection.then(function(collection) {
         var defer = Q.defer();
         var info = getLoggingInformation(req);
         collection.save(info, function(err, result) {
@@ -62,11 +67,11 @@ exports.logRequest = function(req) {
         return defer.promise;
     });
 
-    promise.done(function() {
-        console.log('logged');
-    }, function(err) {
-        console.log(err);
-    });
+    // promise.done(function() {
+    //     console.log('logged');
+    // }, function(err) {
+    //     console.log(err);
+    // });
 }
 
 

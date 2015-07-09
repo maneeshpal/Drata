@@ -37,7 +37,6 @@ module.exports = function(grunt) {
 
     concat: {
       options: {
-        // define a string to put between each file in the concatenated output
         separator: ''
       },
       lib: {
@@ -50,7 +49,6 @@ module.exports = function(grunt) {
         dest: 'content/dis/lib.js'
       },
       dashboard: {
-          // the files to concatenate
           src: [
             'content/js/utils.js',
             'content/js/ko.*.js',
@@ -66,7 +64,6 @@ module.exports = function(grunt) {
             'content/js/controlpanel.js',
             'content/js/tooltipcontent.js'
           ],
-          // the location of the resulting JS file
           dest: 'content/dis/dashboard.js'
       },
       charts: {
@@ -79,7 +76,6 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        // the banner is inserted at the top of the output
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n',
         preserveComments: false
       },
@@ -98,5 +94,5 @@ module.exports = function(grunt) {
 
   grunt.registerTask('buildcss', ['sass']);
   grunt.registerTask('buildjs', ['concat']);
-  grunt.registerTask('default', ['buildcss', 'buildjs', 'watch']);
+  grunt.registerTask('default', ['buildcss', 'buildjs']);
 }
