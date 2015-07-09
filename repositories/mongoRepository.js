@@ -110,7 +110,7 @@ exports.findCollection = function(datasource, database, collectionName, segment)
 };
 
 exports.pop = function() {
-    var maxProps = 10000;
+    var maxProps = 5000;
     var data= [];
     var y = [0,0,0,0,0,0,0];
     var ordernumber = 1;
@@ -118,7 +118,7 @@ exports.pop = function() {
     var items = ['jeans', 'T Shirt', 'Under wear', 'Skirt', 'Pajama', 'Dress Shirt', 'Scarf', 'Women\'s Jacket'];
     var colors = ['blue', 'gray', 'black', 'white', 'purple'];
     var ageGroups = ['adult', 'baby', 'teen', 'Senior Citizen', 'Mid 40\'s'];
-    var startDate = new Date('6/10/2009');
+    var startDate = new Date('1/1/1992');
     for(var j = 0; j <= maxProps; j++){
         for(var yy = 0; yy < y.length; yy++){
             y[yy] += Math.floor((Math.random() * 10 - j%10));
@@ -130,7 +130,7 @@ exports.pop = function() {
             item : items[Math.floor(Math.random() * items.length)],
             price : Math.abs(y[0]) * 100,
             geography : geos[Math.floor(Math.random() * geos.length)],
-            timestamp : new Date(startDate.setHours(startDate.getHours() + j)),
+            timestamp : new Date(startDate.setMinutes(startDate.getMinutes() + j)),
             sex : Math.random() * 10 > 5 ? 'female': 'male',
             itemsex :  Math.random() * 10 > 6 ? 'female': 'male',
             hasCoupon :  Math.random() * 10 > 7,
@@ -151,22 +151,33 @@ exports.pop = function() {
         
         data.push(dd);
     }
-    var getDbInstance = baseMongoRepo.dbInstance().serverName('drataDemoExternal').dbName('shopperstop')();
+    var getDbInstance = baseMongoRepo
+        .dbInstance()
+        .serverName('drataDemoExternal')
+        .dbName('shopperstop')();
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         db.collection('shoppercheckout', function(err, collection) {
             if(err){
                 defer.reject({code: 500, message: 'something went wrong'});
             }
-            else{
-                collection.insert(data, {safe:true}, function(err, result) {
+            else {
+                collection.remove({}, function(err, result) {
                     if(err){
                         defer.reject({code: 500, message: err});
                     }
-                    else{
-                        defer.resolve({message: 'shoppercheckout collection populated successfully'});  
+                    else {
+                        //defer.resolve({message: 'removed'});  
+                        collection.insert(data, function(insertErr, insertResult) {
+                            if(insertErr){
+                                defer.reject({code: 500, message: insertErr});
+                            }
+                            else{
+                                defer.resolve({message: 'shoppercheckout collection populated successfully'});  
+                            }
+                        });
                     }
-                });
+                })
             }
         });
         return defer.promise;   

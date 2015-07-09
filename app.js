@@ -43,7 +43,7 @@ app.get('/', function(req, res) {
   res.sendfile('homepage.html');
 });
 
-app.get('/api/dashboardpop', controller.databasepop);
+app.get('/api/databasepop', controller.databasepop);
 
 //get dashboard
 app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
