@@ -9,7 +9,8 @@ var express = require('express'),
    	http = require('http'),
    	path = require('path'),
     config = require('./routes/config.json'),
-    skt = require('./routes/socket');
+    skt = require('./routes/socket'),
+    logger = require('./routes/logger');
 
 var app = express();
 
@@ -26,19 +27,18 @@ app.configure(function () {
 
 app.set('port',process.env.PORT || 3000);
 
-app.get('/dashboard/:dashboardId', function(req, res){
+app.get('/dashboard/:dashboardId', function(req, res) {
+  logger.logRequest(req);
   res.sendfile('dash.html');
 });
 
-app.get('/dashboard', function(req, res){
+app.get('/dashboard', function(req, res) {
+  logger.logRequest(req);
   res.sendfile('dash.html');
 });
 
-app.get('/tabular', function(req, res){
-  res.sendfile('tabular.html');
-});
-
-app.get('/', function(req, res){
+app.get('/', function(req, res) {
+  logger.logRequest(req);
   res.sendfile('homepage.html');
 });
 

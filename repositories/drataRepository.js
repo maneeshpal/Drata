@@ -8,11 +8,29 @@ var _ = require('underscore');
 var Q = require('q');
 var demoDashboardData = require('../routes/demo.json');
 
-var tagCollection = 'tags', widgetCollection = 'widget', dashboardCollection = 'dashboard';
+var tagCollection = 'tags', 
+    widgetCollection = 'widget', 
+    dashboardCollection = 'dashboard';
 
 var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
-var db, io;
+var io;
+
+var openConnection = function() {
+    var defer = Q.defer();
+    mongoClient.open(function(err, mongoClient) {
+        if(!err){
+            var db = mongoClient.db(config.drataInternal.databaseName);
+            defer.resolve(db);
+        }else{
+            console.log('Database connection failure.');
+        }
+    });
+    return defer.promise;
+};
+
+var openMongoClient = openConnection();
+
 function getValidMongoId(id){
     var defer = Q.defer(), objectId;
     try {
@@ -26,26 +44,25 @@ function getValidMongoId(id){
 };
 
 var connectToCollection = function(name) {
-    var defer = Q.defer();
-    db.collection(name, function(err, collection) {
-        if(err){
-            defer.reject({code:500, message: utils.format('Error connecting to Mongo Collection: {0}', name)});
-        }
-        else{
-            defer.resolve(collection);
-        }
+    return openMongoClient.then(function(db) {
+        var defer = Q.defer();
+        db.collection(name, function(err, collection) {
+            if(err){
+                defer.reject({code:500, message: utils.format('Error connecting to Mongo Collection: {0}', name)});
+            }
+            else{
+                defer.resolve(collection);
+            }
+        });
+        return defer.promise;
     });
-    return defer.promise;
 };
 
-mongoClient.open(function(err, mongoClient) {
-    if(!err){
-        console.log('drataStore connection opened');
-        db = mongoClient.db(config.drataInternal.databaseName);
-    }else{
-        console.log('Database connection failure.');
-    }
-});
+var connection = {};
+connection[tagCollection] = connectToCollection(tagCollection);
+
+connection[widgetCollection] = connectToCollection(widgetCollection);
+connection[dashboardCollection] = connectToCollection(dashboardCollection);
 
 var handleErrorResponse = function(err) {
     this.send(err.code || 500, err.message || err.toString());
@@ -53,7 +70,7 @@ var handleErrorResponse = function(err) {
 
 var findObject = function(collectionName, id){
     return getValidMongoId(id).then(function(objectId){
-        return connectToCollection(collectionName).then(function(collection){
+        return connection[collectionName].then(function(collection){
             var defer = Q.defer();
                 collection.findOne({
                 '_id' : objectId
@@ -79,7 +96,7 @@ exports.setIO = function(socketio){
 };
 
 var findDemoDashboard = function(){
-    return connectToCollection(dashboardCollection).then(function(collection){
+    return connection[dashboardCollection].then(function(collection){
         var defer = Q.defer();
         collection.findOne({
             'demo' : true
@@ -111,7 +128,7 @@ exports.findWidget = function(req, res) {
 
 exports.findWidgetsOfDashboard = function(req, res) {
     var dashboardId = req.params.dashboardId;
-    var promise = connectToCollection(widgetCollection).then(function(collection){
+    var promise = connection[widgetCollection].then(function(collection){
         var defer = Q.defer();
         collection.find({'dashboardId' : dashboardId}).toArray(function(err, result) {
             err ? defer.reject({code:404, message: utils.format('Error getting widgets for dashboard : {0}', dashboardId)}) : defer.resolve(result);
@@ -125,7 +142,7 @@ exports.findWidgetsOfDashboard = function(req, res) {
 
 var updateWidget = function(widgetModel){
     return getValidMongoId(widgetModel._id).then(function(widgetObjectId){
-        return connectToCollection(widgetCollection).then(function(collection){
+        return connection[widgetCollection].then(function(collection){
             return getDashboard(widgetModel.dashboardId).then(function(result){
                 if(!result.demo){
                     return getWidget(widgetModel._id).then(function(result){
@@ -149,7 +166,7 @@ var updateWidget = function(widgetModel){
 
 var updateWidgetViewOptions = function(widgetModel){
     return getWidget(widgetModel._id).then(function(widget) {
-        return connectToCollection(widgetCollection).then(function(collection) {
+        return connection[widgetCollection].then(function(collection) {
             var defer = Q.defer();
             widget.dateUpdated = new Date();
             widget.sizex = widgetModel.sizex;
@@ -168,7 +185,7 @@ var updateWidgetViewOptions = function(widgetModel){
 };
 
 var addWidget = function(widgetModel){
-    return connectToCollection(widgetCollection).then(function(collection){
+    return connection[widgetCollection].then(function(collection){
         return getDashboard(widgetModel.dashboardId).then(function(result){
             var defer = Q.defer();
             if(result.demo && !allowDemo){
@@ -222,7 +239,7 @@ exports.addWidget = function(req, res){
 };
 
 var deleteWidget = function(widgetId){
-    return connectToCollection(widgetCollection).then(function(collection){
+    return connection[widgetCollection].then(function(collection){
         return getWidget(widgetId).then(function(w){
             return getDashboard(w.dashboardId).then(function(d){
                 
@@ -258,7 +275,7 @@ exports.deleteWidget = function(req, res){
 };
 
 var upsertDashboard = function(dashboardModel, allowDemo){
-    return connectToCollection(dashboardCollection).then(function(collection){
+    return connection[dashboardCollection].then(function(collection){
         if(dashboardModel._id){
             return getDashboard(dashboardModel._id).then(function(d) {
                 if(d.demo && !allowDemo){
@@ -300,7 +317,7 @@ exports.upsertDashboard = function(req, res){
 };
 
 function removeCollection(collectionName){
-    return connectToCollection(collectionName).then(function(collection){    
+    return connection[collectionName].then(function(collection){    
         var defer = Q.defer();
         collection.remove({}, function(err, result) {
             err ? defer.reject({
@@ -346,7 +363,7 @@ exports.generateDemoDashboard = function(req, res){
 };
 
 exports.getAllDashboards = function(req, res) {
-    var promise = connectToCollection(dashboardCollection).then(function(collection){
+    var promise = connection[dashboardCollection].then(function(collection){
         var defer = Q.defer();
         collection.find().toArray(function(err, result) {
             err ? defer.reject({code: 500, message: 'Error getting all dashboards'}) : defer.resolve(result);
@@ -360,7 +377,7 @@ exports.getAllDashboards = function(req, res) {
 };
 
 exports.cleanupNonDemoDashboards = function(req, res) {
-    var promise = connectToCollection(dashboardCollection).then(function(collection){
+    var promise = connection[dashboardCollection].then(function(collection){
         var defer = Q.defer();
         
         var cutoff = new Date();
@@ -398,7 +415,7 @@ exports.cleanupNonDemoDashboards = function(req, res) {
 };
 
 exports.getWidgets = function(req, res) {
-    var promise = connectToCollection(widgetCollection).then(function(collection){
+    var promise = connection[widgetCollection].then(function(collection){
         var defer = Q.defer();
         var q = queryGenerator.getWidgetListMongoQuery(req.body);
         collection.find(q).toArray(function(err, result) {
@@ -413,7 +430,7 @@ exports.getWidgets = function(req, res) {
 };
 
 exports.getAllTags = function(req, res){
-    var promise = connectToCollection(tagCollection).then(function(collection){
+    var promise = connection[tagCollection].then(function(collection){
         var defer = Q.defer();
         collection.find().toArray(function(err, result) {
             err ? defer.reject({code: 500, message: 'Error getting all tags'}) : defer.resolve(result);
@@ -427,7 +444,7 @@ exports.getAllTags = function(req, res){
 };
 
 exports.getAllTagsOfDashboard = function(req, res){
-    var promise = connectToCollection(tagCollection).then(function(collection){
+    var promise = connection[tagCollection].then(function(collection){
         var defer = Q.defer();
         collection.find({dashboardId: req.params.dashboardId}).toArray(function(err, result) {
             err ? defer.reject({code: 500, message: utils.format('Error getting all tags of dashboard. Id: {0}', req.params.dashboardId)}) : defer.resolve(result);
@@ -441,7 +458,7 @@ exports.getAllTagsOfDashboard = function(req, res){
 };
 
 var addTag = function(tagModel, allowDemo){
-    return connectToCollection(tagCollection).then(function(collection){
+    return connection[tagCollection].then(function(collection){
         return getDashboard(tagModel.dashboardId).then(function(result){
             var defer = Q.defer();
             if(result.demo && !allowDemo){
@@ -478,7 +495,7 @@ var removeTag = function(tagId){
             }
             else {
                 return getValidMongoId(tagId).then(function(tagObjectId){
-                    return connectToCollection(tagCollection).then(function(collection){
+                return connection[tagCollection].then(function(collection){
                         var defer = Q.defer();
                         collection.remove({_id : tagObjectId}, {safe:true,justOne:true}, function(err, result) {
                             err ? defer.reject({code: 500, message: utils.format('Error removing tag. Id: {0}', tagId)}) : defer.resolve(result);
@@ -506,7 +523,7 @@ var deleteAllTagsDashboard = function(dashboardId) {
             return defer.promise;
         }
         else {
-            return connectToCollection(tagCollection).then(function(collection){
+            return connection[tagCollection].then(function(collection){
                 var defer = Q.defer();
                 collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
                     err ? defer.reject({code: 500, message: utils.format('Error deleting all tags of dashboard. Id: {0}', req.params.dashboardId)}) : defer.resolve(result);
@@ -525,7 +542,7 @@ var deleteAllWidgetsDashboard = function(dashboardId) {
             return defer.promise;
         }
         else {
-            return connectToCollection(widgetCollection).then(function(collection){
+            return connection[widgetCollection].then(function(collection){
                 var defer = Q.defer();
                 collection.remove({dashboardId : dashboardId}, {safe:true}, function(err, result) {
                     err ? defer.reject({code: 500, message: utils.format('Error deleting all widgets of dashboard. Id: {0}', dashboardId)}) : defer.resolve(result);
@@ -538,7 +555,7 @@ var deleteAllWidgetsDashboard = function(dashboardId) {
 
 var deleteDashboard = function(dashboardId){
     return getValidMongoId(dashboardId).then(function(dashboardObjectId){
-        return connectToCollection(dashboardCollection).then(function(collection){
+        return connection[dashboardCollection].then(function(collection){
             var defer = Q.defer();
             collection.remove({_id : dashboardObjectId, $or : [{demo:{$exists: false}}, {demo : false}]}, {safe:true,justOne:true}, function(err, result) {
                 err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be deleted. Id: {0}', dashboardId)}) : defer.resolve(result);
