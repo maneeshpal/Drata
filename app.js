@@ -44,7 +44,7 @@ app.get('/', function(req, res) {
 
 app.get('/demo',  drataRepository.redirectDemo);
 
-app.get('/api/dashboardpop', controller.databasepop);
+app.get('/api/databasepop', controller.databasepop);
 
 //get dashboard
 app.get('/api/dashboard/:dashboardId', drataRepository.findDashboard);
