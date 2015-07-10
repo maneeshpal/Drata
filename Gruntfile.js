@@ -13,7 +13,8 @@ module.exports = function(grunt) {
         files: {
           'content/style/app.css': 'content/foundation/scss/foundation.scss',
           'content/style/dashboard.css': 'content/style/dashboard.scss',
-          'content/style/home.css': 'content/style/home.scss'
+          'content/style/home.css': 'content/style/home.scss',
+          'content/style/bw.css': 'content/style/bw.scss',
         }
       }
     },

@@ -1,0 +1,35 @@
+.browserWarning {
+    background: white;
+    border: 2px solid #aaa;
+    position: fixed;
+    left: 50%;
+    margin-left: -300px;
+    padding: 10px;
+    top: 25px;
+    width: 100%;
+    width: 600px;
+    z-index: 999;
+}
+
+.browserWarning p + p {
+    margin-top: 10px;
+}
+
+.browserWarning-dismiss {
+    float: right;
+    color: #aaa;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.browserWarning-suggestions {
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.browserWarning-suggestion {
+    display: inline-block;
+    padding: 5px 7px;
+    background: #f1f1f1;
+    margin-left: 5px;
+}
