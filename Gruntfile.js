@@ -45,7 +45,8 @@ module.exports = function(grunt) {
           'content/js/lib/*.js',
           'content/foundation/js/foundation/foundation.js',
           'content/foundation/js/foundation/foundation.topbar.js',
-          'content/foundation/js/foundation/foundation.dropdown.js'
+          'content/foundation/js/foundation/foundation.dropdown.js',
+          'content/foundation/js/foundation/foundation.reveal.js'
         ],
         dest: 'content/dis/lib.js'
       },

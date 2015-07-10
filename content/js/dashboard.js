@@ -16,8 +16,8 @@
                 drata.cPanel.topBar.currentDashboardName(dashboard.name);
                 drata.cPanel.theme(dashboard.theme);
                 theme = dashboard.theme;
-
-                //dashboardId = d._id;
+                dashboard.demo && showInto();
+                
                 drata.apiClient.getWidgetsOfDashboard(dashboard._id).then(function(widgets){
                     var ind = 0;
                     self.loading(false);
@@ -42,6 +42,9 @@
             });
         };
         
+        var showInto = function() {
+            $('#demoIntro').foundation('reveal', 'open');
+        }
         self.noWidgets = ko.computed(function(){
             return self.widgets().length === 0 && !self.loading();
         });
