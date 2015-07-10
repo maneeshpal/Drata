@@ -43,7 +43,14 @@
         };
         
         var showInto = function() {
-            $('#demoIntro').foundation('reveal', 'open');
+            var seen = document.cookie.toString().indexOf('demoIntro=true') > -1;
+            if(!seen) {
+                $('#demoIntro').foundation('reveal', 'open');
+                var exp = new Date();
+                exp.setDate(exp.getDate() + 2);
+                document.cookie = 'demoIntro=true; expires=' + exp.toUTCString();
+            }
+            
         }
         self.noWidgets = ko.computed(function(){
             return self.widgets().length === 0 && !self.loading();
