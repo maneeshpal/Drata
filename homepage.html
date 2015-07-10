@@ -13,12 +13,17 @@
 <div class="row collapse" style="overflow:hidden">
     <div class="small-12 columns">
         <div class="r-corner">
+            <div class="r-corner1 show-for-large-up">
+                <span class="take_demo"><a href="/demo">demo</a></span>
+            </div>
+            
             <div class="r-corner3">drata</div>
             <div class="r-corner2">
                 <ul class="menu">
                     <li>about</li>
                     <li><a href="http://github.com/maneeshpal/drata/wiki">docs</a></li>
-                    <li><a href="/dashboard">dashboard</a></li>
+                    <li><a href="http://github.com/maneeshpal/drata">download</a></li>
+                    <li class="hide-for-large-up"><a href="/demo">demo</a></li>
                 </ul>
             </div>
         </div>
@@ -208,5 +213,8 @@
 
         })(this, jQuery);
     </script>
+<!--[if lte IE 9]>
+    <link type="text/css" rel="stylesheet" media="all" href="/style/bw.css"/><div class="browserWarning" id="browser-warning"> <a class="browserWarning-dismiss fa fa-close" id="dismiss-browser-warning"></a> <p>You are using an unsupported browser. Drata is a data visualization application that relies on browser features that are not supported by your browser. If you are interested in trying out Drata, please upgrade your browser.</p><p>For a better experience, try one of these browsers:</p><p class="browserWarning-suggestions"> <a class="browserWarning-suggestion" href="https://www.google.com/chrome/browser/desktop/" target="_blank">Chrome</a> <a class="browserWarning-suggestion" href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">Firefox</a> <a class="browserWarning-suggestion" href="https://support.apple.com/downloads/#safari" target="_blank">Safari</a> <a class="browserWarning-suggestion" href="http://windows.microsoft.com/en-us/internet-explorer/download-ie" target="_blank">Internet Explorer</a> </p></div><script>if (window.addEventListener){window.addEventListener('load', initializeBrowserWarning, false);}else if (window.attachEvent){window.attachEvent('onload', initializeBrowserWarning);}function initializeBrowserWarning(){var warningElem=document.getElementById('browser-warning'); var warningDismiss=document.getElementById('dismiss-browser-warning'); warningDismiss.onclick=function(){warningElem.style.display='none';}}</script>
+<![endif]-->
 </body>
 </html>
