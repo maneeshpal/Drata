@@ -362,7 +362,7 @@
                 
                 self.tabularModel({ data: chartData, segment: widgetModel.segmentModel });
 
-                self.autoRefresh.startTimer();
+                !previewMode && self.autoRefresh.startTimer();
 
             }, function(error){
                 displayErrorMessage(error.responseText);

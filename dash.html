@@ -24,6 +24,26 @@
         <section class="top-bar-section">
             <!-- Right Nav Section -->
             <ul class="right">
+                <!-- ko if: $parent.isWidgetEditorView -->
+                <li class="divider"></li>
+                <li class="has-form">
+                    <a title="Preview Widget" class="button secondary" data-bind="click:drata.dashboard.widgetEditor.preview">
+                    <span class="fa fa-eye hide-for-medium-up"></span>
+                    <span class="show-for-medium-up">Preview</span>
+                    </a>
+                </li>
+                <!-- ko if: $parent.currentDashboard() -->
+                <li class="divider"></li>
+                <li class="has-form">
+                    <a title="Save/update Widget" class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
+                    <span class="fa fa-floppy-o hide-for-medium-up"></span>
+                    <span data-bind="text:drata.dashboard.widgetEditor.addUpdateBtnText" class="show-for-medium-up">
+                    </span>
+                    </a>
+                </li>
+                <!-- /ko -->
+                <!-- /ko -->
+
                 <li class="divider"></li>
                 <li class="has-dropdown dashboard-settings">
                     <a data-dropdown="dashboard_settings" data-options="align:bottom"><i class="fa fa-cog"></i></a>
@@ -43,32 +63,25 @@
                         </li>
                     </ul>
                 </li>
-                <!-- ko if: $parent.isWidgetEditorView -->
-                <li class="divider"></li>
-                <li class="has-form">
-                    <a class="button secondary" data-bind="click:drata.dashboard.widgetEditor.preview">Preview</a>
-                </li>
-                <!-- ko if: $parent.currentDashboard() -->
-                <li class="divider"></li>
-                <li class="has-form">
-                    <a class="button" data-bind="click:drata.dashboard.widgetEditor.notifyWidget">
-                        <!-- ko text:drata.dashboard.widgetEditor.addUpdateBtnText -->
-                        <!-- /ko -->
-                    </a>
-                </li>
-                <!-- /ko -->
-                <!-- /ko -->
             </ul>
 
             <!-- Left Nav Section -->
             
             <ul class="left">
+                <!-- ko ifnot: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-dropdown not-click">
                     <a><span class="fa fa-th-large"></span>
                     <!-- ko text: currentDashboardName() -->
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
+                        <!-- ko if: $parent.isWidgetNavVisible -->
+                        <li class="divider hide-for-large-up"></li>
+                        <li class="has-dropdown not-click hide-for-large-up">
+                        <!-- ko template: 'managewidgetlinks-template' -->
+                        <!-- /ko -->
+                        </li>
+                        <!-- /ko -->
                         <li class="has-form">
                             <a href="#create" class="button">
                                 <i class="fa fa-wrench"></i>&nbsp;Create Dashboard
@@ -84,27 +97,15 @@
                         </li>
                     </ul>
                 </li>
+                <!-- /ko -->
                 <!-- ko if: $parent.isWidgetNavVisible -->
-                <li class="divider"></li>
-                <li class="has-dropdown not-click">
-                    <a>
-                        <span class="fa fa-list-alt"></span> Widgets
-                    </a>
-                    <ul class="dropdown">
-                        <li class="has-form">
-                            <a data-bind="click: createWidget" class="button">
-                                <i class="fa fa-wrench"></i>&nbsp;Create New Widget
-                            </a>
-                        </li>
-                        <li class="has-form">
-                            <a class="button secondary" href="#managewidgets">
-                                <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
-                            </a>
-                        </li>
-                    </ul>
-
+                <li class="divider show-for-large-up"></li>
+                <li class="has-dropdown not-click show-for-large-up">
+                <!-- ko template: 'managewidgetlinks-template' -->
+                <!-- /ko -->
                 </li>
                 <!-- /ko -->
+                
                 <!-- ko if: $parent.displayMode().displayText -->
                 <li class="divider"></li>
                 <li class="top-bar-text">
@@ -119,14 +120,14 @@
     </div>
 
     <div data-bind="visible:isDefaultView" style="display:none" class="row">
-        <div class="small-12 medium-10 large-8 columns small-centered">
+        <div class="medium-12 large-4 large-push-8 columns">
             <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
             <!-- /ko -->
-            <h3 class="view-heading">Or, select existing Dashboard</h3>
+        </div>
+        <div class="medium-12 large-8 large-pull-4 columns">
             <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
             <!-- /ko -->
         </div>
-        
     </div>
 
     <div data-bind="with: currentDashboard, visible:isDashboardView">
@@ -148,18 +149,11 @@
 
     <div data-bind="with: dashboardManager, visible:isDashboardManagerView" style="display:none">
         <div class="row">
-            <div class="small-12 columns text-center">
-                <h3 class="view-heading">Manage Existing Dashboards</h3>
-            </div>
-        </div>
-
-        <div class="row">
             <div class="small-12 medium-10 large-8 columns small-centered">
                 <!-- ko template: {name: 'dashboardmanager-template'} -->
                 <!-- /ko -->
             </div>
         </div>
-        
     </div>
 
     <div class="widget-manager" data-bind="with: widgetManager, visible:isWidgetManagerView">
@@ -169,6 +163,21 @@
 
     <!-- ko template: {name: 'notifications-template', data: drata.nsx.notifier} -->
     <!-- /ko -->
+    <script type="text/html" id="managewidgetlinks-template">
+        <a><span class="fa fa-list-alt"></span> Widgets</a>
+        <ul class="dropdown">
+            <li class="has-form">
+                <a data-bind="click: createWidget" class="button">
+                    <i class="fa fa-wrench"></i>&nbsp;Create New Widget
+                </a>
+            </li>
+            <li class="has-form">
+                <a class="button secondary" href="#managewidgets">
+                    <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
+                </a>
+            </li>
+        </ul>
+    </script>
 
     <div class="form-error fixed" data-bind="visible: formErrors().length > 0" style="display:none">
         <h6 class="heading"><span style="color:#f04124" class="fa fa-exclamation-triangle"> </span>Form Errors</h6>
