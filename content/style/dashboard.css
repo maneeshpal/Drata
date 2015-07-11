@@ -469,6 +469,10 @@ input.error {
 h3 small.bent {
   font-style: italic; }
 
+h3.view-heading {
+  font-weight: 300;
+  margin: 20px 0; }
+
 .row.fancytable {
   padding: 1rem 0;
   border-left: 1px solid #cccccc;
@@ -847,11 +851,6 @@ span.dtooltip-complexcondition {
   position: absolute;
   right: 20px;
   top: 8px; }
-
-h3.view-heading {
-  font-weight: 300;
-  margin: 20px 0;
-  text-align: center; }
 
 .preview-placeholder {
   border: 5px dashed #cccccc;
