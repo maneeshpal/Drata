@@ -91,7 +91,7 @@
                     </select>
                 </div>
 
-                <div class="auto-refresh" data-bind="with: autoRefresh">
+                <div class="auto-refresh" data-bind="visible: !previewMode, with: autoRefresh">
                     <!-- ko if: turnedOn() -->
                         <!-- ko text: formattedTime() --><!-- /ko -->
                     <!-- /ko -->
