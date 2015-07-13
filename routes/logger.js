@@ -5,6 +5,7 @@ var parser = new UAParser();
 var mongo = require('mongodb');
 var config = require('../routes/config.json');
 var Q = require('q');
+var utils = require('../utils/utils');
 
 var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
 
@@ -45,8 +46,8 @@ var connectToCollection = function(name) {
 
 var requestLogConnection = connectToCollection('requestlog');
 
-var getLoggingInformation = function(req) {
-    return {
+var getLoggingInformation = function(req, events) {
+    var log = {
         dateLogged: new Date(),
         url: req.url,
         ipAddress: req.headers['x-forwarded-for'] || 
@@ -55,12 +56,15 @@ var getLoggingInformation = function(req) {
             req.connection.socket.remoteAddress,
         userAgent: parser.setUA(req.headers['user-agent']).getResult()
     }
+    if(events) log.events = utils.clone(events);
+
+    return log;
 };
 
-exports.logRequest = function(req) {
+exports.logRequest = function(req, events) {
     var promise = requestLogConnection.then(function(collection) {
         var defer = Q.defer();
-        var info = getLoggingInformation(req);
+        var info = getLoggingInformation(req, events);
         collection.save(info, function(err, result) {
             err ? defer.reject({code: 500, message: 'loggin failed'}) : defer.resolve(result);
         });

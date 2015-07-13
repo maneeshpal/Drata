@@ -29,17 +29,17 @@ app.configure(function () {
 app.set('port',process.env.PORT || 3000);
 
 app.get('/dashboard/:dashboardId', function(req, res) {
-  logger.logRequest(req);
+  logger.logRequest(req, { pageId: 'dashboard'});
   res.sendfile('dash.html');
 });
 
 app.get('/dashboard', function(req, res) {
-  logger.logRequest(req);
+  logger.logRequest(req, { pageId: 'dashboard manager'});
   res.sendfile('dash.html');
 });
 
 app.get('/', function(req, res) {
-  logger.logRequest(req);
+  logger.logRequest(req, { pageId: 'homepage'});
   res.sendfile('homepage.html');
 });
 
