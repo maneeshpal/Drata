@@ -278,7 +278,7 @@ var getTrackChartData = function(segmentModel, inputData){
     
     if(!segmentModel.dataGroup.hasGrouping){
         return [{
-            key : 'xxx',
+            key : 'selection',
             values : result
         }]
     }
@@ -437,7 +437,7 @@ var getComparisonChartData = function(segmentModel, inputData){
             });
 
             topLevelResponse.push({
-                key : 'xxx',
+                key : 'selection',
                 groupLevel: 'A',
                 values: response
             });
@@ -495,7 +495,6 @@ var getComparisonChartData = function(segmentModel, inputData){
         }
     }
     else{
-        var toplevelkey = 'xxxx';
         result = [];
         
         _.each(segmentModel.selection, function(sel){
@@ -510,13 +509,13 @@ var getComparisonChartData = function(segmentModel, inputData){
         });
 
         response.push({
-            key : toplevelkey,
+            key : 'selection',
             groupLevel : 'B',
             values: result
         });
 
         topLevelResponse.push({
-            key : toplevelkey,
+            key : 'selection',
             groupLevel : 'A',
             values: response
         });
