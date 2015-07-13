@@ -5,7 +5,7 @@ Drata
 
 #### Website [http://drata.io] (http://drata.io)
 
-#### [Documentation] (/maneeshpal/drata/wiki)
+#### [Documentation] (http://github.com/maneeshpal/drata/wiki)
 
 #### Demo [http://drata.io/demo] (http://drata.io/demo)
 
