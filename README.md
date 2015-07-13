@@ -1,12 +1,12 @@
 Drata
 =====
 
-*** A simple Data Visualization tool
+### A simple Data Visualization tool
 
-**** Website [http://drata.io] (http://drata.io)
+#### Website [http://drata.io] (http://drata.io)
 
-**** Documentation [[home]]
+#### [Documentation] (http://github.com/maneeshpal/drata/wiki)
 
-**** Demo [http://drata.io/demo] (http://drata.io/demo)
+#### Demo [http://drata.io/demo] (http://drata.io/demo)
 
-**** MIT License
+#### MIT License
