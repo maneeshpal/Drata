@@ -110,7 +110,7 @@ setTimeout(function() {
     .then(function(response) {
       console.log('removing dashboards', response);
     });
-}, 300000);
+}, 14400000); //4 hours
 
 skt.initialize(server);
 
