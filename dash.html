@@ -194,20 +194,20 @@
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="/dis/lib.js"></script>
-    <script type="text/javascript" src="/dis/dashboard.js"></script>
-    <script type="text/javascript" src="/dis/charts.js"></script>
+    <script type="text/javascript" src="/dis/drata.min.js"></script>
     
     <script type="text/javascript">
         (function (root, $) {
-            drata.utils.onTemplateLoad(['dashboard_template', 'widgeteditor_template', 'segment_template2', 'dashboard_manager_template', 'utility_template'], function(){
-                
-                    root.drata.cPanel = new drata.dashboard.controlPanel();
+            function loaded(tmpl){
+                $('body').append(tmpl);
+                root.drata.cPanel = new drata.dashboard.controlPanel();
                     
-                    ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
+                ko.applyBindings(root.drata.cPanel, document.getElementsByTagName('body')[0]);
 
-                    $(document).foundation();
-            });
-        
+                $(document).foundation();
+            }
+
+            $.get('/dis/templates.html', loaded);
         })(this, $);
     </script>
 
