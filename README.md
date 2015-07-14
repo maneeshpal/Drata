@@ -7,6 +7,8 @@ A simple Business Intelligence tool
 ***Drata*** is a self-hosted application that can be installed locally. It integrates with your MS Sql and MongoDB instances for data analysis. 
 
 
+***
+
 * See [documentation] (http://github.com/maneeshpal/drata/wiki)
 * Demo [http://drata.io/demo] (http://drata.io/demo)
 * Contact me: admin@drata.io
