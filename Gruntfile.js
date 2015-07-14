@@ -8,7 +8,7 @@ module.exports = function(grunt) {
       },
       dist: {
         options: {
-          outputStyle: 'expanded'
+          outputStyle: 'compressed'
         },
         files: {
           'content/style/app.css': 'content/foundation/scss/foundation.scss',
@@ -32,7 +32,7 @@ module.exports = function(grunt) {
       },
       js : {
         files: 'content/js/**/*',
-        tasks: ['concat']
+        tasks: ['concat', 'uglify']
       }
     },
 
@@ -48,6 +48,10 @@ module.exports = function(grunt) {
           'content/foundation/js/foundation/foundation.dropdown.js'
         ],
         dest: 'content/dis/lib.js'
+      },
+      templates: {
+        src: 'content/templates/*.html',
+        dest: 'content/dis/templates.html'
       },
       dashboard: {
           src: [
@@ -94,6 +98,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('buildcss', ['sass']);
-  grunt.registerTask('buildjs', ['concat']);
+  grunt.registerTask('buildjs', ['concat', 'uglify']);
   grunt.registerTask('default', ['buildcss', 'buildjs']);
 }

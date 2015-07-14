@@ -60,18 +60,6 @@
         return format;
     };
 
-    var onTemplateLoad = function(templates, callback){
-        var c = 0;
-        function loaded(tmpl){
-            $('body').append(tmpl);
-            c++;
-            if(c === templates.length) callback && callback();
-        }
-        _.each(templates, function(t){
-            $.get('/templates/' + t + '.html', loaded);
-        });
-    };
-    
     var formatDate = function(dt){
         return (dt instanceof Date) ? format('{0}/{1}/{2} {3}:{4}', dt.getMonth() + 1, dt.getDate(), dt.getFullYear(), dt.getHours(), dt.getMinutes()): '__';
     };
@@ -658,7 +646,6 @@
         selectionsExpression: selectionsExpression,
         conditionsExpression: conditionsExpression,
         conditionExpression: conditionExpression,
-        onTemplateLoad: onTemplateLoad,
         intervalFormats: intervalFormats,
         getTextFormat: getTextFormat,
         getSelectionProperties: getSelectionProperties,
