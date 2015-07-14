@@ -184,7 +184,7 @@ var updateWidgetViewOptions = function(widgetModel){
     });
 };
 
-var addWidget = function(widgetModel){
+var addWidget = function(widgetModel, allowDemo){
     return connection[widgetCollection].then(function(collection){
         return getDashboard(widgetModel.dashboardId).then(function(result){
             var defer = Q.defer();
@@ -274,6 +274,7 @@ exports.deleteWidget = function(req, res){
     }, handleErrorResponse.bind(res));
 };
 
+
 var upsertDashboard = function(dashboardModel, allowDemo){
     return connection[dashboardCollection].then(function(collection){
         if(dashboardModel._id){
@@ -340,6 +341,8 @@ exports.truncateData = function(req, res){
 
 exports.generateDemoDashboard = function(req, res){
     var demoData = utils.clone(demoDashboardData);
+    demoData.dashboard.name = demoData.dashboard.name + '-' + Math.floor(Math.random() * 100);
+
     var promise = upsertDashboard(demoData.dashboard, true).then(function(dashboardModel){
         var wPromises = [];
         var dashboardId = dashboardModel._id.toString();
