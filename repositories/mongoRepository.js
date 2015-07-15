@@ -6,6 +6,9 @@ var config = require('../routes/config.json');
 var baseMongoRepo = require('./baseMongoRepository');
 var Q = require('q');
 
+var excludedDatabaseNames = ['local'];
+var excludedCollectionNames = ['system.indexes'];
+
 exports.getDatabaseNames = function(datasource){
     var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName('local')();
     return getDbInstance.then(function(db){
@@ -15,8 +18,11 @@ exports.getDatabaseNames = function(datasource){
                 defer.reject({code: 500, message:'Error getting database names'});
             }
             else{
-                defer.resolve(resp.databases.map(function(d){
-                    return d.name;
+                defer.resolve(resp.databases
+                    .filter(function(v) {
+                        return excludedDatabaseNames.indexOf(v.name) < 0;
+                    }).map(function(d){
+                        return d.name;
                 }));
             }
         });
@@ -34,7 +40,7 @@ exports.getCollectionNames = function(datasource, database) {
             }
             else{
                 var returnCollections = result.filter(function(v){
-                    return v.name.indexOf('.system.') < 0;
+                    return excludedCollectionNames.indexOf(v.name) < 0;
                 }).map(function(v){
                     return v.name.replace(database + '.','');
                 });
