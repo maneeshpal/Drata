@@ -570,6 +570,7 @@
         timeframes : ['minute', 'hour', 'day', 'month', 'year'],
         uniqueClientId: parseInt(Math.random() * 100000000),
         dateIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', '1y', 'week', 'month', 'quarter', 'year'],
+        dataFilterIntervalTypeAheads: ['1h', '5m','60s', '1d','1w', '1y', '2w', '2y'],
         sortTypes: { 
             numeric: { 
                 asc: 'fa-sort-numeric-asc', 

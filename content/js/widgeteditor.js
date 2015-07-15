@@ -12,8 +12,6 @@
         self.database = ko.observable();
         self.previewWidget = ko.observable();
         self.segment = new Segmentor();
-        //self.segmentModel = ko.observable();
-        //self.chartData = ko.observable();
         self.showTabular = ko.observable();
 
         self.tabularModel = ko.observable();
@@ -21,8 +19,20 @@
         var cloneModel = {}, previewWidgetLoadedToken;
         
         self.name = ko.observable();
-        //self.sizex = ko.observable("4");
-        //self.sizey = ko.observable("1");
+        
+        var clearTabular = function() {
+            drata.pubsub.unsubscribe(previewWidgetLoadedToken);
+            self.tabularModel(undefined);
+        }
+
+        var setPreviewWidgetLoadedToken = function() {
+            previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, model) {
+                self.tabularModel(model && {
+                    segment: model.segment,
+                    data: model.data
+                })
+            });
+        }
 
         self.dataSource.subscribe(function(newValue){
             if(!newValue){
@@ -133,8 +143,6 @@
                 self.addUpdateBtnText('Save');
                 self.dataSource(undefined);
                 self.name(undefined);
-                //self.sizex("4");
-                //self.sizey("1");
                 self.previewWidget(undefined);
                 location.hash = '';
             }
@@ -142,17 +150,13 @@
 
         self.attach = function (event,options) {
             self.dataSource(undefined);
-            self.tabularModel(undefined);
+            clearTabular();
             cloneModel = drata.utils.clone(options.widgetModel);
             self.dataSource(cloneModel.dataSource);
             self.name(cloneModel.name);
             self.addUpdateBtnText('Update');
-            previewWidgetLoadedToken = drata.pubsub.subscribe('previewWidgetLoaded', function(eventName, model) {
-                self.tabularModel(model && {
-                    segment: model.segment,
-                    data: model.data
-                })
-            });
+
+            setPreviewWidgetLoadedToken();
             self.previewWidget(new drata.dashboard.widget(cloneModel, 100, true));
         };
 
@@ -167,15 +171,16 @@
             if(w) w.clearTimeouts();
             self.previewWidget(undefined);
             cloneModel = {};
-            drata.pubsub.unsubscribe(previewWidgetLoadedToken);
-            self.tabularModel(undefined);
+            clearTabular();
         };
 
         self.preview = function() {
-            //self.tabularModel(undefined);
             if(!validateWidgetEditor()) return;
             var model = self.segment.getModel();
             if(!model) return;
+
+            setPreviewWidgetLoadedToken();
+            
             self.previewWidget(new drata.dashboard.widget({
                 name: self.name(),
                 dataSource: self.dataSource(),
@@ -215,7 +220,7 @@
                     return self.dataSource.isValid() && self.database.isValid();
                 }
             }
-        })
+        });
     };
     root.drata.ns('dashboard').extend({
         widgetEditor: new WidgetEditor()
