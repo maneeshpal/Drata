@@ -56,7 +56,7 @@
     var addWidget = function(model){
         var promise = _perform('POST', apiRoot + 'widget',model);
         promise.done(function(response){
-            socket.emit('widgetcreated', {
+            socket && socket.emit('widgetcreated', {
                 widgetId : response._id, 
                 dashboardId: response.dashboardId
             });
@@ -67,7 +67,7 @@
     var updateWidget = function(model){
         var promise = _perform('PUT', apiRoot + 'widget',model);
         promise.done(function(response){
-            socket.emit('widgetupdated', {
+            socket && socket.emit('widgetupdated', {
                 widgetId : model._id, 
                 dashboardId: model.dashboardId
             });
@@ -78,7 +78,7 @@
     var updateWidgetViewOptions = function(model){
         var promise = _perform('PUT', apiRoot + 'widgetviewoptions',model);
         promise.done(function(response){
-            socket.emit('widgetupdated', {
+            socket && socket.emit('widgetupdated', {
                 widgetId : model._id, 
                 dashboardId: model.dashboardId
             });
@@ -90,7 +90,7 @@
         var url = apiRoot + drata.utils.format('widget/{0}', widgetId);
         var promise = _perform('DELETE',url);
         promise.done(function(){
-            socket.emit('widgetremoved', {
+            socket && socket.emit('widgetremoved', {
                 widgetId : widgetId
             });
             drata.pubsub.publish('widgetremoved', widgetId);
