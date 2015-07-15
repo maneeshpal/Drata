@@ -33,7 +33,7 @@
   position: absolute;
 }
 
-.chk-tabular:checked + .tabular-data {
+.chk-tabular:checked ~ .tabular-data {
   max-height: 1000px;
 }
 
