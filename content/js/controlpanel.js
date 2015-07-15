@@ -68,7 +68,7 @@
 		};
 		
 		self.listenWidgetRemoved = function(widgetId){
-			socket.on('widgetremoved'+widgetId, function (data) {
+			socket && socket.on('widgetremoved'+widgetId, function (data) {
 	            var widget = getWidgetFromDashboard(data.widgetId);
 	            if(widget){
 	            	drata.nsx.notifier.notifyWidgetRemoved({
