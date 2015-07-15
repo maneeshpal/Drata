@@ -89,6 +89,10 @@ module.exports = function(grunt) {
           'content/dis/<%= pkg.name %>.min.js': ['<%= concat.dashboard.dest %>','<%= concat.charts.dest %>']
         }
       }
+    },
+    clean: {
+      js: 'content/dis/**',
+      css: 'content/style/*.css'
     }
   });
 
@@ -96,6 +100,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   grunt.registerTask('buildcss', ['sass']);
   grunt.registerTask('buildjs', ['concat', 'uglify']);
