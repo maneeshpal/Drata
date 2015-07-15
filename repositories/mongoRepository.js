@@ -6,7 +6,7 @@ var config = require('../routes/config.json');
 var baseMongoRepo = require('./baseMongoRepository');
 var Q = require('q');
 
-var excludedDatabaseNames = ['local'];
+var excludedDatabaseNames = ['local', 'admin', 'db'];
 var excludedCollectionNames = ['system.indexes'];
 
 exports.getDatabaseNames = function(datasource){
