@@ -529,7 +529,7 @@
 	    
 	    this.name.subscribe(function(newValue){
 	        model.name = newValue;
-	        drata.apiClient.upsertDashboard(model);
+	        drata.apiClient.updateDashboard(model);
 	    });
 	    
 	    this.cloneDashboard = function(){
@@ -680,12 +680,11 @@
 	            theme: 'default'
 	        };
 
-	        drata.apiClient.upsertDashboard(dashboardModel).then(function(response){
-	            var _id = response._id;
+	        drata.apiClient.addDashboard(dashboardModel).then(function(dashboardId) {
 	            var tagList = self.tags.tagList(), chosenWidgets = self.chosenWidgets();
 	            
 	            function redirect()  {
-	            	window.location.href = '/dashboard/'+ _id;
+	            	window.location.href = '/dashboard/'+ dashboardId;
 	            }
 	            if(!tagList.length && !chosenWidgets.length){
 	             	redirect();   
@@ -694,14 +693,14 @@
 	                var prs = [];
 
 	                tagList.forEach(function(t) {
-	                    t.dashboardId = _id;
+	                    t.dashboardId = dashboardId;
 	                    delete t.dateCreated;
 	                    prs.push(drata.apiClient.addTag(t));
 	                });
 	                
 	                chosenWidgets.forEach(function(w) {
 	                    var widgetModel = w.getModel();
-	                    widgetModel.dashboardId = _id;
+	                    widgetModel.dashboardId = dashboardId;
 	                    delete widgetModel.dateCreated;
 	                    delete widgetModel.dateUpdated;
 	                    delete widgetModel._id;

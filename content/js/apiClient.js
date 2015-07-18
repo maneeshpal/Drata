@@ -98,8 +98,12 @@
         return promise;
     };
 
-    var upsertDashboard = function(model){
+    var updateDashboard = function(model) {
         return _perform('PUT', apiRoot + 'dashboard',model);
+    };
+
+    var addDashboard = function(model) {
+        return _perform('POST', apiRoot + 'dashboard',model);
     };
 
     var deleteDashboard = function(dashboardId){
@@ -218,7 +222,8 @@
         updateWidget: updateWidget,
         updateWidgetViewOptions: updateWidgetViewOptions,
         deleteWidget:deleteWidget,
-        upsertDashboard: upsertDashboard,
+        updateDashboard: updateDashboard,
+        addDashboard: addDashboard,
         deleteDashboard: deleteDashboard,
         getAllDashboards:getAllDashboards,
         getAllTags: getAllTags,

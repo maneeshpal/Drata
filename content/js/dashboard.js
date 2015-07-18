@@ -74,7 +74,7 @@
                 _id: dashboardId,
                 theme: theme
             };
-            drata.apiClient.upsertDashboard(model);    
+            drata.apiClient.updateDashboard(model);    
         };
 
         drata.pubsub.subscribe('themechanged', function(eventName, newTheme){
