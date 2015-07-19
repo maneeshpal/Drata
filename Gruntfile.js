@@ -33,6 +33,10 @@ module.exports = function(grunt) {
       js : {
         files: 'content/js/**/*',
         tasks: ['concat', 'uglify']
+      },
+      html : {
+        files: 'content/templates/*.html',
+        tasks: ['concat']
       }
     },
 

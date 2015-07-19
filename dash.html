@@ -120,11 +120,11 @@
     </div>
 
     <div data-bind="visible:isDefaultView" style="display:none" class="row">
-        <div class="medium-12 large-4 large-push-8 columns">
+        <div class="medium-12 large-4 columns">
             <!-- ko template: {name: 'dashboard-create-template', data: dashboardCreator} -->
             <!-- /ko -->
         </div>
-        <div class="medium-12 large-8 large-pull-4 columns">
+        <div class="medium-12 large-8 columns">
             <!-- ko template: {name: 'dashboardmanager-template', data: dashboardManager} -->
             <!-- /ko -->
         </div>
@@ -140,22 +140,6 @@
         <!-- /ko -->
     </div>
     
-    <div class="row" data-bind="with: dashboardCreator, visible:isDashboardCreatorView" style="display:none">
-        <div class="small-12 medium-10 large-8 columns small-centered">
-        <!-- ko template: {name: 'dashboard-create-template'} -->
-        <!-- /ko -->
-        </div>
-    </div>
-
-    <div data-bind="with: dashboardManager, visible:isDashboardManagerView" style="display:none">
-        <div class="row">
-            <div class="small-12 medium-10 large-8 columns small-centered">
-                <!-- ko template: {name: 'dashboardmanager-template'} -->
-                <!-- /ko -->
-            </div>
-        </div>
-    </div>
-
     <div class="widget-manager" data-bind="with: widgetManager, visible:isWidgetManagerView">
         <!-- ko template: {name: 'widgetmanager-template'} -->
         <!-- /ko -->

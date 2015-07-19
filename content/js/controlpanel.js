@@ -175,7 +175,7 @@
 			manage: {name: 'manage', hash: 'manage', displayText: 'Manage Dashboard'},
 			editwidget: {name: 'editwidget', hash: 'editwidget', displayText: 'Widget Editor'},
 			managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
-			create: {name: 'create', hash: 'create', displayText: 'Create Dashboard'},
+			//create: {name: 'create', hash: 'create', displayText: 'Create Dashboard'},
 			dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
 			defaultview: {name: 'defaultview', hash: '', displayText: 'Create/Manage'}
 		};
@@ -191,7 +191,7 @@
 	    	var mode;
 	    	switch(c[0]){
 	    		case displayModes.manage.hash:
-	    			mode = displayModes.manage;
+	    			mode = displayModes.defaultview;
 	    		break;
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
@@ -206,9 +206,9 @@
 	    		case displayModes.managewidgets.hash:
 	    			mode = displayModes.managewidgets;
 	    		break;
-	    		case displayModes.create.hash:
-	    			mode = displayModes.create;
-	    		break;
+	    		// case displayModes.create.hash:
+	    		// 	mode = displayModes.create;
+	    		// break;
 	    		default:
 	    			if(currentDashboardId){
 	    				mode = displayModes.dashboardview;
@@ -228,13 +228,6 @@
 			return self.displayMode() === displayModes.editwidget;
 		});
 
-		self.isDashboardCreatorView = ko.computed(function(){
-			return self.displayMode() === displayModes.create;
-		});
-
-		self.isDashboardManagerView = ko.computed(function(){
-			return self.displayMode() === displayModes.manage;
-		});
 		self.isWidgetManagerView = ko.computed(function(){
 			return self.displayMode() === displayModes.managewidgets;
 		});
@@ -295,6 +288,10 @@
 	    self.closeDashboardManager = function(){
 	        $('#dashboardManager').removeClass('showme');
 	    };
+
+	    self.noDashboards = ko.computed(function () {
+	    	return self.dashboards().length === 0;
+	    });
 
 	    self.filteredDashboards = ko.computed(function(){
 	        var chosenTags = self.chosenTags();
