@@ -185,8 +185,7 @@
             defaultDate: "-1m",
             changeMonth: true,
             changeYear: true,
-            numberOfMonths: 1,
-            //onClose: function( selectedDate ) {}
+            numberOfMonths: 1
         };
 
         if(config.maxDate){
@@ -194,13 +193,13 @@
         }
 
         self.showDatePicker = function(){
-            dp && dp.datepicker('show');
+            dp && dp.datetimepicker('show');
         };
 
         self.initializeDatePicker = function(nodes){
             dp = $(nodes).find('#datepicker');
             dp.attr('id', 'datepicker' + rnd);
-            dp.datepicker(options);
+            dp.datetimepicker();
         };
     };
 
