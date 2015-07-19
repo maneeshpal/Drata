@@ -143,22 +143,6 @@
         return {height: txt.height(), width: txt.width() };
     };
     
-    var head = document.getElementsByTagName('head')[0];
-        
-    // var createTemplate = function (templateName, templateString, overrideExisting) {
-    //     if (document.getElementById(templateName) && !overrideExisting) return document.getElementById(templateName);
-
-    //     var el = document.createElement('script');
-
-    //     el.type = 'text/html';
-    //     el.id = templateName;
-    //     el.text = templateString;
-    //     var insertBeforeEl = head && head.getElementsByTagName('base')[0] || null;
-    //     document.body ? document.body.appendChild(el) : head.insertBefore(el, insertBeforeEl);
-
-    //     return el;
-    // };
-
     var hmsConv = {
         h: { label: 'hours', labelSingular: 'hour', value: 60 * 60 * 1000 },
         m: { label: 'minutes', labelSingular: 'minute', value: 60 * 1000 },
@@ -281,16 +265,24 @@
     };
 
     var getValidDate = function(dateVal, isUs) {
-        var matches = /^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/.exec(dateVal);
-        if (matches == null) return undefined;
-        
-        var d = isUs? matches[2]:matches[1];
-        var m = isUs? matches[1]-1:matches[2]-1;
-        var y = matches[3];
-        var composedDate = new Date(y, m, d);
+        if(!dateVal) return;
+        dateVal = dateVal.trim();
+        var matches = /^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})([-: ](\d{1,2})[:](\d{1,2}))?$/.exec(dateVal);
+        if (matches == null) return;
+        var d = matches[3];
+        var m = matches[2] - 1;
+        var y = matches[1];
+        var h = matches[5];
+        var mi = matches[6];
+        h = h || 0;
+        mi = mi || 0;
+
+        var composedDate = new Date(y, m, d, h, mi);
         return (composedDate.getDate() == d &&
             composedDate.getMonth() == m &&
-            composedDate.getFullYear() == y) ? composedDate : undefined;
+            composedDate.getFullYear() == y) &&
+            composedDate.getHours() == h &&
+            composedDate.getMinutes() == mi  ? composedDate : undefined;
     };
 
     var intervalFormats = {
@@ -345,14 +337,19 @@
                 return intervalFormats[options.dateInterval];
             }
 
-            if(!options.range) return intervalFormats.day;
-            
-            var msDay = 172800000, 
+            var interval;
+            if(options.formatType === 'date' && !options.range) {
+                interval = parseTime(options.dateInterval).ms;
+            } else if (options.range) {
+                interval = options.range[1] - options.range[0];    
+            } else {
+                intervalFormats.day;
+            }
+
+            var msDay = 345600000, //4 days 
                 msMonth = 7776000000, 
                 msYear = 31536000000;
 
-            var interval = options.range[1] - options.range[0];
-            
             return interval <= msDay ? intervalFormats.hours : intervalFormats.day;
         },
         getTickFormat: function( options ) {

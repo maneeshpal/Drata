@@ -54,8 +54,8 @@
 		            }
 		        ],
 		        "dataFilter" : {
-		            "from" : "10/04/2006",
-		            "to" : "11/05/2014",
+		            "from" : "2006/04/10",
+		            "to" : "2014/11/05",
 		            "dateProp" : "timestamp"
 		        },
 		        "chartType" : "line",
