@@ -83,22 +83,20 @@
 
     <div class="row">
         <div class="small-12 medium-6 columns">
-            <label> From:
-                <!-- ko template: {
-                    name: 'timeframeItem-template', 
-                    data: from
-                } -->
-                <!-- /ko -->
-            </label>
+            <label> From: <span data-bind="tooltip: {datakey: 'dateIntervalFrom'}" class="fa fa-question-circle dtooltip"></span></label>
+            <!-- ko template: {
+                name: 'timeframeItem-template', 
+                data: from
+            } -->
+            <!-- /ko -->
         </div>
         <div class="small-12 medium-6 columns">
-            <label> To:
-                <!-- ko template: {
-                    name: 'timeframeItem-template', 
-                    data: to
-                } -->
-                <!-- /ko -->
-            </label>
+            <label> To: <span data-bind="tooltip: {datakey: 'dateIntervalTo'}" class="fa fa-question-circle dtooltip"></span></label>
+            <!-- ko template: {
+                name: 'timeframeItem-template', 
+                data: to
+            } -->
+            <!-- /ko -->
         </div>
     </div>
 
@@ -280,8 +278,7 @@
                         <span class="switch-label">% change</span>
                     </label>
                     <!-- ko if : $index() === 0 -->
-                    &nbsp;
-                    <span data-bind="tooltip: {datakey: 'percentChange'}" class="fa fa-question-circle dtooltip"></span>
+                    <span data-bind="tooltip: {datakey: 'percentChange'}" class="fa fa-question-circle dtooltip dtooltip-selectionlever"></span>
                     <!-- /ko -->
                     <!-- /ko -->
                     <!-- ko if: $parent.showDistinct -->
@@ -292,6 +289,9 @@
                         </div>
                         <span class="switch-label">distinct</span>
                     </label>
+                    <!-- ko if : $index() === 0 -->
+                    <span data-bind="tooltip: {datakey: 'distinctSelection'}" class="fa fa-question-circle dtooltip dtooltip-selectionlever"></span>
+                    <!-- /ko -->
                     <!-- /ko -->
                 </div>
             <!-- /ko -->
@@ -414,7 +414,7 @@
             </div>
         </div>
         <!-- /ko -->
-        <div>
+        <div style="position: relative">
             <span data-bind="tooltip: {datakey: 'complexCondition'}" class="fa fa-question-circle dtooltip dtooltip-complexcondition">
                 </span>
             <i class="fa fa-plus condition-action-complex" data-bind="click:toggleComplex"></i>

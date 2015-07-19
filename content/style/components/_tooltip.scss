@@ -9,13 +9,13 @@ span{
   }
   &.dtooltip-aggregate-func{
     position:absolute;
-    left: 24px;
+    left: 15px;
     top: -1px;
   }
   &.dtooltip-selection-prop {
     position:absolute;
-    right: 20px;
-    top: -11px;
+    right: 40px;
+    top: 8px;
   }
   &.dtooltip-expression {
     right: 19px;
@@ -24,7 +24,11 @@ span{
   }
   &.dtooltip-complexcondition {
     position: absolute;
-    right: 20px;
+    right: 0;
     top: 8px;
+  }
+  &.dtooltip-selectionlever {
+    position: relative;
+    top: -7px; 
   }
 }

@@ -141,6 +141,9 @@ select.error{
     margin-left: 5px;
 }
 
+.selection-switch input[type="checkbox"]+label, input[type="radio"]+label {
+    margin-right: 0;
+}
 .selection-switch .switch {
     margin-top: 5px;
     margin-bottom: 1rem;
