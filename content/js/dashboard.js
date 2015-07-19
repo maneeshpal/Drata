@@ -265,19 +265,10 @@
 
         self.editWidget = function () {
             var widgetId = self.getId();
-            
-            if(widgetModel.isDemo) {
-                location.hash = '#editwidget/demo';
-                drata.pubsub.publish('widgetedit', {
-                    widgetModel: widgetModel
-                });
-            }
-            else{
-                location.hash = '#editwidget/' + widgetId;    
-            }
+            location.hash = '#editwidget/' + widgetId;
         };
 
-        var _t = undefined;
+        var _t;
 
         self.resizeContent = function(){
             _t && clearTimeout(_t);

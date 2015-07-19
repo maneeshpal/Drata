@@ -652,14 +652,7 @@
 	    this.dataFilterExpression = drata.utils.getDataFilterExpression(model.segmentModel.dataFilter);
 	    
 	    this.manageWidget = function(){
-	    	if(model.isDemo) {
-	    		location.hash = '#editwidget/demo';
-                drata.pubsub.publish('widgetedit', {
-                    widgetModel: model
-                });
-            }else{
-            	location.hash = '#editwidget/'+ this._id;
-            }
+	    	location.hash = '#editwidget/'+ this._id;
 	    };
 	    this.getModel = function(){
 	        return model;
