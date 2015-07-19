@@ -288,7 +288,7 @@
             }
         };
 
-        var _t = undefined;
+        var _t;
 
         self.resizeContent = function(){
             _t && clearTimeout(_t);
