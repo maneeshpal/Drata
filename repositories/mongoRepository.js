@@ -10,7 +10,7 @@ var excludedDatabaseNames = ['local', 'admin', 'db'];
 var excludedCollectionNames = ['system.indexes'];
 
 exports.getDatabaseNames = function(datasource){
-    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName('local')();
+    var getDbInstance = baseMongoRepo.dbInstance(datasource, 'local');
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         db.admin().listDatabases(function(err, resp){
@@ -31,10 +31,10 @@ exports.getDatabaseNames = function(datasource){
 };
 
 exports.getCollectionNames = function(datasource, database) {
-    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    var getDbInstance = baseMongoRepo.dbInstance(datasource, database);
     return getDbInstance.then(function(db){
         var defer = Q.defer();
-        db.collectionNames(function(err, result) {
+        db.listCollections().toArray(function(err, result) {
             if(err){
                 defer.reject({code: 500, message: 'Error retreiving collection names'});
             }
@@ -52,7 +52,7 @@ exports.getCollectionNames = function(datasource, database) {
 };
 
 exports.findProperties = function(datasource, database, collectionName){
-    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    var getDbInstance = baseMongoRepo.dbInstance(datasource, database);
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         db.collection(collectionName, function(err, collection) {
@@ -75,7 +75,7 @@ exports.findProperties = function(datasource, database, collectionName){
 };
 
 exports.findCollection = function(datasource, database, collectionName, segment) {
-    var getDbInstance = baseMongoRepo.dbInstance().serverName(datasource).dbName(database)();
+    var getDbInstance = baseMongoRepo.dbInstance(datasource, database);
     return getDbInstance.then(function(db) {
         var defer = Q.defer();
         var query = queryGenerator.getQuery(segment);
@@ -158,32 +158,42 @@ exports.pop = function() {
         data.push(dd);
     }
     var getDbInstance = baseMongoRepo
-        .dbInstance()
-        .serverName('drataDemoExternal')
-        .dbName('shopperstop')();
+        .dbInstance('drataDemoExternal', 'shopperstop');
+        
     return getDbInstance.then(function(db){
         var defer = Q.defer();
         db.collection('shoppercheckout', function(err, collection) {
             if(err){
+                console.log(err);
                 defer.reject({code: 500, message: 'something went wrong'});
             }
             else {
-                collection.remove({}, function(err, result) {
-                    if(err){
-                        defer.reject({code: 500, message: err});
-                    }
-                    else {
-                        //defer.resolve({message: 'removed'});  
-                        collection.insert(data, function(insertErr, insertResult) {
-                            if(insertErr){
-                                defer.reject({code: 500, message: insertErr});
+
+                // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+                
+                collection.bulkWrite([
+                    { 
+                        deleteMany: { 
+                            filter: {} 
+                        } 
+                    }] , {
+                        ordered:false, 
+                        w: -1
+                    }, function(insertErr, r) {
+                        if(insertErr){
+                            defer.reject({code: 500, message: insertErr});
+                        }
+                        else {
+                            var bulk = collection.initializeOrderedBulkOp();
+                            
+                            for(var i = 0; i < data.length; i++) {
+                                bulk.insert(data[i]);
                             }
-                            else{
-                                defer.resolve({message: 'shoppercheckout collection populated successfully'});  
-                            }
-                        });
-                    }
-                })
+                            bulk.execute(function(err, result) {
+                                err ? defer.reject(err) : defer.resolve({message: 'shoppercheckout collection populated successfully'});  
+                            });
+                        }
+                });
             }
         });
         return defer.promise;   

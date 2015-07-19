@@ -84,7 +84,7 @@
                 _id: dashboardId,
                 theme: theme
             };
-            drata.apiClient.upsertDashboard(model);    
+            drata.apiClient.updateDashboard(model);    
         };
 
         drata.pubsub.subscribe('themechanged', function(eventName, newTheme){
@@ -161,6 +161,7 @@
         self.autoRefresh = new AutoRefresh(widgetModel.refresh);
         self.showTabularData = ko.observable(widgetModel.showTabularData);
         self.tabularModel = ko.observable();
+        self.demo = widgetModel.demo;
         var _name = ko.observable(widgetModel.name || 'New widget'),
         _sizex = ko.observable(widgetModel.sizex),
         _sizey = ko.observable(widgetModel.sizey);
@@ -276,7 +277,7 @@
         self.editWidget = function () {
             var widgetId = self.getId();
             
-            if(widgetModel.isDemo) {
+            if(widgetModel.demo) {
                 location.hash = '#editwidget/demo';
                 drata.pubsub.publish('widgetedit', {
                     widgetModel: widgetModel

@@ -1,79 +1,61 @@
-var mongo = require('mongodb');
+var MongoClient = require('mongodb').MongoClient;
 var config = require('../routes/config.json');
+var utils = require('../utils/utils');
 var _ = require('underscore');
 var Q = require('q');
-var BSON = mongo.BSONPure;
+var BSON = require('mongodb').BSONPure;
 
-var mongoClients = {}, dbs = {};
-var serverNames = config.dataSources.map(function(d){
-        return d.alias;   
-    });
+var dataSources = {};
 
-var mongoSources = config.dataSources.filter(function(d){
+config.dataSources.filter(function(d){
     return d.type === 'mongodb';
+}).forEach(function(dataSource) {
+    dataSources[dataSource.alias] =  dataSource;
 });
 
-_.each(mongoSources, function(server){
-    var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));   
-    instance.open(function(err, mongoClient) {
-        if(err){
-            console.log(server.alias + ' connection refused');
-        }else{
-            mongoClients[server.alias] = mongoClient;
-            dbs[server.alias] = {}; 
-            console.log('new server: ' + server.alias); 
-        }
-    });
-})
+dataSources[config.drataInternal.alias] = config.drataInternal;
 
-var connectionCount = 0;
-exports.dbInstance = function(){
-    var _name, _serverName;
-    function _connect(){
-        var defer = Q.defer();
-        if(!dbs[_serverName]) {
-            if(serverNames.indexOf(_serverName) > -1){
-                var server = _.find(config.dataSources, function(s){
-                    return s.alias === _serverName;
-                });
-                var instance = new mongo.MongoClient(new mongo.Server(server.serverName, server.port));   
-                instance.open(function(err, mongoClient) {
-                    if(err){
-                        console.log(_serverName + ' connection refused');
-                        defer.reject({code: 500, message:_serverName + ' connection refused'});
-                    }else{
-                        mongoClients[_serverName] = mongoClient;
-                        dbs[_serverName] = {}
-                        dbs[_serverName][_name] = mongoClient.db(_name); 
-                        console.log('new server: ' + _serverName);
-                        defer.resolve(dbs[_serverName][_name]);
-                    }
-                });
-            }
-            else{
-                defer.reject({code: 500, message: _serverName +' not found'});
-            }
-        }
-        else{
-            if(!dbs[_serverName][_name]){
-                dbs[_serverName][_name] = mongoClients[_serverName].db(_name);
-            }
-            defer.resolve(dbs[_serverName][_name]);    
-        }
-        return defer.promise;
-    };
+var dbInstances = {};
+function resetConnection (key) {
+	if(!dbInstances[key]) return;
 
-    _connect.dbName = function(val){
-        if(!_serverName) throw "Server not speficied";
-        if (!arguments.length) return _name;
-        _name = val;
-        return _connect;
-    };
+    console.log('max connection reached.'+ key + '. Resetting..');
+    dbInstances[key].dbInstance.close();
+    dbInstances[key].dbInstance = undefined;
+    dbInstances[key].connectionCount = 0;
+}
 
-    _connect.serverName = function(val){
-        if (!arguments.length) return _serverName;
-        _serverName = val;
-        return _connect;
-    };
-    return _connect;
+exports.dbInstance = function (serverName, dbName) {
+    var defer = Q.defer();
+    var key = serverName + dbName;
+    var dataSource = dataSources[serverName];
+    if(dbInstances[key] && dbInstances[key].connectionCount >= 9) {
+        resetConnection(key);
+    }
+    if(dbInstances[key] && dbInstances[key].dbInstance) {
+        dbInstances[key].connectionCount ++;
+        defer.resolve(dbInstances[key].dbInstance);
+    }
+    else {
+	    var url = utils.format('mongodb://{0}:{1}/{2}', dataSource.serverName, dataSource.port, dbName);
+	    MongoClient.connect(url,
+	        { 
+	            server: {
+	                poolSize: 10
+	            }
+	        }, function(err, db) {
+        	if (err) {
+        		defer.reject({ code: 500, message: err.message + '; Cannot connect to: '+ url });
+        		resetConnection(key);
+        	} else {
+    			dbInstances[key] = {
+    				dbInstance: db,
+    				connectionCount: 0
+    			}
+        		defer.resolve(db);
+        	}
+	    })
+	}
+
+    return defer.promise;
 };

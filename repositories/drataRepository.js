@@ -1,9 +1,10 @@
-var mongo = require('mongodb');
 var utils = require('../utils/utils');
 var queryGenerator = require('../utils/mongoquerygenerator');
 var socket = require('../routes/socket');
 var config = require('../routes/config.json');
-var BSON = mongo.BSONPure;
+var baseMongoRepository = require('../repositories/baseMongoRepository');
+var BSON = require('mongodb').BSONPure;
+var ObjectID = require('mongodb').ObjectID;
 var _ = require('underscore');
 var Q = require('q');
 var demoDashboardData = require('../routes/demo.json');
@@ -12,30 +13,16 @@ var tagCollection = 'tags',
     widgetCollection = 'widget', 
     dashboardCollection = 'dashboard';
 
-var mongoClient = new mongo.MongoClient(new mongo.Server(config.drataInternal.serverName, config.drataInternal.port));
-
 var io;
 
 var openConnection = function() {
-    var defer = Q.defer();
-    mongoClient.open(function(err, mongoClient) {
-        if(!err){
-            var db = mongoClient.db(config.drataInternal.databaseName);
-            defer.resolve(db);
-        }else{
-            console.log('Database connection failure.');
-        }
-    });
-    return defer.promise;
+    return baseMongoRepository.dbInstance(config.drataInternal.alias, config.drataInternal.databaseName);
 };
 
-var openMongoClient = openConnection();
-
 function getValidMongoId(id){
-    var defer = Q.defer(), objectId;
+    var defer = Q.defer();
     try {
-       objectId = mongo.ObjectID(id);
-       defer.resolve(objectId);
+       defer.resolve(ObjectID(id));
     }
     catch(e){
         defer.reject({code: 500, message : utils.format('Invalid objectId: {0}', id)});
@@ -44,13 +31,13 @@ function getValidMongoId(id){
 };
 
 var connectToCollection = function(name) {
-    return openMongoClient.then(function(db) {
+    return openConnection().then(function(db) {
         var defer = Q.defer();
         db.collection(name, function(err, collection) {
             if(err){
                 defer.reject({code:500, message: utils.format('Error connecting to Mongo Collection: {0}', name)});
             }
-            else{
+            else {
                 defer.resolve(collection);
             }
         });
@@ -65,7 +52,7 @@ connection[widgetCollection] = connectToCollection(widgetCollection);
 connection[dashboardCollection] = connectToCollection(dashboardCollection);
 
 var handleErrorResponse = function(err) {
-    this.send(err.code || 500, err.message || err.toString());
+    this.status(err.code || 500).send(err.message || err.toString());
 }
 
 var findObject = function(collectionName, id){
@@ -135,6 +122,7 @@ exports.findWidgetsOfDashboard = function(req, res) {
         });
         return defer.promise;
     });
+    
     promise.done(function(result){
         res.send(result);
     }, handleErrorResponse.bind(res));
@@ -149,7 +137,8 @@ var updateWidget = function(widgetModel){
                         var defer = Q.defer();
                         widgetModel._id = widgetObjectId;
                         widgetModel.dateUpdated = new Date();
-                        collection.save(widgetModel, {safe:true}, function(err, result) {
+                        
+                        collection.updateOne({ _id: widgetObjectId }, widgetModel, function(err, result) {
                             err ? defer.reject({code: 500, message: 'cannot update widget'}) : defer.resolve();
                         });
                         return defer.promise;
@@ -176,7 +165,7 @@ var updateWidgetViewOptions = function(widgetModel){
             widget.name = widgetModel.name;
             widget.refresh = widgetModel.refresh;
 
-            collection.save(widget, {safe:true}, function(err, result) {
+            collection.updateOne({ _id: widget._id }, widget, function(err, result) {
                 err ? defer.reject({code: 500, message: 'cannot update widget view options'}) : defer.resolve();
             });
         return defer.promise;
@@ -189,8 +178,8 @@ var addWidget = function(widgetModel, allowDemo){
         return getDashboard(widgetModel.dashboardId).then(function(result){
             var defer = Q.defer();
             if(result.demo && !allowDemo){
-                widgetModel._id = new mongo.ObjectID();
-                widgetModel.isDemo = true;
+                widgetModel._id = new ObjectID();
+                widgetModel.demo = true;
                 defer.resolve(widgetModel);
             }
             else {
@@ -199,8 +188,8 @@ var addWidget = function(widgetModel, allowDemo){
                 
                 delete widgetModel._id; //just in case
                 delete widgetModel.demo; // just incase, a user clones a demo widget to a different dashboard.
-                collection.save(widgetModel, {safe:true}, function(err, result) {
-                    err ? defer.reject({code: 500, message: 'cannot create widget'}) : defer.resolve(result);
+            collection.insertOne(widgetModel, function(err, result) {
+                err ? defer.reject({code: 500, message: 'cannot create widget'}) : defer.resolve(result.ops[0]);
                 }); 
             }
             return defer.promise;
@@ -211,22 +200,22 @@ var addWidget = function(widgetModel, allowDemo){
 exports.updateWidget = function(req, res){
     var widgetModel = req.body;
     if(!widgetModel._id){
-        res.send(404);
+        res.status(404).send();
     }
     updateWidget(widgetModel)
     .then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 }
 
 exports.updateWidgetViewOptions = function(req, res) {
     var widgetModel = req.body;
     if(!widgetModel._id){
-        res.send(404);
+        res.status(404).send();
     }
     updateWidgetViewOptions(widgetModel)
     .then(function() {
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 }
 
@@ -270,51 +259,58 @@ var deleteWidget = function(widgetId){
 
 exports.deleteWidget = function(req, res){
     deleteWidget(req.params.widgetId).then(function(result){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
-
-var upsertDashboard = function(dashboardModel, allowDemo){
+var addDashboard = function (dashboardModel) {
     return connection[dashboardCollection].then(function(collection){
-        if(dashboardModel._id){
-            return getDashboard(dashboardModel._id).then(function(d) {
-                if(d.demo && !allowDemo){
+        var defer = Q.defer();
+        dashboardModel.dateCreated = new Date();
+        dashboardModel.dateUpdated = new Date();
+        collection.insertOne(dashboardModel, function(err, result) {
+            err ? defer.reject({code: 500, message: 'Dashboard cannot be created'}) : defer.resolve(result.insertedId);
+        });
+        return defer.promise;
+    });
+};
+
+var updateDashboard = function (dashboardModel) {
+    return connection[dashboardCollection].then(function(collection){
+        return getDashboard(dashboardModel._id).then(function(d) {
+                if(d.demo){
                     var defer = Q.defer();
                     defer.resolve();
                     return defer.promise;
                 }
                 else{
-                var defer = Q.defer();
-                d.dateUpdated = new Date();
-                d.name = dashboardModel.name;
-                d.theme = dashboardModel.theme;
+                    var defer = Q.defer();
+                    d.dateUpdated = new Date();
+                    d.name = dashboardModel.name;
+                    d.theme = dashboardModel.theme;
 
-                collection.save(d, {safe:true}, function(err, result) {
-                    err ? defer.reject({code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id)}) : defer.resolve(result);
-                });
+                    collection.updateOne({ _id: d._id }, d, function(err, result) {
+                        err ? defer.reject({ code: 500, message: utils.format('Dashboard cannot be updated. Id: {0}', dashboardModel._id) }) : defer.resolve(result);
+                    });
 
-                return defer.promise;
+                    return defer.promise;
                 }
-            });
-        }
-        else{
-            var defer = Q.defer();
-            dashboardModel.dateCreated = new Date();
-            dashboardModel.dateUpdated = new Date();
-            collection.save(dashboardModel, {safe:true}, function(err, result) {
-                err ? defer.reject({code: 500, message: 'Dashboard cannot be created'}) : defer.resolve(result);
-            });
-            return defer.promise;
-        }
+        });
     });
 };
 
-exports.upsertDashboard = function(req, res){
-    upsertDashboard(req.body)
-        .then(function(result){
-            res.send(result);
-        }, handleErrorResponse.bind(res));
+exports.updateDashboard = function(req, res){
+    updateDashboard(req.body)
+    .then(function(result){
+        res.send(result);
+    }, handleErrorResponse.bind(res));
+};
+
+exports.addDashboard = function(req, res){
+    addDashboard(req.body)
+    .then(function(result){
+        res.send(result);
+    }, handleErrorResponse.bind(res));
 };
 
 function removeCollection(collectionName){
@@ -335,7 +331,7 @@ exports.truncateData = function(req, res){
     var dw = removeCollection(widgetCollection);
     var dt = removeCollection(tagCollection);
     Q.all([dp,dw,dt]).then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
@@ -343,9 +339,9 @@ exports.generateDemoDashboard = function(req, res){
     var demoData = utils.clone(demoDashboardData);
     demoData.dashboard.name = demoData.dashboard.name + '-' + Math.floor(Math.random() * 100);
 
-    var promise = upsertDashboard(demoData.dashboard, true).then(function(dashboardModel){
+    var promise = addDashboard(demoData.dashboard, true).then(function(dashboardId){
         var wPromises = [];
-        var dashboardId = dashboardModel._id.toString();
+        dashboardId = dashboardId.toString();
         
         _.each(demoData.widgets, function(widgetModel){
             widgetModel.dashboardId = dashboardId;
@@ -361,7 +357,7 @@ exports.generateDemoDashboard = function(req, res){
     });
 
     promise.then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
@@ -485,7 +481,7 @@ var addTag = function(tagModel, allowDemo){
 
 exports.addTag = function(req, res){
     addTag(req.body).then(function(result){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
@@ -514,7 +510,7 @@ var removeTag = function(tagId){
 
 exports.removeTag = function(req, res){
     removeTag(req.params.tagId).then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
@@ -570,13 +566,13 @@ var deleteDashboard = function(dashboardId){
 
 exports.deleteAllTagsDashboard = function(req, res){
     deleteAllTagsDashboard(req.params.dashboardId).then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
 exports.deleteAllWidgetsDashboard = function(req, res){
     deleteAllWidgetsDashboard(req.params.dashboardId).then(function(){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };
 
@@ -586,6 +582,6 @@ exports.deleteDashboard = function(req, res){
           return deleteDashboard(req.params.dashboardId);  
         })
     }).then(function(result){
-        res.send(200);
+        res.status(200).send();
     }, handleErrorResponse.bind(res));
 };

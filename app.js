@@ -4,6 +4,7 @@
 //  */
 
 var express = require('express'),
+    bodyParser = require('body-parser'),
     drataRepository = require('./repositories/drataRepository'),
     controller = require('./routes/externaldatacontroller'),
    	http = require('http'),
@@ -18,28 +19,25 @@ var serverNames = config.dataSources.map(function(d){
     return d.alias;
 });
 
-app.configure(function () {
-    //app.use(logger);
-    app.use(express.json());
-    app.use(express.urlencoded());
-    app.use(express.static(path.join(__dirname, 'content')));
-});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
+app.use(express.static(path.join(__dirname, 'content')));
 
 app.set('port',process.env.PORT || 3000);
 
 app.get('/dashboard/:dashboardId', function(req, res) {
   logger.logRequest(req, { pageId: 'dashboard'});
-  res.sendfile('dash.html');
+  res.sendFile('/dash.html', { root: __dirname });
 });
 
 app.get('/dashboard', function(req, res) {
   logger.logRequest(req, { pageId: 'dashboard manager'});
-  res.sendfile('dash.html');
+  res.sendFile('/dash.html', { root: __dirname });
 });
 
 app.get('/', function(req, res) {
   logger.logRequest(req, { pageId: 'homepage'});
-  res.sendfile('homepage.html');
+  res.sendFile('homepage.html', { root: __dirname });
 });
 
 app.get('/demo',  drataRepository.redirectDemo);
@@ -63,11 +61,12 @@ app.get('/api/truncatedata', drataRepository.truncateData);
 app.get('/api/generateDemoDashboard', drataRepository.generateDemoDashboard);
 app.get('/api/cleanup', drataRepository.cleanupNonDemoDashboards);
 app.post('/api/widgets', drataRepository.getWidgets);
-//update dashboard
-app.post('/api/dashboard', drataRepository.upsertDashboard);
 
 //update dashboard
-app.put('/api/dashboard', drataRepository.upsertDashboard);
+app.put('/api/dashboard', drataRepository.updateDashboard);
+
+//add dashboard
+app.post('/api/dashboard', drataRepository.addDashboard);
 
 //delete dashboard
 app.delete('/api/dashboard/:dashboardId', drataRepository.deleteDashboard);

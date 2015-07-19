@@ -33,7 +33,7 @@ exports.databasepop = function(req, res){
     }).done(function(result){
         res.send(result);
     },function(error){
-        res.send(error.code, error.message);
+        res.status(error.code).send(error.message);
     });
 };
 
@@ -42,8 +42,8 @@ exports.getDatabaseNames = function(req, res){
         return instance.getDatabaseNames(req.params.datasource);
     }).done(function(result){
         res.send(result);
-    },function(error){
-        res.send(error.code, error.message);
+    },function(error) {
+        res.status(error.code).send(error.message);
     });
 };
 
@@ -53,7 +53,8 @@ exports.getCollectionNames = function(req, res){
     }).done(function(result){
         res.send(result);
     },function(error){
-        res.send(error.code, error.message);
+        console.log(error);
+        res.status(error.code).send(error.message);
     });
 };
 
@@ -63,7 +64,7 @@ exports.findProperties = function(req, res){
     }).done(function(result){
         res.send(result);
     },function(error){
-        res.send(error.code, error.message);
+        res.status(error.code).send(error.message);
     });
 };
 
@@ -71,11 +72,12 @@ exports.findCollection = function(req, res){
     getInstance(req.params.datasource).then(function(instance){
         return instance.findCollection(req.params.datasource, req.params.dbname, req.params.collectionName, req.body);
     },function( error ) {
-        res.send(error.code, error.message);
+        res.status(error.code).send(error.message);
     }).done(function(result){
         res.send(result);
     },function(error){
-        res.send(error.code, 'Message: ' + error.message + (error.ex ? '; Debug: ' + JSON.stringify(error.ex) : ''));
+        console.log(error);
+        res.status(error.code).send('Message: ' + error.message + (error.ex ? '; Debug: ' + JSON.stringify(error.ex) : ''));
     });
 };
 

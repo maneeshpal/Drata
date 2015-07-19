@@ -107,8 +107,14 @@
 	        delete widgetModel._id;
 	        widgetModel.displayIndex = currentDashboard.widgets().length;
 			drata.apiClient.addWidget(widgetModel).then(function(response){
-                console.log('widget created in db');
-	            currentDashboard.addWidget(response);
+                currentDashboard.addWidget(response);
+                if(response.demo) {
+                	drata.nsx.notifier.addNotification({
+	        			message: 'NOTE: Widgets added to Demo Dashboard will not be saved.',
+	        			type: 'info',
+	        			displayTimeout: 5000
+	        		});
+                }
 	        });
 		});
 
@@ -195,7 +201,7 @@
 	    		break;
 	    		case displayModes.editwidget.hash:
 	    			mode = displayModes.editwidget;
-	    			if(c[1]){
+	    			if(c[1] && c[1] !== 'demo'){
 	    				drata.apiClient.getWidget(c[1]).then(function(response){
     						drata.pubsub.publish('widgetedit', {
 					            widgetModel: response
@@ -529,7 +535,7 @@
 	    
 	    this.name.subscribe(function(newValue){
 	        model.name = newValue;
-	        drata.apiClient.upsertDashboard(model);
+	        drata.apiClient.updateDashboard(model);
 	    });
 	    
 	    this.cloneDashboard = function(){
@@ -652,7 +658,7 @@
 	    this.dataFilterExpression = drata.utils.getDataFilterExpression(model.segmentModel.dataFilter);
 	    
 	    this.manageWidget = function(){
-	    	if(model.isDemo) {
+	    	if(model.demo) {
 	    		location.hash = '#editwidget/demo';
                 drata.pubsub.publish('widgetedit', {
                     widgetModel: model
@@ -680,12 +686,11 @@
 	            theme: 'default'
 	        };
 
-	        drata.apiClient.upsertDashboard(dashboardModel).then(function(response){
-	            var _id = response._id;
+	        drata.apiClient.addDashboard(dashboardModel).then(function(dashboardId) {
 	            var tagList = self.tags.tagList(), chosenWidgets = self.chosenWidgets();
 	            
 	            function redirect()  {
-	            	window.location.href = '/dashboard/'+ _id;
+	            	window.location.href = '/dashboard/'+ dashboardId;
 	            }
 	            if(!tagList.length && !chosenWidgets.length){
 	             	redirect();   
@@ -694,14 +699,14 @@
 	                var prs = [];
 
 	                tagList.forEach(function(t) {
-	                    t.dashboardId = _id;
+	                    t.dashboardId = dashboardId;
 	                    delete t.dateCreated;
 	                    prs.push(drata.apiClient.addTag(t));
 	                });
 	                
 	                chosenWidgets.forEach(function(w) {
 	                    var widgetModel = w.getModel();
-	                    widgetModel.dashboardId = _id;
+	                    widgetModel.dashboardId = dashboardId;
 	                    delete widgetModel.dateCreated;
 	                    delete widgetModel.dateUpdated;
 	                    delete widgetModel._id;
