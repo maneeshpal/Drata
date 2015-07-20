@@ -46,17 +46,22 @@ module.exports = function(grunt) {
       },
       lib: {
         src: [
-          'content/js/lib/*.js',
-          'content/foundation/js/foundation/foundation.js',
-          'content/foundation/js/foundation/foundation.topbar.js',
-          'content/foundation/js/foundation/foundation.dropdown.js',
-          'content/foundation/js/foundation/foundation.reveal.js'
+          'content/js/lib/*.js'
         ],
         dest: 'content/dis/lib.js'
       },
       templates: {
         src: 'content/templates/*.html',
         dest: 'content/dis/templates.html'
+      },
+      libdashboard: {
+        src: [
+          'content/foundation/js/foundation/foundation.js',
+          'content/foundation/js/foundation/foundation.topbar.js',
+          'content/foundation/js/foundation/foundation.dropdown.js',
+          'content/foundation/js/foundation/foundation.reveal.js'
+        ],
+        dest: 'content/dis/libdashboard.js'
       },
       dashboard: {
           src: [
@@ -76,6 +81,16 @@ module.exports = function(grunt) {
           ],
           dest: 'content/dis/dashboard.js'
       },
+      home: {
+          src: [
+            'content/js/utils.js',
+            'content/js/tempdata.js',
+            'content/js/models/labels.js',
+            'content/js/charts/barchart.js',
+            'content/js/charts/pie.js'
+          ],
+          dest: 'content/dis/home.js'
+      },
       charts: {
         src: [
           'content/js/models/*.js',
@@ -86,12 +101,13 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        //banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n',
+        banner: '/*!\n* <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("dd-mm-yyyy") %>\n* Simple Business Intelligence tool.\n* http://drata.io\n* Free to use under the MIT license.\n* http://www.opensource.org/licenses/mit-license.php\n*/\n',
         preserveComments: true
       },
       dist: {
         files: {
-          'content/dis/<%= pkg.name %>.min.js': ['<%= concat.dashboard.dest %>','<%= concat.charts.dest %>']
+          'content/dis/<%= pkg.name %>.min.js': ['<%= concat.libdashboard.dest %>', '<%= concat.dashboard.dest %>','<%= concat.charts.dest %>'],
+          'content/dis/<%= pkg.name %>.home.min.js': ['<%= concat.home.dest %>']
         }
       }
     },
@@ -127,5 +143,5 @@ module.exports = function(grunt) {
 
   grunt.registerTask('buildcss', ['sass']);
   grunt.registerTask('buildjs', ['concat', 'uglify']);
-  grunt.registerTask('default', ['buildcss', 'buildjs']);
+  grunt.registerTask('default', ['clean', 'buildcss', 'buildjs']);
 }
