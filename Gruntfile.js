@@ -11,10 +11,10 @@ module.exports = function(grunt) {
           outputStyle: 'compressed'
         },
         files: {
-          'content/style/app.css': 'content/foundation/scss/foundation.scss',
-          'content/style/dashboard.css': 'content/style/dashboard.scss',
-          'content/style/home.css': 'content/style/home.scss',
-          'content/style/bw.css': 'content/style/bw.scss',
+          'content/dis/app.css': 'content/foundation/scss/foundation.scss',
+          'content/dis/dashboard.css': 'content/style/dashboard.scss',
+          'content/dis/home.css': 'content/style/home.scss',
+          'content/dis/bw.css': 'content/style/bw.scss'
         }
       }
     },
@@ -96,8 +96,7 @@ module.exports = function(grunt) {
       }
     },
     clean: {
-      js: 'content/dis/**',
-      css: 'content/style/*.css'
+      all: 'content/dis/**'
     },
     bump: {
       options: {
