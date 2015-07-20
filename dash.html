@@ -90,10 +90,16 @@
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
                         <!-- ko if: $parent.isWidgetNavVisible -->
-                        <li class="divider hide-for-large-up"></li>
-                        <li class="has-dropdown not-click hide-for-large-up">
-                        <!-- ko template: 'managewidgetlinks-template' -->
-                        <!-- /ko -->
+                        <li class="divider hide-for-medium-up"></li>
+                        <li class="has-form hide-for-medium-up">
+                            <a data-bind="click: createWidget" class="button">
+                                <i class="fa fa-wrench"></i>&nbsp;Create New Widget
+                            </a>
+                        </li>
+                        <li class="has-form hide-for-medium-up">
+                            <a class="button secondary" href="#managewidgets">
+                                <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
+                            </a>
                         </li>
                         <!-- /ko -->
                         
@@ -108,10 +114,16 @@
                 </li>
                 <!-- /ko -->
                 <!-- ko if: $parent.isWidgetNavVisible -->
-                <li class="divider show-for-large-up"></li>
-                <li class="has-dropdown not-click show-for-large-up">
-                <!-- ko template: 'managewidgetlinks-template' -->
-                <!-- /ko -->
+                <li class="divider show-for-medium-up"></li>
+                <li class="has-dropdown not-click show-for-medium-up">
+                    <a>
+                        <span class="fa fa-list-alt"></span> 
+                        Widget 
+                    </a>
+                    <ul class="dropdown">
+                    <!-- ko template: 'managewidgetlinks-template' -->
+                    <!-- /ko -->
+                    </ul>
                 </li>
                 <!-- /ko -->
                 
@@ -159,19 +171,16 @@
     <!-- ko template: {name: 'notifications-template', data: drata.nsx.notifier} -->
     <!-- /ko -->
     <script type="text/html" id="managewidgetlinks-template">
-        <a><span class="fa fa-list-alt"></span> Widgets</a>
-        <ul class="dropdown">
-            <li class="has-form">
-                <a data-bind="click: createWidget" class="button">
-                    <i class="fa fa-wrench"></i>&nbsp;Create New Widget
-                </a>
-            </li>
-            <li class="has-form">
-                <a class="button secondary" href="#managewidgets">
-                    <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
-                </a>
-            </li>
-        </ul>
+        <li class="has-form">
+            <a data-bind="click: createWidget" class="button">
+                <i class="fa fa-wrench"></i>&nbsp;Create New Widget
+            </a>
+        </li>
+        <li class="has-form">
+            <a class="button secondary" href="#managewidgets">
+                <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
+            </a>
+        </li>
     </script>
 
     <div class="form-error fixed" data-bind="visible: formErrors().length > 0" style="display:none">
