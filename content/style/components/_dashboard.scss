@@ -265,11 +265,16 @@ input.error {
 /*topbar*/
 
 .top-bar .top-bar-text {
-    padding:0 12px;
-    line-height: 45px;
+    padding:12px;
+    line-height: 25px;
     background-color: #f5f5f5;
     border-radius: 5px 5px 0 0;
     font-size: .9rem;
+}
+
+.top-bar-text .close{
+  line-height: 27px;
+  margin-left: 5px;
 }
 
 .top-bar-section .dropdown li.has-form .button {

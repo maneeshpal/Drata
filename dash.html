@@ -118,8 +118,10 @@
                 <!-- ko if: $parent.displayMode().displayText -->
                 <li class="divider"></li>
                 <li class="top-bar-text">
-                    <!--ko text: $parent.displayMode().displayText --><!--/ko -->
-                    &nbsp;<i class="fa fa-times-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></i>
+                    <div class="clearfix">
+                    <div class="left show-for-medium-up" data-bind="text: $parent.displayMode().displayText"></div>
+                    <div class="close right fa fa-times-circle" style="cursor:pointer" data-bind="click: $parent.handleCloseView"></div>
+                    </div>
                 </li>
                 <!-- /ko -->
                 <li class="divider"></li>

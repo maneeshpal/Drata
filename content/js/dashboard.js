@@ -13,7 +13,7 @@
             dashboardId = d_id;
             drata.apiClient.getDashboard(dashboardId).then(function(dashboard){
                 self.name(dashboard.name);
-                drata.cPanel.topBar.currentDashboardName(dashboard.name);
+                drata.cPanel.topBar.currentDashboardName(dashboard.name.substr(0,18));
                 drata.cPanel.theme(dashboard.theme);
                 theme = dashboard.theme;
 
