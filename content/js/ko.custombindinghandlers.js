@@ -182,15 +182,8 @@
         self.enabled = config.enabled;
         var rnd = Math.floor(Math.random() * 1000);
         var options = {
-            defaultDate: "-1m",
-            changeMonth: true,
-            changeYear: true,
-            numberOfMonths: 1
+            defaultTime: '00:00'
         };
-
-        if(config.maxDate){
-            options.maxDate = config.maxDate;
-        }
 
         self.showDatePicker = function(){
             dp && dp.datetimepicker('show');
@@ -199,7 +192,7 @@
         self.initializeDatePicker = function(nodes){
             dp = $(nodes).find('#datepicker');
             dp.attr('id', 'datepicker' + rnd);
-            dp.datetimepicker();
+            dp.datetimepicker(options);
         };
     };
 

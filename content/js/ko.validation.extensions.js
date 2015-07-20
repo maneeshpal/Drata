@@ -4,9 +4,7 @@
                 if(!val)
                     return true;
                 var formattedDate = drata.utils.getValidDate(val, true);
-                if(!formattedDate || (formattedDate.setHours(0,0,0,0) > new Date().setHours(0,0,0,0)))
-                    return false;
-                return true;
+                return !!formattedDate;
             },
             message: 'Invalid Date'
         };

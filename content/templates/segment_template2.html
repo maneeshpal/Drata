@@ -7,7 +7,7 @@
 
 <div class="row">
     <div class="small-12 columns">
-        <ul class="medium-block-grid-5 radius chart-types">
+        <ul class="small-block-grid-5 radius chart-types">
           <!-- ko foreach: drata.global.chartMappings -->
           <li><a class="chart-type button" data-bind="css: {'primary': $parent.chartType() === $data.label, 'secondary' : $parent.chartType() !== $data.label }, click: $parent.setChartType.bind($parent, $data.label)"><span class="chart-icon fa " data-bind="css: $data.icon"></span> <!-- ko text: $data.label --><!-- /ko --> </a></li>
           <!-- /ko -->
@@ -61,7 +61,6 @@
         <div class="small-8 columns">
             <div data-bind="visible: dateType() === 'static', dateTextBox: {
                     selectedValue: staticDate,
-                    maxDate: new Date(),
                     placeholder: 'Static Date'
             }"></div>
             <div data-bind="visible: dateType() === 'dynamic', comboBox:{selectedValue: dynamicDate, options: drata.global.dataFilterIntervalTypeAheads, optionsCaption: 'Dynamic interval'}">
