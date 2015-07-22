@@ -19,7 +19,7 @@ var dbInstances = {};
 function resetConnection (key) {
 	if(!dbInstances[key]) return;
 
-    console.log('max connection reached.'+ key + '. Resetting..');
+    //console.log('max connection reached.'+ key + '. Resetting..');
     dbInstances[key].dbInstance.close();
     dbInstances[key].dbInstance = undefined;
     dbInstances[key].connectionCount = 0;
@@ -29,7 +29,7 @@ exports.dbInstance = function (serverName, dbName) {
     var defer = Q.defer();
     var key = serverName + dbName;
     var dataSource = dataSources[serverName];
-    if(dbInstances[key] && dbInstances[key].connectionCount >= 9) {
+    if(dbInstances[key] && dbInstances[key].connectionCount >= 5) {
         resetConnection(key);
     }
     if(dbInstances[key] && dbInstances[key].dbInstance) {
@@ -41,7 +41,7 @@ exports.dbInstance = function (serverName, dbName) {
 	    MongoClient.connect(url,
 	        { 
 	            server: {
-	                poolSize: 10
+	                poolSize: 5
 	            }
 	        }, function(err, db) {
         	if (err) {
