@@ -536,6 +536,7 @@
 	        		widgetList: widgetList,
 	        		name: this.name()
 	        	});
+	        	$("html, body").animate({ scrollTop: 0 }, 300);
 	    	}.bind(this));
     	}.bind(this);
 
@@ -663,8 +664,9 @@
 		self.widgetList = ko.observableArray();
 		self.chosenWidgets = ko.observableArray();
 		self.selectAll = ko.observable();
-
-		this.upsertDashboard = function(){
+		self.cloning = ko.observable();
+		this.upsertDashboard = function() {
+			self.cloning(false);
 	        var dashboardModel = {
 	            name: this.name(),
 	            theme: 'default'
@@ -704,6 +706,7 @@
 	    };
 
 	    drata.pubsub.subscribe('onDashboardClone', function(eventName, params){
+	    	self.clearAll();
 	    	self.name(params.name);
 	    	self.widgetList(params.widgetList || []);
 	    	self.tags.tagList(params.tagList.map(function(t){
@@ -712,8 +715,17 @@
 	    		}
 	    	}));
 	    	self.selectAll(true);
-	    	location.hash = 'create';
+	    	self.cloning(true);
+	    	//location.hash = 'create';
 	    });
+
+	    self.clearAll = function () {
+	    	self.name(undefined);
+	    	self.widgetList([]);
+	    	self.tags.tagList([]);
+	    	self.selectAll(false);
+	    	self.cloning(false);
+	    };
 
 	    self.selectAll.subscribe(function(newValue){
 	    	if(newValue){

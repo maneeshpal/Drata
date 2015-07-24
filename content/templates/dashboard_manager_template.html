@@ -16,9 +16,9 @@
     </div>
     <!-- ko ifnot: noDashboards -->
     <div class="row fancytable header">
-        <div class="small-4 columns">Dashboard Name</div>
-        <div class="small-4 columns">Date Created</div>
-        <div class="small-4 columns">Actions</div>
+        <div class="small-6 medium-4 columns">Dashboard Name</div>
+        <div class="hide-for-small medium-4 columns">Date Created</div>
+        <div class="small-6 medium-4 columns">Actions</div>
     </div>
     <!-- ko template: {name: 'dashboardView-template', foreach: filteredDashboards} -->
     <!-- /ko --> 
@@ -35,15 +35,15 @@
 </script>
 <script type="text/html" id="dashboardView-template">
     <div class="row fancytable content">
-        <div class="small-4 columns" style="padding-left:35px">
+        <div class="small-12 medium-4 columns" style="padding-left:35px">
            <!-- ko editLabel: {title: name, href:url} -->
            <!-- /ko -->
         </div>
             
-        <div class="small-4 columns">
+        <div class="small-6 medium-4 columns">
             <label data-bind="text: dateCreated"></label>
         </div>
-        <div class="small-4 columns">
+        <div class="small-6 medium-4 columns">
             <a data-bind="click: cloneDashboard">clone</a>&nbsp; <a data-bind="click:$parent.deleteDashboard.bind($parent)">remove</a>
         </div>
         <i class="fa" style="position:absolute; top:21px;left:12px" data-bind="{click: viewDetails,css: {'fa-plus': !toggleExtendedDetails(), 'fa-minus': toggleExtendedDetails}}"></i> 
@@ -74,18 +74,15 @@
              <a data-bind="visible: !addingTag(), click:toggleTagInput.bind($data, true)"><i class="fa fa-plus"></i> Add Tag</a>
         </div>
     </div>
-    <div class="row">
-        <div style="min-width:250px" class="small-12 medium-6 columns" data-bind="visible: addingTag">
-            <div class="row collapse">
-                <div class="small-8 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
-                </div>
-                <div class="small-2 columns">
-                    <a data-bind="click:addTag" class="button postfix success"><i class="fa fa-check"></i></a>
-                </div>
-                <div class="small-2 columns">
-                    <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="fa fa-trash-o"></i></a>
-                </div>
-            </div>
+
+    <div class="row collapse" style="max-width: 300px" data-bind="visible: addingTag">
+        <div class="small-6 columns" data-bind="comboBox :{selectedValue: newTag, options: availableTags,optionsCaption:'choose tag'}">
+        </div>
+        <div class="small-3 columns">
+            <a data-bind="click:addTag" class="button postfix success"><i class="fa fa-check"></i></a>
+        </div>
+        <div class="small-3 columns">
+            <a data-bind="click:toggleTagInput.bind($data, false)" class="button postfix alert"><i class="fa fa-trash-o"></i></a>
         </div>
     </div>
 </script>
@@ -169,16 +166,18 @@
 <script type="text/html" id="dashboard-create-template">
     <div class="row">
         <div class="small-12 columns">
+        <!-- ko ifnot: cloning -->
             <h3 class="view-heading">Create Dashboard</h3>
             <h3 class="view-heading"><small>You can add widgets to your dashboard in the next step. You may add one or more tags if you wish</small></h3>
-        </div>
-    </div>
-    <div class="row collapse">
-        <div class="small-8 columns">
+        <!-- /ko -->
+        <!-- ko if: cloning -->
+            <h3 class="view-heading">Clone Dashboard</h3>
+            <h3 class="view-heading">
+                <small>Pick the widgets and tags you need to be cloned.</small> </h3>
+            <h3 class="view-heading">
+                <small><strong>Note: </strong>Cloning creates new instance of existing widgets. Changes made to the cloned widgets on new dashboard will not be reflected on the dashboard you cloned from.</small></h3>
+        <!-- /ko -->
             <input type="text" class="giant" placeholder="Dashboard name" data-bind="value:name" />
-        </div>
-        <div class="small-4 columns">
-            <a class="giant button primary postfix" data-bind="click:upsertDashboard"><i class="fa fa-plus"></i>&nbsp;Add</a>
         </div>
     </div>
     <!-- ko if: widgetList().length>0 -->
@@ -193,6 +192,12 @@
     <div class="row">
         <div class="small-12 columns">
             <!-- ko template : {name: 'tags-template', data: tags} --><!-- /ko -->
+        </div>
+        <div class="small-12 columns">
+            <a class="button primary" data-bind="click:upsertDashboard"><i class="fa fa-plus"></i>&nbsp;Add</a>
+            <!-- ko if: cloning -->
+            <a class="button secondary" data-bind="click:clearAll"><i class="fa fa-times"></i>&nbsp;Clear</a>
+            <!-- /ko -->
         </div>
     </div>
 </script>
