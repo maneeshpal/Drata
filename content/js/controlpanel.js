@@ -120,7 +120,15 @@
 
 		//return self;
 	};
-	
+	var displayModes = {
+		manage: {name: 'manage', hash: 'manage', displayText: 'Manage Dashboard'},
+		editwidget: {name: 'editwidget', hash: 'editwidget', displayText: 'Widget Editor'},
+		managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
+		clonewidgets: {name: 'clonewidgets', hash: 'clonewidgets', displayText: 'Clone Widgets'},
+		dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
+		defaultview: {name: 'defaultview', hash: '', displayText: 'Create/Manage'}
+	};
+
 	var ControlPanel = function(){
 		var self = this, _t, resized = false;
 		self.currentDashboard = ko.observable();
@@ -177,16 +185,7 @@
 			}
 		});
 
-		var displayModes = {
-			manage: {name: 'manage', hash: 'manage', displayText: 'Manage Dashboard'},
-			editwidget: {name: 'editwidget', hash: 'editwidget', displayText: 'Widget Editor'},
-			managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
-			clonewidgets: {name: 'clonewidgets', hash: 'clonewidgets', displayText: 'Clone Widgets'},
-			dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
-			defaultview: {name: 'defaultview', hash: '', displayText: 'Create/Manage'}
-		};
-
-    	var currentDashboardId = window.location.pathname.split('/')[2];
+		var currentDashboardId = window.location.pathname.split('/')[2];
 		
 		if(currentDashboardId){
 			var d = new drata.dashboard.dashboard(currentDashboardId);
@@ -210,9 +209,11 @@
 	    			}
 	    		break;
 	    		case displayModes.clonewidgets.hash:
+	    			self.widgetManager.chooseWidgets(true);
 	    			mode = displayModes.clonewidgets;
 	    		break;
 	    		case displayModes.managewidgets.hash:
+	    			self.widgetManager.chooseWidgets(false);
 	    			mode = displayModes.managewidgets;
 	    		break;
 	    		default:
@@ -336,17 +337,9 @@
 
 	    drata.models.dashboardList.subscribe(populateDashboards);
 
-	    var selectAll = false;
-	    self.toggleAllTags = function(){
-	        selectAll = !selectAll;
-	        if(!selectAll){
-	            self.chosenTags([]);  
-	        }
-	        else{
-	            self.chosenTags(drata.models.tagNameList());   
-	        }
-	        return true;
-	    };
+	    self.tagNameList = ko.computed( function () {
+	    	return drata.models.tagNameList().concat('untagged');
+	    });
 	};
 
 	var propertyManager = function() {
@@ -412,7 +405,7 @@
 	};
 
 	var WidgetManager = function(model, options) {
-		this.chooseWidgets = true;
+		this.chooseWidgets = ko.observable(true);
 	    this.widgetList = ko.observableArray();
 	    this.bindWidgets = function(model) {
 	        drata.apiClient.getWidgets(model).then(function(response){
@@ -500,7 +493,7 @@
 	var DashboardItem = function(model, options){
 	    options = options || {};
 	    model = model || {};
-	    this.chooseWidgets = false;
+	    this.chooseWidgets = ko.observable(false);
 	    this._id = model._id;
 	    this.name = ko.observable(model.name);
 	    this.dateCreated = drata.utils.formatDate(new Date(model.dateCreated));
