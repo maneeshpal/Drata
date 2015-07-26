@@ -95,7 +95,7 @@ var findDemoDashboard = function(){
 }
 exports.redirectDemo = function(req, res){
     findDemoDashboard().then(function(demoDashboardModel){
-        res.redirect('/dashboard/' + demoDashboardModel._id.toString(), 302);
+        res.redirect(302, '/dashboard/' + demoDashboardModel._id.toString());
     }, handleErrorResponse.bind(res));
 };
 
@@ -143,7 +143,7 @@ var updateWidget = function(widgetModel){
                         });
                         return defer.promise;
                     });    
-                }else{
+                } else {
                     var defer = Q.defer();
                     defer.resolve();
                     return defer.promise;
@@ -156,19 +156,26 @@ var updateWidget = function(widgetModel){
 var updateWidgetViewOptions = function(widgetModel){
     return getWidget(widgetModel._id).then(function(widget) {
         return connection[widgetCollection].then(function(collection) {
-            var defer = Q.defer();
-            widget.dateUpdated = new Date();
-            widget.sizex = widgetModel.sizex;
-            widget.sizey = widgetModel.sizey;
-            widget.displayIndex = widgetModel.displayIndex;
-            widget.showTabularData = widgetModel.showTabularData;
-            widget.name = widgetModel.name;
-            widget.refresh = widgetModel.refresh;
+            return getDashboard(widgetModel.dashboardId).then(function(result) {
+                var defer = Q.defer();
+                if(!result.demo) {
+                    widget.dateUpdated = new Date();
+                    widget.sizex = widgetModel.sizex;
+                    widget.sizey = widgetModel.sizey;
+                    widget.displayIndex = widgetModel.displayIndex;
+                    widget.showTabularData = widgetModel.showTabularData;
+                    widget.name = widgetModel.name;
+                    widget.refresh = widgetModel.refresh;
 
-            collection.updateOne({ _id: widget._id }, widget, function(err, result) {
-                err ? defer.reject({code: 500, message: 'cannot update widget view options'}) : defer.resolve();
+                    collection.updateOne({ _id: widget._id }, widget, function(err, result) {
+                        err ? defer.reject({code: 500, message: 'cannot update widget view options'}) : defer.resolve();
+                    });
+                    return defer.promise;
+                } else {
+                    defer.resolve();
+                    return defer.promise;
+                }
             });
-        return defer.promise;
         });
     });
 };

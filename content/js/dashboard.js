@@ -411,6 +411,7 @@
         
         self.getViewOptionsModel = function (argument) {
             return {
+                dashboardId: widgetModel.dashboardId,
                 _id: widgetModel._id,
                 sizex: _sizex(),
                 sizey: _sizey(),
