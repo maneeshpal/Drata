@@ -3,7 +3,7 @@
 @import "dratamixins";
 
 body.campfire {
-	background-color:$superdark;
+	background-color:$dark;
 	.dashboard {
 		background: $superdark;
 	}
@@ -20,7 +20,7 @@ body.campfire {
 	}
 
 	.widget-editor, .widget-editor .widget-wrapper{
-		background: $dark;
+		//background: $dark;
 		border-color: $medium;
 	}
 
@@ -163,38 +163,10 @@ body.campfire {
 		}
 	}
 	//widget manager
-	.row.fancytable{
-		border-color: $kindadark;
-		&.header {
-			background-color: $kindadark;
-		}
-		&.content:last-child {
-			border-color: $kindadark;
-		}
+	.detail-content.expand {
+		background-color: $dark2;
 	}
 	//end widget manager
-
-	.dr-modal {
-		background-color: $medium;
-		border-color:$dark;
-		box-shadow: 1px 1px 1px $superdark;
-	}
-
-	//tables
-	table tr.even, table tr.alt, table tr:nth-of-type(even){
-		background: $dark;
-	}
-
-	table {
-		background:$dark2;
-		border-color: $dark2;
-	}
-
-	table tr th, table tr td {
-		color:$superlight;
-	}
-
-	//end tables
 
 	//complex combo
 	.complexcombo {

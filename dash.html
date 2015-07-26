@@ -62,17 +62,40 @@
                 <li class="has-dropdown dashboard-settings">
                     <a data-dropdown="dashboard_settings" data-options="align:bottom"><i class="fa fa-cog"></i></a>
                     <ul class="dropdown">
+                        <!-- ko if: $parent.isWidgetNavVisible -->
+                        <li class="divider hide-for-medium-up"></li>
+                        <li class="has-form hide-for-medium-up">
+                            <a data-bind="click: createWidget" class="button">
+                                <i class="fa fa-wrench"></i>&nbsp;Create New Widget
+                            </a>
+                        </li>
+                        <li class="has-form hide-for-medium-up">
+                            <a class="button secondary" href="#clonewidgets">
+                                <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
+                            </a>
+                        </li>
+                        <!-- /ko -->
+                        <li class="has-form">
+                            <a class="button secondary" href="#manage">
+                                <i class="fa fa-wrench"></i>&nbsp;Manage Dashboards
+                            </a>
+                        </li>
+                        <li class="has-form">
+                            <a class="button secondary" href="#managewidgets">
+                                <i class="fa fa-wrench"></i>&nbsp;Manage Widgets
+                            </a>
+                        </li>
+                        <li>
+                            <label>Help &nbsp;
+                                <input type="checkbox" style="margin-bottom:1rem" data-bind="checked: drata.globalsettings.enableToolTips"></input>
+                            </label>
+                        </li>
                         <li class="theme">
                             <label>Theme &nbsp;
                                 <select data-bind="value: $parent.theme">
                                     <option>default</option>
                                     <option>campfire</option>
                                 </select>
-                            </label>
-                        </li>
-                        <li>
-                            <label>Help &nbsp;
-                                <input type="checkbox" style="margin-bottom:1rem" data-bind="checked: drata.globalsettings.enableToolTips"></input>
                             </label>
                         </li>
                     </ul>
@@ -89,27 +112,11 @@
                     <!-- ko text: currentDashboardName() -->
                                 <!-- /ko --> </a>
                     <ul class="dropdown">
-                        <!-- ko if: $parent.isWidgetNavVisible -->
-                        <li class="divider hide-for-medium-up"></li>
-                        <li class="has-form hide-for-medium-up">
-                            <a data-bind="click: createWidget" class="button">
-                                <i class="fa fa-wrench"></i>&nbsp;Create New Widget
-                            </a>
-                        </li>
-                        <li class="has-form hide-for-medium-up">
-                            <a class="button secondary" href="#managewidgets">
-                                <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
-                            </a>
-                        </li>
-                        <!-- /ko -->
+                        
                         
                         <!-- ko template : {name: 'dashboard-menu-template'} --><!--/ko-->
                         
-                        <li class="has-form">
-                            <a class="button secondary" href="#manage">
-                                <i class="fa fa-wrench"></i>&nbsp;Manage Dashboards
-                            </a>
-                        </li>
+                        
                     </ul>
                 </li>
                 <!-- /ko -->
@@ -168,6 +175,11 @@
         <!-- /ko -->
     </div>
 
+    <div class="widget-manager" data-bind="with: widgetManager, visible:isWidgetCloneView">
+        <!-- ko template: {name: 'widgetclone-template'} -->
+        <!-- /ko -->
+    </div>
+
     <!-- ko template: {name: 'notifications-template', data: drata.nsx.notifier} -->
     <!-- /ko -->
     <script type="text/html" id="managewidgetlinks-template">
@@ -177,7 +189,7 @@
             </a>
         </li>
         <li class="has-form">
-            <a class="button secondary" href="#managewidgets">
+            <a class="button secondary" href="#clonewidgets">
                 <i class="fa fa-wrench"></i>&nbsp;Clone Existing Widget
             </a>
         </li>
