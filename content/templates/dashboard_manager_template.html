@@ -2,16 +2,11 @@
     <div class="row">
         <div class="small-12 columns">
             <h3 class="view-heading">Manage existing Dashboards</h3>
-            <span>Filter by tags: </span>
-            <input type="checkbox" id="chkAll" data-bind="click: toggleAllTags" />
-                <label>Select All</label>
-            <!-- ko foreach: drata.models.tagNameList -->
-            <input type="checkbox" data-bind="attr:{'id': 'chk'+ $index()}, checkedValue: $data, checked: $parent.chosenTags" />
-                <label data-bind="attr:{'for': 'chk'+ $index()}, text: $data"></label>
-            
-            <!-- /ko -->
-            <input type="checkbox" id="chkUnTagged" data-bind="checkedValue: 'untagged', checked: chosenTags" />
-            <label for="chkUnTagged">Untagged</label>
+            <div style="margin-bottom: 20px" data-bind="checkboxDropdown:{ 
+                options:tagNameList, 
+                selectedOptions: chosenTags,
+                optionsCaption: 'Filter by Tags'}">
+            </div>
         </div>
     </div>
     <!-- ko ifnot: noDashboards -->
@@ -92,13 +87,16 @@
 </script>
 
 <script id="widgetclone-template" type="text/html">
-    <div class="row text-center">
+    <div class="row">
         <div class="small-12 columns">
             <h3 class="view-heading">Clone widgets from existing dashboards to the current Dashboard</h3>
+        </div>
+        <div class="small-6 columns">
             <!-- ko template : { name: 'filtertags-template'} -->
             <!-- /ko -->
-                <button class="tiny" data-bind="enable: chosenWidgets().length > 0, click: addWidgets">Add to dashboard</button>
-            
+        </div>
+        <div class="small-6 columns">
+            <button class="tiny" data-bind="enable: chosenWidgets().length > 0, click: addWidgets">Add to dashboard</button>
         </div>
     </div>
     
@@ -111,9 +109,11 @@
 </script>
 
 <script id="widgetmanager-template" type="text/html">
-    <div class="row text-center">
-        <div class="small-12 columns">
+    <div class="row">
+        <div class="small-6 columns">
             <h3 class="view-heading">Manage Widgets</h3>
+        </div>
+        <div class="small-6 columns" style="margin-top:20px">
             <!-- ko template : { name: 'filtertags-template'} -->
             <!-- /ko -->
         </div>
@@ -128,12 +128,13 @@
 </script>
 
 <script id="filtertags-template" type="text/html">
-    <span>Filter by Chart Type: </span>
-    <input id="dhkSelectAllWidgets" data-bind="click: toggleAllChosenWidgets" type="checkbox"></input> <label for="dhkSelectAllWidgets">Select All</label>
-    <!-- ko foreach: drata.global.chartMappings -->
-    <input type="checkbox" data-bind="attr:{'id': 'chk_chartType'+ $index()}, checkedValue: $data.label, checked: $parent.chosenChartTypes" />
-        <label data-bind="attr:{'for': 'chk_chartType'+ $index()}, text: $data.label"></label>
-    <!-- /ko -->
+    <div data-bind="checkboxDropdown:{ 
+        options:drata.global.chartMappings, 
+        selectedOptions: chosenChartTypes,
+        optionsCaption: 'Filter Chart Types', 
+        optionsText:'label', 
+        optionsValue: 'label'}">
+    </div>
 </script>
 
 <script id="widgetDetails-template" type="text/html">

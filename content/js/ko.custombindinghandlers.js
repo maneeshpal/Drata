@@ -83,8 +83,8 @@
             '<div id="lblSelectedValues" class="chk-dd-label" data-bind="text: displayValuesList, click: handlelabelClick"></div>',
             '<ul id="combolist" class="combolist no-bullet" style="display:none; margin-top:0" data-bind="foreach: options">',
                 '<li>',
-                    '<input type="checkbox" data-bind="attr:{\'id\': \'chkdd\' + $index()}, checkedValue: $parent.optionsValue ? $data[$parent.optionsValue] : $data, checked: $parent.selectedOptions" />',
-                    '<label data-bind="attr:{\'for\': \'chkdd\'+ $index()}, text: $parent.optionsText ? $data[$parent.optionsText] : $data"></label>',
+                    '<input type="checkbox" data-bind="attr:{\'id\': \'chkdd\' + $parent.uniqId + $index()}, checkedValue: $parent.optionsValue ? $data[$parent.optionsValue] : $data, checked: $parent.selectedOptions" />',
+                    '<label data-bind="attr:{\'for\': \'chkdd\' + $parent.uniqId + $index()}, text: $parent.optionsText ? $data[$parent.optionsText] : $data"></label>',
                 '</li>',
             '</ul>',
             '<span class="chk-dd-arrow fa fa-chevron-down" data-bind="click: handlelabelClick"></span>',
@@ -416,6 +416,7 @@
 
     var CheckboxDropdownVM = function(config){
         var self = this;
+        self.uniqId = Math.floor(Math.random() * 99999);
         self.selectedOptions = ko.isObservable(config.selectedOptions) ? config.selectedOptions : ko.observableArray(config.selectedOptions);
         self.overrideSelectionText = ko.isObservable(config.overrideSelectionText) ? config.overrideSelectionText : ko.observable(config.overrideSelectionText);
         self.options = ko.isObservable(config.options) ? config.options : ko.observableArray(config.options);
