@@ -181,7 +181,7 @@
 			manage: {name: 'manage', hash: 'manage', displayText: 'Manage Dashboard'},
 			editwidget: {name: 'editwidget', hash: 'editwidget', displayText: 'Widget Editor'},
 			managewidgets: {name: 'managewidgets', hash: 'managewidgets', displayText: 'Manage Widgets'},
-			//create: {name: 'create', hash: 'create', displayText: 'Create Dashboard'},
+			clonewidgets: {name: 'clonewidgets', hash: 'clonewidgets', displayText: 'Clone Widgets'},
 			dashboardview: {name: 'dashboardview', hash: '', displayText: ''},
 			defaultview: {name: 'defaultview', hash: '', displayText: 'Create/Manage'}
 		};
@@ -209,12 +209,12 @@
 	    				});
 	    			}
 	    		break;
+	    		case displayModes.clonewidgets.hash:
+	    			mode = displayModes.clonewidgets;
+	    		break;
 	    		case displayModes.managewidgets.hash:
 	    			mode = displayModes.managewidgets;
 	    		break;
-	    		// case displayModes.create.hash:
-	    		// 	mode = displayModes.create;
-	    		// break;
 	    		default:
 	    			if(currentDashboardId){
 	    				mode = displayModes.dashboardview;
@@ -232,6 +232,10 @@
 
 		self.isWidgetEditorView = ko.computed(function(){
 			return self.displayMode() === displayModes.editwidget;
+		});
+
+		self.isWidgetCloneView = ko.computed(function(){
+			return self.displayMode() === displayModes.clonewidgets;
 		});
 
 		self.isWidgetManagerView = ko.computed(function(){
@@ -407,14 +411,15 @@
 	    //return self;
 	};
 
-	var WidgetManager = function(model, options){
+	var WidgetManager = function(model, options) {
+		this.chooseWidgets = true;
 	    this.widgetList = ko.observableArray();
 	    this.bindWidgets = function(model) {
 	        drata.apiClient.getWidgets(model).then(function(response){
 	            this.widgetList(ko.utils.arrayMap(
 	                response,
 	                function(widgetModel) {
-	                    return new WidgetItem(widgetModel, {chooseWidgets: true}); 
+	                    return new WidgetItem(widgetModel, 'widgetManager'); 
 	                }
 	            ));
 	        }.bind(this));
@@ -472,7 +477,7 @@
 			})[0];
 			if(widgetToUpdate) {
 				self.widgetList.remove(widgetToUpdate);
-				self.widgetList.push(new WidgetItem(widgetModel, {chooseWidgets: true})); 
+				self.widgetList.push(new WidgetItem(widgetModel, 'widgetManager')); 
 			}
 		});
 	    //lets remove the widget from widget manager view, so that no one 
@@ -495,6 +500,7 @@
 	var DashboardItem = function(model, options){
 	    options = options || {};
 	    model = model || {};
+	    this.chooseWidgets = false;
 	    this._id = model._id;
 	    this.name = ko.observable(model.name);
 	    this.dateCreated = drata.utils.formatDate(new Date(model.dateCreated));
@@ -513,7 +519,7 @@
 		            this.widgetList(ko.utils.arrayMap(
 		                response,
 		                function(widgetModel) {
-		                    return new WidgetItem(widgetModel); 
+		                    return new WidgetItem(widgetModel, 'dashboardManager'); 
 		                }
 		            ));
 		            widgetsBound = true;
@@ -523,12 +529,8 @@
 	    	return defer.promise();
 	    };
 
-	    this.toggleExtendedDetails = ko.observable(false);
+	    this.viewDetails = ko.observable(false);
 	    var widgetsBound;
-	    this.viewDetails = function(item, event){
-	        if(event.target.href) return true;
-	        this.toggleExtendedDetails(!this.toggleExtendedDetails());
-	    };
 	    
 	    this.name.subscribe(function(newValue){
 	        model.name = newValue;
@@ -547,7 +549,7 @@
     	}.bind(this);
 
 	    options.bindWidgets && this.bindWidgets();
-	    this.toggleExtendedDetails.subscribe(function(ted){
+	    this.viewDetails.subscribe(function(ted){
 	    	if(ted && !widgetsBound) this.bindWidgets();
 	    }, this);
 	};
@@ -638,19 +640,15 @@
 	    
 	};
 
-	var WidgetItem = function(model, options){
-	    options = options || {};
-	    this.chooseWidgets = options.chooseWidgets;
+	var WidgetItem = function(model, identifier) {
 	    this.name = ko.observable(model.name);
 	    this._id = model._id;
+	    this.uniqId = identifier + model._id;
 	    this.chartType = model.segmentModel.chartType;
 	    this.selectedDataKey = model.selectedDataKey;
 	    this.dateUpdated = drata.utils.formatDate(new Date(model.dateUpdated));
+	    this.dateCreated = drata.utils.formatDate(new Date(model.dateCreated));
 	    this.viewDetails = ko.observable(false);
-	    this.toggleExtendedDetails = function(){
-	        this.viewDetails(!this.viewDetails());
-	    };
-	    //this.manageUrl = '#editwidget/'+ model._id || '';
 	    this.selectionsExpression = drata.utils.selectionsExpression(model.segmentModel.selection, true);
 	    this.conditionsExpression = drata.utils.conditionsExpression(model.segmentModel.group) || 'none';
 	    this.dataFilterExpression = drata.utils.getDataFilterExpression(model.segmentModel.dataFilter);
