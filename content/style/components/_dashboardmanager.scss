@@ -22,14 +22,14 @@ h3.view-heading {
     text-align: left;
 }
 
-@for $i from 1 through 4 {
+@for $i from 1 through 6 {
     .flex-#{$i} {
         flex: $i;
     }
 }
 
 @media #{$small-only} {
-    @for $i from 1 through 4 {
+    @for $i from 1 through 6 {
         .small-flex-#{$i} {
             flex: $i;
         }
@@ -87,9 +87,16 @@ h3.view-heading {
     flex: 0 0 60px;
 }
 
+.detail-chartType {
+    flex: 0 0 50px;
+}
+
 .detail-content {
     padding: 10px 0;
     border-bottom: 1px dashed #ccc;
+}
+.detail-datakey {
+    justify-content: center;
 }
 
 .dashboardView-widgetList .detail-header {
