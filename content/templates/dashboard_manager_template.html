@@ -57,7 +57,7 @@
             </div>
         </div>
         <div class="dashboardView-widgetList">
-        <!-- ko template :{name:'widgetDetails-template2'} -->
+        <!-- ko template :{name:'widgetDetails-template'} -->
         <!-- /ko -->
         <!-- ko template :{name: 'tags-template', data: tagList} -->
         <!-- /ko -->
@@ -104,7 +104,7 @@
     
     <div class="row">
         <div class="small-12 columns">
-        <!-- ko template :{name:'widgetDetails-template2'} -->
+        <!-- ko template :{name:'widgetDetails-template'} -->
         <!-- /ko -->
         </div>
     </div>
@@ -121,7 +121,7 @@
     
     <div class="row">
         <div class="small-12 columns">
-        <!-- ko template : { name: 'widgetDetails-template2' } -->
+        <!-- ko template : { name: 'widgetDetails-template' } -->
         <!-- /ko -->
         </div>
     </div>
@@ -136,26 +136,27 @@
     <!-- /ko -->
 </script>
 
-<script id="widgetDetails-template2" type="text/html">
+<script id="widgetDetails-template" type="text/html">
     <div class="flex-row detail-header">
         <!--ko if: chooseWidgets -->
         <div class="detail-action">
         </div>
         <!-- /ko -->
-        <div class="flex-item flex-3">Widget Name</div>
-        <div class="flex-item flex-1 show-for-large-up">Chart Type</div>
-        <div class="flex-item flex-1 show-for-large-up">Collection</div>
+        <div class="flex-item flex-5 show-for-large-up">Widget Name</div>
+        <div class="flex-item flex-5 show-for-medium-down">Widget List</div>
+        <div class="detail-chartType show-for-large-up">type</div>
+        <div class="detail-datakey flex-item flex-2 show-for-large-up">Collection</div>
         <div class="detail-manage show-for-large-up">
             
         </div>
     </div>
     
-    <!-- ko template :{name:'widgetDetail-template2', foreach: widgetList} -->
+    <!-- ko template :{name:'widgetDetail-template', foreach: widgetList} -->
     <!-- /ko -->
     </table>        
 </script>
 
-<script id="widgetDetail-template2" type="text/html">
+<script id="widgetDetail-template" type="text/html">
     <div class="detail-content" data-bind="css: { 'expand': viewDetails }">
         <div class="flex-row">
             <!--ko if: $parent.chooseWidgets -->
@@ -163,7 +164,7 @@
                 <input type="checkbox" data-bind="checkedValue: $data, checked: $parent.chosenWidgets" style="margin-bottom:0"></input>
             </div>
             <!-- /ko -->
-            <div class="flex-item flex-3">
+            <div class="flex-item flex-5">
                 <div class="flex-row">
                     <div class="detail-action">
                         <input type="checkbox" class="detail-toggle" data-bind="attr: { id: uniqId },checked: viewDetails"></input>
@@ -176,10 +177,10 @@
                     </div>
                 </div>
             </div>
-            <div class="flex-item flex-1 show-for-large-up">
+            <div class="detail-chartType">
                 <!-- ko text:chartType --> <!--/ko -->
             </div>
-            <div class="flex-item flex-1 show-for-large-up">
+            <div class="detail-datakey flex-item flex-2 show-for-large-up">
                 <!-- ko text:selectedDataKey --> <!--/ko -->
             </div>
             <div class="detail-manage">
