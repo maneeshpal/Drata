@@ -37,7 +37,14 @@ exports.dbInstance = function (serverName, dbName) {
         defer.resolve(dbInstances[key].dbInstance);
     }
     else {
-	    var url = utils.format('mongodb://{0}:{1}/{2}', dataSource.serverName, dataSource.port, dbName);
+	    var authenticationPart = '',
+            dataSourcePart = utils.format('{0}:{1}/{2}', dataSource.serverName, dataSource.port, dbName);
+        if(dataSource.username && dataSource.password) {
+            authenticationPart = utils.format('{0}:{1}@', dataSource.username, dataSource.password);
+        }
+
+        var url = utils.format('mongodb://{0}{1}', authenticationPart, dataSourcePart);
+         
 	    MongoClient.connect(url,
 	        { 
 	            server: {
