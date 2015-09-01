@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <!-- /ko -->
-                <li class="has-dropdown hide-for-medium-up">
+                <li class="has-dropdown hide-for-medium-up not-click">
                     <a data-dropdown="dashboard_actions" data-options="align:bottom">actions</a>
                     <ul class="dropdown">
                         <li class="has-form">
@@ -108,9 +108,11 @@
                 <!-- ko ifnot: $parent.isWidgetEditorView -->
                 <li class="divider"></li>
                 <li class="has-dropdown not-click">
-                    <a><span class="fa fa-th-large"></span>
-                    <!-- ko text: currentDashboardName() -->
-                                <!-- /ko --> </a>
+                    <a>
+                        <span class="fa fa-th-large"></span>
+                        <!-- ko text: currentDashboardName() -->
+                        <!-- /ko --> 
+                    </a>
                     <ul class="dropdown">
                         <!-- ko template : {name: 'dashboard-menu-template'} --><!--/ko-->
                     </ul>
